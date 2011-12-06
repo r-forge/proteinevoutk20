@@ -11,10 +11,36 @@ GM[1,1] <- 0
 for(i in 2:20){
   GM[i,i] <- 0
   for(j in 1:(i-1)){
-    GM[i,j] <- GM[j,i]
+    GM[i,j] <- GM[j,i] #symmetric matrix
   }
 }
 GM <- GM/100 #make the mean 1 instead of 100
+
+#x*dgamma(x)
+xgamma <- function(x,shape,scale){
+  return(x*dgamma(x,shape,rate=scale))
+}
+
+#Given the shape and scale of the gamma distribution,
+#the number of categories of discretization.
+#Find the mean of portion of the gamma distribution falling in 
+#each category
+dis_gamma <- function(sh,sc,category=4){
+  #browser()
+  z <- vector(length=(category+1))
+  x <- vector(length=category)
+  z[1] <- 0
+  z[category+1] <- Inf
+  for(i in 2:category){
+    z[i] <- qgamma((i-1)/category,shape=sh,rate=sc)
+  }
+  for(j in 1:category){
+    x[j] <- integrate(xgamma,shape=sh,scale=sc,lower=z[j],upper=z[j+1])$value/(integrate(dgamma,shape=sh,rate=sc,lower=z[j],upper=z[j+1])$value)
+  }
+  return(x)
+}
+
+#means <- dis_gamma(sh,sc)
 ############################################
 #Functionality function, arguments: 
 #d: distance between the optimal and observed amino acids, a vector of length n
@@ -23,12 +49,11 @@ GM <- GM/100 #make the mean 1 instead of 100
 #dis: distribution function from which s is drawn. 1: exponential, 2: gamma, 3: uniform(0,1)
 #para: parameter for the distribution. Rate for exponential, shape for gamma
 #model: model number. 1: exponential 2: parabolic
-Ftny <- function(d, s, model=1, dis=0, para=1){  #default: n=15, exponential distribution with rate 1
+Ftny_sim <- function(d, s, model=1, dis=0, para=1){
   #browser()
   #different distributions where s comes from
   n <- length(d) #length of the protein as an amino acid sequence
   if(dis==0){
-    s <- rep(s,n)
   }
   else if(dis==1)
     {s <- rexp(n,para)} #random generation of n numbers from exponential distribution
@@ -45,7 +70,18 @@ Ftny <- function(d, s, model=1, dis=0, para=1){  #default: n=15, exponential dis
     result <- prod(1/(1+d*s)) 
   }
   return(result)
-}
+} #This is used to do simulation, not the calculation
+
+Ftny <- function(d, s, model=1){  #default: n=15, exponential distribution with rate 1
+  #browser()
+  if(model==1){ #model 1
+    result <- prod(exp(-d*s)) #the function
+  }
+  else if(model==2){ #model 2
+    result <- prod(1/(1+d*s)) 
+  }
+  return(result)
+} #d and s are given
 
 #fitness function
 #q, Phi: constants
@@ -56,29 +92,31 @@ Ftny <- function(d, s, model=1, dis=0, para=1){  #default: n=15, exponential dis
 
 #fixation probability function from protein 1 to protein 2,
 #which is also the instantaneous rate from protein1 to protein2
-#parameters: fit1, fit2: fitnesses of protein 1 and 2
+#parameters: d1, d2: distances from the optimal protein, vectors
+# s: selection coefficients for all sites
 # n: length of protein
 # a1, a2: parameters in cost function C_n
 #Ne: effective population size
 #formula number: 1: Sela & Hirsh's formula (default); 2: classic formula
 
-#####
-#try to put it in a further calculated form, with same terms for ftny's pulle out
-#as common factors. To do this, have to recognize which ONE is the one that's different
-#in the two proteins
-#####
-fix <- function(d1, d2, a1, a2, Ne, formula=1,s=0.8,model=1,dis=0,para=1){
+a1 <- 2
+a2 <- 1
+Phi <- 0.25
+q <- 4*10^(-7)
+Ne <- 1.37*10^7
+
+fix <- function(d1, d2, s, formula=1, model=1){
   #browser()
   n <- length(d1)
   C_n <- a1 + a2*n
   if(n==1){ #if there is only 1 amino acid in the sequence
-    ftny1 <- Ftny(d1,s,model,dis,para)
-    ftny2 <- Ftny(d2,s,model,dis,para)
-    if(ftny1==ftny2){ #When the fitnesses are the same, neutral case, pure drift
+    if((d1==d2)|s==0){ #When the fitnesses are the same, neutral case, pure drift
       return(1/(2*Ne))
     }
     else{
-      fit_ratio <- exp(-q*Phi*C_n*((1/ftny2)-(1/ftny1))) #w2/w1
+      ftny1 <- Ftny(d1,s,model)
+      ftny2 <- Ftny(d2,s,model)
+      fit_ratio <- exp(-q*Phi*C_n*((1/ftny1)-(1/ftny2))) #w1/w2
     }
   }
   else{ # there are more than 1 amino acids in the protein
@@ -89,26 +127,27 @@ fix <- function(d1, d2, a1, a2, Ne, formula=1,s=0.8,model=1,dis=0,para=1){
     if(length(D) > 1){ #if there are more than 1 site with different amino acids
       return(0)
     }
+    else if(length(D)==0){ #two protein sequences are the same
+      return(1/(2*Ne)) 
+    }
     else if(length(D)==1){ #if there is only one site that is different
-      ftny_S <- Ftny(d1[S],s,model,dis,para)
-      ftny_D1 <- Ftny(d1[D],s,model,dis,para)
-      ftny_D2 <- Ftny(d2[D],s,model,dis,para)
+      ftny_S <- Ftny(d1[S],s[S],model) #same terms in the product for both proteins
+      ftny_D1 <- Ftny(d1[D],s[D],model) #different terms in the product
+      ftny_D2 <- Ftny(d2[D],s[D],model)
       if(ftny_D1==ftny_D2){
         return(1/(2*Ne))
       }
       else{
-        fit_ratio <- exp(-q*Phi*C_n*(1/ftny_S)*((1/ftny_D2)-(1/ftny_D1)))
+        fit_ratio <- exp(-q*Phi*C_n*(1/ftny_S)*((1/ftny_D1)-(1/ftny_D2)))
       }
     }
   }
-  #######
   #different fixation prob formula
-  #######
       if(formula==1){
         result <- (1-fit_ratio)/(1-fit_ratio^(2*Ne))
       }
       else if(formula==2){
-        se <- fit_ratio - 1 # s=(w2-w1)/w1
+        se <- fit_ratio - 1 # s=(w1-w2)/w2
         result <- (1-exp(-2*se))/(1-exp(-4*Ne*se))
       }
       else{
@@ -123,16 +162,17 @@ fix <- function(d1, d2, a1, a2, Ne, formula=1,s=0.8,model=1,dis=0,para=1){
 ######################################################
 
 #Function to generate the transition matrix (20*20 for now) 
-#given the optimal amino acid
+#given the optimal amino acid. This is only for one site (amino acid)
 #parameter: op(aa_op): optimal amino acid at this site
-mat_gen_indep <- function(op){
+#s: selection coefficient
+mat_gen_indep <- function(op,s,formula=1,model=1){
   mat <- matrix(0,nrow=20,ncol=20) #set diagonal entries to be 0 at first
   for(i in 1:19){
     for(j in (i+1):20){
       d1 <- GM[i,op] #distance between aa_i and aa_op
       d2 <- GM[j,op]
-      mat[i,j] <- fix(d1,d2,a1,a2,Ne,formula=1) #fixation prob -> transition rate
-      mat[j,i] <- fix(d2,d1,a1,a2,Ne,formula=1) #symmetric entry
+      mat[i,j] <- fix(d1,d2,s,formula,model) #fixation prob -> transition rate
+      mat[j,i] <- fix(d2,d1,s,formula,model) #symmetric entry
     }#end for j
     mat[i,i] <- -(sum(mat[i,])) #diagonal entry; sum of each row is 0
   }#end for i
@@ -140,27 +180,33 @@ mat_gen_indep <- function(op){
   return(mat)
 }
 
-#take care of the NaN's in the matrix
+#arr: the protein sequences; each row represents a protein considered in the matrix
+#op: optimal amino acid sequences
+#s: selection coefficients
+#formula, model
 #########################################################################3
-matgen_dep <- function(arr,op){
-  m <- dim(arr)[1]
-  mat <- matrix(0,dim=c(m,m))
+mat_gen_dep <- function(arr,op,s,formula=1,model=1){
+  #browser()
+  m <- dim(arr)[1] #number of proteins to consider
+  n <- dim(arr)[2] #number of sites in each protein
+  mat <- matrix(0,nrow=m,ncol=m) #matrix to return, every entry is initiated to be 0
   for(i in 1:(m-1)){
-    mat[i,i] <- 0
     for(j in (i+1):m){
       d1 <- rep(0,n)
       d2 <- d1
-      for(k in 1:n)
-        d1[k] <- GM[arr[i,k],op]#distance vectors
-        d2[k] <- GM[arr[j,k],op]
-        mat[i,j] <- fix(d1,d2,a1,a2,Ne,formula=1) #fixation prob -> transition rate
-        mat[i,j] <- fix(d2,d1,a1,a2,Ne,formula=1) #symmetric entry
+      for(k in 1:n){
+        d1[k] <- GM[arr[i,k],op[k]]#distance vectors
+        d2[k] <- GM[arr[j,k],op[k]]
+      }
+      mat[i,j] <- fix(d1,d2,s,formula,model) #fixation prob -> transition rate
+      mat[j,i] <- fix(d2,d1,s,formula,model) #symmetric entry
     }
     mat[i,i] <- -sum(mat[i,])
   }
   mat[m,m] <- -sum(mat[m,])
   return(mat)
 }
+
 #Given 2 amino acid sequences, find the transition rate matrix using parsimony path
 #1.Find all the sequences on the path
 #2.Calculate the entries between 2 sequences that differ at only one site
@@ -201,30 +247,58 @@ path <- function(p1,p2){
   }
   return(paths)
 }
-p1 <- c(4,3,6,8,3)
-p2 <- c(2,3,5,8,4)
-path(p1,p2)
+# p1 <- c(4,3,6,8,3)
+# p2 <- c(2,3,5,8,4)
+# path(p1,p2)
 
 #Given two protein sequences of the same lengths, calculated the probability (likelihood) of 
 #going from protein1 to protein2 using site independent method.
 #Calculate the probability of going from one amino acid to another, then
 #multiply them together to get the total probability.
 #Parameter: branch length t. There is only one branch and two nodes in this simplest case
-prob <- function(prn1, prn2, prn_op, t, indep=TRUE){
+prob_indep_gamma <- function(prn1, prn2, prn_op, t,sh,category=4,formula=1,model=1){
+  #browser()
   l <- length(prn1) #length of protein
-  if(indep){ #site independent case
+  p_t <- vector()
+
     pr <- 1
-    for(i in 1:l){
-      ma <- mat_gen_indep(prn_op[i]) #transition matrix Q
-      Pt <- expm(ma*t) #P(t) = exp(Qt)
-      pr <- pr*pt[prn1[i],prn2[2]] #the entry corresponding to the amino acids in the sequences
-    }
+    for(i in 1:l){ # for each amino acid in the protein, calculate the probability of transition
+      means <- dis_gamma(sh,sh,category) #means for discrete gamma distribution
+      for(j in 1:category){
+        ma <- mat_gen_indep(prn_op[i],means[j],formula, model) #transition matrix Q
+        Pt <- expm(ma*t) #P(t) = exp(Qt)
+        p_t <- c(p_t,Pt[prn1[i],prn2[i]])#the entry corresponding to the amino acids in the sequences
+      }
+      p <- mean(p_t) #f(x)=(1/k)*sum(f(x|means))
+      pr <- pr*p 
+    }  
+  return(pr)
+}
+
+prob_dep_gamma <- function(prn1,prn2,prn_op,t,sh,category=4,formula=1,model=1){
+  Arr <- path(prn1,prn2) # all the sequences lying on the path from protein 1 to protein 2
+  m <- dim(Arr)[1]
+  l <- length(prn1) #number of amino acids
+  means <- dis_gamma(sh,sh,category) #means in discrete gamma distribution for each category
+  means_index <- integer.base.b(seq(0,category^l-1),category)+1 #all possible combinations of (discrete) gamma means
+  index <- dim(means_index)[1] #number of assignments of means to each site (s)
+  pr <- vector(length=index)
+  for(i in 1:index){
+    s <- means[means_index[i,]]
+    ma <- mat_gen_dep(Arr,prn_op,s,formula,model)
+    Pt <- expm(ma*t)
+    pr <- c(pr,Pt[1,m]) #first row last column entry of P(t)
+  }
+  p <- mean(pr)
+  return(p)
+}
+ 
+prob <- function(prn1, prn2, prn_op, t, sh, indep=TRUE,category=4,formula=1,model=1){
+  if(indep){ #site independent case
+    prob_indep_gamma(prn1,prn2,prn_op,t,sh,category,formula,model)
   }
   else{ #site dependent case
-    paths <- path(prn1,prn2)
-    ma <- mat_gen_dep(paths,prn_op)
-    Pt <- expm(ma*t)
-    pr <- Pt[1,dim(Pt)[2]] #first row last column entry of P(t)
+    prob_dep_gamma(prn1,prn2,prn_op,t,sh,category,formula,model)
   }
   return(pr)
 }
@@ -250,3 +324,18 @@ Ne <- 1.37*10^7
 #     d2[i] <- GM[pr2[i],pr0[i]]
 #   }
 
+integer.base.b <-function(x, b=2){
+  xi <- as.integer(x)
+  if(any(is.na(xi) | ((x-xi)!=0)))
+		print(list(ERROR="x not integer", x=x))
+	N <- length(x)
+	xMax <- max(x)	
+	ndigits <- (floor(logb(xMax, base=b))+1)
+	Base.b <- array(NA, dim=c(N, ndigits))
+	for(i in 1:ndigits){#i <- 1
+		Base.b[, ndigits-i+1] <- (x %% b)
+		x <- (x %/% b)
+	}
+	if(N ==1) Base.b[1, ] else Base.b
+}
+#integer.base.b(seq(0,4^3),b=4) + 1
