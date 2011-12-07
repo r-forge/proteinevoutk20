@@ -2,6 +2,8 @@
 #physiochemical distance matrix#
 ##################################
 #notice that the proteins in matrix rows and columns are not in the same order
+setwd("~/Documents/ProteinEvo")
+library("Matrix")
 GranthamMatrix <- read.csv("GranthamMatrix.csv",
                            header=TRUE, sep=",",row.names=1)
 #View(GranthamMatrix) #check the matrix
@@ -25,6 +27,8 @@ xgamma <- function(x,shape,scale){
 #the number of categories of discretization.
 #Find the mean of portion of the gamma distribution falling in 
 #each category
+#THIS FUNCTION WILL RETURN ERROR WHEN THE SHAPE PARAMETER IS TOO SMALL
+#BECAUSE THE INTEGRATION VALUE WILL BE NON-FINITE!!!!
 dis_gamma <- function(sh,sc,category=4){
   #browser()
   z <- vector(length=(category+1))
@@ -143,6 +147,10 @@ fix <- function(d1, d2, s, formula=1, model=1){
     }
   }
   #different fixation prob formula
+  if(fit_ratio==1){
+    return(1/(2*Ne))
+  }
+  else{
       if(formula==1){
         result <- (1-fit_ratio)/(1-fit_ratio^(2*Ne))
       }
@@ -153,7 +161,7 @@ fix <- function(d1, d2, s, formula=1, model=1){
       else{
         print("Error! Please choose 1 or 2 as formula number. 1: Hirsh's; 2: classic pop gen's")
       } 
-
+  }
   return(result)
 }
 
@@ -189,11 +197,11 @@ mat_gen_dep <- function(arr,op,s,formula=1,model=1){
   #browser()
   m <- dim(arr)[1] #number of proteins to consider
   n <- dim(arr)[2] #number of sites in each protein
+  d1 <- rep(0,n)
+  d2 <- d1
   mat <- matrix(0,nrow=m,ncol=m) #matrix to return, every entry is initiated to be 0
   for(i in 1:(m-1)){
     for(j in (i+1):m){
-      d1 <- rep(0,n)
-      d2 <- d1
       for(k in 1:n){
         d1[k] <- GM[arr[i,k],op[k]]#distance vectors
         d2[k] <- GM[arr[j,k],op[k]]
@@ -251,7 +259,7 @@ path <- function(p1,p2){
 # p2 <- c(2,3,5,8,4)
 # path(p1,p2)
 
-#Given two protein sequences of the same lengths, calculated the probability (likelihood) of 
+#Given two protein sequences of the same lengths, calculated the probability (-loglikelihood) of 
 #going from protein1 to protein2 using site independent method.
 #Calculate the probability of going from one amino acid to another, then
 #multiply them together to get the total probability.
@@ -259,19 +267,18 @@ path <- function(p1,p2){
 prob_indep_gamma <- function(prn1, prn2, prn_op, t,sh,category=4,formula=1,model=1){
   #browser()
   l <- length(prn1) #length of protein
-  p_t <- vector()
-
-    pr <- 1
-    for(i in 1:l){ # for each amino acid in the protein, calculate the probability of transition
-      means <- dis_gamma(sh,sh,category) #means for discrete gamma distribution
-      for(j in 1:category){
+  means <- dis_gamma(sh,sh,category) #means for discrete gamma distribution
+  pr <- 0
+  for(i in 1:l){ # for each amino acid in the protein, calculate the probability of transition
+    p_t <- vector() #store the probabilities for all categories
+    for(j in 1:category){
         ma <- mat_gen_indep(prn_op[i],means[j],formula, model) #transition matrix Q
         Pt <- expm(ma*t) #P(t) = exp(Qt)
         p_t <- c(p_t,Pt[prn1[i],prn2[i]])#the entry corresponding to the amino acids in the sequences
-      }
-      p <- mean(p_t) #f(x)=(1/k)*sum(f(x|means))
-      pr <- pr*p 
-    }  
+    }
+    p <- mean(p_t) #f(x)=(1/k)*sum(f(x|means))
+    pr <- pr-log(p)
+  }  
   return(pr)
 }
 
@@ -290,9 +297,34 @@ prob_dep_gamma <- function(prn1,prn2,prn_op,t,sh,category=4,formula=1,model=1){
     pr <- c(pr,Pt[1,m]) #first row last column entry of P(t)
   }
   p <- mean(pr)
-  return(p)
+  return(-log(p))
 }
- 
+
+#Fixed rate for s -> likelihood
+#Independent-site version
+prob_indep_fix <- function(prn1,prn2,prn_op,t,s=1,formula=1,model=1){
+  l <- length(prn1) #length of protein
+  pr <- 0
+  for(i in 1:l){ # for each amino acid in the protein, calculate the probability of transition
+    ma <- mat_gen_indep(prn_op[i],s,formula, model) #transition matrix Q
+    Pt <- expm(ma*t) #P(t) = exp(Qt)
+    p <- Pt[prn1[i],prn2[i]]#the entry corresponding to the amino acids in the sequences
+    pr <- pr-log(p)
+  }  
+  return(pr)
+}
+
+prob_dep_fix <- function(prn1,prn2,prn_op,t,s=1,formula=1,model=1){
+  Arr <- path(prn1,prn2) # all the sequences lying on the path from protein 1 to protein 2
+  m <- dim(Arr)[1] # number of amino acid sequences on the parsimony path
+  l <- length(prn1) #number of amino acids in the protein
+  sv <- rep(s,l) #s is the same for all sites
+  ma <- mat_gen_dep(Arr,prn_op,sv,formula,model) #transition rate matrix for the path Q
+  Pt <- expm(ma*t) # P(t) = Exp(Q*t)
+  p <- Pt[1,m] #first row last column entry of P(t)
+  return(-log(p))
+}
+
 prob <- function(prn1, prn2, prn_op, t, sh, indep=TRUE,category=4,formula=1,model=1){
   if(indep){ #site independent case
     prob_indep_gamma(prn1,prn2,prn_op,t,sh,category,formula,model)
