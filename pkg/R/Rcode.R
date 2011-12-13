@@ -6,7 +6,7 @@ library("Matrix")
 #parameter values
 a1 <- 2
 a2 <- 1
-Phi <- 0.25
+Phi <- 0.5
 q <- 4*10^(-7)
 Ne <- 1.37*10^7
 #############################################################################
@@ -346,20 +346,39 @@ simulation_indep <- function(pr, op, t, s=1,formula=1,model=1){
       t_wait <- rexp(1,rate=lambda) #waiting time from exponential distribution with above rate
       t_now <- t_now + t_wait #time after current waiting time
       Pt <- expm(ma*t_wait) #P(t) = exp(Qt)
-      p_vec <- Pt[pr[i],]#the entry corresponding to the amino acids in the sequences
-      prt <- which.max(p_vec)
-      #print(prt)
+      p_vec <- Pt[pr[i],]#the entry corresponding to the amino acids in the sequence
+      prt <- mkv(runif(1),p_vec)
+      print(prt)
     }
     end_pr[i] <- prt 
-    print(i)
-    print(end_pr[i])
+    #print(i)
+    #print(end_pr[i])
   }
   print("ending protein:")
   print(end_pr)
   print("steps:")
   print(step)
 }
-#simulation_indep(seq(1,20),rep(2,20),10^7)
+#simulation_indep(2,1,10^6)
+
+#Function to choose a state given the probabilities of changing to 
+#all states (probability vector)
+mkv <- function(odds,vec){
+  if(odds<vec[1]){
+    pick <- 1
+  }
+  else{
+    k <- 1
+    while(odds > sum(vec[1:k])){
+      k <- k + 1
+      if(odds < sum(vec[1:k])){
+        pick <- k
+      }
+    }
+  }
+  return(pick)
+}
+
 #optim(c(10,0.1),prob_fix,prn1=p1,prn2=p2,prn_op=op)
 #optim(c(10,1),prob_fix,prn1=p1,prn2=p2,prn_op=op)
 ################################################################
