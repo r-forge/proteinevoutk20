@@ -332,11 +332,11 @@ simulation_indep <- function(pr, op, t, s=1,formula=1,model=1){
   l <- length(pr)
   end_pr <- vector(,length=l)
   step <- rep(0,l)
+  out_mat <- list()
   for(i in 1:l){ # for each amino acid in the protein, calculate the probability of transition
-    #print("amino acid number:")
-    #print(i)
     t_now <- 0 #starting from time 0 until t
-    prt <- pr[i]
+    prt <- pr[i] #protein after waiting time t_wait
+    output <- vector()
     ma <- mat_gen_indep(op[i],s,formula, model) #transition matrix Q
     while(t_now < t){
       step[i] <- step[i] + 1
@@ -348,16 +348,21 @@ simulation_indep <- function(pr, op, t, s=1,formula=1,model=1){
       Pt <- expm(ma*t_wait) #P(t) = exp(Qt)
       p_vec <- Pt[pr[i],]#the entry corresponding to the amino acids in the sequence
       prt <- mkv(runif(1),p_vec)
-      print(prt)
+      output <- c(output,prt)
     }
+    out_mat[[i]] <- output
+#     print("chain:")
+#     print(output)
     end_pr[i] <- prt 
     #print(i)
     #print(end_pr[i])
   }
-  print("ending protein:")
-  print(end_pr)
-  print("steps:")
-  print(step)
+#   print("ending protein:")
+#   print(end_pr)
+#   print("steps:")
+#   print(step)
+  result <- list(chain=out_mat,end_pr=end_pr)
+  return(result)
 }
 #simulation_indep(2,1,10^6)
 
@@ -379,6 +384,45 @@ mkv <- function(odds,vec){
   return(pick)
 }
 
+rate_move_dep <- function(pr, op, s,formula=1,model=1){
+  l <- length(pr)
+  rates <- vector() #store the rates of moving to other states
+  d1 <- vector(length=l) #distance from optimal aa's
+  for(i in 1:l){ 
+    d1[i] <- GM[pr[i],op[i]]
+  }
+  #browser()
+  for(i in 1:l){
+    d2 <- d1
+    aa <- seq(1:20)[-pr[i]]
+    for(j in 1:19){
+      d2[i] <- GM[op[i],aa[j]]
+      rates <- c(rates,fix(d1,d2,s,formula,model))
+    }
+  }
+  rates
+}
+#rate_move_dep(c(1,2),c(3,3),c(1,1))
+
+simulation_dep <- function(pr,op,t,s,formula=1,model=1){
+  browser()
+  t_now <- 0
+  path <- pr
+  while(t_now < t){
+    rates <- rate_move_dep(pr,op,s,formula,model)
+    lambda <- sum(rates)
+    t_wait <- rexp(1,lambda)
+    t_now <- t_now + t_wait
+    rates <- rates/lambda
+    index <- mkv(runif(1),rates)
+    pos <- (index-1) %/% 19 + 1
+    rmd <- (index-1) %% 19 + 1
+    pr[pos] <- aa[-pr[pos]][rmd]
+    path <- rbind(path,pr)
+  }
+  path
+}
+#simulation_dep(rep(3,3),seq(1:3),10^7,rep(1,3))
 #optim(c(10,0.1),prob_fix,prn1=p1,prn2=p2,prn_op=op)
 #optim(c(10,1),prob_fix,prn1=p1,prn2=p2,prn_op=op)
 ################################################################
