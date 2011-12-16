@@ -123,7 +123,7 @@ fix <- function(d1, d2, s, formula=1, model=1){
   if(fit_ratio==1){
     return(1/(2*Ne))
   }
-  if(fit_ratio==Inf){ #Is this true?
+  else if(fit_ratio==Inf){ #Is this true?
     return(0)
   }
   else{
@@ -325,46 +325,7 @@ prob_fix <- function(para, prn1, prn2, prn_op, indep=TRUE,formula=1,model=1){
   }
 }
 
-#simulation for site-independent case
-#Multiple sites(amino acids) in the protein
-simulation_indep <- function(pr, op, t, s=1,formula=1,model=1){
-  #browser()
-  l <- length(pr)
-  end_pr <- vector(,length=l)
-  step <- rep(0,l)
-  out_mat <- list()
-  for(i in 1:l){ # for each amino acid in the protein, calculate the probability of transition
-    t_now <- 0 #starting from time 0 until t
-    prt <- pr[i] #protein after waiting time t_wait
-    output <- vector()
-    ma <- mat_gen_indep(op[i],s,formula, model) #transition matrix Q
-    while(t_now < t){
-      step[i] <- step[i] + 1
-      #print("step number:")
-      #print(step)
-      lambda <- -ma[prt,prt]
-      t_wait <- rexp(1,rate=lambda) #waiting time from exponential distribution with above rate
-      t_now <- t_now + t_wait #time after current waiting time
-      Pt <- expm(ma*t_wait) #P(t) = exp(Qt)
-      p_vec <- Pt[pr[i],]#the entry corresponding to the amino acids in the sequence
-      prt <- mkv(runif(1),p_vec)
-      output <- c(output,prt)
-    }
-    out_mat[[i]] <- output
-#     print("chain:")
-#     print(output)
-    end_pr[i] <- prt 
-    #print(i)
-    #print(end_pr[i])
-  }
-#   print("ending protein:")
-#   print(end_pr)
-#   print("steps:")
-#   print(step)
-  result <- list(chain=out_mat,end_pr=end_pr)
-  return(result)
-}
-#simulation_indep(2,1,10^6)
+
 
 #Function to choose a state given the probabilities of changing to 
 #all states (probability vector)
@@ -386,6 +347,7 @@ mkv <- function(odds,vec){
 
 rate_move_dep <- function(pr, op, s,formula=1,model=1){
   l <- length(pr)
+  sv <- rep(s,l)
   rates <- vector() #store the rates of moving to other states
   d1 <- vector(length=l) #distance from optimal aa's
   for(i in 1:l){ 
@@ -397,32 +359,63 @@ rate_move_dep <- function(pr, op, s,formula=1,model=1){
     aa <- seq(1:20)[-pr[i]]
     for(j in 1:19){
       d2[i] <- GM[op[i],aa[j]]
-      rates <- c(rates,fix(d1,d2,s,formula,model))
+      rates <- c(rates,fix(d1,d2,sv,formula,model))
     }
   }
   rates
 }
 #rate_move_dep(c(1,2),c(3,3),c(1,1))
 
-simulation_dep <- function(pr,op,t,s,formula=1,model=1){
-  browser()
-  t_now <- 0
-  path <- pr
-  while(t_now < t){
-    rates <- rate_move_dep(pr,op,s,formula,model)
-    lambda <- sum(rates)
-    t_wait <- rexp(1,lambda)
+simulation_dep <- function(pr,op,t,s=1,formula=1,model=1){
+  #browser()
+  l <- length(pr) #number of sites
+  t_now <- 0 #time until the current step of simulation
+  path <- array(c(pr,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
+  colnames(path) <- colnames(path,do.NULL = FALSE, prefix = "Site.") #colomn names
+  colnames(path)[l+1] <- "Time Now"
+  colnames(path)[l+2] <- "Waiting Time"
+  while(t_now < t){ #when current time is less than t
+    rates <- rate_move_dep(pr,op,s,formula,model) #moving rates of a protein to its neighbors
+    lambda <- sum(rates) 
+    t_wait <- rexp(1,lambda) #waiting time
     t_now <- t_now + t_wait
-    rates <- rates/lambda
-    index <- mkv(runif(1),rates)
-    pos <- (index-1) %/% 19 + 1
-    rmd <- (index-1) %% 19 + 1
+    rates <- rates/lambda #probability vector of moving
+    index <- mkv(runif(1),rates) #index of the protein it moves to
+    pos <- (index-1) %/% 19 + 1 #index of the site that changes
+    rmd <- (index-1) %% 19 + 1 # the amino acid that site changes to
     pr[pos] <- aa[-pr[pos]][rmd]
-    path <- rbind(path,pr)
+    path <- rbind(path,c(pr,t_now,t_wait)) #record this moving step
   }
   path
 }
-#simulation_dep(rep(3,3),seq(1:3),10^7,rep(1,3))
+#simulation_dep(rep(3,3),seq(1:3),10^7,1)
+
+#simulation for site-independent case
+#Multiple sites(amino acids) in the protein
+simulation_indep <- function(pr, op, t, s=1,formula=1,model=1){
+  l <- length(pr) #number of sites(amino acids)
+  t_now <- 0 #time until now
+  arr <- array(c(pr,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
+  colnames(arr) <- colnames(arr,do.NULL = FALSE, prefix = "Site.")
+  colnames(arr)[l+1] <- "Time Now"
+  colnames(arr)[l+2] <- "Waiting Time"
+  while(t_now < t){ #while the time does not exceed the simulation time
+    t_sim <- NULL # simulated waiting times
+    for(i in 1:l){
+      rate <- sum(find_rate(pr[i],op[i],s,formula, model)) # rates of exponential distributions for waiting times
+      t_sim <- c(t_sim,rexp(1,rate)) #waiting times
+    }
+    t_wait <- min(t_sim) #shortest waiting time
+    pos <- which.min(t_sim) #site where the shortest waiting time occurs
+    t_now <- t_now + t_wait #time after waiting (up to now)
+    #probability vector of moving to other aa's at "pos"
+    move_prob <- find_rate(pr[pos],op[pos],s,formula,model)/sum(find_rate(pr[pos],op[pos],s,formula,model))
+    pr[pos] <- mkv(runif(1),move_prob)#the amino acid it moves to
+    arr <- rbind(arr,c(pr,t_now,t_wait)) #record this moving step
+  }
+  arr
+}
+#simulation_indep(rep(2,3),seq(4:6),10^6)
 #optim(c(10,0.1),prob_fix,prn1=p1,prn2=p2,prn_op=op)
 #optim(c(10,1),prob_fix,prn1=p1,prn2=p2,prn_op=op)
 ################################################################
