@@ -3,12 +3,12 @@
 ##################################
 #notice that the proteins in matrix rows and columns are not in the same order
 library("Matrix")
-#parameter values
-a1 <- 2
-a2 <- 1
-Phi <- 0.5
-q <- 4*10^(-7)
-Ne <- 1.37*10^7
+#parameter values, now passed into the functions instead of being global
+# a1 <- 2
+# a2 <- 1
+# Phi <- 0.5
+# q <- 4*10^(-7)
+# Ne <- 1.37*10^7
 #############################################################################
 #Import Grantham distance matrix from .csv file, and make the mean distance 
 # equal to 1 instead of original 100
@@ -92,7 +92,7 @@ Ftny <- function(d, s, model=1){  #default: n=15, exponential distribution with 
 # a1, a2: parameters in cost function C_n
 #Ne: effective population size
 #formula number: 1: Sela & Hirsh's formula (default); 2: classic formula
-fix <- function(d1, d2, s, formula=1, model=1){
+fix <- function(d1, d2, s, formula=1, model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7){
   #browser()
   n <- length(d1)
   C_n <- a1 + a2*n
@@ -160,14 +160,14 @@ fix <- function(d1, d2, s, formula=1, model=1){
 #given the optimal amino acid. This is only for one site (amino acid)
 #parameter: aa_op: optimal amino acid at this site
 #s: selection coefficient
-mat_gen_indep <- function(aa_op,s,formula=1,model=1){
+mat_gen_indep <- function(aa_op,s,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7){
   mat <- matrix(0,nrow=20,ncol=20) #set diagonal entries to be 0 at first
   for(i in 1:19){
     for(j in (i+1):20){
       d1 <- GM[i,aa_op] #distance between aa_i and aa_op
       d2 <- GM[j,aa_op]
-      mat[i,j] <- fix(d1,d2,s,formula,model) #fixation prob -> transition rate
-      mat[j,i] <- fix(d2,d1,s,formula,model) #symmetric entry
+      mat[i,j] <- fix(d1,d2,s,formula,model,a1,a2,Phi,q,Ne) #fixation prob -> transition rate
+      mat[j,i] <- fix(d2,d1,s,formula,model,a1,a2,Phi,q,Ne) #symmetric entry
     }#end for j
     mat[i,i] <- -(sum(mat[i,])) #diagonal entry; sum of each row is 0
   }#end for i
@@ -177,22 +177,19 @@ mat_gen_indep <- function(aa_op,s,formula=1,model=1){
 
 #arr: the protein sequences; each row represents a protein considered in the matrix
 #op: optimal amino acid sequences
-#s: selection coefficients
+#s: selection coefficients - a vector
 #formula, model
 #########################################################################3
-mat_gen_dep <- function(arr,protein_op,s,formula=1,model=1){
-  #browser()
+mat_gen_dep <- function(arr,protein_op,s,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7){
   m <- dim(arr)[1] #number of proteins to consider
   n <- dim(arr)[2] #number of sites in each protein
-  d1 <- rep(0,n)
-  d2 <- d1
   mat <- matrix(0,nrow=m,ncol=m) #matrix to return, every entry is initiated to be 0
   for(i in 1:(m-1)){
     for(j in (i+1):m){
-      d1 <- pchem(arr[i,],protein_op)
-      d1 <- pchem(arr[j,],protein_op)
-      mat[i,j] <- fix(d1,d2,s,formula,model) #fixation prob -> transition rate
-      mat[j,i] <- fix(d2,d1,s,formula,model) #symmetric entry
+      d1 <- pchem_d(arr[i,],protein_op)
+      d2 <- pchem_d(arr[j,],protein_op)
+      mat[i,j] <- fix(d1,d2,s,formula,model,a1,a2,Phi,q,Ne) #fixation prob -> transition rate
+      mat[j,i] <- fix(d2,d1,s,formula,model,a1,a2,Phi,q,Ne) #symmetric entry
     }
     mat[i,i] <- -sum(mat[i,])
   }
@@ -221,7 +218,22 @@ binary <- function(x,k){
 	return(Base)
 }
 
-
+integer.base.b <-function(x, b=2){
+  xi <- as.integer(x)
+  if(any(is.na(xi) | ((x-xi)!=0)))
+  	print(list(ERROR="x not integer", x=x))
+	N <- length(x)
+	xMax <- max(x)	
+	ndigits <- (floor(logb(xMax, base=b))+1)
+	Base.b <- array(NA, dim=c(N, ndigits))
+	for(i in 1:ndigits){#i <- 1
+		Base.b[, ndigits-i+1] <- (x %% b)
+		x <- (x %/% b)
+	}
+	if(N ==1) Base.b[1, ] else Base.b
+}
+#integer.base.b(seq(0,4^3),b=4) + 1
+########################################################
 #Given two sequences, find all the sequences on
 #the possible paths
 path <- function(protein1,protein2){
@@ -249,7 +261,7 @@ path <- function(protein1,protein2){
 #Calculate the probability of going from one amino acid to another, then
 #multiply them together to get the total probability.
 #Parameter: branch length t. There is only one branch and two nodes in this simplest case
-prob_indep_gamma <- function(protein1, protein2, protein_op, t,shape,category=4,formula=1,model=1){
+prob_indep_gamma <- function(protein1, protein2, protein_op, t,shape,category=4,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7){
   #browser()
   l <- length(protein1) #length of protein
   means <- dis_gamma(shape,shape,category) #means for discrete gamma distribution
@@ -257,7 +269,7 @@ prob_indep_gamma <- function(protein1, protein2, protein_op, t,shape,category=4,
   for(i in 1:l){ # for each amino acid in the protein, calculate the probability of transition
     p_t <- vector() #store the probabilities for all categories
     for(j in 1:category){
-        ma <- mat_gen_indep(protein_op[i],means[j],formula, model) #transition matrix Q
+        ma <- mat_gen_indep(protein_op[i],means[j],formula, model,a1,a2,Phi,q,Ne) #transition matrix Q
         Pt <- expm(ma*t) #P(t) = exp(Qt)
         p_t <- c(p_t,Pt[protein1[i],protein2[i]])#the entry corresponding to the amino acids in the sequences
     }
@@ -267,7 +279,7 @@ prob_indep_gamma <- function(protein1, protein2, protein_op, t,shape,category=4,
   return(pr)
 }
 
-prob_dep_gamma <- function(protein1,protein2,protein_op,t,shape,category=4,formula=1,model=1){
+prob_dep_gamma <- function(protein1,protein2,protein_op,t,shape,category=4,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7){
   Arr <- path(protein1,protein2) # all the sequences lying on the path from protein 1 to protein 2
   m <- dim(Arr)[1]
   l <- length(protein1) #number of amino acids
@@ -277,7 +289,7 @@ prob_dep_gamma <- function(protein1,protein2,protein_op,t,shape,category=4,formu
   pr <- vector(length=index)
   for(i in 1:index){
     s <- means[means_index[i,]]
-    ma <- mat_gen_dep(Arr,protein_op,s,formula,model)
+    ma <- mat_gen_dep(Arr,protein_op,s,formula,model,a1,a2,Phi,q,Ne)
     Pt <- expm(ma*t)
     pr <- c(pr,Pt[1,m]) #first row last column entry of P(t)
   }
@@ -286,23 +298,23 @@ prob_dep_gamma <- function(protein1,protein2,protein_op,t,shape,category=4,formu
 }
 
 
-prob_gamma <- function(protein1, protein2, protein_op, t, shape, indep=TRUE,category=4,formula=1,model=1){
+prob_gamma <- function(protein1, protein2, protein_op, t, shape, indep=TRUE,category=4,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7){
   if(indep){ #site independent case
-    prob_indep_gamma(protein1,protein2,protein_op,t,shape,category,formula,model)
+    prob_indep_gamma(protein1,protein2,protein_op,t,shape,category,formula,model,a1,a2,Phi,q,Ne)
   }
   else{ #site dependent case
-    prob_dep_gamma(protein1,protein2,protein_op,t,shape,category,formula,model)
+    prob_dep_gamma(protein1,protein2,protein_op,t,shape,category,formula,model,a1,a2,Phi,q,Ne)
   }
   return(pr)
 }
 ###################################################################################################
 #Fixed rate for s -> likelihood
 #Independent-site version
-prob_indep_fix <- function(protein1,protein2,protein_op,t,s=1,formula=1,model=1){
+prob_indep_fix <- function(protein1,protein2,protein_op,t,s=1,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7){
   l <- length(protein1) #length of protein
   pr <- 0
   for(i in 1:l){ # for each amino acid in the protein, calculate the probability of transition
-    ma <- mat_gen_indep(protein_op[i],s,formula, model) #transition matrix Q
+    ma <- mat_gen_indep(protein_op[i],s,formula, model,a1,a2,Phi,q,Ne) #transition matrix Q
     Pt <- expm(ma*t) #P(t) = exp(Qt)
     p <- Pt[protein1[i],protein2[i]]#the entry corresponding to the amino acids in the sequences
     pr <- pr-log(p)
@@ -311,25 +323,25 @@ prob_indep_fix <- function(protein1,protein2,protein_op,t,s=1,formula=1,model=1)
 }
 
 #Dependent-site version
-prob_dep_fix <- function(protein1,protein2,protein_op,t,s=1,formula=1,model=1){
+prob_dep_fix <- function(protein1,protein2,protein_op,t,s=1,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7){
   Arr <- path(protein1,protein2) # all the sequences lying on the path from protein 1 to protein 2
   m <- dim(Arr)[1] # number of amino acid sequences on the parsimony path
   l <- length(protein1) #number of amino acids in the protein
   sv <- rep(s,l) #s is the same for all sites
-  ma <- mat_gen_dep(Arr,protein_op,sv,formula,model) #transition rate matrix for the path Q
+  ma <- mat_gen_dep(Arr,protein_op,sv,formula,model,a1,a2,Phi,q,Ne) #transition rate matrix for the path Q
   Pt <- expm(ma*t) # P(t) = Exp(Q*t)
   p <- Pt[1,m] #first row last column entry of P(t)
   return(-log(p))
 }
 
-prob_fix <- function(para, protein1, protein2, protein_op, indep=TRUE,formula=1,model=1){
+prob_fix <- function(para, protein1, protein2, protein_op, indep=TRUE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7){
   t <- para[1]
   s <- para[2]
   if(indep){ #site independent case
-    prob_indep_fix(protein1,protein2,protein_op,t,s,formula,model)
+    prob_indep_fix(protein1,protein2,protein_op,t,s,formula,model,a1,a2,Phi,q,Ne)
   }
   else{ #site dependent case
-    prob_dep_fix(protein1,protein2,protein_op,t,s,formula,model)
+    prob_dep_fix(protein1,protein2,protein_op,t,s,formula,model,a1,a2,Phi,q,Ne)
   }
 }
 
@@ -353,28 +365,25 @@ mkv <- function(odds,vec){
   return(pick)
 }
 
-rate_move_dep <- function(protein, protein_op, s,formula=1,model=1){
+rate_move_dep <- function(protein, protein_op, s,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7){
   l <- length(protein)
   sv <- rep(s,l)
   rates <- vector() #store the rates of moving to other states
-  d1 <- vector(length=l) #distance from optimal aa's
-  for(i in 1:l){ 
-    d1[i] <- GM[protein[i],protein_op[i]]
-  }
+  d1 <- pchem_d(protein,protein_op) #distance from optimal aa's
   #browser()
   for(i in 1:l){
     d2 <- d1
     aa <- seq(1:20)[-protein[i]]
     for(j in 1:19){
       d2[i] <- GM[protein_op[i],aa[j]]
-      rates <- c(rates,fix(d1,d2,sv,formula,model))
+      rates <- c(rates,fix(d1,d2,sv,formula,model,a1,a2,Phi,q,Ne))
     }
   }
   rates
 }
-#rate_move_dep(c(1,2),c(3,3),c(1,1))
+#rate_move_dep(c(1,2),c(3,3),1)
 
-simulation_dep <- function(protein,protein_op,t,s=1,formula=1,model=1,record.fitness=TRUE){
+simulation_dep <- function(protein,protein_op,t,s=1,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7,record.fitness=TRUE){
   #browser()
   l <- length(protein) #number of sites
   t_now <- 0 #time until the current step of simulation
@@ -383,7 +392,7 @@ simulation_dep <- function(protein,protein_op,t,s=1,formula=1,model=1,record.fit
   colnames(path)[l+1] <- "Time Now"
   colnames(path)[l+2] <- "Waiting Time"
   while(t_now < t){ #when current time is less than t
-    rates <- rate_move_dep(protein,protein_op,s,formula,model) #moving rates of a protein to its neighbors
+    rates <- rate_move_dep(protein,protein_op,s,formula,model,a1,a2,Phi,q,Ne) #moving rates of a protein to its neighbors
     lambda <- sum(rates) 
     t_wait <- rexp(1,lambda) #waiting time
     t_now <- t_now + t_wait
@@ -392,7 +401,7 @@ simulation_dep <- function(protein,protein_op,t,s=1,formula=1,model=1,record.fit
       index <- mkv(runif(1),rates) #index of the protein it moves to
       pos <- (index-1) %/% 19 + 1 #index of the site that changes
       rmd <- (index-1) %% 19 + 1 # the amino acid that site changes to
-      protein[pos] <- aa[-protein[pos]][rmd]
+      protein[pos] <- seq(1:20)[-protein[pos]][rmd] #new protein
       path <- rbind(path,c(protein,t_now,t_wait)) #record this moving step
     }
     else{
@@ -412,7 +421,7 @@ simulation_dep <- function(protein,protein_op,t,s=1,formula=1,model=1,record.fit
 
 #simulation for site-independent case
 #Multiple sites(amino acids) in the protein
-simulation_indep <- function(protein, protein_op, t, s=1,formula=1,model=1,record.fitness=TRUE){
+simulation_indep <- function(protein, protein_op, t, s=1,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7,record.fitness=TRUE){
   l <- length(protein) #number of sites(amino acids)
   t_now <- 0 #time until now
   arr <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
@@ -422,7 +431,7 @@ simulation_indep <- function(protein, protein_op, t, s=1,formula=1,model=1,recor
   while(t_now < t){ #while the time does not exceed the simulation time
     t_sim <- NULL # simulated waiting times
     for(i in 1:l){
-      rate <- sum(find_rate(protein[i],protein_op[i],s,formula, model)) # rates of exponential distributions for waiting times
+      rate <- sum(find_rate(protein[i],protein_op[i],s,formula, model,a1,a2,Phi,q,Ne)) # rates of exponential distributions for waiting times
       t_sim <- c(t_sim,rexp(1,rate)) #waiting times
     }
     t_wait <- min(t_sim) #shortest waiting time
@@ -430,7 +439,7 @@ simulation_indep <- function(protein, protein_op, t, s=1,formula=1,model=1,recor
     t_now <- t_now + t_wait #time after waiting (up to now)
     if(t_now < t){
       #probability vector of moving to other aa's at "pos"
-      move_prob <- find_rate(protein[pos],protein_op[pos],s,formula,model)/sum(find_rate(protein[pos],protein_op[pos],s,formula,model))
+      move_prob <- find_rate(protein[pos],protein_op[pos],s,formula,model,a1,a2,Phi,q,Ne)/sum(find_rate(protein[pos],protein_op[pos],s,formula,model,a1,a2,Phi,q,Ne))
       protein[pos] <- mkv(runif(1),move_prob)#the amino acid it moves to
       arr <- rbind(arr,c(protein,t_now,t_wait)) #record this moving step
     }
@@ -451,7 +460,7 @@ simulation_indep <- function(protein, protein_op, t, s=1,formula=1,model=1,recor
 #find the instantaneous rates of moving from "protein" to another 
 # amino acid, with optimal amino acid "protein_op"
 # Note: the rate of not moving is set to 0, here, the sum of the vector is not equal to 0
-find_rate <- function(protein, protein_op, s=1, formula=1, model=1){
+find_rate <- function(protein, protein_op, s=1, formula=1, model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-7),Ne=1.37*10^7){
   aa <- seq(1:20)
   rate <- vector()
   for(i in 1:length(aa)){
@@ -459,7 +468,7 @@ find_rate <- function(protein, protein_op, s=1, formula=1, model=1){
       rate <- c(rate,0)
     }
     else{
-    rate <- c(rate,fix(GM[protein,protein_op],GM[aa[i],protein_op],s,formula,model))
+    rate <- c(rate,fix(GM[protein,protein_op],GM[aa[i],protein_op],s,formula,model,a1,a2,Phi,q,Ne))
     }
   }
   rate
@@ -484,21 +493,7 @@ find_rate <- function(protein, protein_op, s=1, formula=1, model=1){
 #     d2[i] <- GM[pr2[i],pr0[i]]
 #   }
 
-integer.base.b <-function(x, b=2){
-  xi <- as.integer(x)
-  if(any(is.na(xi) | ((x-xi)!=0)))
-		print(list(ERROR="x not integer", x=x))
-	N <- length(x)
-	xMax <- max(x)	
-	ndigits <- (floor(logb(xMax, base=b))+1)
-	Base.b <- array(NA, dim=c(N, ndigits))
-	for(i in 1:ndigits){#i <- 1
-		Base.b[, ndigits-i+1] <- (x %% b)
-		x <- (x %/% b)
-	}
-	if(N ==1) Base.b[1, ] else Base.b
-}
-#integer.base.b(seq(0,4^3),b=4) + 1
+
 ####################################################################################
 Ftny_sim <- function(d, s, model=1, dis=0, para=1){
   #browser()
