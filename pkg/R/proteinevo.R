@@ -284,6 +284,8 @@ rate_move <- function(protein, protein_op, m, s,indep=TRUE,formula=1,model=1,a1=
   }
   rates
 }
+
+
 #Simulation. Given the starting protein and the optimal protein
 #t: running time of the chain
 simulation <- function(protein,protein_op,t,m,s,indep=FALSE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne),record.fitness=TRUE){
@@ -316,9 +318,9 @@ simulation <- function(protein,protein_op,t,m,s,indep=FALSE,formula=1,model=1,a1
     ftny_vec <- NULL
     fitness_vec <- NULL
     for(i in 1:dim(path)[1]){
-      ftny_vec <- c(ftny_vec,Ftny(pchem_d(path[i,seq(1:l)],protein_op),s,model))
+      ftny_vec <- c(ftny_vec,Ftny(pchem_d(path[i,seq(1:l)],protein_op),s,model)) #functionality
     }
-    fitness_vec <- exp(-q*Phi*C/ftny_vec)
+    fitness_vec <- exp(-q*Phi*C/ftny_vec) #fitness
     path <- cbind(path,ftny_vec)
     path <- cbind(path,fitness_vec)
     colnames(path)[l+3] <- "Functionality"
@@ -326,11 +328,70 @@ simulation <- function(protein,protein_op,t,m,s,indep=FALSE,formula=1,model=1,a1
   }
   path
 }
+#####################################################
+#Find the rates of moving to other amino acids for only one site, with other sites fixed either at the optimal or non-optimal amino acid
+#change_site is the site that is evolving, default is the first one
+rate_move_1site <- function(protein,protein_op,m,change_site=1,s,indep=T,formula=1,model=1,a1=2,a2=1,Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne)){
+  #browser()
+  rates <- vector()
+  d1 <- pchem_d(protein,protein_op)
+  d2 <- d1
+  aa <- seq(1:m)[-protein[change_site]]
+  for(i in 1:(m-1)){
+    d2[change_site] <- GM[protein_op[change_site],aa[i]]
+    rates <- c(rates,2*Ne*mu*fix(d1,d2,s,indep,formula,model,a1,a2,Phi,q,Ne))
+  }
+  return(rates)
+}
 
-simulation_large <- function(protein,protein_op,t,s=1,num,indep=TRUE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne)){
+#simulation when only one site is evolving, with other sites fixed
+#finish writing this function
+simulation_1site <- function(protein,protein_op,t,m,change_site=1, s,indep=FALSE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne),record.fitness=TRUE){
+  #browser()
+  l <- length(protein) #number of sites
+  C <- a1 + a2*l #protein production cost
+  t_now <- 0 #time until the current step of simulation
+  path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
+  colnames(path) <- colnames(path,do.NULL = FALSE, prefix = "Site.") #colomn names
+  colnames(path)[l+1] <- "Time Now"
+  colnames(path)[l+2] <- "Waiting Time"
+  while(t_now < t){ #when current time is less than t
+    rates <- rate_move_1site(protein,protein_op,m,change_site,s,indep,formula,model,a1,a2,Phi,q,Ne,mu) #moving rates of a protein to its neighbors
+    lambda <- sum(rates) # rate of staying at the same state
+    t_wait <- rexp(1,lambda) #waiting time, coming from exponential distribution with rate lambda
+    t_now <- t_now + t_wait
+    if(t_now < t){
+      rates <- rates/lambda #probability vector of moving
+      index <- mkv(runif(1),rates) #index of the protein it moves to
+      protein[change_site] <- seq(1:m)[-protein[change_site]][index] #change the state of the site that is evolving
+      path <- rbind(path,c(protein,t_now,t_wait)) #record this moving step
+    }
+    else{
+      path <- rbind(path,c(protein,t,NA)) #record this moving step
+    }
+  }
+  if(record.fitness){
+    ftny_vec <- NULL
+    fitness_vec <- NULL
+    for(i in 1:dim(path)[1]){
+      ftny_vec <- c(ftny_vec,Ftny(pchem_d(path[i,seq(1:l)],protein_op),s,model)) #functionality
+    }
+    fitness_vec <- exp(-q*Phi*C/ftny_vec) #fitness
+    path <- cbind(path,ftny_vec)
+    path <- cbind(path,fitness_vec)
+    colnames(path)[l+3] <- "Functionality"
+    colnames(path)[l+4] <- "Fitness"
+  }
+  path
+}
+  
+#####################################################
+#simulate a big number(num) of chains up to time t, and record the last protein state in each chain.
+#the frequencies of each protein in this set should serve as a good approximation to the stationary probability
+simulation_large <- function(protein,protein_op,t,m,s,indep=FALSE,num,indep=TRUE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne)){
   result <- array()
   for(i in 1:num){
-    sim <- simulation_m(protein,protein_op,t,s,indep=TRUE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne),record.fitness=FALSE)
+    sim <- simulation(protein,protein_op,t,m,s,indep,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne),record.fitness=FALSE)
     result <- rbind(result,tail(sim,1)[c(1,2)])
   }
   return(result[-1,])
