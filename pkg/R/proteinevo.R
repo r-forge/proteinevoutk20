@@ -1,5 +1,7 @@
-library("Matrix") #load the library that includes the function "expm" to calculate exponential of matrix
 setwd("~/Documents/ProteinEvo") #set working directory
+library("Matrix") #load the library that includes the function "expm" to calculate exponential of matrix
+library("phangorn")
+
 
 ##################################
 #physiochemical distance matrix#
@@ -173,7 +175,7 @@ mat_gen_indep <- function(aa_op,m,s,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10
 #protein_op: optimal protein
 #s: selection coefficients 
 #########################################################################3
-# mat_gen_arr<- function(arr,protein_op,s,indep=FALSE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3, mu=1/(2*Ne)){
+mat_gen_arr<- function(arr,protein_op,s,indep=FALSE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3, mu=1/(2*Ne)){
   n1 <- dim(arr)[1] #number of proteins to consider
   #n <- dim(arr)[2] #number of sites in each protein
   mat <- matrix(0,nrow=n1,ncol=n1) #matrix to return, every entry is initiated to be 0
@@ -331,6 +333,37 @@ simulation <- function(protein,protein_op,t,m,s,indep=FALSE,formula=1,model=1,a1
     colnames(path)[l+4] <- "Fitness"
   }
   path
+}
+
+#Simulation of protein sequences of length "l" on a phylogeny "tree", 
+#given the ancestral sequence "rootseq", optimal amino acid sequence "protein_op",
+#selection coefficient "s", 
+simTree <- function(tree, l=1000, rootseq=NULL,protein_op=rep(1,l),m,s,indep=FALSE,formula=1,model=1,a1=2, a2=1, 
+                    Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne),
+                     bf=NULL,levels = NULL, rate=1, ancestral=FALSE){
+    if(is.null(bf)) bf = rep(1/m,m) #base frequency, randomly chosen from all states
+    if(is.null(rootseq))rootseq = sample(c(1:m), l, replace=TRUE, prob=bf) #sequence at the root
+    tree = ape:::reorder.phylo(tree) #oder the tree, cladwise
+    edge = tree$edge #edges
+    nNodes = max(edge) #number of nodes in the tree
+    res = matrix(NA, nNodes, l) #result to return, amino acid sequences at all nodes
+    parent <- as.integer(edge[, 1]) #parents of the edges
+    child <- as.integer(edge[, 2]) #children of the edges
+    root <- as.integer(parent[!match(parent, child, 0)][1])  
+    res[root, ] = rootseq #the sequence at the root
+    tl = tree$edge.length #lengths of the edges
+    for(i in 1:length(tl)){
+        from = parent[i] 
+        to = child[i]
+        res[to,] = as.numeric(tail(simulation(res[from,],protein_op,tl[i],m,s,indep,
+                              formula,model,a1,a2,Phi,q,Ne,mu,record.fitness=FALSE),1)[c(1:l)])
+    }
+    k = length(tree$tip)
+    label = c(tree$tip, as.character((k+1):nNodes))
+    rownames(res)=label 
+    if(!ancestral)res = res[ tree$tip, , drop=FALSE]
+    return(as.data.frame(res))
+    #if(pt=="AA") return(phyDat.AA(as.data.frame(res), return.index=TRUE))
 }
 #####################################################
 #Find the rates of moving to other amino acids for only one site, with other sites fixed either at the optimal or non-optimal amino acid
