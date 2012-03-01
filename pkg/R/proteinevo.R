@@ -349,8 +349,7 @@ simTree <- function(tree, l=1000, rootseq=NULL,protein_op=rep(1,l),m,s,indep=FAL
     res = matrix(NA, nNodes, l) #result to return, amino acid sequences at all nodes
     parent <- as.integer(edge[, 1]) #parents of the edges
     child <- as.integer(edge[, 2]) #children of the edges
-    root <- as.integer(parent[!match(parent, child, 0)][1])  
-    res[root, ] = rootseq #the sequence at the root
+    root <- as.integer(parent[!match(parent, child, 0)][1])
     tl = tree$edge.length #lengths of the edges
     for(i in 1:length(tl)){
         from = parent[i] 
@@ -365,257 +364,49 @@ simTree <- function(tree, l=1000, rootseq=NULL,protein_op=rep(1,l),m,s,indep=FAL
     return(as.data.frame(res))
     #if(pt=="AA") return(phyDat.AA(as.data.frame(res), return.index=TRUE))
 }
-#####################################################
-#Find the rates of moving to other amino acids for only one site, with other sites fixed either at the optimal or non-optimal amino acid
-#change_site is the site that is evolving, default is the first one
-rate_move_1site <- function(protein,protein_op,m,change_site=1,s,indep=T,formula=1,model=1,a1=2,a2=1,Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne)){
-  #browser()
-  rates <- vector()
-  d1 <- pchem_d(protein,protein_op)
-  d2 <- d1
-  aa <- seq(1:m)[-protein[change_site]]
-  for(i in 1:(m-1)){
-    d2[change_site] <- GM[protein_op[change_site],aa[i]]
-    rates <- c(rates,2*Ne*mu*fix(d1,d2,s,indep,formula,model,a1,a2,Phi,q,Ne))
+########################################################
+#Find the likelihood of a tree given data
+########################################################
+#Likelihood of data on a tree, given the selection coefficient "s" and the optimal amino acid sequence "protein_op"
+likelihood_indep <- function(tree,data,protein_op,m=20,s=1,bf=NULL,
+                             formula=1,model=1,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+  l <- length(protein_op) #number of sites in the sequence
+  pr <- 0
+  for(i in 1:l){
+    llh = likelihood_site(tree,data[,l],protein_op[i],m,s,bf,formula,model,a1,a2,Phi,q,Ne)
+    pr = pr - log(llh)
   }
-  return(rates)
+  pr
 }
 
-#simulation when only one site is evolving, with other sites fixed
-#finish writing this function
-simulation_1site <- function(protein,protein_op,t,m,change_site=1, s,indep=FALSE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne),record.fitness=TRUE){
-  #browser()
-  l <- length(protein) #number of sites
-  C <- a1 + a2*l #protein production cost
-  t_now <- 0 #time until the current step of simulation
-  path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
-  colnames(path) <- colnames(path,do.NULL = FALSE, prefix = "Site.") #colomn names
-  colnames(path)[l+1] <- "Time Now"
-  colnames(path)[l+2] <- "Waiting Time"
-  while(t_now < t){ #when current time is less than t
-    rates <- rate_move_1site(protein,protein_op,m,change_site,s,indep,formula,model,a1,a2,Phi,q,Ne,mu) #moving rates of a protein to its neighbors
-    lambda <- sum(rates) # rate of staying at the same state
-    t_wait <- rexp(1,lambda) #waiting time, coming from exponential distribution with rate lambda
-    t_now <- t_now + t_wait
-    if(t_now < t){
-      rates <- rates/lambda #probability vector of moving
-      index <- mkv(runif(1),rates) #index of the protein it moves to
-      protein[change_site] <- seq(1:m)[-protein[change_site]][index] #change the state of the site that is evolving
-      path <- rbind(path,c(protein,t_now,t_wait)) #record this moving step
+likelihood_site <- function(tree,data,optimal,m=20,s=1,bf=NULL,
+                            formula=1,model=1,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+    if(is.null(bf)) bf = rep(1/m,m) #base frequency, randomly chosen from all states
+    Q = mat_gen_indep(optimal,m,s,formula,model,a1,a2,Phi,q,Ne)
+    tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
+    edge = tree$edge #edges
+    nNodes = max(edge) #number of nodes in the tree
+    probvec = matrix(NA,nNodes,m)
+    parent <- as.integer(edge[, 1]) #parents of the edges
+    child <- as.integer(edge[, 2]) #children of the edges
+    root <- as.integer(parent[!match(parent, child, 0)][1])  
+    tip <- as.integer(child[!match(child,parent,0)])
+    for(i in 1:length(tip)){
+      probvec[i,] = 0
+      probvec[i,data[i]] = 1
     }
-    else{
-      path <- rbind(path,c(protein,t,NA)) #record this moving step
+    #or use this to find tips:
+    #tip <- c(1:length(tree$tip.label))
+    tl = tree$edge.length #lengths of the edges
+    for(i in 1:tree$Nnode){
+        from = parent[2*i] 
+        to = child[(2*i-1):(2*i)]
+        t_left = tree$edge.length[2*i-1]
+        t_right = tree$edge.length[2*i]
+        for(j in 1:m){
+          probvec[from,j] = (expm(Q*t_left)[j,] %*% probvec[to[1],])*(expm(Q*t_right)[j,] %*% probvec[to[2],])
+        }
     }
-  }
-  if(record.fitness){
-    ftny_vec <- NULL
-    fitness_vec <- NULL
-    for(i in 1:dim(path)[1]){
-      ftny_vec <- c(ftny_vec,Ftny(pchem_d(path[i,seq(1:l)],protein_op),s,model)) #functionality
-    }
-    fitness_vec <- exp(-q*Phi*C/ftny_vec) #fitness
-    path <- cbind(path,ftny_vec)
-    path <- cbind(path,fitness_vec)
-    colnames(path)[l+3] <- "Functionality"
-    colnames(path)[l+4] <- "Fitness"
-  }
-  path
-}
-#####################################################
-#Given a protein, the optimal protein, and the selection vector (or constant selection)
-#find the vector of rates of moving from the protein to all its neighbors
-#Here we fix one particular site and let other sites evolve
-#If the length of the protein is l, then it has (m-1)*(l-1) neighbors
-rate_move_fixsite <- function(protein, protein_op, m, fix_site,s,indep=TRUE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne)){
-  l <- length(protein) #number of sites
-  rates <- vector() # rates of moving to neighboring proteins, vector to return
-  d1 <- pchem_d(protein,protein_op) #distance vector between given protein and optimal protein
-  for(i in 1:l){ #loop over every position
-    if(i!=fix_site){ #the fixed site does not change, we don't calculate fixation probabilities for these
-    d2 <- d1 #set the distance vectors to be the same, later on, change the specific one with change
-    aa <- seq(1:m)[-protein[i]] #All the m-1 aa's the site can change to
-    for(j in 1:(m-1)){ #loop over the m-1 amino acids
-        d2[i] <- GM[protein_op[i],aa[j]]
-        rates <- c(rates,2*Ne*mu*fix(d1,d2,s,indep,formula,model,a1,a2,Phi,q,Ne))
-    }
-  }
-#     else{
-#       rates <- c(rates,rep(0,m-1))
-#     }
-  }
-  rates
+    probvec[root,] %*% bf
 }
 
-
-#Simulation. Given the starting protein and the optimal protein
-#t: running time of the chain
-simulation_fixsite <- function(protein,protein_op,t,m,fix_site,s,indep=FALSE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne),record.fitness=TRUE){
-  #browser()
-  l <- length(protein) #number of sites
-  C <- a1 + a2*l #protein production cost
-  t_now <- 0 #time until the current step of simulation
-  path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
-  colnames(path) <- colnames(path,do.NULL = FALSE, prefix = "Site.") #colomn names
-  colnames(path)[l+1] <- "Time Now"
-  colnames(path)[l+2] <- "Waiting Time"
-  while(t_now < t){ #when current time is less than t
-    rates <- rate_move_fixsite(protein,protein_op,m,fix_site,s,indep,formula,model,a1,a2,Phi,q,Ne,mu) #moving rates of a protein to its neighbors
-    lambda <- sum(rates) # rate of staying at the same state
-    t_wait <- rexp(1,lambda) #waiting time, coming from exponential distribution with rate lambda
-    t_now <- t_now + t_wait
-    if(t_now < t){
-      rates <- rates/lambda #probability vector of moving
-      index <- mkv(runif(1),rates) #index of the protein it moves to
-      pos_nofixsite <- seq(1:l)[-fix_site]
-      pos <- (index-1) %/% (m-1) + 1 #index of the site that changes
-      rmd <- (index-1) %% (m-1) + 1 # the amino acid that site changes to
-      protein[pos_nofixsite[pos]] <- seq(1:m)[-protein[pos_nofixsite[pos]]][rmd] #new protein
-      path <- rbind(path,c(protein,t_now,t_wait)) #record this moving step
-    }
-    else{
-      path <- rbind(path,c(protein,t,NA)) #record this moving step
-    }
-  }
-  if(record.fitness){
-    ftny_vec <- NULL
-    fitness_vec <- NULL
-    for(i in 1:dim(path)[1]){
-      ftny_vec <- c(ftny_vec,Ftny(pchem_d(path[i,seq(1:l)],protein_op),s,model)) #functionality
-    }
-    fitness_vec <- exp(-q*Phi*C/ftny_vec) #fitness
-    path <- cbind(path,ftny_vec)
-    path <- cbind(path,fitness_vec)
-    colnames(path)[l+3] <- "Functionality"
-    colnames(path)[l+4] <- "Fitness"
-  }
-  path
-}
-
-#####################################################
-#simulate a big number(num) of chains up to time t, and record the last protein state in each chain.
-#the frequencies of each protein in this set should serve as a good approximation to the stationary probability
-simulation_large <- function(protein,protein_op,t,m,s,indep=FALSE,num,indep=TRUE,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne)){
-  result <- array()
-  for(i in 1:num){
-    sim <- simulation(protein,protein_op,t,m,s,indep,formula=1,model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne),record.fitness=FALSE)
-    result <- rbind(result,tail(sim,1)[c(1,2)])
-  }
-  return(result[-1,])
-}
-########################################################################
-########################################################################
-
-###function to find the average time of m transitions in a simulation###
-avg_time <- function(sim,m){
-  time <- sim[,"Time Now"] #extract the times when the transitions happen
-  #time <- as.numeric(sim[,2])
-  l <- length(time)
-  time <- head(time,l-1) #in the last step, there is no transition
-  time_start <- head(time, l-1-m)
-  time_end <- tail(time, l-1-m)
-  return(mean(time_end-time_start))
-}
-
-##Extract the states every m transitions###
-sim_extract <- function(sim,m){
-  time_trans <- avg_time(sim,m) #average time of m transitions
-  time <- sim[,"Time Now"] #times of transition happening
-  #time <- as.numeric(sim[,2])
-  time_mod <- time %/% time_trans #
-  pick_time_vec <- time_mod[-length(time_mod)]-time_mod[-1]
-  return(sim[pick_time_vec < 0,])
-}
-
-#Put the sites together as one column so that we can order them and get the levels of them
-parse_array <- function(Array,sites){
-  ParsedArray <- array(dim=c(dim(Array)[1],dim(Array)[2]-sites+1)) #the array to return
-  l <- dim(ParsedArray)[2] #number of records
-  for(i in 1:dim(Array)[1]){
-    ParsedArray[i,1] <- paste(Array[i,seq(1,sites,by=1)],collapse="_") #collapse the sites to one column
-  }
-  for(j in 2:l){
-    ParsedArray[,j] <- as.numeric(Array[,sites+j-1])
-  }
-  ParsedArray
-}
-
-
-
-sim1 <- sim_extract(sim_ind,10)
-sim1_state <- sim1[,1]
-vec <- as.numeric(table(sim1_state))
-table(sim1_state)
-freq_sim <- vec/sum(vec)
-
-q <- 4e-3
-Ne <- 1.37e3
-Phi <- 0.5
-C <- 3
-ftny_vec <- NULL
-for(i in 1:m){
-  distance <- pchem_d(i,2)
-  ftny_vec <- c(ftny_vec,Ftny(distance,0.1))
-}
-fit_vec <- exp(-q*Phi*C/ftny_vec)
-freq <- (fit_vec/max(fit_vec))^(2*Ne-1) #this is a better way to evaluate S-H formula
-freq_SH <- freq/sum(freq)
-
-find_freq <- function(sim, sites,transitions,burnin,Ne=1.37e3){
-  browser()
-  sim <- sim[-c(1:burnin),]
-  sim_ex <- sim_extract(sim,transitions)
-  sim_parsed <- parse_array(sim_ex,sites)
-  data <- sim_parsed[,c(1,5)]
-  data <- data[order(data[,1]),]
-  data_unique <- unique(data)
-  data_level <- table(data[,1])
-  counts <- as.numeric(data_level)
-  freq_sim <- counts/sum(counts)
-  fit_vec <- as.numeric(data_unique[,2])
-  freq <- (fit_vec/max(fit_vec))^(2*Ne-1) #this is a better way to evaluate S-H formula
-  freq_SH <- freq/sum(freq)
-  freq <- list(freq_sim=freq_sim, freq_SH=freq_SH)
-  return(freq)
-}
-
-#Expected value of the fitness ratio between 2 states at a certain sites
-#This is a simple case where there are only 3 sites and 3 states for each site, which means, there are 27 proteins in total
-#protein_op is the optimal AA sequence
-#freq_sta is the stationary probability vector for all 27 AA sequences
-exp_fratio <- function(state1, state2,site,protein_op,s,freq_sta){
-  exp_fit_ratio <- 0
-  for(i in 1:3){
-    for(j in 1:3){
-      if(site==1){
-        index <- (i-1)*3 + j
-        freq <- sum(freq_sta[index],freq_sta[index+9],freq_sta[index+18])
-        exp_fit_ratio <- exp_fit_ratio + (Ftny_protein(c(state1,i,j),protein_op,s)/Ftny_protein(c(state2,i,j),protein_op,s))*freq
-      }
-      else if(site==2){
-        index <- index <- (i-1)*9 + j
-        freq <- sum(freq_sta[index],freq_sta[index+3],freq_sta[index+6])
-        exp_fit_ratio <- exp_fit_ratio + (Ftny_protein(c(i,state1,j),protein_op,s)/Ftny_protein(c(i,state2,j),protein_op,s))*freq
-      }
-      else if(site==3){
-        index <- index <- (i-1)*9 + (j-1)*3 + 1
-        freq <- sum(freq_sta[index],freq_sta[index+1],freq_sta[index+2])
-        exp_fit_ratio <- exp_fit_ratio + (Ftny_protein(c(i,j,state1),protein_op,s)/Ftny_protein(c(i,j,state2),protein_op,s))*freq
-      }
-    }
-  }
-  exp_fit_ratio
-}
-sim0.1_parsed <- parse_array(sim0.1,2)
-data <- simOut0.1_parsed[,c(1,5)]
-data <- data[order(data[,1]),]
-data_unique <- unique(data)
-data_level <- table(data[,1])
-counts <- as.numeric(data_level)
-freq <- counts/sum(counts)
-fit_vec <- as.numeric(data_unique[,2])
-
-ssim <- sim_simple(4,W,10^7)
-ssim_ex <- sim_extract(ssim,5)
-ssim_state <- ssim_ex[,1]
-vec <- as.numeric(table(ssim_state))
-freq <- vec/sum(vec)
