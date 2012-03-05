@@ -55,10 +55,10 @@ Ftny <- function(d, s, model=1){
   else{
   }
   if(model==1){ #model 1
-    result <- prod(exp(-d*s)) #the function
+    result <- prod(exp(-d*s)) #product of ftny at sites (exponential functions)
   }
   else if(model==2){ #model 2
-    result <- prod(1/(1+d*s)) 
+    result <- length(d)/(sum(1+d*s)) #harmonic mean of ftny at all sites (F_i = 1 + d_i * s_i)
   } 
   #Other formulae?
   return(result)
@@ -77,7 +77,8 @@ Ftny_protein <- function(protein,protein_op,s,model=1){
 #C_n = a1 + a2*n, cost --  linear function of the length
 #formula number: 1: Sela & Hirsh's formula (default); 2: canonical formula
 fix <- function(d1, d2, s, indep=FALSE,formula=1, model=1,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3){
-  #browser()
+  if(length(d1)!=length(d2))
+    return("error: two proteins have different lengths")
   n <- length(d1)
   C_n <- a1 + a2*n
   if(n==1){ #if there is only 1 amino acid in the sequence
@@ -92,7 +93,7 @@ fix <- function(d1, d2, s, indep=FALSE,formula=1, model=1,a1=2, a2=1, Phi=0.5,q=
   }
   else{ # there are more than 1 amino acids in the protein
     if(length(s)==1){
-      s <- rep(s,length(d1))
+      s <- rep(s,n)
     }
     index <- seq(1,n)
     diff <- d1 - d2
@@ -105,20 +106,29 @@ fix <- function(d1, d2, s, indep=FALSE,formula=1, model=1,a1=2, a2=1, Phi=0.5,q=
       return(1/(2*Ne)) 
     }
     else if(length(D)==1){ #if there is only one site that is different
-      if(indep==TRUE){ # in site-indepdent case, F_S is equivalent to 0
-        ftny_S <- 1
-      }
-      else{
-        ftny_S <- Ftny(d1[S],s[S],model) #same terms in the product for both proteins
-      }
-      ftny_D1 <- Ftny(d1[D],s[D],model) #different terms in the product
-      ftny_D2 <- Ftny(d2[D],s[D],model)
-      if(ftny_D1==ftny_D2){
-        return(1/(2*Ne))
-      }
-      else{
-        fit_ratio <- exp(-q*Phi*C_n*(1/ftny_S)*((1/ftny_D1)-(1/ftny_D2)))
-      }
+      if(model==1){
+        if(indep==TRUE){ # in site-indepdent case, F_S is equivalent to 0
+          ftny_S <- 1
+        }
+        else{
+          ftny_S <- Ftny(d1[S],s[S],model) #same terms in the product for both proteins
+        }
+        ftny_D1 <- Ftny(d1[D],s[D],model) #different terms in the product
+        ftny_D2 <- Ftny(d2[D],s[D],model)
+        if(ftny_D1==ftny_D2){
+          return(1/(2*Ne))
+        }
+        else{
+          fit_ratio <- exp(-q*Phi*C_n*(1/ftny_S)*((1/ftny_D1)-(1/ftny_D2)))
+        }
+      } #end if model==1
+      else{ #model==2, results are the same for dependent and independent cases
+        ds_diff <- (d1[D]-d2[D])*s[D]
+        if(ds_diff==0)
+          return(1/(2*Ne))
+        else
+          fit_ratio <- exp(-q*Phi*C_n*ds_diff/n)
+      } #end if model==2
     }
   }
   #different fixation prob formula
@@ -257,7 +267,11 @@ path <- function(protein1,protein2){
 
 #Function to choose a state given the probabilities of changing to 
 #all states (probability vector)
+#CONSIDER USING "SAMPLE" INSTEAD OF THIS FUNCTION
 mkv <- function(odds,vec){
+  vec <- vec/sum(vec)
+  vec_order <- order(vec,decreasing=T)
+  vec <- vec[vec_order]
   if(odds<vec[1]){
     pick <- 1
   }
@@ -270,7 +284,7 @@ mkv <- function(odds,vec){
       }
     }
   }
-  return(pick)
+  return(vec_order[pick])
 }
 
 #Given a protein, the optimal protein, and the selection vector (or constant selection)
@@ -309,8 +323,9 @@ simulation <- function(protein,protein_op,t,m,s,indep=FALSE,formula=1,model=1,a1
     t_wait <- rexp(1,lambda) #waiting time, coming from exponential distribution with rate lambda
     t_now <- t_now + t_wait
     if(t_now < t){
-      rates <- rates/lambda #probability vector of moving
-      index <- mkv(runif(1),rates) #index of the protein it moves to
+      #rates <- rates/lambda #probability vector of moving
+      r <- runif(1)
+      index <- sample(length(rates),1,replace=T,rates) #index of the protein it moves to
       pos <- (index-1) %/% (m-1) + 1 #index of the site that changes
       rmd <- (index-1) %% (m-1) + 1 # the amino acid that site changes to
       protein[pos] <- seq(1:m)[-protein[pos]][rmd] #new protein
@@ -324,7 +339,7 @@ simulation <- function(protein,protein_op,t,m,s,indep=FALSE,formula=1,model=1,a1
     ftny_vec <- NULL
     fitness_vec <- NULL
     for(i in 1:dim(path)[1]){
-      ftny_vec <- c(ftny_vec,Ftny(pchem_d(path[i,seq(1:l)],protein_op),s,model)) #functionality
+      ftny_vec <- c(ftny_vec,Ftny_protein(path[i,seq(1:l)],protein_op,s,model)) #functionality
     }
     fitness_vec <- exp(-q*Phi*C/ftny_vec) #fitness
     path <- cbind(path,ftny_vec)
@@ -338,9 +353,9 @@ simulation <- function(protein,protein_op,t,m,s,indep=FALSE,formula=1,model=1,a1
 #Simulation of protein sequences of length "l" on a phylogeny "tree", 
 #given the ancestral sequence "rootseq", optimal amino acid sequence "protein_op",
 #selection coefficient "s", 
-simTree <- function(tree, l=1000, rootseq=NULL,protein_op=rep(1,l),m,s,indep=FALSE,formula=1,model=1,a1=2, a2=1, 
+simTree <- function(tree, l=1000,protein_op=rep(1,l),m,s,indep=TRUE,formula=1,model=2,a1=2, a2=1, 
                     Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,mu=1/(2*Ne),
-                     bf=NULL,levels = NULL, rate=1, ancestral=FALSE){
+                     bf=NULL,rootseq=NULL,ancestral=FALSE){
     if(is.null(bf)) bf = rep(1/m,m) #base frequency, randomly chosen from all states
     if(is.null(rootseq))rootseq = sample(c(1:m), l, replace=TRUE, prob=bf) #sequence at the root
     tree = ape:::reorder.phylo(tree) #oder the tree, cladwise
@@ -350,7 +365,9 @@ simTree <- function(tree, l=1000, rootseq=NULL,protein_op=rep(1,l),m,s,indep=FAL
     parent <- as.integer(edge[, 1]) #parents of the edges
     child <- as.integer(edge[, 2]) #children of the edges
     root <- as.integer(parent[!match(parent, child, 0)][1])
+    res[root,] <- rootseq
     tl = tree$edge.length #lengths of the edges
+    #browser()
     for(i in 1:length(tl)){
         from = parent[i] 
         to = child[i]
@@ -368,25 +385,26 @@ simTree <- function(tree, l=1000, rootseq=NULL,protein_op=rep(1,l),m,s,indep=FAL
 #Find the likelihood of a tree given data
 ########################################################
 #Likelihood of data on a tree, given the selection coefficient "s" and the optimal amino acid sequence "protein_op"
-likelihood_indep <- function(tree,data,protein_op,m=20,s=1,bf=NULL,
-                             formula=1,model=1,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+ll_indep <- function(tree,data,protein_op,m=20,s=1,rootseq=NULL,
+                             formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
   l <- length(protein_op) #number of sites in the sequence
   pr <- 0
   for(i in 1:l){
-    llh = likelihood_site(tree,data[,l],protein_op[i],m,s,bf,formula,model,a1,a2,Phi,q,Ne)
+    llh = ll_site(tree,data[,i],protein_op[i],m,s,rootseq,formula,model,a1,a2,Phi,q,Ne)
     pr = pr - log(llh)
   }
   pr
 }
 
-likelihood_site <- function(tree,data,optimal,m=20,s=1,bf=NULL,
-                            formula=1,model=1,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
-    if(is.null(bf)) bf = rep(1/m,m) #base frequency, randomly chosen from all states
-    Q = mat_gen_indep(optimal,m,s,formula,model,a1,a2,Phi,q,Ne)
+ll_site <- function(tree,data,optimal,m=20,s=1,rootseq=NULL,
+                            formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+    
+    if(is.null(rootseq)) rootseq = rep(1/m,m) #base frequency, randomly chosen from all states
+    Q = mat_gen_indep(optimal,m,s,formula,model,a1,a2,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
     tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
     edge = tree$edge #edges
     nNodes = max(edge) #number of nodes in the tree
-    probvec = matrix(NA,nNodes,m)
+    probvec = matrix(NA,nNodes,m) #probability of gettting different states at nodes that evolve to the current sequences
     parent <- as.integer(edge[, 1]) #parents of the edges
     child <- as.integer(edge[, 2]) #children of the edges
     root <- as.integer(parent[!match(parent, child, 0)][1])  
@@ -401,12 +419,14 @@ likelihood_site <- function(tree,data,optimal,m=20,s=1,bf=NULL,
     for(i in 1:tree$Nnode){
         from = parent[2*i] 
         to = child[(2*i-1):(2*i)]
-        t_left = tree$edge.length[2*i-1]
-        t_right = tree$edge.length[2*i]
+        t_left = tl[2*i-1]
+        t_right = tl[2*i]
         for(j in 1:m){
-          probvec[from,j] = (expm(Q*t_left)[j,] %*% probvec[to[1],])*(expm(Q*t_right)[j,] %*% probvec[to[2],])
+          #find the likelihood of a node when likelihood of both its descendents is found --- pruning
+          probvec[from,j] = (expm(Q*t_left)[j,] %*% probvec[to[1],])*(expm(Q*t_right)[j,] %*% probvec[to[2],]) 
         }
     }
-    probvec[root,] %*% bf
+    browser()
+    probvec[root,] %*% rootseq
 }
 
