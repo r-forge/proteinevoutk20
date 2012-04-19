@@ -1,7 +1,7 @@
 setwd("~/Documents/ProteinEvo") #set working directory
 library("Matrix") #load the library that includes the function "expm" to calculate exponential of matrix
 library("phangorn")
-
+#I will commit this
 
 ##################################
 #physiochemical distance matrix#
