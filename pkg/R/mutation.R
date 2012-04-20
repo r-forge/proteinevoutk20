@@ -491,6 +491,22 @@ MLE_GTR <- function(start_pt,tree,data,protein_op,m=20,alpha,beta,gamma,MuMat,bf
 }
 ##MLE_GTR(tree,data,rep(2,10),10,0.1,al,be,ga)
 
+##C,Phi,q and s are all multiplied together so that the product of them is actually
+##one big composite parameter
+##Now try to estimate s, and the distance weights at the same time
+##The lower and upper bounds are included in the parameters to set, too
+MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,protein_op,m=20,alpha,MuMat,bf=NULL,formula=1,model=2,
+                       a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+  negloglike <- function(para){
+    s = para[1]
+    beta = para[2]
+    gamma = para[3]
+    return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,protein_op,m,bf,formula,model,a1,
+                    a2,Phi,q,Ne))
+  }
+  ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=T,control=list(trace=1))
+  return(ans)
+}
 
 MLEweights <- function(tree,data,protein_op,m=20,s,alpha,bf=NULL,formula=1,model=2,
                        a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03,mu=1/(2*Ne)){
