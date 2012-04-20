@@ -480,13 +480,13 @@ ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,protein_op,m=20,bf=NULL,
   pr
 }
 
-MLE_GTR <- function(start_pt,tree,data,protein_op,m=20,alpha,beta,gamma,MuMat,bf=NULL,formula=1,model=2,
+MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,protein_op,m=20,alpha,beta,gamma,MuMat,bf=NULL,formula=1,model=2,
                        a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
   negloglike <- function(s){
     return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,protein_op,m,bf,formula,model,a1,
                     a2,Phi,q,Ne))
   }
-  ans <- optimx(start_pt,negloglike,lower=0,upper=1,method="nlminb",hessian=T,control=list(trace=1))
+  ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=T,control=list(trace=1))
   return(ans)
 }
 ##MLE_GTR(tree,data,rep(2,10),10,0.1,al,be,ga)
@@ -495,7 +495,7 @@ MLE_GTR <- function(start_pt,tree,data,protein_op,m=20,alpha,beta,gamma,MuMat,bf
 ##one big composite parameter
 ##Now try to estimate s, and the distance weights at the same time
 ##The lower and upper bounds are included in the parameters to set, too
-MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,protein_op,m=20,alpha,MuMat,bf=NULL,formula=1,model=2,
+MLE_GTR_sw<- function(start_pt,lowerb,upperb,tree,data,protein_op,m=20,alpha,MuMat,bf=NULL,formula=1,model=2,
                        a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
   negloglike <- function(para){
     s = para[1]
