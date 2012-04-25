@@ -1,9 +1,13 @@
-#load the required libraries
+##load the required libraries
 library("Matrix")
 library("seqinr")
 library("phangorn")
 library("optimx")
 #all the names of the nucleotides and codons that'll be needed 
+
+#Nucleotide mutation rates estimated from Rokas's data:
+Nu_vec <- c(14.86435,1.39133,1.0000,2.94194,2.33991,8.23705)
+
 aa <- s2c("SRLPTAVGIFYCHQNKDEMW")
 aa <- levels(factor(aa)) #all the amino acids
 Nu <- s2c("tcag") #nucleotide TCAG
@@ -18,6 +22,25 @@ for(i in 1:4){
 }
 cds <- nu_list[!nu_list %in% stop_cd] #61 non-stop codons
 
+## read in fasta file of nucleotides in 1 gene, convert it into amino acid data
+conv <- function(filename){
+  levels <- levels(factor(s2c("SRLPTAVGIFYCHQNKDEMW")))
+  data <- read.fasta(file=filename)
+  seqdata <- vector()
+  for(i in 1:length(data)){
+    aas <- translate(seq=data[[i]])
+    aan <- as.numeric(factor(aas,levels))
+    seqdata <- rbind(seqdata,aan)
+  }
+  dimnames(seqdata)[[1]]<- attr(data,"name")
+  return(seqdata)
+}
+
+## Find the most frequent element of a vector
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
 #Given a vector of length 6 (number of parameters for GTR matrix)
 #get the GTR rate matrix Q
 mat_form <- function(vec){
@@ -425,8 +448,12 @@ simTree <- function(tree, l,rep=1000,protein_op=rep(1,l),m,s,GTRvec,alpha=al, be
 ########################################################
 #data with only 1 site
 ll_site <- function(tree,data,optimal,m=20,s=1,MuMat,alpha=al, beta=be, gamma=ga,
-                    bf=NULL,formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+                    root=NULL,bf=NULL,formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
     if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
+    if(!is.null(root)){ 
+      bf = rep(0,m)
+      bf[root]=1 #set the frequency of the root aa to be 1, others to be 0
+    }
     if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
     GM1 = GM_cpv(GMcpv,alpha,beta,gamma)
     ##MuMat = aa_MuMat_form(GTRvec)
@@ -460,51 +487,52 @@ ll_site <- function(tree,data,optimal,m=20,s=1,MuMat,alpha=al, beta=be, gamma=ga
     }
     return(as.numeric(probvec[root,] %*% bf))
 }
+#ll_site(t,data[,1],optimal[1],20,0.1,aamat)
+
 #Likelihood of data on a tree, given the selection coefficient "s" and the optimal amino acid sequence "protein_op"
-ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,protein_op,m=20,bf=NULL,
+ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,root=NULL,bf=NULL,
                              formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
-  l <- length(protein_op) #number of sites in the sequence
+  l <- dim(data)[2] #number of sites in the sequence
   pr <- 0
-  data <- data[with(data,order(data[1,],data[2,],data[3,],data[4,]))] #order the data so that same data will be next to each other
-  llh = ll_site(tree,data[,1],protein_op[1],m,s,MuMat,alpha,beta,gamma,bf,formula,model,a1,a2,Phi,q,Ne)
+  data <- data[,order(data[1,],data[2,],data[3,],data[4,],data[5,],data[6,],data[7,],data[8,])] #order the data so that same data will be next to each other
+  protein_op <- apply(data,2,Mode)
+  llh = ll_site(tree,data[,1],protein_op[1],m,s,MuMat,alpha,beta,gamma,root,bf,formula,model,a1,a2,Phi,q,Ne)
   for(i in 2:l){
     if(length(which(data[,i]!=data[,i-1]))==0){ #if data at the two sites are the same, don't need to calculate again
       pr = pr - log(llh)
     }
     else{
-    llh = ll_site(tree,data[,i],protein_op[i],m,s,MuMat,alpha,beta,gamma,bf,formula,model,a1,a2,Phi,q,Ne)
+    llh = ll_site(tree,data[,i],protein_op[i],m,s,MuMat,alpha,beta,gamma,root,bf,formula,model,a1,a2,Phi,q,Ne)
     pr = pr - log(llh)
     }
   }
   pr
 }
 
-MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,protein_op,m=20,alpha,beta,gamma,MuMat,bf=NULL,formula=1,model=2,
+
+MLE_GTR <- function(start_pt,tree,data,m=20,alpha,beta,gamma,MuMat,bf=NULL,formula=1,model=2,
                        a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
   negloglike <- function(s){
     return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,protein_op,m,bf,formula,model,a1,
                     a2,Phi,q,Ne))
   }
-  ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=T,control=list(trace=1))
+  ans <- optimx(start_pt,negloglike,lower=0,upper=1,method="nlminb",hessian=T,control=list(trace=1))
   return(ans)
 }
 ##MLE_GTR(tree,data,rep(2,10),10,0.1,al,be,ga)
-
-##C,Phi,q and s are all multiplied together so that the product of them is actually
-##one big composite parameter
-##Now try to estimate s, and the distance weights at the same time
-##The lower and upper bounds are included in the parameters to set, too
-MLE_GTR_sw<- function(start_pt,lowerb,upperb,tree,data,protein_op,m=20,alpha,MuMat,bf=NULL,formula=1,model=2,
-                       a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+MLE_GTR_swNe<- function(start_pt,lowerb,upperb,tree,data,m=20,alpha,MuMat,                      ,bf=NULL,formula=1,model=2,
+                      a1=2,a2=1,Phi=0.5,q=4e-3){
   negloglike <- function(para){
     s = para[1]
     beta = para[2]
     gamma = para[3]
+    Ne = para[4]
     return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,protein_op,m,bf,formula,model,a1,
                     a2,Phi,q,Ne))
   }
-  ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=T,control=list(trace=1))
+  ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=T,
+                control=list(trace=1))
   return(ans)
 }
 
