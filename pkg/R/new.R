@@ -280,17 +280,19 @@ for(i in 2:19){
 d[with(d,order(d[1,],d[2,],d[3,],d[4,]))]
 #Question: how to do the same with data frame with arbitrary number or rows?
 
-load("cpv01_b_1000.RData")
-mle0.1_1000
-m <- attr(mle0.1_1000,"details")
-H <- m[[1]]$nhatend
-eigen(H)
-solve(H)
-sqrt(diag(solve(H)))
-solve(H[c(1,2),c(1,2)])
-sqrt(diag(solve(H[c(1,2),c(1,2)])))
-
-
+data <- read.fasta("RokasGene1.fasta")
+l <- length(data[[1]]) #number of nucleotides in this gene
+l_aa <- l/3 #number of amino acids in the gene
+aa_order <- sample(l_aa,l_aa,replace=T) #orders of amino acids in the new sample
+data_resample <- data
+for(i in 1:length(data)){
+  d <- data[[i]] #original data for i-th species
+  resample <- vector(mode="character",length=1701)
+  for(j in 1:l_aa){
+    resample[((j-1)*3+1):(j*3)] <- d[((aa_order[j]-1)*3+1):(aa_order[j]*3)]
+  }
+  data_resample[[i]] <- resample
+}
 
 library("seqinr")
 conv <- function(filename){
@@ -312,6 +314,7 @@ Mode <- function(x) {
 }
 
 optimal <- apply(data,2,Mode)
+
 #all the names of the nucleotides and codons that'll be needed 
 aa <- s2c("SRLPTAVGIFYCHQNKDEMW")
 aa <- levels(factor(aa)) #all the amino acids
