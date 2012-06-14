@@ -1,17 +1,24 @@
 ##load the required libraries
-library("Matrix")
-library("seqinr")
-library("phangorn")
-library("optimx")
+library(seqinr)
+library(phangorn)
+library(optimx)
+library(expm)
+library(parallel)
+library(minqa)
 ##all the names of the nucleotides and codons that'll be needed 
 
 ##Nucleotide mutation rates estimated from Rokas's data (using PAUP):
-Nu_vec <- c(14.86435,1.39133,1.0000,2.94194,2.33991,8.23705)
+##Model GTR, with Gamma rate distribution and invariable sites and etc
+##Nuvec <-  c(2.94194,8.23705,1.39133,2.33991,14.86435,1.00000)
+##Model GTR
+Nu_vec <- c(1.96575,4.08655,1.39431,1.46172,6.36024,1.00000)
+##Nuvec <-  c(2.94194,8.23705,1.39133,2.33991,14.86435,1.00000)
+freq <- c(0.31065,0.18365,0.20955,0.29615)
 
 ##Short names for all the amino acids, in alphabetical order
 aa <- s2c("SRLPTAVGIFYCHQNKDEMW")
 aa <- levels(factor(aa)) #all the amino acids
-Nu <- s2c("tcag") #nucleotide TCAG
+Nu <- s2c("acgt") #nucleotide ACGT - now the order is changed !!!
 stop_cd <- c("taa","tag","tga") #stop codons
 nu_list <- NULL #list of all 64 codons (including stop codons)
 for(i in 1:4){
@@ -37,6 +44,21 @@ conv <- function(filename){
   return(seqdata)
 }
 
+##rokas.gene1 <- conv("RokasGene1.fasta") #Read in the data of 1st gene in Rokas's data
+##rokas.gene1 <- conv("gene1.fasta") #Read in the data of 1st gene in Rokas's data
+
+##Given sequence data on a gene for different species, resample data of the 
+##same length for bootstrapping 
+##PAY SPECIAL ATTENTION TO THE SEED OF RANDOM GENERATOR FUNCTION!!!
+##LOOK AT THE BOOT PACKAGE AND SEE IF THERE IS SOME ALREADY EXISTED FUNCTION
+resample <- function(seqdata){
+  l <- dim(seqdata)[2] #number of (amino acid) sites in the gene
+  sample_index <- sample(l,l,replace=T) #sample the indices with replacements
+  SeqSample <- seqdata[,sample_index] #return the new sample
+  dimnames(SeqSample) = dimnames(seqdata)
+  return(list(SeqSample=SeqSample, index=sample_index))
+}
+
 ## Find the most frequent element of a vector
 ## It works for numbers and characters
 Mode <- function(x) {
@@ -57,19 +79,29 @@ mat_form <- function(vec){
   for(i in 1:4){ #row sums equal to 0
     rate_mat[i,i] <- -sum(rate_mat[i,-i])
   }
+  dimnames(rate_mat)[[1]] <- Nu
+  dimnames(rate_mat)[[2]] <- Nu
   return(rate_mat)
 }
 
-
+##Find the scale for the subsitution rate matrix Q
+scale.rate <- function(Q){
+  Pi <- as.vector(expm(Q*10000)[1,]) #equilibrium frequency vector
+  return(-sum(Pi*diag(Q)))
+}
 #Find the mutation rate matrix (20 by 20) from the 6 rates in GTR mutation rate
 #matrix for nucleotides
-aa_MuMat_form <- function(vec){
-  Q <- mat_form(vec)
-  dimnames(Q) <- list(Nu, Nu) #change the dimnames to be the nucleotides
+#the rate G<->C is normalized to 1, now the scale is to scale the rates to real values
+aa_MuMat_form <- function(vec,scale=T){
+  Q <- mat_form(vec) #rate matrix for nucleotides
+  if(scale==T){ #scale the rate matrix
+    Scale = scale.rate(Q)
+    Q=Q/Scale
+  }
   ##mutation matrix for 61 codons
   codon_array <- array(0,dim=c(61,61),dimnames=list(cds,cds))
   for(m in 1:61){                       #loop through all 61 codons
-    cd_str <- cds[m]
+    cd_str <- cds[m] #mth codon in string format
     cd <- s2c(cd_str)   #one codon, convert from string to char vector
     ##print(paste("starting from",cd_str,":" ))  #for testing purpose
     for(i in 1:3){           #every nucleotide in the codon can mutate
@@ -90,6 +122,7 @@ aa_MuMat_form <- function(vec){
   for(i in 1:61){                       #row sums equal to 0
     codon_array[i,i] <- -sum(codon_array[i,-i])
   }
+  #browser()
   ##equilibrium frequenciew for 61 codons
   cd_eqlm <- expm(codon_array*10000)[1,]
 	
@@ -134,6 +167,7 @@ avg_dis <- function(vector){
   ct <- l*(l-1)/2
   return((ct/Sum)^2)
 }
+##Grantham weights
 al <- avg_dis(GMcpv[,1])
 be <- avg_dis(GMcpv[,2])
 ga <- avg_dis(GMcpv[,3])
@@ -143,7 +177,7 @@ ga <- avg_dis(GMcpv[,3])
 #Grantham matrix has mean 100 instead of 1
 GM_cpv <- function(datamatrix, alpha=al, beta=be, gamma=ga){
   A <- datamatrix
-  DistanceMatrix <- matrix(0,nrow=20,ncol=20)
+  DistanceMatrix <- matrix(0,nrow=20,ncol=20) #diagonal entries have values 0
   for(i in 1:19){
 	for(j in (i+1):20)
 		DistanceMatrix[i,j] <- (alpha*(A[i,1] - A[j,1])^2 + beta*(A[i,2]-A[j,2])^2+gamma*(A[i,3]-A[j,3])^2)^(1/2)
@@ -151,10 +185,10 @@ GM_cpv <- function(datamatrix, alpha=al, beta=be, gamma=ga){
 ##make a symmetric matrix
   result <- DistanceMatrix + t(DistanceMatrix)
 ##normalize the mean to 1
-  m <- sum(result)/(400-20)
+  m <- sum(result)/(400-20) #exclude the diagonal entries
   return(result/m)
 }
-##GM_cpv(GM)
+##GM <- GM_cpv(GMcpv)
 
 
 ##################################
@@ -219,7 +253,7 @@ Ftny_protein <- function(protein,protein_op,s,DisMat,model=2){
 #C: cost function, linearly function of the length of the protein
 #C_n = a1 + a2*n, cost --  linear function of the length
 #formula number: 1: Sela & Hirsh's formula (default); 2: canonical formula
-fix <- function(d1, d2, s, indep=TRUE,formula=1, model=2,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3){
+fix <- function(d1, d2, s, indep=TRUE,formula=1, model=2,a1=2, a2=1, Phi=0.5,q=4e-7,Ne=1.36e7){
   if(length(d1)!=length(d2))
     return("error: two proteins have different lengths")
   n <- length(d1)
@@ -297,7 +331,7 @@ fix <- function(d1, d2, s, indep=TRUE,formula=1, model=2,a1=2, a2=1, Phi=0.5,q=4
 #fixation probability of a mutant with initial freq 1/(2Ne) in a diploid population
 #with proteins as parameteres instead of distance vectors for the proteins
 fix_protein <- function(protein1, protein2, protein_op, s, DisMat,
-                        indep=FALSE, formula=1, model=2,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3){
+                        indep=FALSE, formula=1, model=2,a1=2, a2=1, Phi=0.5,q=4e-7,Ne=1.36e7){
   d1 <- pchem_d(protein1,protein_op,DisMat)
   d2 <- pchem_d(protein2,protein_op,DisMat)
   return(fix(d1,d2,s,indep,formula,model,a1,a2,Phi,q,Ne))
@@ -313,7 +347,7 @@ fix_protein <- function(protein1, protein2, protein_op, s, DisMat,
 #m: number of states (amino acids) considered
 #DisMat: distance matrix between amino acids
 #MuMat: mutation rate matrix between amino acids
-mat_gen_indep <- function(aa_op,m,s,DisMat,MuMat,formula=1,model=2,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3){
+mat_gen_indep <- function(aa_op,m,s,DisMat,MuMat,formula=1,model=2,a1=2, a2=1, Phi=0.5,q=4e-7,Ne=1.36e7){
   mat <- matrix(0,nrow=m,ncol=m) #set diagonal entries to be 0 at first
   for(i in 1:(m-1)){
     for(j in (i+1):m){
@@ -331,7 +365,7 @@ mat_gen_indep <- function(aa_op,m,s,DisMat,MuMat,formula=1,model=2,a1=2, a2=1, P
 ##Given a protein, the optimal protein, and the selection vector (or constant selection)
 ##find the vector of rates of moving from the protein to all its neighbors
 ##If the length of the protein is l, then it has (m-1)*l neighbors
-rate_move <- function(protein, protein_op, m, s,DisMat,MuMat,indep=TRUE,formula=1,model=2,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3){
+rate_move <- function(protein, protein_op, m, s,DisMat,MuMat,indep=TRUE,formula=1,model=2,a1=2, a2=1, Phi=0.5,q=4e-7, Ne=1.36e7){
   l <- length(protein) #number of sites
   rates <- vector(length=l*(m-1)) # rates of moving to neighboring proteins, vector to return
   for(i in 1:l){
@@ -348,7 +382,7 @@ rate_move <- function(protein, protein_op, m, s,DisMat,MuMat,indep=TRUE,formula=
 #Simulation. Given the starting protein and the optimal protein
 #t: running time of the chain
 #MuMat: matrix of mutation rates between amino acids
-simulation <- function(protein,protein_op,t,m,s,DisMat,MuMat,indep=TRUE,formula=1,model=2,a1=2, a2=1, Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,record.fitness=FALSE){
+simulation <- function(protein,protein_op,t,m,s,DisMat,MuMat,indep=TRUE,formula=1,model=2,a1=2, a2=1, Phi=0.5,q=4e-7, Ne=1.36e7,record.fitness=FALSE){
   #browser()
   l <- length(protein) #number of sites
   C <- a1 + a2*l #protein production cost
@@ -389,6 +423,9 @@ simulation <- function(protein,protein_op,t,m,s,DisMat,MuMat,indep=TRUE,formula=
     colnames(path)[l+3] <- "Functionality"
     colnames(path)[l+4] <- "Fitness"
   }
+  ##shift the third column up one step so that the waiting time is the time
+  ## spent in the state in the first column
+  path[,3] <- c(path[-1,3],NA)  
   path
 }
 #simulation(c(1,2),c(3,4),1000,10,0.1,GM,mumat,indep=T)
@@ -397,16 +434,16 @@ simulation <- function(protein,protein_op,t,m,s,DisMat,MuMat,indep=TRUE,formula=
 #Simulation of protein sequences of length "l" on a phylogeny "tree", 
 #given the ancestral sequence "rootseq", optimal amino acid sequence "protein_op",
 #selection coefficient "s", 
-simTree <- function(tree, l,protein_op=rep(1,l),m,s,GTRvec,alpha=al, beta=be, gamma=ga,
-                    indep=TRUE,formula=1,model=2,a1=2, a2=1, 
-                    Phi=0.5,q=4*10^(-3),Ne=1.37*10^3,
-                     bf=NULL,rootseq=NULL,ancestral=FALSE){
+simTree <- function(tree,l,protein_op=rep(1,l),m,s,GTRvec,alpha=al,
+                    beta=be, gamma=ga,scale=T,indep=TRUE,formula=1,model=2,a1=2, a2=1, 
+                    Phi=0.5,q=4e-7, Ne=1.36e7,
+                    bf=NULL,rootseq=NULL,ancestral=FALSE){
     # check if the input tree is rooted binary tree. if not, throw an error.
     if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
     if(is.null(bf)) bf = rep(1/m,m) #base frequency, randomly chosen from all states
     if(is.null(rootseq))rootseq = sample(c(1:m), l, replace=TRUE, prob=bf) #sequence at the root
     GM1=GM_cpv(GMcpv,alpha,beta,gamma) #Distance matrix from new weights
-    mumat = aa_MuMat_form(GTRvec)
+    mumat = aa_MuMat_form(GTRvec,scale)
     tree = ape:::reorder.phylo(tree) #oder the tree, cladwise
     edge = tree$edge #edges
     nNodes = max(edge) #number of nodes in the tree
@@ -434,22 +471,57 @@ simTree <- function(tree, l,protein_op=rep(1,l),m,s,GTRvec,alpha=al, beta=be, ga
     return(as.data.frame(res))
     #if(pt=="AA") return(phyDat.AA(as.data.frame(res), return.index=TRUE))
 }
-simTree(tree,5,protein_op=Protein_op[1:5],m=20,s=0.3,Nu_vec,al,be,ga,q=4e-7,Ne=1.36e7,Root[1:5])
+#simTree(tree,5,protein_op=Protein_op[1:5],m=20,s=0.3,Nu_vec,al,be,ga,q=4e-7,Ne=1.36e7,Root[1:5])
 ########################################################
 #Find the likelihood of a tree given data
 ########################################################
 #data with only 1 site
+
+##A function I need to do the matrix exponential correctly
+is.nan.inf <- function(x){
+  return((any(x==Inf))||(any(is.nan(x))))
+}
+## A modified version of expm that make sure there is no Inf and NaN in the result of matrix exponential
+expm.m <- function(x){
+  edefault <- expm(x) #expm from expm package with default method "higham08.b"
+  if(is.nan.inf(edefault)==FALSE) #if there is no Inf or NaN values in the result, return the result
+    return(edefault)
+  else{
+    eward77 <- expm(x,method="Ward77") #method Ward77
+    if(is.nan.inf(eward77)==FALSE)
+      return(eward77)
+    else{
+      epade <- expm(x,method="Pade") #method Pade
+      if(is.nan.inf(epade)==FALSE)
+        return(epade)
+      else{
+        etaylor <- expm(x,method="taylor") #method Taylor
+        if(is.nan.inf(etaylor)==FALSE)
+          return(etaylor)
+        else{
+          return(edefault)
+          warning("all methods give Inf or NaN")
+        }
+      }
+    }
+  }
+}
+
 ll_site <- function(tree,data,optimal,m=20,s=1,MuMat,alpha=al, beta=be, gamma=ga,
-                    root=NULL,bf=NULL,formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+                    root=NULL,bf=NULL,formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-7,Ne=1.36e7){
+    ##If the given tree is not rooted and binary, then throw error and exit
     if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
+    ##If the amino acid at the root is specified, set the base frequencies
     if(!is.null(root)){ 
       bf = rep(0,m)
       bf[root]=1 #set the frequency of the root aa to be 1, others to be 0
     }
+    ##if the base frequencies are not specified, do a uniform distribution
     if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
     GM1 = GM_cpv(GMcpv,alpha,beta,gamma)
     ##MuMat = aa_MuMat_form(GTRvec)
     Q = mat_gen_indep(optimal,m,s,GM1,MuMat,formula,model,a1,a2,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
+    
     tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
     edge = tree$edge #edges
     nNodes = max(edge) #number of nodes in the tree
@@ -470,35 +542,44 @@ ll_site <- function(tree,data,optimal,m=20,s=1,MuMat,alpha=al, beta=be, gamma=ga
         to = child[(2*i-1):(2*i)]
         t_left = tl[2*i-1]
         t_right = tl[2*i]
+        ##pick the right method to calculate the matrix exponential
+        v.left <- expm.m(Q*t_left)
+        v.right <- expm.m(Q*t_right)
         for(j in 1:m){
           #find the likelihood of a node when likelihood of both its descendents is found --- pruning
-          probvec[from,j] = (expm(Q*t_left)[j,] %*% probvec[to[1],])*(expm(Q*t_right)[j,] %*% probvec[to[2],]) 
+          probvec[from,j] = (v.left[j,] %*% probvec[to[1],])*(v.right[j,] %*% probvec[to[2],]) 
         }
-        if(sum(probvec[from,])==0)
+        #browser()
+        if(sum(probvec[from,])==0) #probability is very very low
           warning("numerical overflow")
     }
     return(as.numeric(probvec[root,] %*% bf))
 }
 #ll_site(t,data[,1],optimal[1],20,0.1,aamat)
+#ll_site(tree,data[[12]][,4],Mode(data[[12]][,4]),m=20,s=70,mumat,al,be,ga)
 
 ##Likelihood of data on a tree, given the selection coefficient "s" and the optimal amino acid sequence "protein_op"
 ##If protein_op (optimal protein) is not given, get it from the most frequent amino acids appeared in the data
 ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,root=NULL,bf=NULL,
-                             formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+                             formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-7,Ne=1.36e7){
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
   l <- dim(data)[2] #number of sites in the sequence
   pr <- 0
+  ##The following only works with trees of 8 tips, revise accordingly, or change to a better way!!!!
   data <- data[,order(data[1,],data[2,],data[3,],data[4,],data[5,],data[6,],data[7,],data[8,])] #order the data so that same data will be next to each other
   if(is.null(protein_op)) #Use the most frequent amino acid, what if there are more than 1 with highest frequency??
     protein_op <- apply(data,2,Mode)
-  llh = ll_site(tree,data[,1],protein_op[1],m,s,MuMat,alpha,beta,gamma,root,bf,formula,model,a1,a2,Phi,q,Ne)
+  llh = log(ll_site(tree,data[,1],protein_op[1],m,s,MuMat,alpha,beta,gamma,root,bf,formula,model,a1,a2,Phi,q,Ne))
+  #print(llh)
   for(i in 2:l){
     if(length(which(data[,i]!=data[,i-1]))==0){ #if data at the two sites are the same, don't need to calculate again
-      pr = pr - log(llh)
+      pr = pr - llh
+      #print(llh)
     }
     else{ #if this pattern hasn't appeared before, calculate the loglikelihood
-    llh = ll_site(tree,data[,i],protein_op[i],m,s,MuMat,alpha,beta,gamma,root,bf,formula,model,a1,a2,Phi,q,Ne)
-    pr = pr - log(llh)
+    llh = log(ll_site(tree,data[,i],protein_op[i],m,s,MuMat,alpha,beta,gamma,root,bf,formula,model,a1,a2,Phi,q,Ne))
+    pr = pr - llh
+    #print(llh)
     }
   }
   pr
@@ -506,24 +587,51 @@ ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,roo
 
 ##This function finds the MLE estimator for "s" only, given that all other parameters are known,
 ##including weights(alpha, beta, gamma), mutation rates, C, q, Phi, and Ne
-MLE_GTR <- function(start_pt,lowerb, upperb,tree,data,m=20,alpha,beta,gamma,MuMat,
+MLE_GTR <- function(start_pt,lowerb, upperb,tree,data,m=20,alpha,beta,gamma,MuMat,optim.m=1,
                     protein_op=NULL,root=NULL,bf=NULL,formula=1,model=2,
-                       a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+                       a1=2,a2=1,Phi=0.5,q=4e-7,Ne=1.37e7){
   negloglike <- function(s){ #The function to minimize
     return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,formula,model,a1,
                     a2,Phi,q,Ne))
   }
-  ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=T,control=list(trace=1))
+  #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,all.methods=T,save.failures=T,
+                #hessian=T,control=list(trace=1))
+  if(optim.m==1)
+    ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",
+                hessian=F,control=list(trace=1))
+  else #Powell method bobyqa
+    #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=3))
+    ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb)#does not print out too much information
+  #ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=1))
+  return(ans)
+}
+##Use the GS (golden section) method for optimization since there is only one parameter to optimize
+MLE_GTR_GS <- function(start_pt,lowerb, upperb,tree,data,m=20,alpha,beta,gamma,MuMat,
+                    protein_op=NULL,root=NULL,bf=NULL,formula=1,model=2,
+                       a1=2,a2=1,Phi=0.5,q=4e-7,Ne=1.37e7){
+  negloglike <- function(s){ #The function to minimize
+    return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,formula,model,a1,
+                    a2,Phi,q,Ne))
+  }
+  ans <- GS(negloglike,lowerb,start_pt,upperb)
   return(ans)
 }
 ##MLE_GTR(tree,data,rep(2,10),10,0.1,al,be,ga)
 
+##For given beta and gamma, (suppose that alpha=al or 1) find MLE for s in each gene
+## and the maximum likelihood values under these s values
+ll_sw <- function(beta, gamma, tree,data,alpha,MuMat,protein_op=NULL,root=NULL,bf=NULL,
+                  formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-7,Ne=1.37e7,m=20){
+  ##Do this for every gene in the data
+  MLE_GTR(0.3,-10,1000,tree,data,m,alpha,beta, gamma,MuMat,protein_op,root,bf,formula,
+          model,a1,a2,Phi,q,Ne)
+}
 ##This function finds the MLE estimators for s, and the cpv weights. Here alpha is given, beta and gamma are being
 ##estimated, since only 2 of them are free parameters.
 ##Brian suggested that the restriction should be that alpha + beta + gamma = 1, DO THIS LATER!
 MLE_GTR_sw<- function(start_pt,lowerb,upperb,tree,data,m=20,alpha,MuMat,
                       protein_op=NULL,root=NULL,bf=NULL,formula=1,model=2,
-                      a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+                      a1=2,a2=1,Phi=0.5,q=4e-7,Ne=1.37e07){
   negloglike <- function(para){
     s = para[1]
     beta = para[2]
@@ -531,9 +639,11 @@ MLE_GTR_sw<- function(start_pt,lowerb,upperb,tree,data,m=20,alpha,MuMat,
     return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,formula,model,a1,
                     a2,Phi,q,Ne))
   }
-  ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=T,control=list(trace=1))
+  #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=T,control=list(trace=1))
+  ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=3))
   return(ans)
 }
+
 
 ##This function finds the MLE's for s, two of the cpv weights, and the effective population size Ne
 ##Since the scale of Ne is big, we try to find the MLE for log_10(Ne)
@@ -598,56 +708,13 @@ ll_root_eqlm <- function(s,alpha,beta,gamma,tree,data,protein_op,m=20,
 
 #find the MLE for s when the equilibrium frequencies are not given
 #instead they come from Sella-Hirsh's formula and depend on s
-MLEeqlm <- function(tree,data,protein_op,m=20,formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03){
+MLEeqlm <- function(tree,data,protein_op,m=20,formula=1,model=2,a1=2,a2=1,Phi=0.5,q=4e-7,Ne=1.37e07){
     negloglike <- function(s){
     return(ll_root_eqlm(s,tree,data,protein_op,m,formula,model,a1,a2,Phi,q,Ne))
   }
   best <- GS(negloglike,0,2)
   return(best)
 }
-
-MLEalpha <- function(tree,data,protein_op,m=20,s,beta, gamma,bf=NULL,formula=1,model=2,
-                       a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03,mu=1/(2*Ne)){
-  negloglike <- function(alpha){
-    return(ll_indep(s,alpha,beta,gamma,tree,data,protein_op,m,bf,formula,model,a1,
-                    a2,Phi,q,Ne,mu))
-  }
-  best <- GS(negloglike,0,5)
-  return(best)
-}
-
-MLEbeta <- function(tree,data,protein_op,m=20,s,alpha, gamma,bf=NULL,formula=1,model=2,
-                       a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03,mu=1/(2*Ne)){
-  negloglike <- function(beta){
-    return(ll_indep(s,alpha,beta,gamma,tree,data,protein_op,m,bf,formula,model,a1,
-                    a2,Phi,q,Ne,mu))
-  }
-  #optimx(1,negloglike,lower=0,upper=5,method="L-BFGS-B")
-  best <- GS(negloglike,0,5)
-  return(best)
-}
-
-MLEgamma <- function(tree,data,protein_op,m=20,s,alpha, beta,bf=NULL,formula=1,model=2,
-                       a1=2,a2=1,Phi=0.5,q=4e-3,Ne=1.37e03,mu=1/(2*Ne)){
-  negloglike <- function(gamma){
-    return(ll_indep(s,alpha,beta,gamma,tree,data,protein_op,m,bf,formula,model,a1,
-                    a2,Phi,q,Ne,mu))
-  }
-  #optimx(1,negloglike,lower=0,upper=5,method="L-BFGS-B")
-  best <- GS(negloglike,0,0.1)
-  return(best)
-}
-
-
-MLEPhi <- function(tree,data,protein_op,m=20,s,bf=NULL,
-                   formula=1,model=2,a1=2,a2=1,q=4e-3,Ne=1.37e03){
-  negloglike <- function(Phi){
-    return(ll_indep(s,tree,data,protein_op,m,bf,formula,model,a1,a2,Phi,q,Ne))
-  }
-  best <- GS(negloglike,0,5)
-  return(best)
-}
-
 
 GS <- function (func, a, b, tol=1e-5) 
 {
@@ -658,11 +725,12 @@ GS <- function (func, a, b, tol=1e-5)
   fy <- func(y)
   steps <- ceiling (log(2*tol/(b-a))/log(r))
   for (i in 1:steps) {
-    if (fy > fx) {
+    if ((fy > fx)||(fy==Inf)) {
       b <- y
       y <- x
       fy <- fx
       x <- b - r* (b-a)
+      print(paste("x=",x))
       fx <- func(x)
       print(paste(fx,", at",x))
     }
@@ -671,6 +739,7 @@ GS <- function (func, a, b, tol=1e-5)
       x <- y
       fx <- fy
       y <- a + r* (b-a)
+      print(paste("y=",y))
       fy <- func(y) 
       print(paste(fy,", at",y))
     }
@@ -695,4 +764,18 @@ GS <- function (func, a, b, tol=1e-5)
   
   response <- list(position=position, value=value) 
   return (response)
+}
+
+##Another version of golden section 
+GS <- function(f, x1, x2, x3, tol=1e-7) {
+  r <- 2 - (1+sqrt(5))/2
+	x4 <- x2 + (x3-x2)*r
+	if ( abs(x3-x1) < tol ){
+		return(list(pos=x2,value=f(x2)))
+	}
+	if (f(x4) < f(x2)) {
+		gSection(f, x2, x4, x3, tol)
+	} else {
+		gSection(f, x4, x2, x1, tol)
+	}
 }
