@@ -1,0 +1,7 @@
+#!/bin/bash
+#$ -S /bin/bash
+#$ -N Test1
+#$ -q medium*
+#$ -pe threads 12
+#$ -cwd
+/data/apps/R/2.14.0/bin/R CMD BATCH --vanilla ~/proteinevoutk20/pkg/R/test1.R ~/proteinevoutk20/pkg/R/test1.txt
