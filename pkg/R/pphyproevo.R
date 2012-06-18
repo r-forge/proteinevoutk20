@@ -407,11 +407,11 @@ MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20
 }
 #############################################################################
 ##Given values for beta and gamma, find the MLE's of s for all 106 genes
-MLE.s <- function(x,generange){
+MLE.s <- function(x,generange,optim.m=1){
   Beta <- x[1]
   Gamma <- x[2]
   mle.s.one <- function(k){
-    MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat,optim.m=1)
+    MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat,optim.m=optim.m)
   }
   mclapply(generange,mle.s.one)
 }
