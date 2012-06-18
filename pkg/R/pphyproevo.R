@@ -391,30 +391,29 @@ ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,roo
 #############################################################################
 ##This function finds the MLE estimator for "s" only, given that all other parameters are known,
 ##including weights(alpha, beta, gamma), mutation rates, C, q, Phi, and Ne
-MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20,optim.m=1,
-                    protein_op=NULL,root=NULL,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20,optim.m=1,protein_op=NULL,root=NULL,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7,trace=0){
   negloglike <- function(s){ #The function to minimize
     return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,C,Phi,q,Ne))
   }
   if(optim.m==1) #method nlminb using PORT routines
     #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",
                 #hessian=FALSE,control=list(trace=1,kkt=FALSE))
-    ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=1))
+    ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=trace))
   else #Powell method bobyqa
-    ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=3))
+    ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=trace))
     #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb)#does not print out too much information
     
   return(ans)
 }
 #############################################################################
 ##Given values for beta and gamma, find the MLE's of s for all 106 genes
-MLE.s <- function(x){
+MLE.s <- function(x,generange){
   Beta <- x[1]
   Gamma <- x[2]
   mle.s.one <- function(k){
     MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat,optim.m=1)
   }
-  mclapply(1:106,mle.s.one)
+  mclapply(generange,mle.s.one)
 }
 #system.time(res <- MLE_GTR(1,0,1e4,tree,data[[2]],al,be,ga,mumat))
 l <- 10
