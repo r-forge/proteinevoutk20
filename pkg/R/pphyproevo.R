@@ -11,7 +11,7 @@ library(minqa) #optimization function bobyqa
 library(mgcv) #find the unique rows in a matrix - uniquecombs
 ##################################################################
 #directory of the data need to read, including gene, tree, Grantham data
-datadir <- paste(system("echo $HOME"),"/proteinevoutk20/pkg/Data/",sep="")
+datadir <- "~/proteinevoutk20/pkg/Data/"
 ##################################################################
 ##   Read in parameters and data  ##
 ##################################################################
@@ -228,7 +228,7 @@ aa_MuMat_form <- function(vec,scale=T){
   dimnames(arr) <- NULL
   return(arr)
 }
-
+## Amino acid mutation rate matrix for the GTR model of nucleotide
 mumat <- aa_MuMat_form(Nu_vec)
 #############################################################################
 ##find the physiochemical distance vector between two proteins, given the distance matrix
