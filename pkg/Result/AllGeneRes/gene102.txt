@@ -1,0 +1,116 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library("Matrix")
+Loading required package: lattice
+> library("seqinr")
+> library("phangorn")
+Loading required package: ape
+
+Attaching package: 'ape'
+
+The following object(s) are masked from 'package:seqinr':
+
+    as.alignment, consensus
+
+Loading required package: igraph
+> library("optimx")
+Loading required package: numDeriv
+> load("mutation.RData")
+> 
+> gene102 <- conv("gene102.fasta")
+> mumat <- aa_MuMat_form(Nu_vec)
+> tree <- read.nexus("GTR.tre")
+> system.time(mle <- MLE_GTR_sw(c(0.2,0.3,0.003),c(0,0,0),c(1000,1,1),tree,gene102[,1:10],m=20,al,mumat,q=4e-7,Ne=1.36e7))
+fn is  negloglike 
+Function has  3  arguments
+par[ 1 ]:  0   <? 0.2   <? 1000     In Bounds    
+par[ 2 ]:  0   <? 0.3   <? 1     In Bounds   In Bounds   
+par[ 3 ]:  0   <? 0.003   <? 1     In Bounds   In Bounds   In Bounds  
+Analytic gradient not made available.
+Analytic Hessian not made available.
+Loading required package: BB
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+Loading required package: minqa
+Looking for method =  nlminb 
+Scale check -- log parameter ratio= 2   log bounds ratio= 3 
+Method:  nlminb 
+  0:     78.974356: 0.200000 0.300000 0.00300000
+  1:     78.212667: 0.254753 0.288782  1.00000
+  2:     78.139612: 0.399294 0.288874  1.00000
+  3:     78.081624: 0.348546 0.303193  1.00000
+  4:     78.079456: 0.335759 0.318550  1.00000
+  5:     78.079268: 0.337203 0.329554  1.00000
+  6:     78.078634: 0.340252 0.391589  1.00000
+  7:     78.077362: 0.343968 0.546402  1.00000
+  8:     78.073239: 0.346581  1.00000  1.00000
+  9:     78.073006: 0.345407  1.00000  1.00000
+ 10:     78.072524: 0.340055  1.00000 0.999924
+ 11:     78.072523: 0.339960  1.00000 0.999841
+ 12:     78.072521: 0.339954  1.00000 0.999607
+ 13:     78.072503: 0.339785  1.00000 0.997094
+ 14:     78.072297: 0.338533  1.00000 0.966207
+ 15:     78.071411: 0.333468  1.00000 0.783696
+ 16:     78.068839: 0.326759  1.00000 0.425186
+ 17:     78.066310: 0.329430  1.00000 0.382749
+ 18:     78.051254: 0.344578  1.00000 0.0429244
+ 19:     78.035594: 0.385351 0.999469 0.0761942
+ 20:     78.027555: 0.399404  1.00000 0.0392982
+ 21:     78.026725: 0.386704  1.00000 0.0420351
+ 22:     78.026606: 0.388526  1.00000 0.0456677
+ 23:     78.026539: 0.386517  1.00000 0.0451090
+ 24:     78.026534: 0.387180  1.00000 0.0442128
+ 25:     78.026531: 0.387460  1.00000 0.0444582
+ 26:     78.026531: 0.387458  1.00000 0.0444606
+ 27:     78.026531: 0.387456  1.00000 0.0444588
+ 28:     78.026531: 0.387454  1.00000 0.0444470
+ 29:     78.026531: 0.387457  1.00000 0.0444354
+Post processing for method  nlminb 
+Successful convergence! 
+Compute Hessian approximation at finish of  nlminb 
+Compute gradient approximation at finish of  nlminb 
+Save results from method  nlminb 
+Assemble the answers
+Sort results
+    user   system  elapsed 
+2260.254    3.326 3789.608 
+Warning messages:
+1: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called 'BB'
+2: Package `BB' Not installed 
+3: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called 'ucminf'
+4: Package `ucminf' Not installed 
+5: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called 'Rcgmin'
+6: Package `Rcgmin' Not installed 
+7: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called 'Rvmmin'
+8: Package `Rvmmin' Not installed 
+9: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called 'minqa'
+10: Package `minqa' (for uobyqa, newuoa, and bobyqa) Not installed 
+> save.image(file="gene102.RData")
+> 
+> proc.time()
+    user   system  elapsed 
+2267.991    3.488 3808.047 

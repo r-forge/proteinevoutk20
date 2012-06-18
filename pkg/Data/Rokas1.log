@@ -1,0 +1,334 @@
+
+P A U P *
+Portable version 4.0b10 for Unix
+Wed May 16 14:11:38 2012
+
+      -----------------------------NOTICE-----------------------------
+        This is a beta-test version.  Please report any crashes,
+        apparent calculation errors, or other anomalous results.
+        There are no restrictions on publication of results obtained
+        with this version, but you should check the WWW site
+        frequently for bug announcements and/or updated versions.  
+        See the README file on the distribution media for details.
+      ----------------------------------------------------------------
+
+paup> execute Rokas_etal_Nature_2003.nex;
+
+
+Processing of file "~/ProteinEvo/trunk/Rokas_etal_Nature_2003.nex" begins...
+
+Are you sure you want to reset the active datafile? (Y/n) paup> y
+
+
+Data read in DNA format
+
+Data matrix has 8 taxa, 127026 characters
+Valid character-state symbols: ACGT
+Missing data identified by '?'
+"Equate" macros in effect:
+   R,r ==> {AG}
+   Y,y ==> {CT}
+   M,m ==> {AC}
+   K,k ==> {GT}
+   S,s ==> {CG}
+   W,w ==> {AT}
+   H,h ==> {ACT}
+   B,b ==> {CGT}
+   V,v ==> {ACG}
+   D,d ==> {AGT}
+   N,n ==> {ACGT}
+
+Processing of file "~/ProteinEvo/trunk/Rokas_etal_Nature_2003.nex" completed.
+
+paup> cstatus;
+
+
+Character-status summary:
+  Current optimality criterion = parsimony
+  No characters are excluded
+  Of 127026 total characters:
+    All characters are of type 'unord'
+    All characters have equal weight
+    55232 characters are constant
+    31906 variable characters are parsimony-uninformative
+    Number of parsimony-informative characters = 39888
+
+paup> tstatus;
+
+
+Taxon-status summary:
+   Original data matrix contains 8 taxa
+   No taxa have been deleted
+   No taxa have been assigned to the outgroup: outgroup defaults to first taxon (Scer)
+
+paup> set criterion=likelihood;
+
+
+Optimality criterion set to likelihood.
+
+paup> showtrees;
+
+
+There are no trees in memory (ShowTrees command)
+
+paup> begin trees;
+
+
+paup> tree [*] mytree = (((((((Scer,Spar),Smik),Skud),Sbay),Scas),Sklu),Calb);
+
+
+paup> end;
+
+
+1 tree read from TREES block
+   Time used = 32 sec (CPU time = 0.00 sec)
+
+Rooted tree(s) input but current criterion and/or option settings would specify unrooted trees. 
+Do you want to "deroot" the tree(s)? (Y/n) paup> n
+
+
+paup> lset nst=1 basefreq=equal;
+
+
+paup> lscore;
+
+
+Likelihood scores of tree(s) in memory:
+  Likelihood settings:
+    Number of substitution types  = 1
+    Assumed nucleotide frequencies (set by user):
+      A=0.25000  C=0.25000  G=0.25000  T=0.25000
+    Among-site rate variation:
+      Assumed proportion of invariable sites  = none
+      Distribution of rates at variable sites = equal
+    These settings correspond to the JC69 model
+    Number of distinct data patterns under this model = 1981
+    Molecular clock not enforced
+    Starting branch lengths obtained using Rogers-Swofford approximation method
+    Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20, delta=1e-06
+    -ln L (unconstrained) = unavailable due to missing-data and/or ambiguities
+
+Tree               1
+-ln L   734615.65273
+
+Time used to compute likelihoods = <1 sec (CPU time = 0.07 sec)
+
+paup> savetrees file=JC.tre brlens=yes;
+
+
+1 tree saved to file "~/ProteinEvo/trunk/JC.tre"
+
+paup> !less JC.tre 
+
+paup> q
+
+paup> pwd
+
+paup> !
+
+
+paup> lset nst=1 basefreq=empirical;
+
+
+paup> lscore;
+
+
+Likelihood scores of tree(s) in memory:
+  Likelihood settings:
+    Number of substitution types  = 1
+    Assumed nucleotide frequencies (empirical frequencies):
+      A=0.31065  C=0.18365  G=0.20955  T=0.29615
+    Among-site rate variation:
+      Assumed proportion of invariable sites  = none
+      Distribution of rates at variable sites = equal
+    These settings correspond to the F81 model
+    Number of distinct data patterns under this model = 8899
+    Molecular clock not enforced
+    Starting branch lengths obtained using Rogers-Swofford approximation method
+    Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20, delta=1e-06
+    -ln L (unconstrained) = unavailable due to missing-data and/or ambiguities
+
+Tree               1
+-ln L   730795.65416
+
+Time used to compute likelihoods = 1 sec (CPU time = 0.34 sec)
+
+paup> savetrees file=F81.tre brelen=yes;
+
+
+Error(#115): Keyword "brelen" is not recognized.
+
+paup> savetrees file=F81.tre brlens=yes;
+
+
+1 tree saved to file "~/ProteinEvo/trunk/F81.tre"
+
+paup> lset nst=6 basefreq=empirical;
+
+
+paup> lscore;
+
+
+Likelihood scores of tree(s) in memory:
+  Likelihood settings:
+    Number of substitution types  = 6
+    User-specified substitution rate matrix =
+                -   1.000000   1.000000   1.000000
+         1.000000          -   1.000000   1.000000
+         1.000000   1.000000          -   1.000000
+         1.000000   1.000000   1.000000          -
+    Assumed nucleotide frequencies (empirical frequencies):
+      A=0.31065  C=0.18365  G=0.20955  T=0.29615
+    Among-site rate variation:
+      Assumed proportion of invariable sites  = none
+      Distribution of rates at variable sites = equal
+    These settings correspond to the GTR model
+    Number of distinct data patterns under this model = 8899
+    Molecular clock not enforced
+    Starting branch lengths obtained using Rogers-Swofford approximation method
+    Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20, delta=1e-06
+    -ln L (unconstrained) = unavailable due to missing-data and/or ambiguities
+
+Tree               1
+-ln L   730795.65416
+
+Time used to compute likelihoods = 2 sec (CPU time = 0.34 sec)
+
+paup> lset rmatrix=estimate;
+
+
+paup> lscore
+
+
+Likelihood scores of tree(s) in memory:
+  Likelihood settings:
+    Number of substitution types  = 6
+    Substitution rate-matrix parameters estimated via ML
+    Assumed nucleotide frequencies (empirical frequencies):
+      A=0.31065  C=0.18365  G=0.20955  T=0.29615
+    Among-site rate variation:
+      Assumed proportion of invariable sites  = none
+      Distribution of rates at variable sites = equal
+    These settings correspond to the GTR model
+    Number of distinct data patterns under this model = 8899
+    Molecular clock not enforced
+    Starting branch lengths obtained using Rogers-Swofford approximation method
+    Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20, delta=1e-06
+    -ln L (unconstrained) = unavailable due to missing-data and/or ambiguities
+
+Tree               1
+--------------------
+-ln L   706932.08691
+Rate matrix R:
+  AC         1.96575
+  AG         4.08655
+  AT         1.39431
+  CG         1.46172
+  CT         6.36024
+  GT         1.00000
+
+Time used to compute likelihoods = 56 sec (CPU time = 11.17 sec)
+
+paup> lset nst=1 basefreq=empirical;
+
+
+paup> lset rmatrix=estimate;
+
+
+paup> lscore;
+
+
+Likelihood scores of tree(s) in memory:
+  Likelihood settings:
+    Number of substitution types  = 1
+    Assumed nucleotide frequencies (empirical frequencies):
+      A=0.31065  C=0.18365  G=0.20955  T=0.29615
+    Among-site rate variation:
+      Assumed proportion of invariable sites  = none
+      Distribution of rates at variable sites = equal
+    These settings correspond to the F81 model
+    Number of distinct data patterns under this model = 8899
+    Molecular clock not enforced
+    Starting branch lengths obtained using Rogers-Swofford approximation method
+    Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20, delta=1e-06
+    -ln L (unconstrained) = unavailable due to missing-data and/or ambiguities
+
+Tree               1
+-ln L   730795.65416
+
+Time used to compute likelihoods = 2 sec (CPU time = 0.33 sec)
+
+paup> lset nst=1 basefreq=equal;
+
+
+paup> lset rmatrix=estimate;
+
+
+paup> lscore;
+
+
+Likelihood scores of tree(s) in memory:
+  Likelihood settings:
+    Number of substitution types  = 1
+    Assumed nucleotide frequencies (set by user):
+      A=0.25000  C=0.25000  G=0.25000  T=0.25000
+    Among-site rate variation:
+      Assumed proportion of invariable sites  = none
+      Distribution of rates at variable sites = equal
+    These settings correspond to the JC69 model
+    Number of distinct data patterns under this model = 1981
+    Molecular clock not enforced
+    Starting branch lengths obtained using Rogers-Swofford approximation method
+    Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20, delta=1e-06
+    -ln L (unconstrained) = unavailable due to missing-data and/or ambiguities
+
+Tree               1
+-ln L   734615.65273
+
+Time used to compute likelihoods = 1 sec (CPU time = 0.04 sec)
+
+paup> lset nst=6 basefreq=empirical;
+
+
+paup> lset rmatrix=estimate;
+
+
+paup> lscore;
+
+
+Likelihood scores of tree(s) in memory:
+  Likelihood settings:
+    Number of substitution types  = 6
+    Substitution rate-matrix parameters estimated via ML
+    Assumed nucleotide frequencies (empirical frequencies):
+      A=0.31065  C=0.18365  G=0.20955  T=0.29615
+    Among-site rate variation:
+      Assumed proportion of invariable sites  = none
+      Distribution of rates at variable sites = equal
+    These settings correspond to the GTR model
+    Number of distinct data patterns under this model = 8899
+    Molecular clock not enforced
+    Starting branch lengths obtained using Rogers-Swofford approximation method
+    Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20, delta=1e-06
+    -ln L (unconstrained) = unavailable due to missing-data and/or ambiguities
+
+Tree               1
+--------------------
+-ln L   706932.08691
+Rate matrix R:
+  AC         1.96575
+  AG         4.08655
+  AT         1.39431
+  CG         1.46172
+  CT         6.36024
+  GT         1.00000
+
+Time used to compute likelihoods = 57 sec (CPU time = 11.14 sec)
+
+paup> savetrees file=GTR.tre brlens=yes;
+
+
+1 tree saved to file "~/ProteinEvo/trunk/GTR.tre"
+
+paup> q
+

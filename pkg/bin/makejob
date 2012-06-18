@@ -1,0 +1,7 @@
+#!/bin/bash
+for ((i=51; i <=106; i++))
+do
+	echo "nohup R CMD BATCH --no-restore gene"$i".R gene"$i".txt > /dev/null &" >> lab9job
+	echo $i
+done
+exit 0

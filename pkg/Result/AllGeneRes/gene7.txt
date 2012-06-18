@@ -1,0 +1,149 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library("Matrix")
+Loading required package: lattice
+> library("seqinr")
+> library("phangorn")
+Loading required package: ape
+
+Attaching package: 'ape'
+
+The following object(s) are masked from 'package:seqinr':
+
+    as.alignment, consensus
+
+Loading required package: igraph
+> library("optimx")
+Loading required package: numDeriv
+> load("mutation.RData")
+> 
+> gene7 <- conv("gene7.fasta")
+> mumat <- aa_MuMat_form(Nu_vec)
+> tree <- read.nexus("GTR.tre")
+> system.time(mle <- MLE_GTR_sw(c(0.2,0.3,0.003),c(0,0,0),c(1000,1,1),tree,gene7[,1:10],m=20,al,mumat,q=4e-7,Ne=1.36e7))
+fn is  negloglike 
+Function has  3  arguments
+par[ 1 ]:  0   <? 0.2   <? 1000     In Bounds    
+par[ 2 ]:  0   <? 0.3   <? 1     In Bounds   In Bounds   
+par[ 3 ]:  0   <? 0.003   <? 1     In Bounds   In Bounds   In Bounds  
+Analytic gradient not made available.
+Analytic Hessian not made available.
+Loading required package: BB
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+Loading required package: minqa
+Looking for method =  nlminb 
+Scale check -- log parameter ratio= 2   log bounds ratio= 3 
+Method:  nlminb 
+  0:     71.239791: 0.200000 0.300000 0.00300000
+  1:     70.423625: 0.327481 0.289688 0.994787
+  2:     70.260970: 0.827481 0.289380 0.994207
+  3:     69.980940: 0.608731 0.299120 0.994283
+  4:     69.980887: 0.606717 0.305095 0.994124
+  5:     69.980825: 0.605941 0.316840 0.993758
+  6:     69.980330: 0.598008 0.528895 0.986929
+  7:     69.979977: 0.599801 0.570518 0.985739
+  8:     69.978771: 0.619278  1.00000 0.972232
+  9:     69.978204: 0.610752  1.00000 0.972179
+ 10:     69.978192: 0.609617  1.00000 0.971924
+ 11:     69.978189: 0.609060  1.00000 0.971538
+ 12:     69.978184: 0.608939  1.00000 0.970952
+ 13:     69.978123: 0.608434  1.00000 0.963840
+ 14:     69.977443: 0.605342  1.00000 0.882657
+ 15:     69.976638: 0.603932  1.00000 0.796641
+ 16:     69.974602: 0.603645  1.00000 0.624587
+ 17:     69.973666: 0.604636  1.00000 0.562136
+ 18:     69.971652: 0.606780 0.998889 0.437242
+ 19:     69.970922: 0.607656 0.998491 0.393020
+ 20:     69.970738: 0.618139 0.997956 0.391223
+ 21:     69.970487: 0.614146 0.997561 0.381358
+ 22:     69.970292: 0.619546 0.992302 0.361437
+ 23:     69.968989: 0.615691 0.991786 0.263266
+ 24:     69.968973: 0.618743 0.989873 0.262329
+ 25:     69.968933: 0.616601 0.989019 0.259408
+ 26:     69.968874: 0.619131 0.982604 0.256602
+ 27:     69.968827: 0.617024 0.983873 0.241916
+ 28:     69.968740: 0.616216 0.966128 0.265819
+ 29:     69.968691: 0.619211 0.961112 0.261860
+ 30:     69.968580: 0.616515 0.954904 0.259860
+ 31:     69.961281: 0.615520 0.498646 0.179814
+ 32:     69.958996: 0.624539 0.483815 0.129714
+ 33:     69.954923: 0.625134 0.396709 0.0692377
+ 34:     69.953112: 0.621919 0.364725 0.0857299
+ 35:     69.952026: 0.613221 0.338401 0.0625627
+ 36:     69.949378: 0.628228 0.305591 0.0606452
+ 37:     69.942526: 0.631482 0.167380 0.0185456
+ 38:     69.920397: 0.583314 0.0311615 0.0216781
+ 39:     69.903413: 0.586260  0.00000 0.0109695
+ 40:     69.902917: 0.586921 0.00309502 0.00971519
+ 41:     69.901775: 0.587948 0.00231482 0.00860496
+ 42:     69.900901: 0.593075  0.00000 0.00569595
+ 43:     69.900733: 0.594180 0.00288441 0.00623948
+ 44:     69.899042: 0.594537 0.00241420 0.00769220
+ 45:     69.897495: 0.597292 0.000224680 0.00893865
+ 46:     69.896949: 0.598011 7.64467e-05 0.00790115
+ 47:     69.896669: 0.599127 0.000667861 0.00776012
+ 48:     69.896315: 0.600117  0.00000 0.00796853
+ 49:     69.895993: 0.601203 0.000661381 0.00795781
+ 50:     69.891522: 0.629599 0.000630387 0.00774587
+ 51:     69.891425: 0.629930 0.000616686 0.00735517
+ 52:     69.891408: 0.630265 0.000593982 0.00710602
+ 53:     69.891404: 0.630270 0.000581886 0.00712445
+ 54:     69.891386: 0.630142 0.000500043 0.00720666
+ 55:     69.891357: 0.629930 8.96872e-05 0.00731665
+ 56:     69.891349: 0.630108 0.000300885 0.00719157
+ 57:     69.891340: 0.630100 0.000217326 0.00717776
+ 58:     69.891339: 0.630133 0.000128891 0.00713309
+ 59:     69.891338: 0.630131 0.000171797 0.00713653
+ 60:     69.891338: 0.630131 0.000171797 0.00713653
+ 61:     69.891338: 0.630131 0.000171797 0.00713653
+ 62:     69.891338: 0.630131 0.000171797 0.00713653
+ 63:     69.891338: 0.630131 0.000171797 0.00713653
+Post processing for method  nlminb 
+Compute Hessian approximation at finish of  nlminb 
+Compute gradient approximation at finish of  nlminb 
+Save results from method  nlminb 
+Assemble the answers
+Sort results
+    user   system  elapsed 
+2394.197    1.332 2396.267 
+Warning messages:
+1: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called 'BB'
+2: Package `BB' Not installed 
+3: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called 'ucminf'
+4: Package `ucminf' Not installed 
+5: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called 'Rcgmin'
+6: Package `Rcgmin' Not installed 
+7: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called 'Rvmmin'
+8: Package `Rvmmin' Not installed 
+9: In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called 'minqa'
+10: Package `minqa' (for uobyqa, newuoa, and bobyqa) Not installed 
+> save.image(file="gene7.RData")
+> 
+> proc.time()
+    user   system  elapsed 
+2399.877    1.477 2402.233 

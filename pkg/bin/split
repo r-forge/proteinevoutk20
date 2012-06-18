@@ -1,0 +1,29 @@
+#!/bin/bash                                                                       
+cur=`pwd`
+cp $cur'/RokasCopy.nex' $cur'/Rokas.nex'
+for (( i = 1; i <= 110; i++ ))
+do
+    sed 7q $cur'/Rokas.nex' > $cur'/gene'$i'.nex'
+    echo $i
+done
+
+sed  '1,7d' $cur'/Rokas.nex' > 'temp'
+mv 'temp' $cur'/Rokas.nex'
+
+for (( i = 1; i <= 110; i++ ))
+do
+    sed 9q $cur'/Rokas.nex' >> $cur'/gene'$i'.nex'
+    echo "End;" >> $cur'/gene'$i'.nex'
+    sed '1,9d' $cur'/Rokas.nex' > 'temp'
+    mv 'temp' $cur'/Rokas.nex'
+    echo $i
+done
+
+for (( i = 1; i <= 110; i++ ))
+do
+    a = sed -n '8p' $cur'/gene'$i'.nex' | sed "s/,/ /g" aline | awk '{print $2}'
+    echo $a
+    echo $i
+done
+
+exit 0

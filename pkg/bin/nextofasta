@@ -1,0 +1,12 @@
+#!/bin/bash            
+
+for (( i = 1; i <= 106; i++ ))
+do
+    sed '1,8d' gene$i.nex > gene$i.fasta
+    sed '9d' gene$i.fasta | sed 's/^/>/' | sed 's/S* /&\
+/' > tmp
+    mv tmp gene$i.fasta
+    echo $i
+done
+
+exit 0

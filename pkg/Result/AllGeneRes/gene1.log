@@ -1,0 +1,168 @@
+
+P A U P *
+Portable version 4.0b10 for Unix
+Fri Jun  1 13:36:52 2012
+
+      -----------------------------NOTICE-----------------------------
+        This is a beta-test version.  Please report any crashes,
+        apparent calculation errors, or other anomalous results.
+        There are no restrictions on publication of results obtained
+        with this version, but you should check the WWW site
+        frequently for bug announcements and/or updated versions.  
+        See the README file on the distribution media for details.
+      ----------------------------------------------------------------
+
+paup> execute RokasGene1.nex 
+
+
+Processing of file "~/ProteinEvo/trunk/RokasGene1.nex" begins...
+
+Data read in DNA format
+
+Data matrix has 8 taxa, 1701 characters
+Valid character-state symbols: ACGT
+Missing data identified by '?'
+"Equate" macros in effect:
+   R,r ==> {AG}
+   Y,y ==> {CT}
+   M,m ==> {AC}
+   K,k ==> {GT}
+   S,s ==> {CG}
+   W,w ==> {AT}
+   H,h ==> {ACT}
+   B,b ==> {CGT}
+   V,v ==> {ACG}
+   D,d ==> {AGT}
+   N,n ==> {ACGT}
+
+Processing of file "~/ProteinEvo/trunk/RokasGene1.nex" completed.
+
+paup> set criterion=likelihood;
+
+
+Optimality criterion set to likelihood.
+
+paup> begin tree;
+
+
+paup> tree [*] mytree = (((((((Scer,Spar),Smik),Skud),Sbay),Scas),Sklu),Calb);
+
+
+paup> end tree;
+
+
+1 tree read from TREES block
+   Time used = 24 sec (CPU time = 0.00 sec)
+
+Rooted tree(s) input but current criterion and/or option settings would specify
+unrooted trees.  Do you want to "deroot" the tree(s)? (Y/n) paup> n
+
+
+Error(#117): Ambiguous command abbreviation: tree (TreeInfo, TreeDist)
+
+paup> begin trees;
+
+
+paup> tree [*] mytree = (((((((Scer,Spar),Smik),Skud),Sbay),Scas),Sklu),Calb);
+
+
+paup> end trees;
+
+
+1 tree read from TREES block
+   Time used = 5 sec (CPU time = 0.00 sec)
+
+Rooted tree(s) input but current criterion and/or option settings would specify
+unrooted trees.  Do you want to "deroot" the tree(s)? (Y/n) paup> n
+
+
+Error(#112): Command "trees" is unrecognized.
+
+paup> end;
+
+
+Error(#114): Unexpected 'End' (or 'EndBlock')
+
+paup> begin trees;
+
+
+paup> tree [*] mytree = (((((((Scer,Spar),Smik),Skud),Sbay),Scas),Sklu),Calb);
+
+
+paup> end;
+
+
+1 tree read from TREES block
+   Time used = 3 sec (CPU time = 0.01 sec)
+
+Rooted tree(s) input but current criterion and/or option settings would specify
+unrooted trees.  Do you want to "deroot" the tree(s)? (Y/n) paup> n
+
+
+paup> showtrees;
+
+
+Tree number 1:
+
+                                                                 /--------- Scer
+                                                       /---------+
+                                                       |         \--------- Spar
+                                              /--------+
+                                              |        \------------------- Smik
+                                     /--------+
+                                     |        \---------------------------- Skud
+                            /--------+
+                            |        \------------------------------------- Sbay
+                  /---------+
+                  |         \---------------------------------------------- Scas
+         /--------+
+         |        \-------------------------------------------------------- Sklu
+---------+
+         \----------------------------------------------------------------- Calb
+
+paup> lset nst=6 basefreq=empirical rmatrix=estimate;
+
+
+paup> lscore;
+
+
+Likelihood scores of tree(s) in memory:
+  Likelihood settings:
+    Number of substitution types  = 6
+    Substitution rate-matrix parameters estimated via ML
+    Assumed nucleotide frequencies (empirical frequencies):
+      A=0.24419  C=0.21789  G=0.20385  T=0.33407
+    Among-site rate variation:
+      Assumed proportion of invariable sites  = none
+      Distribution of rates at variable sites = equal
+    These settings correspond to the GTR model
+    Number of distinct data patterns under this model = 567
+    Molecular clock not enforced
+    Starting branch lengths obtained using Rogers-Swofford approximation method
+    Branch-length optimization = one-dimensional Newton-Raphson with pass
+                                 limit=20, delta=1e-06
+    -ln L (unconstrained) = 7789.86151
+
+Tree             1
+------------------
+-ln L   9746.95140
+Rate matrix R:
+  AC       1.44576
+  AG       4.01590
+  AT       0.95387
+  CG       1.33834
+  CT       4.11904
+  GT       1.00000
+
+Time used to compute likelihoods = 1 sec (CPU time = 0.82 sec)
+
+paup> savetrees file=gene1.tre brlens=yes;
+
+
+OK to replace file "~/ProteinEvo/trunk/gene1.tre"? (Y/n) paup> y
+
+
+1 tree saved to file "~/ProteinEvo/trunk/gene1.tre"
+
+paup> q
+

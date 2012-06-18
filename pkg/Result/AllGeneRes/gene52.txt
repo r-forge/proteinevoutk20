@@ -1,0 +1,96 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library("Matrix")
+Loading required package: lattice
+> library("seqinr")
+> library("phangorn")
+Loading required package: ape
+
+Attaching package: 'ape'
+
+The following object(s) are masked from 'package:seqinr':
+
+    as.alignment, consensus
+
+Loading required package: igraph
+> library("optimx")
+Loading required package: numDeriv
+> load("mutation.RData")
+> 
+> gene52 <- conv("gene52.fasta")
+> mumat <- aa_MuMat_form(Nu_vec)
+> tree <- read.nexus("GTR.tre")
+> system.time(mle <- MLE_GTR_sw(c(0.2,0.3,0.003),c(0,0,0),c(1000,1,1),tree,gene52[,1:10],m=20,al,mumat,q=4e-7,Ne=1.36e7))
+fn is  negloglike 
+Function has  3  arguments
+par[ 1 ]:  0   <? 0.2   <? 1000     In Bounds    
+par[ 2 ]:  0   <? 0.3   <? 1     In Bounds   In Bounds   
+par[ 3 ]:  0   <? 0.003   <? 1     In Bounds   In Bounds   In Bounds  
+Analytic gradient not made available.
+Analytic Hessian not made available.
+Loading required package: BB
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+Loading required package: minqa
+Looking for method =  nlminb 
+Scale check -- log parameter ratio= 2   log bounds ratio= 3 
+Method:  nlminb 
+  0:     75.402766: 0.200000 0.300000 0.00300000
+  1:     73.172495: 0.716307 0.277940 0.859119
+  2:     73.150289: 0.835774 0.285017 0.853944
+  3:     73.142037: 0.801496 0.332370 0.848896
+  4:     73.137863: 0.789525 0.412703 0.837791
+  5:     73.124607: 0.770176 0.707734 0.793098
+  6:     73.106142: 0.769529  1.00000 0.732938
+  7:     73.097145: 0.791041  1.00000 0.692199
+  8:     73.075380: 0.851338  1.00000 0.514830
+  9:     71.287037: 0.979723  1.00000  0.00000
+ 10:     70.812704:  1.05121  1.00000  0.00000
+ 11:     67.552996:  1.71839  1.00000  0.00000
+ 12:     64.876159:  2.65694  1.00000  0.00000
+ 13:     62.677952:  3.96944  1.00000  0.00000
+ 14:     60.670187:  5.92027  1.00000  0.00000
+ 15:     58.628219:  9.29239  1.00000  0.00000
+ 16:     57.636593:  12.7647  1.00000  0.00000
+ 17:     57.352693:  15.2210  1.00000  0.00000
+ 18:     57.298049:  16.6397  1.00000  0.00000
+ 19:     57.294513:  17.0714  1.00000  0.00000
+ 20:     57.294468:  17.1250  1.00000  0.00000
+ 21:     57.294468:  17.1267  1.00000  0.00000
+ 22:     57.294468:  17.1267  1.00000  0.00000
+Post processing for method  nlminb 
+Successful convergence! 
+Compute Hessian approximation at finish of  nlminb 
+Compute gradient approximation at finish of  nlminb 
+Gradient computation failure!
+Gradient not computable after method nlminb 
+Save results from method  nlminb 
+Assemble the answers
+Sort results
+    user   system  elapsed 
+1144.728    1.807 2365.248 
+There were 11 warnings (use warnings() to see them)
+> save.image(file="gene52.RData")
+> 
+> proc.time()
+    user   system  elapsed 
+1152.395    2.001 2383.620 
