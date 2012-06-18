@@ -1,0 +1,110 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library("Matrix")
+Loading required package: lattice
+> library("seqinr")
+> library("phangorn")
+Loading required package: ape
+
+Attaching package: 'ape'
+
+The following object(s) are masked from 'package:seqinr':
+
+    as.alignment, consensus
+
+Loading required package: igraph
+> library("optimx")
+Loading required package: numDeriv
+> load("mutation.RData")
+> 
+> gene74 <- conv("gene74.fasta")
+> mumat <- aa_MuMat_form(Nu_vec)
+> tree <- read.nexus("GTR.tre")
+> system.time(mle <- MLE_GTR_sw(c(0.2,0.3,0.003),c(0,0,0),c(1000,1,1),tree,gene74[,1:10],m=20,al,mumat,q=4e-7,Ne=1.36e7))
+fn is  negloglike 
+Function has  3  arguments
+par[ 1 ]:  0   <? 0.2   <? 1000     In Bounds    
+par[ 2 ]:  0   <? 0.3   <? 1     In Bounds   In Bounds   
+par[ 3 ]:  0   <? 0.003   <? 1     In Bounds   In Bounds   In Bounds  
+Analytic gradient not made available.
+Analytic Hessian not made available.
+Loading required package: BB
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+Loading required package: minqa
+Looking for method =  nlminb 
+Scale check -- log parameter ratio= 2   log bounds ratio= 3 
+Method:  nlminb 
+  0:     111.76768: 0.200000 0.300000 0.00300000
+  1:     110.27558:  1.16599 0.0531001  0.00000
+  2:     109.91141:  1.16526 0.151290  0.00000
+  3:     109.91139:  1.16526 0.151290 1.12210e-08
+  4:     109.91138:  1.16526 0.151290 7.84465e-09
+  5:     109.91138:  1.16526 0.151290 5.44406e-09
+  6:     109.91138:  1.16526 0.151290 5.08441e-09
+  7:     109.91138:  1.16526 0.151290 4.64432e-09
+  8:     109.91138:  1.16526 0.151290 4.95231e-09
+  9:     109.71326:  1.17457 0.114864  0.00000
+ 10:     108.84388:  2.58497 0.0882653  0.00000
+ 11:     108.84384:  2.58497 0.0882653 1.08079e-08
+ 12:     108.84384:  2.58497 0.0882653 1.06282e-08
+ 13:     108.84382:  2.58497 0.0882653 8.71303e-09
+ 14:     108.84381:  2.58497 0.0882653 4.21446e-09
+ 15:     108.84381:  2.58497 0.0882653 3.73760e-09
+ 16:     108.84381:  2.58497 0.0882653 3.88974e-09
+ 17:     108.84381:  2.58497 0.0882653 3.91196e-09
+ 18:     108.59780:  2.99729 0.156868  0.00000
+ 19:     108.59778:  2.99729 0.156868 2.61648e-08
+ 20:     108.59778:  2.99729 0.156868 2.55232e-08
+ 21:     108.59774:  2.99729 0.156868 1.91986e-08
+ 22:     108.59771:  2.99729 0.156868 1.27946e-08
+ 23:     108.59770:  2.99729 0.156868 8.21915e-09
+ 24:     108.59770:  2.99729 0.156868 6.37536e-09
+ 25:     108.59770:  2.99729 0.156868 7.12747e-09
+ 26:     108.59770:  2.99729 0.156868 7.01160e-09
+ 27:     108.59770:  2.99729 0.156868 7.02732e-09
+ 28:     108.59483:  2.99130 0.158488  0.00000
+ 29:     108.58684:  2.95572 0.168203 2.23925e-08
+ 30:     108.58684:  2.95536 0.168303 2.00832e-08
+ 31:     108.58684:  2.95463 0.168503 1.53029e-08
+ 32:     108.58683:  2.95463 0.168503 4.89056e-09
+ 33:     108.58682:  2.95463 0.168503 1.00755e-08
+ 34:     108.58682:  2.95463 0.168503 8.64794e-09
+ 35:     108.58682:  2.95463 0.168503 7.91997e-09
+ 36:     108.58682:  2.95463 0.168503 8.07887e-09
+ 37:     108.58682:  2.95463 0.168503 8.07887e-09
+Post processing for method  nlminb 
+Compute Hessian approximation at finish of  nlminb 
+Compute gradient approximation at finish of  nlminb 
+Gradient computation failure!
+Gradient not computable after method nlminb 
+Save results from method  nlminb 
+Assemble the answers
+Sort results
+    user   system  elapsed 
+2972.898    4.518 4503.783 
+There were 11 warnings (use warnings() to see them)
+> save.image(file="gene74.RData")
+> 
+> proc.time()
+    user   system  elapsed 
+2980.608    4.684 4522.193 

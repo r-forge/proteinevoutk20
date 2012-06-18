@@ -1,0 +1,42 @@
+Meeting Dec 8, Thursday. 11:30 - 12:00
+To do next:
+1. Use obvious examples to see if the code works as expected.
+	For example, amino acids that are far away vs. that are close to each other;
+	same amino acids in two proteins, with different selection strengths exerted;
+	what else cases to verify?
+2. Simulate data, in both site-dependent and site-independent cases. Then use the simulated data to estimate the parameters, see if the estimates are close to the true parameters. 
+	For site-dependent case, move one step each time. Start with an amino acid sequence, after the wait time, move one step to one of its neighborhood sequences. After another waiting period, move another step. 
+	Do not use the same idea that is used to calculate the log-likelihood with parsimony path. 
+
+3. Optimization methods: 
+	optimx
+	newuoa{minqa}
+	and others.
+	
+4. Keep track of times when the moves occur, fitness values also ( or calculate them later).
+
+5. Stationary probabilities. Calculate directly or use a big enough t in the simulation. Find the site that will move first, move to next step, then repeat the process.
+
+6. lapply function in R, mclapply (multiple cores)
+
+7. mutation rates separately from the fixation probabilities which depend on the fitness. Multiply those rates together so we can tweak either of them.
+
+Questions:
+1. What if ftny1 and ftny2 are both very small, say, one is on the scale of -10 and the other of -12. When calculate the fitness ratio, it becomes Inf and that makes the fixation probability NaN.
+
+	The fixation probability is a decreasing function of the fitness ratio, with y=0 as horizontal asymptote. When fitness ratio approaches 1, it is equivalent to the neutral case (pure drift). Fixation probability is 1/2N for diploid species.
+	
+2. If I set those to be 0, then at some row, the whole row of the rate matrix are all 0. Does that even make sense?
+	This means that the process will never move to another (different) state once it reaches the state. Simply put, the state is absorbing.
+	
+3. For diploid species, Sella-Hirsh formula: (1-w1/w2)/(1-(w1/w2)^(2N)), but for the canonical formula, it should be (1-exp(2Nps))/(1-exp(2Ns)), instead of using 4 as coefficients in the exponentials. If use 4, the value from formula 1 is about half of the value from formula 2.
+
+4. For branch length: Mike--Let's do generations and assume they are on the order of 10^6-10^9 generations.
+-----------------------------------------------------------------------
+
+Dec 19, Monday, 10:00 - 10:30:
+1. Calculate the stationary probability vector using the formula in Sella-Hirsh's paper. Direct calculations is not meaningful, try to use a smaller population size, or change the form of the formula so that the number is not either Inf of 0. Compare with the result from simulation, this is to check if the simulation is done correctly. (R package: bignum)
+
+2. Look at the behavior difference between site-independent and site-dependent cases, see if they are similar enough that we could ignore the site-dependent case later on with 61 states in codon level.
+
+3. Add mutation rates to the fixation rates. Start with mutations between nucleotides, then go up to codon level (61*61). Mutation is only possible if it only happens at one site. For the fixation rates, synonymous transition can be considered as neutral mutation, hence the fixation rate is 1/(2*N). For the mutation rate matrix, start with the most general model, more general than the GTR model. 

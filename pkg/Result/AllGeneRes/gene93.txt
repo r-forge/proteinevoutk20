@@ -1,0 +1,146 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library("Matrix")
+Loading required package: lattice
+> library("seqinr")
+> library("phangorn")
+Loading required package: ape
+
+Attaching package: 'ape'
+
+The following object(s) are masked from 'package:seqinr':
+
+    as.alignment, consensus
+
+Loading required package: igraph
+> library("optimx")
+Loading required package: numDeriv
+> load("mutation.RData")
+> 
+> gene93 <- conv("gene93.fasta")
+> mumat <- aa_MuMat_form(Nu_vec)
+> tree <- read.nexus("GTR.tre")
+> system.time(mle <- MLE_GTR_sw(c(0.2,0.3,0.003),c(0,0,0),c(1000,1,1),tree,gene93[,1:10],m=20,al,mumat,q=4e-7,Ne=1.36e7))
+fn is  negloglike 
+Function has  3  arguments
+par[ 1 ]:  0   <? 0.2   <? 1000     In Bounds    
+par[ 2 ]:  0   <? 0.3   <? 1     In Bounds   In Bounds   
+par[ 3 ]:  0   <? 0.003   <? 1     In Bounds   In Bounds   In Bounds  
+Analytic gradient not made available.
+Analytic Hessian not made available.
+Loading required package: BB
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+Loading required package: minqa
+Looking for method =  nlminb 
+Scale check -- log parameter ratio= 2   log bounds ratio= 3 
+Method:  nlminb 
+  0:     37.675092: 0.200000 0.300000 0.00300000
+  1:     37.495896: 0.173914 0.302525  0.00000
+  2:     37.495750: 0.173914 0.302525 1.03564e-05
+  3:     37.495577: 0.173923 0.302524 5.50638e-06
+  4:     37.495562: 0.173933 0.302523 2.51530e-06
+  5:     37.495536: 0.173943 0.302522 4.18655e-06
+  6:     37.454708: 0.216177 0.298417 3.23929e-06
+  7:     37.391814: 0.259454 0.134296 1.10841e-06
+  8:     37.220190: 0.298338  0.00000  0.00000
+  9:     37.219518: 0.299600  0.00000  0.00000
+ 10:     37.213222: 0.312103  0.00000  0.00000
+ 11:     37.175899: 0.425204  0.00000  0.00000
+ 12:     37.157053: 0.528313  0.00000  0.00000
+ 13:     37.134391: 0.721967  0.00000  0.00000
+ 14:     37.109920:  1.05680  0.00000  0.00000
+ 15:     37.088784:  1.56046  0.00000  0.00000
+ 16:     37.075186:  2.15365  0.00000  0.00000
+ 17:     37.065426:  2.89414  0.00000  0.00000
+ 18:     37.055054:  4.07020  0.00000  0.00000
+ 19:     37.026058:  7.78463  0.00000  0.00000
+ 20:     36.734216:  44.7325  0.00000  0.00000
+ 21:     34.614658:  407.751  0.00000  0.00000
+ 22:     33.003568:  878.627  0.00000  0.00000
+ 23:     32.682179:  1000.00 1.12873e-10  0.00000
+ 24:     32.682061:  1000.00 1.14829e-10  0.00000
+ 25:     32.680917:  1000.00 1.34369e-10  0.00000
+ 26:     30.366272:  1000.00 0.000122010 1.43790e-08
+ 27:     30.277950:  775.713 0.000122023 1.43755e-08
+ 28:     30.133328:  779.654 0.000122005  0.00000
+ 29:     30.120457:  779.654 0.000122005 2.98742e-09
+ 30:     30.120390:  779.654 0.000122005 2.98119e-09
+ 31:     30.119726:  779.654 0.000122005 2.91892e-09
+ 32:     30.113504:  779.654 0.000122005 2.30171e-09
+ 33:     30.106353:  779.654 0.000122005 1.43867e-09
+ 34:     30.105133:  779.654 0.000122005 1.24421e-09
+ 35:     30.103430:  779.654 0.000122005 8.55314e-10
+ 36:     30.103364:  779.654 0.000122005 5.16613e-10
+ 37:     30.103163:  779.654 0.000122005 7.01329e-10
+ 38:     30.103151:  779.654 0.000122005 6.69699e-10
+ 39:     30.103150:  779.654 0.000122005 6.60742e-10
+ 40:     30.103150:  779.654 0.000122005 6.61908e-10
+ 41:     30.103150:  779.654 0.000122005 6.60754e-10
+ 42:     30.103150:  779.654 0.000122005 6.61908e-10
+ 43:     30.103150:  779.654 0.000122005 6.60755e-10
+ 44:     30.103150:  779.654 0.000122005 6.61905e-10
+ 45:     30.103150:  779.654 0.000122005 6.60753e-10
+ 46:     30.103150:  779.654 0.000122005 6.61902e-10
+ 47:     30.103150:  779.654 0.000122005 6.60754e-10
+ 48:     30.103150:  779.654 0.000122005 6.61904e-10
+ 49:     30.103150:  779.654 0.000122005 6.60755e-10
+ 50:     30.103150:  779.654 0.000122005 6.61907e-10
+ 51:     30.103150:  779.654 0.000122005 6.60756e-10
+ 52:     30.103150:  779.654 0.000122005 6.61903e-10
+ 53:     30.103150:  779.654 0.000122005 6.60752e-10
+ 54:     30.103150:  779.654 0.000122005 6.61906e-10
+ 55:     30.103150:  779.654 0.000122005 6.60754e-10
+ 56:     30.082379:  862.998 0.000122019 5.76311e-10
+ 57:     30.082347:  869.857 0.000121996 8.33870e-10
+ 58:     30.081775:  873.287 0.000121975 6.87095e-10
+ 59:     30.080988:  875.807 0.000121899 5.20924e-10
+ 60:     30.079194:  880.421 0.000121694 4.07827e-10
+ 61:     30.070305:  898.878 0.000120554 1.76496e-10
+ 62:     30.046947:  941.843 0.000117989 1.30437e-10
+ 63:     29.793613:  1000.00 9.74801e-05  0.00000
+ 64:     29.766128:  1000.00 9.74801e-05 1.29259e-10
+ 65:     29.056456:  1000.00 5.41641e-05 1.29433e-10
+ 66:     28.899274:  1000.00 4.53913e-05 1.29560e-10
+ 67:     28.578634:  1000.00 2.78458e-05 1.29712e-10
+ 68:     28.529472:  1000.00 2.50612e-05 1.29825e-10
+ 69:     28.438161:  1000.00 1.94920e-05 1.30116e-10
+ 70:     28.410214:  1000.00 1.75428e-05 1.30289e-10
+ 71:     28.366576:  1000.00 1.36444e-05 1.30659e-10
+ 72:     28.366576:  1000.00 1.36444e-05 1.30659e-10
+Post processing for method  nlminb 
+Successful convergence! 
+Compute Hessian approximation at finish of  nlminb 
+Compute gradient approximation at finish of  nlminb 
+Gradient computation failure!
+Gradient not computable after method nlminb 
+Save results from method  nlminb 
+Assemble the answers
+Sort results
+    user   system  elapsed 
+3292.044    4.187 4822.320 
+There were 11 warnings (use warnings() to see them)
+> save.image(file="gene93.RData")
+> 
+> proc.time()
+    user   system  elapsed 
+3299.777    4.351 4840.703 

@@ -1,0 +1,13 @@
+#!/bin/bash                                                                       
+cur=`pwd`
+
+for (( i = 1; i <= 106; i++ ))
+do
+    a=`sed -n '8p' 'gene'$i'.nex' | sed "s/,/ /g" | awk '{print $2}'`
+    echo $a
+    sed -e 's/127026/'$a'/' gene$i.nex > tmp$i
+    mv tmp$i gene$i.nex
+    echo $i
+done
+
+exit 0

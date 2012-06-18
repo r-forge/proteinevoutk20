@@ -1,0 +1,30 @@
+To do next:
+
+1. What if s is negative instead of positive? Will the code even run? What does it mean? Could it be an indicator of violation of the majority rule?
+Use simulated data to answer this question.
+
+Now the boundary of s set for optimization is (0,1000). Estimates of s range from 0~200, it's reasonable since Phi values are supposed to be different between genes whereas it's fixed at the same number in optimization. Do a histogram of all the s values. Also factor in Phi values, try to see the relation between s and Phi. Look at distribution/histogram of s after this too.
+
+2. Beta and gamma should be universal across all the genes instead of have different values. Total number of parameters will be 106+2=108. How to do the optimization for all these parameters? What is the best way for optimization in this case? 
+PARALLELIZE THE CODE IN R, INSTEAD OF DOING IT AT THE VERY LOW LEVEL.
+
+3. Differentiate the (log)likelihood function. If it's possible, potentially it'll accelerate the optimization.
+
+4. Use genes with almost 0 selection, find the information of mutation rates and tree from these. 
+
+5. How do the estimates of the weights affect the landscape of fitness? (Instead of Grantham weights, which are used now)
+
+------------------------------------------------------
+Nonsense error: ribosome ends translation before stop codon
+Causes: Frameshifts, drop off, termination factors
+freq: error/codon ~10^-3 - 10^-4
+		error/protein 10-30%
+effect: Usually destroys protein function
+
+Ribosomes move independently along an mRNA, either elongate at ta codon or undergo a nonsense error.
+
+nonsense adaptation index (NAI)
+protein production rate : phi
+low phi: fitness landscape is relatively flat
+medium phi: a little more stretched
+high phi: very spread out
