@@ -413,7 +413,7 @@ MLE.s <- function(x,generange,optim.m=1){
   mle.s.one <- function(k){
     MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat,optim.m=optim.m)
   }
-  mclapply(generange,mle.s.one)
+  mclapply(generange,mle.s.one,mc.cores=12)
 }
 #system.time(res <- MLE_GTR(1,0,1e4,tree,data[[2]],al,be,ga,mumat))
 l <- 10
