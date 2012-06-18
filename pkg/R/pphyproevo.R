@@ -10,25 +10,29 @@ library(multicore)
 library(minqa) #optimization function bobyqa
 library(mgcv) #find the unique rows in a matrix - uniquecombs
 ##################################################################
-#directory of the data need to read
-datadir <- "/home/jchai1/proteinevo/rokas/rokasdata/"
+#directory of the data need to read, including gene, tree, Grantham data
+datadir <- paste(system("echo $HOME"),"/proteinevoutk20/pkg/Data/",sep="")
 ##################################################################
-##   Read in parameters ##
+##   Read in parameters and data  ##
 ##################################################################
 ##Nucleotide mutation rates estimated from Rokas's data (using PAUP):
 ##Model GTR, with Gamma rate distribution and invariable sites and etc
 ##Nuvec <-  c(2.94194,8.23705,1.39133,2.33991,14.86435,1.00000)
 ##Model GTR
 Nu_vec <- c(1.96575,4.08655,1.39431,1.46172,6.36024,1.00000)
-##Nuvec <-  c(2.94194,8.23705,1.39133,2.33991,14.86435,1.00000)
+##empirical base frequencies
 freq <- c(0.31065,0.18365,0.20955,0.29615)
-
+##Best tree with branch lengths output by PAUP
 tree <- read.nexus(paste(datadir,"GTR.tre",sep=""))
 ##Read the properties of amino acids, including c(composition),p(polarity) and 
 ##v(molecular volume), save the data.frame
 GMcpv <- read.csv(paste(datadir,"Grantham_cpv.csv",sep=""),header=TRUE, sep=",",row.names=1)
 GMcpv <- data.matrix(GMcpv)
-##Build the Gramtham matrix with coefficients for all components as parameters
+
+##################################################################
+##  Grantham Matrix     ##
+##################################################################
+##Build the Grantham matrix with coefficients for all components as parameters
 ##alpha for composition,beta for polarity,gamma for molecular volume
 ##The mean of the distance is normalized to 1,(mean of only the upper triangle elements of the matrix)
 ##The parameter values in Grantham matrix are:
@@ -67,8 +71,13 @@ GM_cpv <- function(datamatrix, alpha=al, beta=be, gamma=ga){
   m <- sum(result)/(400-20) #exclude the diagonal entries
   return(result/m)
 }
+##Default Grantham matrix (one used in Grantham's paper)
 GM <- GM_cpv(GMcpv,al,be,ga)
 
+
+##################################################################
+##   construct matrices for mutation and substitution  ##
+##################################################################
 ##Short names for all the amino acids, in alphabetical order
 aa <- s2c("SRLPTAVGIFYCHQNKDEMW")
 aa <- levels(factor(aa)) #all the amino acids
@@ -84,6 +93,9 @@ for(i in 1:4){
 }
 cds <- nu_list[!nu_list %in% stop_cd] #61 non-stop codons
 
+##################################################################
+##   Read gene data ##
+##################################################################
 ## read in fasta file of nucleotide, convert it into amino acid data
 conv <- function(filename){
   levels <- levels(factor(s2c("SRLPTAVGIFYCHQNKDEMW"))) #amino acids in alphabeticla order
@@ -97,9 +109,7 @@ conv <- function(filename){
   return(seqdata)
 }
 
-##################################################################
 ##   Read in 106 gene data ##
-##################################################################
 l <- 106
 data <- list(length=l)
 ##data stores the data of all genes in rokas's data
@@ -115,7 +125,7 @@ Mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
-
+#############################################################################
 ##Given a vector of length 6 (number of parameters for GTR matrix)
 ##generate the GTR rate matrix Q
 mat_form <- function(vec){
@@ -138,7 +148,7 @@ scale.rate <- function(Q){
   Pi <- as.vector(expm(Q*10000)[1,]) #equilibrium frequency vector
   return(-sum(Pi*diag(Q)))
 }
-
+#############################################################################
 ##A function I need to do the matrix exponential correctly
 is.nan.inf <- function(x){
   return((any(x==Inf))||(any(is.nan(x))))
@@ -169,7 +179,7 @@ expm.m <- function(x){
   }
 }
 
-
+#############################################################################
 #Find the mutation rate matrix (20 by 20) from the 6 rates in GTR mutation rate
 #matrix for nucleotides
 #the rate G<->C is normalized to 1, now the scale is to scale the rates to real values
@@ -359,7 +369,7 @@ ll_site <- function(tree,data,optimal,s=1,MuMat,alpha=al, beta=be, gamma=ga,m=20
     }
     return(as.numeric(probvec[root,] %*% bf))
 }
-
+#############################################################################
 ##Likelihood of data on a tree, given the selection coefficient "s" and the optimal amino acid sequence "protein_op"
 ##If protein_op (optimal protein) is not given, get it from the most frequent amino acids appeared in the data
 ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,root=NULL,bf=NULL,
@@ -375,10 +385,10 @@ ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,roo
     return(-log(ll_site(tree,data.u[,x],protein_op[x],s,MuMat,alpha,beta,gamma,m,root,bf,C,Phi,q,Ne))*occu[x])
   }
   sum(unlist(lapply(1:length(occu),ll.one)))
-  #sum(unlist(mclapply(1:length(occu),ll.one))) #parallel version
+  #sum(unlist(mclapply(1:length(occu),ll.one))) #parallel version, DO NOT parallelize at this level!!!
 }
 #system.time(res3 <- ll_indep(0.1,al,be,ga,mumat,tree,data[[3]]))
-
+#############################################################################
 ##This function finds the MLE estimator for "s" only, given that all other parameters are known,
 ##including weights(alpha, beta, gamma), mutation rates, C, q, Phi, and Ne
 MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20,optim.m=1,
@@ -396,7 +406,8 @@ MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20
     
   return(ans)
 }
-
+#############################################################################
+##Given values for beta and gamma, find the MLE's of s for all 106 genes
 MLE.s <- function(x){
   Beta <- x[1]
   Gamma <- x[2]
