@@ -1,6 +1,0 @@
-rm(list=ls())
-source("~/proteinevoutk20/pkg/R/pphyproevo.R")
-
-## test run from 1:106
-system.time(res <- MLE.s(c(beta[1],gamma[1]),1:106,optim.m=2))
-save.image(file="test1")
