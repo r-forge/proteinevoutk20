@@ -150,29 +150,31 @@ scale.rate <- function(Q){
 }
 #############################################################################
 ##A function I need to do the matrix exponential correctly
+##Check if all the entries in x are finite, if yes, return TRUE, otherwise return FALSE
 is.nan.inf <- function(x){
-  return((any(x==Inf))||(any(is.nan(x))))
+  return(all(is.finite(x)==TRUE))
 }
 ## A modified version of expm that make sure there is no Inf and NaN in the result of matrix exponential
 expm.m <- function(x){
-  edefault <- expm(x) #expm from expm package with default method "higham08.b"
-  if(is.nan.inf(edefault)==FALSE) #if there is no Inf or NaN values in the result, return the result
+   edefault <- expm(x) #expm from expm package with default method "higham08.b"
+  if(is.nan.inf(edefault)==TRUE) #if there is no Inf or NaN values in the result, return the result
     return(edefault)
   else{
+    print(x)
     eward77 <- expm(x,method="Ward77") #method Ward77
-    if(is.nan.inf(eward77)==FALSE)
+    if(is.nan.inf(eward77)==TRUE)
       return(eward77)
     else{
-      epade <- expm(x,method="Pade") #method Pade
-      if(is.nan.inf(epade)==FALSE)
+      epade <- expm(x,method="R_Pade") #method Pade
+      if(is.nan.inf(epade)==TRUE)
         return(epade)
       else{
         etaylor <- expm(x,method="taylor") #method Taylor
-        if(is.nan.inf(etaylor)==FALSE)
+        if(is.nan.inf(etaylor)==TRUE)
           return(etaylor)
         else{
-          return(edefault)
-          warning("all methods give Inf or NaN")
+          return(eward77)
+          warning("all methods give Inf or NaN",immediate.=TRUE)
         }
       }
     }
@@ -273,11 +275,13 @@ fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
     fit_ratio <- exp(-C*Phi*q*s*(d1-d2))
     if(fit_ratio==Inf)
       return(0)
-    else{
+    else if(fit_ratio==1)
+      return(1/(2*Ne))
+    else
       return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
-    }
   }
 }
+
 
 #fixation probability of a mutant with initial freq 1/(2Ne) in a diploid population
 #with proteins as parameteres instead of distance vectors for the proteins
@@ -361,11 +365,17 @@ ll_site <- function(tree,data,optimal,s=1,MuMat,alpha=al, beta=be, gamma=ga,m=20
         to = child[(2*i-1):(2*i)] #direct descendents
         t_left = tl[2*i-1] #left branch length
         t_right = tl[2*i] #right branch length
+        #save(Q,t_left,optimal,s,GM1,MuMat,m,C,Phi,q,Ne,file="~/Desktop/debugging.Rsave",compress=FALSE)
         v.left <- expm.m(Q*t_left) #probabilities of transition from one state to another after time t
+        #print("did v.left, about to do v.right")
         v.right <- expm.m(Q*t_right)
+        #print("did v.right")
         probvec[from,] <- as.vector((v.left%*%probvec[to[1],])*(v.right%*%probvec[to[2],])) #pruning, vector form
-        if(sum(probvec[from,])==0) #probability is very very low
-          warning("numerical overflow")
+        check.sum <- sum(probvec[from,])
+        if(check.sum==0) #probability is very very low
+          warning("numerical overflow",immediate.=TRUE)
+#         else if(!is.finite(check.sum))
+#           warning("sum of probability vector is not finite!",immediate.=TRUE)
     }
     return(as.numeric(probvec[root,] %*% bf))
 }
@@ -384,7 +394,11 @@ ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,roo
   ll.one <- function(x){ #for each unique data, find ll_site, and multiply the -loglikelihood by the occurance
     return(-log(ll_site(tree,data.u[,x],protein_op[x],s,MuMat,alpha,beta,gamma,m,root,bf,C,Phi,q,Ne))*occu[x])
   }
-  sum(unlist(lapply(1:length(occu),ll.one)))
+  lls <- unlist(lapply(1:length(occu),ll.one))
+  if(all(is.finite(lls)==T))
+    sum(lls)
+  else
+    return(10^7)
   #sum(unlist(mclapply(1:length(occu),ll.one))) #parallel version, DO NOT parallelize at this level!!!
 }
 #system.time(res3 <- ll_indep(0.1,al,be,ga,mumat,tree,data[[3]]))
@@ -396,9 +410,9 @@ MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20
     return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,C,Phi,q,Ne))
   }
   if(optim.m==1) #method nlminb using PORT routines
-    #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",
-                #hessian=FALSE,control=list(trace=1,kkt=FALSE))
+    #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=FALSE,control=list(trace=trace,kkt=FALSE))
     ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=trace))
+    #ans <- nmkb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=TRUE))
   else #Powell method bobyqa
     ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=trace))
     #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb)#does not print out too much information
@@ -416,6 +430,6 @@ MLE.s <- function(x,generange,optim.m=1){
   mclapply(generange,mle.s.one,mc.cores=12)
 }
 #system.time(res <- MLE_GTR(1,0,1e4,tree,data[[2]],al,be,ga,mumat))
-l <- 10
-beta <- seq(0,0.5,length.out=(l+1))[-1]
-gamma <- seq(0,0.05,length.out=(l+1))[-1]
+l <- 20
+beta <- seq(0,1,length.out=(l+1))[-1]
+gamma <- seq(0,1,length.out=(l+1))[-1]
