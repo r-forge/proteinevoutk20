@@ -424,10 +424,8 @@ MLE.s <- function(x,generange,optim.m=1){
   Beta <- x[1]
   Gamma <- x[2]
   mle.s.one <- function(k){
-    print(paste("start optimization on gene ", k, sep=""))
-    mle <- MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat,optim.m=optim.m)
-    print(paste("finish optimization on gene ", k, sep=""))
-    return(mle)
+    print(k)
+    MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat,optim.m=optim.m)
   }
   mclapply(generange,mle.s.one,mc.cores=12)
 }
