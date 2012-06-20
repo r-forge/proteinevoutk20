@@ -396,10 +396,6 @@ ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,roo
                              C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
   ##Find the unique columns (site data) and occurences of each unique column
-  if(length(which(is.na(data)))!=0) {
-    warning("NA in data, pruning performed")
-    data <- PruneMissing(data)
-  }
   data.u <- t(uniquecombs(t(data))) # if finds uniqe rows, so use the function on transpose
   ind <- attr(data.u,"index") #corresponding row numbers in unique matrix from original matrix
   occu <- as.numeric(table(ind)) # occurences of each unique column
@@ -423,6 +419,12 @@ MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20
   negloglike <- function(s){ #The function to minimize
     return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,C,Phi,q,Ne))
   }
+  ## Delete columns with NA in data
+  if(length(which(is.na(data)))!=0) {
+    warning("NA in data, pruning performed")
+    data <- PruneMissing(data)
+  }
+  
   if(optim.m==1) #method nlminb using PORT routines
     #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=FALSE,control=list(trace=trace,kkt=FALSE))
     ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=trace))
