@@ -431,6 +431,9 @@ MLE.s <- function(x,generange,optim.m=1){
   }
   mclapply(generange,mle.s.one,mc.cores=12)
 }
+
+errind <- c(21, 39, 25, 84, 88, 71, 82)
+noNAind <- c(1:106)[-errind]
 #system.time(res <- MLE_GTR(1,0,1e4,tree,data[[2]],al,be,ga,mumat))
 l <- 20
 beta <- seq(0,1,length.out=(l+1))[-1]
