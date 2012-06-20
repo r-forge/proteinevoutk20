@@ -380,12 +380,26 @@ ll_site <- function(tree,data,optimal,s=1,MuMat,alpha=al, beta=be, gamma=ga,m=20
     return(as.numeric(probvec[root,] %*% bf))
 }
 #############################################################################
+## Remove columns with NA in the data
+PruneMissing <- function(x){
+  ##Find the array indices of the NA entries
+  naInd <- which(is.na(x),arr.ind=T)
+  dimnames(naInd) <- NULL
+  ## column indices
+  naCol <- naInd[,2]
+  x[,-naCol]
+}
+#############################################################################
 ##Likelihood of data on a tree, given the selection coefficient "s" and the optimal amino acid sequence "protein_op"
 ##If protein_op (optimal protein) is not given, get it from the most frequent amino acids appeared in the data
 ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,root=NULL,bf=NULL,
                              C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
   ##Find the unique columns (site data) and occurences of each unique column
+  if(length(which(is.na(data)))!=0) {
+    warning("NA in data, pruning performed")
+    data <- PruneMissing(data)
+  }
   data.u <- t(uniquecombs(t(data))) # if finds uniqe rows, so use the function on transpose
   ind <- attr(data.u,"index") #corresponding row numbers in unique matrix from original matrix
   occu <- as.numeric(table(ind)) # occurences of each unique column
@@ -432,9 +446,12 @@ MLE.s <- function(x,generange,optim.m=1){
   mclapply(generange,mle.s.one,mc.cores=12)
 }
 
-errind <- c(21, 39, 25, 84, 88, 71, 82)
-noNAind <- c(1:106)[-errind]
 #system.time(res <- MLE_GTR(1,0,1e4,tree,data[[2]],al,be,ga,mumat))
 l <- 20
 beta <- seq(0,1,length.out=(l+1))[-1]
 gamma <- seq(0,1,length.out=(l+1))[-1]
+
+# ##Find the indices of data which include NA's
+# na.num <- sapply(1:106,function(x) length(which(is.na(data[[x]])))) #numbers of NA's in data
+# errind <- which(na.num!=0) #indices with NA's
+# noNAind <- c(1:106)[-errind] #indices without NA's
