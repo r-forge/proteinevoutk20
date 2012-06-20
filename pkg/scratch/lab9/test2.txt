@@ -1,8 +1,8 @@
 
-R version 2.15.0 (2012-03-30)
-Copyright (C) 2012 The R Foundation for Statistical Computing
+R version 2.13.1 (2011-07-08)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
-Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+Platform: i386-apple-darwin9.8.0/i386 (32-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -20,6 +20,7 @@ Type 'q()' to quit R.
 
 > rm(list=ls())
 > source("pphyproevo.R")
+Loading required package: quadprog
 Loading required package: ape
 
 Attaching package: 'ape'
@@ -29,9 +30,42 @@ The following object(s) are masked from 'package:seqinr':
     as.alignment, consensus
 
 Loading required package: igraph
+Loading required package: rgl
+Loading required package: numDeriv
+Loading required package: BB
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+
+Attaching package: 'Rvmmin'
+
+The following object(s) are masked from 'package:Rcgmin':
+
+    optansout
+
+Loading required package: minqa
+Loading required package: Rcpp
+Loading required package: setRNG
+
+Attaching package: 'optimx'
+
+The following object(s) are masked from 'package:Rvmmin':
+
+    optansout
+
+The following object(s) are masked from 'package:Rcgmin':
+
+    optansout
+
 Loading required package: Matrix
 Loading required package: lattice
-Loading required package: numDeriv
+
+Attaching package: 'Matrix'
+
+The following object(s) are masked from 'package:base':
+
+    det
+
 
 Attaching package: 'expm'
 
@@ -46,11 +80,16 @@ The following object(s) are masked from 'package:lattice':
 
     parallel
 
-Loading required package: Rcpp
-This is mgcv 1.7-17. For overview type 'help("mgcv-package")'.
+This is mgcv 1.7-6. For overview type 'help("mgcv-package")'.
+Warning messages:
+1: package 'seqinr' was built under R version 2.13.2 
+2: package 'Rcgmin' was built under R version 2.13.2 
+3: package 'Rvmmin' was built under R version 2.13.2 
+4: package 'minqa' was built under R version 2.13.2 
+5: package 'Rcpp' was built under R version 2.13.2 
 > 
 > ## test run from 1:10
-> system.time(res <- MLE.s(c(beta[1],gamma[1]),1:106))
+> system.time(res <- MLE.s(c(beta[1],gamma[1]),noNAind))
 [1] "start optimization on gene 1"
 [1] "start optimization on gene 2"
 [1] "start optimization on gene 3"
@@ -63,13 +102,3 @@ This is mgcv 1.7-17. For overview type 'help("mgcv-package")'.
 [1] "start optimization on gene 10"
 [1] "start optimization on gene 11"
 [1] "start optimization on gene 12"
-[1] "start optimization on gene 13"
-[1] "start optimization on gene 14"
-[1] "start optimization on gene 15"
-[1] "start optimization on gene 16"
-[1] "start optimization on gene 17"
-[1] "start optimization on gene 18"
-[1] "start optimization on gene 19"
-[1] "start optimization on gene 20"
-[1] "start optimization on gene 21"
-Execution halted
