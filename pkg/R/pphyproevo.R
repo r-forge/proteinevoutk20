@@ -380,6 +380,16 @@ ll_site <- function(tree,data,optimal,s=1,MuMat,alpha=al, beta=be, gamma=ga,m=20
     return(as.numeric(probvec[root,] %*% bf))
 }
 #############################################################################
+## Remove columns with NA in the data
+PruneMissing <- function(x){
+  ##Find the array indices of the NA entries
+  naInd <- which(is.na(x),arr.ind=T)
+  dimnames(naInd) <- NULL
+  ## column indices
+  naCol <- naInd[,2]
+  x[,-naCol]
+}
+#############################################################################
 ##Likelihood of data on a tree, given the selection coefficient "s" and the optimal amino acid sequence "protein_op"
 ##If protein_op (optimal protein) is not given, get it from the most frequent amino acids appeared in the data
 ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,root=NULL,bf=NULL,
@@ -409,6 +419,12 @@ MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20
   negloglike <- function(s){ #The function to minimize
     return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,C,Phi,q,Ne))
   }
+  ## Delete columns with NA in data
+  if(length(which(is.na(data)))!=0) {
+    warning("NA in data, pruning performed")
+    data <- PruneMissing(data)
+  }
+  
   if(optim.m==1) #method nlminb using PORT routines
     #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=FALSE,control=list(trace=trace,kkt=FALSE))
     ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=trace))
@@ -416,7 +432,6 @@ MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20
   else #Powell method bobyqa
     ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=trace))
     #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb)#does not print out too much information
-    
   return(ans)
 }
 #############################################################################
@@ -425,11 +440,21 @@ MLE.s <- function(x,generange,optim.m=1){
   Beta <- x[1]
   Gamma <- x[2]
   mle.s.one <- function(k){
-    MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat,optim.m=optim.m)
+    print(paste("start optimization on gene ", k, sep=""))
+    mle <- MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat,optim.m=optim.m)
+    print(paste("finish optimization on gene ", k, sep=""))
+    return(mle)
   }
-  mclapply(generange,mle.s.one,mc.cores=12)
+  ##mclapply(generange,mle.s.one,mc.cores=12)
+  lapply(generange,mle.s.one)
 }
+
 #system.time(res <- MLE_GTR(1,0,1e4,tree,data[[2]],al,be,ga,mumat))
 l <- 20
 beta <- seq(0,1,length.out=(l+1))[-1]
 gamma <- seq(0,1,length.out=(l+1))[-1]
+
+# ##Find the indices of data which include NA's
+# na.num <- sapply(1:106,function(x) length(which(is.na(data[[x]])))) #numbers of NA's in data
+# errind <- which(na.num!=0) #indices with NA's
+# noNAind <- c(1:106)[-errind] #indices without NA's
