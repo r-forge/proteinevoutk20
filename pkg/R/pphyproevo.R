@@ -454,7 +454,14 @@ l <- 20
 beta <- seq(0,1,length.out=(l+1))[-1]
 gamma <- seq(0,1,length.out=(l+1))[-1]
 
-# ##Find the indices of data which include NA's
-# na.num <- sapply(1:106,function(x) length(which(is.na(data[[x]])))) #numbers of NA's in data
-# errind <- which(na.num!=0) #indices with NA's
-# noNAind <- c(1:106)[-errind] #indices without NA's
+grid.1.beta <- seq(0.6,0.75,length.out=(l+1))[-1]
+grid.1.gamma <- seq(0,0.1,length.out=(l+1))[-1]
+
+grid.3.beta <- seq(0.9,1.0,length.out=(l+1))[-1]
+grid.3.gamma <- grid.1.2.gamma
+
+grid.5.beta <- seq(0.45,0.55,length.out=(l+1))[-1]
+grid.5.gamma <- seq(0.05,0.15,length.out=(l+1))[-1]
+
+grid.6.beta <- seq(0.80,0.90,length.out=(l+1))[-1]
+grid.6.gamma <- grid.5.gamma
