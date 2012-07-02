@@ -1,6 +1,6 @@
 ##############################################
 ##parameter (beta, gamma) values to run
-l <- 2
+l <- 20
 grids <- c(1,3,5,6) #the grids to look into after the firt run
 # beta <- seq(0,1,length.out=(l+1))[-1]
 # gamma <- seq(0,1,length.out=(l+1))[-1]
@@ -31,8 +31,8 @@ for(k in grids){
       system(paste('chmod u+x runGrid_',k,'_',i,'_',j,'.sh',sep=""))
       ##system(paste('/opt/sge/bin/lx24-amd64/qsub runGrid_',k,'_',i,'_',j,'.sh',sep=""))
     }
-##    while(as.numeric(system("/opt/sge/bin/lx24-amd64/qstat | grep -c jchai1",intern=TRUE))>1000) {
-##      Sys.sleep(37)
+    while(as.numeric(system("/opt/sge/bin/lx24-amd64/qstat | grep -c jchai1",intern=TRUE))>1000) {
+      Sys.sleep(37)
     }
   }
 }
