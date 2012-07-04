@@ -2,6 +2,7 @@ load("~/proteinevoutk20/pkg/Data/Rokas.RData")
 datCodon <- phyDat(data,type="CODON")
 datAA <- phyDat(data,type="AA")
 tree <- read.nexus("GTR.tre")
+unroot.tree <- read.nexus("gtrUnrooted.tre")
 ####################################################################
 ###Codon models, using codon data###
 ### w: dN/dS ratio; k: transition transversion ratio
@@ -20,7 +21,10 @@ fit3 <- optim.pml(fit, optEdge=FALSE,model="codon3", control=pml.control(trace=1
 
 mtU <- modelTest.User(datAA,tree,model=c("JTT","LG","WAG","Dayhoff","cpREV","mtmam","mtArt","Mtzoa","mtREV24"))
 mt <- modelTest(datAA,tree,model=c("JTT","LG","WAG","Dayhoff","cpREV","mtmam","mtArt","Mtzoa","mtREV24"))
-fitStart=eval(get(mt$Model[which.min(mt$BIC)],env),env)
+
+###fitStart=eval(get(mt$Model[which.min(mt$BIC)],env),env)
+
+### optimization under 3 models ###
 fitJTT <- pml(tree,datAA,model="JTT",k=4,inv=0.2)
 fitJTT <- optim.pml(fitJTT,optInv=TRUE,optGamma=TRUE,optEdge=FALSE)
 fitJTT
@@ -33,6 +37,7 @@ fitWAG
 
 ### Other models: Dayhoff, cpREV, mtmam, mtArt, Mtzoa, mtREV24 ###
 
+### Modified modelTest function where user can specify whether branch lengths are getting optimized ###
 modelTest.User <- function (object, tree = NULL, model = c("JC", "F81", "K80","HKY", "SYM", "GTR"), optEdge=FALSE, G = TRUE, I = TRUE, k = 4, control = pml.control(epsilon = 1e-08, maxit = 3, trace = 1), multicore = FALSE) 
 {
   if (class(object) == "phyDat") 

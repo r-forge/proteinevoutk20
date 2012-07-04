@@ -111,7 +111,7 @@ conv <- function(filename){
 
 ##   Read in 106 gene data ##
 l <- 106
-data <- list(length=l)
+data <- vector("list",length=l)
 ##data stores the data of all genes in rokas's data
 system.time(
   for(i in 1:l){
