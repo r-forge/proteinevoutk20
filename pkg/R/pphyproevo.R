@@ -436,7 +436,7 @@ MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20
 }
 #############################################################################
 ##Given values for beta and gamma, find the MLE's of s for all 106 genes
-MLE.s <- function(x,generange,optim.m=1){
+MLE.s <- function(x,generange,optim.m=1,multicore=FALSE){
   Beta <- x[1]
   Gamma <- x[2]
   mle.s.one <- function(k){
@@ -445,8 +445,10 @@ MLE.s <- function(x,generange,optim.m=1){
     print(paste("finish optimization on gene ", k, sep=""))
     return(mle)
   }
-  ##mclapply(generange,mle.s.one,mc.cores=12)
-  lapply(generange,mle.s.one)
+  if(multicore)
+    mclapply(generange,mle.s.one)
+  else
+    lapply(generange,mle.s.one)
 }
 
 #system.time(res <- MLE_GTR(1,0,1e4,tree,data[[2]],al,be,ga,mumat))
