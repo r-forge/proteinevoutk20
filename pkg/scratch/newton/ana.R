@@ -19,8 +19,8 @@ check.grid <- function(k,x,y){
 }
 
 vcheck <- Vectorize(check.grid,c("x","y")) # vectorize x and y, (small grid indices)
-## check3 <- outer(1:20,1:20,vcheck,k=3) # check on the 3rd big grid
-## arrayInd(which(check3==1),c(20,20)) # the indices of small grids that didn't finish running
+###check3 <- outer(1:20,1:20,vcheck,k=3) # check on the 3rd big grid
+###arrayInd(which(check3==1),c(20,20)) # the indices of small grids that didn't finish running
 
 
 ### This funciton get the total likelihood value for the 4 picked grids 1,3,5,6 (k)
@@ -49,4 +49,19 @@ vget.grid <- Vectorize(get.val.grid,c("x","y")) #vectorized version of get.val, 
 get.likelihoods.grid <- function(grid){
   likelihood.array.grid <- outer(1:20,1:20,vget.grid,k=grid) #apply vget to recombination of all values across 1:20, return 20*20 array
   return(likelihood.array.grid)
+}
+
+get.s.grid <- function(k,x,y){
+  file <- paste("~/proteinevoutk20/pkg/scratch/newton/RData/SecondRun/grid.",k,".",x,".",y,sep="")
+  if(file.exists(file)){
+    load(file)
+    para <- sapply(1:106, function(x) res[[x]]$par)
+    ## val <- sapply(1:106, function(x) res[[x]]$objective)
+    ## sum(val)
+    return(para)
+  }
+  else{
+    print(paste("grid.",k,".",x,".",y," does not exist! Check running time.",sep=""))
+    return(NA)
+  }
 }
