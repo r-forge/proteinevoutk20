@@ -1,8 +1,7 @@
-load("~/proteinevoutk20/pkg/Data/Rokas.RData")
-datCodon <- phyDat(data,type="CODON")
-datAA <- phyDat(data,type="AA")
-tree <- read.nexus("GTR.tre")
-unroot.tree <- read.nexus("gtrUnrooted.tre")
+load("~/proteinevoutk20/pkg/Data/RokasAA.phyDat") #load Protein Data
+## Read in protein data
+##datAA <- read.nexus.data("rokasAAnoInterleave.nex")
+tree <- read.nexus("gtrUnrooted.tre") # Read in unrooted tree
 ####################################################################
 ###Codon models, using codon data###
 ### w: dN/dS ratio; k: transition transversion ratio
@@ -26,7 +25,7 @@ mt <- modelTest(datAA,tree,model=c("JTT","LG","WAG","Dayhoff","cpREV","mtmam","m
 
 ### optimization under 3 models ###
 fitJTT <- pml(tree,datAA,model="JTT",k=4,inv=0.2)
-fitJTT <- optim.pml(fitJTT,optInv=TRUE,optGamma=TRUE,optEdge=FALSE)
+fitJTT <- optim.pml(fitJTT,optInv=TRUE,optGamma=TRUE,optEdge=TRUE)
 fitJTT
 fitLG <- pml(tree,datAA,model="LG",k=4,inv=0.2)
 fitLG <- optim.pml(fitLG,optInv=TRUE,optGamma=TRUE,optEdge=FALSE)

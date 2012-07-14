@@ -226,7 +226,7 @@ check.local <- function(beta,gamma){
 }
 
 ##run function on all combinations of beta.vec and gamma.vec
-beta.vec <- seq(0,0.1,0.001)
-gamma.vec <- seq(0,0.1,0.001)
-localnum_array <- outer(beta.vec,gamma.vec,num.localop.vec)
+# beta.vec <- seq(0,0.1,0.001)
+# gamma.vec <- seq(0,0.1,0.001)
+# localnum_array <- outer(beta.vec,gamma.vec,num.localop.vec)
 ###qgraph(fma*mumat01,color=Col[ra],curve=0.3,cut=0.0001,layout=lay,asize=0.1)
