@@ -160,7 +160,7 @@ expm.m <- function(x){
   if(is.nan.inf(edefault)==TRUE) #if there is no Inf or NaN values in the result, return the result
     return(edefault)
   else{
-    print(x)
+    #print(x)
     eward77 <- expm(x,method="Ward77") #method Ward77
     if(is.nan.inf(eward77)==TRUE)
       return(eward77)
@@ -440,9 +440,9 @@ MLE.s <- function(x,generange,optim.m=1,multicore=FALSE){
   Beta <- x[1]
   Gamma <- x[2]
   mle.s.one <- function(k){
-    print(paste("start optimization on gene ", k, sep=""))
+    #print(paste("start optimization on gene ", k, sep=""))
     mle <- MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat,optim.m=optim.m)
-    print(paste("finish optimization on gene ", k, sep=""))
+    #print(paste("finish optimization on gene ", k, sep=""))
     return(mle)
   }
   if(multicore)
@@ -452,6 +452,22 @@ MLE.s <- function(x,generange,optim.m=1,multicore=FALSE){
 }
 
 #system.time(res <- MLE_GTR(1,0,1e4,tree,data[[2]],al,be,ga,mumat))
+
+### optimization of beta and gamma
+### starting point, lower bounds, upper bounds, trace, generange, multicore
+MLE.bg <- function(start_pt,lowerb,upperb,generange, trace=0,multicore=FALSE){
+  ## a function of x that return the sum of -loglikelihood values for all genes with s optimized separately for different genes
+  mle.bg.s <- function(x){
+    mle <- MLE.s(x,generange,multicore=multicore) #call the previous function to optimize s for all genes
+    mle.val <- sapply(generange,function(x) mle[[x]]$objective) # best -loglikelihood values
+    return(sum(mle.val)) #summation of all values
+  }
+  ans <- nlminb(start_pt,mle.bg.s,lower=lowerb,upper=upperb,control=list(trace=trace))
+  return(ans)
+}
+
+###############################################################################
+### objects used in grid search for the best estimates of beta and gamma
 l <- 20
 beta <- seq(0,1,length.out=(l+1))[-1]
 gamma <- seq(0,1,length.out=(l+1))[-1]
