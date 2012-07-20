@@ -65,3 +65,33 @@ get.s.grid <- function(k,x,y){
     return(NA)
   }
 }
+vget.s.grid <- Vectorize(get.s.grid,c("x","y")) #vectorized version of get.s.grid, both arguments are vectorized
+
+### A function to find all the s values for a specific gene, in al lthe grids.
+get.s.gene <- function(k,x,y,index){
+  file <- paste("~/proteinevoutk20/pkg/scratch/newton/RData/SecondRun/grid.",k,".",x,".",y,sep="")
+  if(file.exists(file)){
+    load(file)
+    para <- res[[index]]$par
+    ## val <- sapply(1:106, function(x) res[[x]]$objective)
+    ## sum(val)
+    return(para)
+  }
+  else{
+    print(paste("grid.",k,".",x,".",y," does not exist! Check running time.",sep=""))
+    return(NA)
+  }
+}
+
+vget.s.gene <- Vectorize(get.s.gene,c("x","y"))
+s.gene.grid <- function(grid,index){
+  c(outer(1:20,1:20,vget.s.gene,k=grid,index=index))
+}
+grids <- c(1,3,5,6)
+s.gene <- function(index){
+  c(sapply(grids, s.gene.grid,index))
+}
+
+mean.s.gene <- function(index){
+  mean(s.gene(index))
+}
