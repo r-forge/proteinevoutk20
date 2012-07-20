@@ -1,0 +1,68 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> source("~/proteinevoutk20/pkg/R/pphyproevo.R")
+Loading required package: ape
+
+Attaching package: ‘ape’
+
+The following object(s) are masked from ‘package:seqinr’:
+
+    as.alignment, consensus
+
+Loading required package: igraph
+Loading required package: Matrix
+Loading required package: lattice
+Loading required package: numDeriv
+
+Attaching package: ‘expm’
+
+The following object(s) are masked from ‘package:Matrix’:
+
+    expm
+
+
+Attaching package: ‘multicore’
+
+The following object(s) are masked from ‘package:lattice’:
+
+    parallel
+
+Loading required package: Rcpp
+This is mgcv 1.7-17. For overview type 'help("mgcv-package")'.
+> system.time(mle <- MLE.bg(c(0.1,0.01),c(0,0),c(1,1),1:106,trace=1,multicore=TRUE))
+  0:     374824.79: 0.100000 0.0100000
+  1:     368255.37:  1.00000  0.00000
+  2:     367494.92:  1.00000 0.00242505
+  3:     366719.84:  1.00000 0.00301473
+  4:     366652.28:  1.00000 0.00271989
+  5:     366652.28:  1.00000 0.00271989
+  6:     366140.01:  1.00000 0.00271989
+  7:     365604.61:  1.00000 0.00271990
+  8:     365604.61:  1.00000 0.00271990
+  9:     365604.61:  1.00000 0.00271990
+       user      system     elapsed 
+2850128.210    5304.308  158740.415 
+> 
+> save(mle,file="mlebg1.RData")
+> 
+> proc.time()
+       user      system     elapsed 
+2850133.881    5304.476  158747.456 
