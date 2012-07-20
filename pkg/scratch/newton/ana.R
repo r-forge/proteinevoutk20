@@ -67,7 +67,7 @@ get.s.grid <- function(k,x,y){
 }
 vget.s.grid <- Vectorize(get.s.grid,c("x","y")) #vectorized version of get.s.grid, both arguments are vectorized
 
-### A function to find all the s values for a specific gene, in al lthe grids.
+### A function to find all the s values for a specific gene, in one grid.
 get.s.gene <- function(k,x,y,index){
   file <- paste("~/proteinevoutk20/pkg/scratch/newton/RData/SecondRun/grid.",k,".",x,".",y,sep="")
   if(file.exists(file)){
@@ -82,16 +82,23 @@ get.s.gene <- function(k,x,y,index){
     return(NA)
   }
 }
-
+### vectorize the indices of small grids in the 4 grids
 vget.s.gene <- Vectorize(get.s.gene,c("x","y"))
+
+### for a gene and a big grid, find all 400 mles for s in the small grids
 s.gene.grid <- function(grid,index){
   c(outer(1:20,1:20,vget.s.gene,k=grid,index=index))
 }
+
+### Big grids
 grids <- c(1,3,5,6)
+
+### for one gene with "index" find all 1600 mles in all the small grids
 s.gene <- function(index){
   c(sapply(grids, s.gene.grid,index))
 }
 
+### mean value of mle s from all the 1600 grids
 mean.s.gene <- function(index){
   mean(s.gene(index))
 }
