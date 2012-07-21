@@ -459,7 +459,7 @@ MLE.bg <- function(start_pt,lowerb,upperb,generange, trace=0,multicore=FALSE){
   ## a function of x that return the sum of -loglikelihood values for all genes with s optimized separately for different genes
   mle.bg.s <- function(x){
     mle <- MLE.s(x,generange,multicore=multicore) #call the previous function to optimize s for all genes
-    mle.val <- sapply(generange,function(ind) mle[[ind]]$objective) # best -loglikelihood values
+    mle.val <- sapply(1:length(generange),function(ind) mle[[ind]]$objective) # best -loglikelihood values
     return(sum(mle.val)) #summation of all values
   }
   ans <- nlminb(start_pt,mle.bg.s,lower=lowerb,upper=upperb,control=list(trace=trace))
