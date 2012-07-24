@@ -4,111 +4,108 @@
 \usepackage{amsthm}
 \usepackage{color}
 \usepackage{graphicx}
-\title{Nonsynonymous codon substitution --- amino acid substitution}
+\title{A phylogenetic and population genetic model of protein evolution}
 \author{}
 \begin{document}
 \maketitle
-Consider a protein with a sequence of optimal amino acids $\hat{\mathbf{a}} = (\hat{a}_1, \hat{a}_2, \cdots \hat{a}_n)$  and the observed sequence of amino acids is $\mathbf{a} = (a_1, a_2, \cdots, a_n)$.\\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction/Abstract}
+Empirical and mechanistic models of amino acid replacement have been constructed to explain protein evolution since 1978 (Dayhoff et al). Yang et al. (1998) implemented a few mechanistic models at the level of codons and explicitly model the biological processes involved, including different mutation rates between nucleotides, translation of the codon triplet into an amino acid, and the acceptance or rejection of the amino acid due to selective pressure on the protein. We present a new codon model for protein evolution that can 1) empirically estimate the weighting factors for the Grantham matrix of amino acid similarities and use simulations and information from empirical data to find cases where populations of intermediate size may evolve faster than populations of large size.\\
 
-At position $k$, if the observed amino acid is different from the optimal amino acid, there is a selection coefficient $s_k$ for the selection disadvantage. Let $\mathbf{s}=(s_1,s_2,\cdots,s_n)$.\\
+\textit{Brief description of classical empirical and mechanistic models, the motivation of the new model.}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Model}
+Our model works for homologous protein-coding sequence without gaps or with gaps removed. We use a continuous time Markov process to model substitutions among the amino acids within a protein-coding sequence. The states of the Markov process are the 20 natural amino acids (nonnatural amino acids can be easily added), and we use a $20 \times 20$ rate matrix $Q=(Q_{ij})$ where $Q_{ij}$ represents the instantaneous rate that amino acid $i$ will be substituted by amino acid $j$. As usual the row sum of $(Q_{ij})$ equals $0$ and $P(t) = \exp (tQ)$, where $P_{ij}(t)$ is the probability that amino acid $j$ replaces $i$ after time $t$. \\
 
-Given the physiochemical distances (Grantham) between amino acids, the optimal protein and the selection strength $\mathbf{s}$, the of functionality of a protein $\mathbf{a}$ is
+We assume that mutations occur on the codon level at the three codon positions independently. Therefore, more than one nucleotide substitutions are not allowed to occur instantaneously as mutations involving more than one position during time $\Delta t$ will have probabilities $\Delta t^2$ and should be ignored. Based on the $4 \times 4$ mutation rate matrix for nucleotides the mutation rates $\mu_{ij}$ among 20 amino acids are calculated.
+
+Consider a protein as a sequence of amino acid, assume that there is an optimal amino acid for each position. Any non-optimal amino acid at a position is subjected to selection, the strength of which depends on the physiochemical distance (Grantham, Science 1974) between the observed and optimal amino acids and magnitude of the selection force. \\
+
+Suppose a protein of length $n$ has a sequence of optimal amino acids $\hat{\mathbf{a}} = (\hat{a}_1, \hat{a}_2, \cdots \hat{a}_n)$  and the observed sequence of amino acids is $\mathbf{a} = (a_1, a_2, \cdots, a_n)$. At position $k$, the selection coefficient is $s_k$ and let $\mathbf{s}=(s_1,s_2,\cdots,s_n)$. The overall physiochemical difference (distance) $d$ between amino acids $i$ and $j$ consist of 3 components: $D_{ij} = [\alpha (c_i-c_j)^2 + \beta (p_i - p_j)^2 + \gamma (v_i - v_j)^2]$, where $c = $ composition, $p = $ polarity, and $v = $ molecular volume and $\alpha, \beta, \gamma$ are the corresponding weights for each component. The values for properties in amino acid difference formula is given by Grantham (1974). \\
+
+Given the distances $\mathbf{d}$ from the optimal protein and the selection strength $\mathbf{s}$, the functionality of a protein $\mathbf{a}$ with $n$ amino acids is defined as
 
 %{\color{blue} Could the functionality function be changed in a better way?}\\
 \begin{equation}
-F(\mathbf{a}|\hat{\mathbf{a}},\mathbf{s})= \prod_{k=1}^{n}e^{-d(a_k, \hat{a}_k)s_k}=e^{-\mathbf{d}\cdot\mathbf{s}}
-\label{eq:ftny}
+%F(\mathbf{a}|\hat{\mathbf{a}},\mathbf{s})= \prod_{k=1}^{n}e^{-d(a_k, \hat{a}_k)s_k}=e^{-\mathbf{d(\mathbf{a},\hat{\mathbf{a}})}\cdot\mathbf{s}}
+%\label{eq:ftny}
+%\end{equation}
+%or other candidates:
+%\begin{eqnarray}
+%F(\mathbf{a}) & = & \prod_{k=1}^n \frac{1}{1+d_ks_k}\\
+F(\mathbf{a})  =  \frac{n}{\displaystyle  \sum_{k=1}^n{(1+d_ks_k)}} \label{eq:harmonic}\\
+%F(\mathbf{a}) & = & \frac{n}{\sum_{k=1}^{n}\frac{1}{e^{-d(a_k, \hat{a}_k)s_k}}}
+%\end{eqnarray}
 \end{equation}
-or other candidates:
-\begin{eqnarray}
-F(\mathbf{a}) & = & \prod_{k=1}^n \frac{1}{1+d_ks_k}\\
-F(\mathbf{a}) & = & \frac{n}{\sum_{k=1}^n{(1+d_ks_k)}} \label{eq:harmonic}\\
-F(\mathbf{a}) & = & \frac{n}{\sum_{k=1}^{n}\frac{1}{e^{-d(a_k, \hat{a}_k)s_k}}}
-\end{eqnarray}
 The condition $\hat{\mathbf{a}},\mathbf{s}$ will be omitted from now on if there is no potential confusion.\\
 
 %fixation probability 
-The fixation probability of a single protein mutant $\mathbf{a}_j$ from a diploid population with wild type $\mathbf{a}_i$, if they differ at only one position $k$ of the protein, is 
+The fixation probability of a single protein mutant $\mathbf{a}_j$ from a diploid population with wild type $\mathbf{a}_i$ is 
 \begin{equation}
 \pi(\mathbf{a}_i \rightarrow \mathbf{a}_j ) = \frac{1-f(\mathbf{a}_i)/f(\mathbf{a}_j)}{1-(f(\mathbf{a}_i)/f(\mathbf{a}_j))^{2N_e}} = \frac{1-f_i/f_j}{1-(f_i/f_j)^{2N_e}}
 \label{eq:fixation}
 \end{equation}
 according to Sella-Hirsh (Add reference)
-where $f(\mathbf{a}_i)$ and $f(\mathbf{a}_j)$ are the fitnesses of $\mathbf{a}_i$ and $\mathbf{a}_j$. We assume that the mutation rate between 2 proteins who differ at more than one position is 0. \\
+where $f(\mathbf{a}_i)$ and $f(\mathbf{a}_j)$ are the fitnesses of $\mathbf{a}_i$ and $\mathbf{a}_j$. This is an approximation to the canonical formula 
 
-According to the canonical formula, we have
 \begin{equation}
 \pi(\mathbf{a}_i \rightarrow \mathbf{a}_j,p) = \frac{1-e^{-2N_e ps}}{1-e^{-2N_es}}
 \label{eq:fixcanonical}
 \end{equation}
+
 where $p$ is the initial frequency of the mutant, and $s=(f_j-f_i)/f_i$ is the selection advantage of $\mathbf{a}_j$ comparing to $\mathbf{a}_i$.
 When there is a single mutant in the population, i.e. $p=1/(2N_e)$, the formula becomes
-$\frac{1-e^{-s}}{1-e^{-2N_es}}$. Both formulae are valid under the same conditions: $s, \frac{1}{N}, Ns^2 \ll 1$.\\
+$\frac{1-e^{-s}}{1-e^{-2N_es}}$. Both formulae are valid under the same condition: $s, \frac{1}{N}, Ns^2 \ll 1$.\\
 
 
  
 As in Gilchrist 2007, fitness is a function of cost, functionality and some scaling factors:
 \[f(\mathbf{a}) \propto \exp\{-\frac{C\Phi q}{F(\mathbf{a})}\}\]
-where $C$ is the expected cost of producing a single complete protein, $q$ is the scaling constant seconds per ATP determining the relationship between the rate of ATP usage and fitness $f$, and $\Phi$ is a measure of gene expression, specifically protein production rate (protein per second). {\color{blue} Further explanation of these constants and why the formula is like this?}\\
+where $C$ is the expected cost of producing a single complete protein, $q$ is the scaling constant seconds per ATP determining the relationship between the rate of ATP usage and fitness $f$, and $\Phi$ is a measure of gene expression, specifically protein production rate (protein per second). \\
 
-If we combine $C\Phi q$ as one constant $A$, then 
+Combining $C\Phi q$ as one constant $A$, we have
 \[ f(\mathbf{a}) \propto \exp\{-\frac{A}{F(\mathbf{a})}\} \]
 %{\color{blue} Is the fitness function modifiable?}\\
 
-In either S-H formula or the canonical formula of the fixation probability, the value that is of concern is $f_i/f_j$, now calculate $f_i/f_j$:
-\begin{eqnarray}
-\frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} & = & \frac{f_i}{f_j} (\text{consider $C$ as constant for now}) \nonumber\\
-& = & \exp\Big[-\frac{A}{F(\mathbf{a}_i)} + \frac{A}{F(\mathbf{a}_j )}\Big] \nonumber\\
-& = & \exp \Big[-A\Big( \frac{1}{F(\mathbf{a}_i )} - \frac{1}{F(\mathbf{a}_j )}\Big)\Big] \nonumber\\
-& = & \exp \Big[-\frac{A}{\prod_{l\neq k}^n \exp(-d_l s_l)}\Big(\frac{1}{\exp(-d_k^i s_k)}-\frac{1}{\exp(-d_k^j s_k)}\Big)\Big]\nonumber\\
-& = & \exp\Big[ -\frac{A}{F_S}\Big(\exp(d_k^i s_k) - \exp(d_k^j s_k)\Big)\Big]
-\label{eq:fitnessratio}
-\end{eqnarray}
-where $d_k^i$ is the distance between the amino acids at position $k$ in $\mathbf{a}_i$ and $\hat{\mathbf{a}}$ , which is the only position where $\mathbf{a}_i$ and $\mathbf{a}_i$ differ. $F_S$ is the part of functionality shared by sites of the 2 proteins except site $k$. \\
-
-
-If the functionality is defined as in Equation \ref{eq:harmonic}, then we have the following:
+In either S-H formula or the canonical formula of the fixation probability, the value that is of concern is $f_i/f_j$.
+%\begin{eqnarray}
+%\frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} & = & \frac{f_i}{f_j} (\text{consider $C$ as constant for now}) \nonumber\\
+%& = & \exp\Big[-\frac{A}{F(\mathbf{a}_i)} + \frac{A}{F(\mathbf{a}_j )}\Big] \nonumber\\
+%& = & \exp \Big[-A\Big( \frac{1}{F(\mathbf{a}_i )} - \frac{1}{F(\mathbf{a}_j )}\Big)\Big] \nonumber\\
+%& = & \exp \Big[-\frac{A}{\prod_{l\neq k}^n \exp(-d_l s_l)}\Big(\frac{1}{\exp(-d_k^i s_k)}-\frac{1}{\exp(-d_k^j s_k)}\Big)\Big]\nonumber\\
+%& = & \exp\Big[ -\frac{A}{F_S}\Big(\exp(d_k^i s_k) - \exp(d_k^j s_k)\Big)\Big]
+%\label{eq:fitnessratio}
+%\end{eqnarray}
+%where $d_k^i$ is the distance between the amino acids at position $k$ in $\mathbf{a}_i$ and $\hat{\mathbf{a}}$ , which is the only position where $\mathbf{a}_i$ and $\mathbf{a}_j$ differ. $F_S$ is the part of functionality shared by sites of the 2 proteins except site $k$. \\
+If the functionality is defined as in Equation \ref{eq:harmonic}, we have the following:
 
 \begin{equation}
 \frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} = \prod_{k=1}^n\Big( \frac{f(\mathbf{a}_i^k)}{f(\mathbf{a}_j^k)}\Big)^{\frac{1}{n}}
 \end{equation}
 
 
-i.e. the fitness ratio of the whole protein is the geometric mean of the fitness ratios between the two proteins for all sites. Therefore, when only one site (say, site $k$) is allowed to change, we have 
+i.e. the fitness ratio of the whole protein is the geometric mean of the fitness ratios between the two proteins for all sites. Therefore, when $\mathbf{a}_i$ and $\mathbf{a}_j$ only differ at 1 position, it becomes  
 \[\frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} = \Big( \frac{f(\mathbf{a}_i^k)}{f(\mathbf{a}_j^k)}\Big)^{\frac{1}{n}}\]
 and
 \begin{eqnarray}
-\frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} & = &\exp \Big[-\frac{A}{n}\Big( \frac{1}{F(\mathbf{a}_i )} - \frac{1}{F(\mathbf{a}_j )}\Big)\Big] \nonumber\\
+\frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} & = &\exp \Big[-A\Big( \frac{1}{F(\mathbf{a}_i )} - \frac{1}{F(\mathbf{a}_j )}\Big)\Big] \nonumber\\
 & = & \exp\Big[ -\frac{A}{n}(d_k^i s_k - d_k^j s_k)\Big]\\
 & = & \exp\Big[ -\frac{C\Phi q}{n}(d_k^i s_k - d_k^j s_k)\Big]\\
 & = & \exp\Big[ -\frac{C\Phi q s_k}{n}(d_k^i - d_k^j)\Big]
 \end{eqnarray}
 \noindent
-this quantity is only related to site $k$ and is independent of all other sites. Therefore, the sites are independent. In this case, the parameters $C, \Phi, q$ and $s_k$ are all multiplied together, only $C$ depends on $n$, so they should be treated as a composite parameter, as inseparable. \\
+this quantity is only related to site $k$. It is easy to see that all the sites are independent in the sense that if there are more than 1 site that differ, the ratio is simply a product of ratios at all sites. \\
+%and is independent of all other sites. Therefore, the sites are independent. In this case, the parameters $C, \Phi, q$ and $s_k$ are all multiplied together, only $C$ depends on $n$, so they should be treated as a composite parameter, as inseparable. \\
 %{\it Should we relax the condition so that the mutation between proteins with more than 1 different position is also possible?}\\
 
-Instantaneous substitution rate from $\mathbf{a}_i$ to $\mathbf{a}_j$ is 
+We assume that the mutation rate $\mu$ between 2 proteins that differ at more than one position is 0. Instantaneous substitution rate from $\mathbf{a}_i$ to $\mathbf{a}_j$ is 
 \begin{equation}
 u_{ij} = 2N_e \mu_{ij} \pi(\mathbf{a}_i \rightarrow \mathbf{a}_j | \hat{\mathbf{a}}, \mathbf{s})
 \label{eq:subrate}
 \end{equation}
 
-where $\mu_{ij}$ is the mutation rate from $\mathbf{a}_i$ to $\mathbf{a}_j$. Now that the mutation and fixation are both at protein level, for simplicity, we assume that the mutation rates are all the same, as long as there is only one different position between the two proteins considered. \\
+where $\mu_{ij}$ is the mutation rate from $\mathbf{a}_i$ to $\mathbf{a}_j$. Note that the mutation and fixation are both at amino acid level. \\
 
-%We can assume that the physiochemical distances are scalable to be between 0 and 1, with 0 meaning that the amino acid is the optimal one and 1 meaning the worst possible (?) amino acid. \\
-%What is the range for $s$ (the selection strength)? \\
-%$s$ is also between 0 and 1, with 0 meaning that there is no selection over the optimal amino acid at all and 1 meaning that the selection strength is very strong. \\
-%%It could possibly be $[1, \infty)$, with $1$ meaning that there is no selection against the amino acid at this position and $\infty$ meaning the selection is very strong.\\
-%The functionality function should be decreasing with both of the $d$ and $s$, a reasonable function could be $1-ds$. When either $d$ or $s$ is 0, then the functionality is the same as the optimal amino acid; when both $d$ and $s$ are 1, the functionality is 0 (i.e. the amino acid doesn't function at all). \\
-%
-%If the harmonic mean of $(1-ds)$'s over all the amino acid in the protein is used for the functionality, 
-%\[\frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} = exp\Big[ -\frac{C\Phi q}{n}\Big( \frac{(d_k^i - d_k^j)s_k}{(1-d_k^i s_k)(1 - d_k^j s_k)}\Big)\Big]\]
-%
-%Since $d_k$'s are random variables from a probability distribution, as well as $s_k$, we need to take the expectation of $\pi$. Question: How to take the expectation of the complicated function like this?\\
-%
-%As it seems not quite practical to have explicit form of the expectation, hence the transition rate, numerical methods should be considered. By using numerical approximation, we make the functionality function as biologically meaningful and simple as possible. Two good candidates are $e^{-ds}$ and $1 - ds$. \\
-%
-%For the distribution of $s$, there are different options: uniform, exponential or gamma. It is possible that the form will not affect the rate very much. We will go ahead and implement different distributions and see which one does the best job.
 
 Questions:
 \begin{enumerate}
