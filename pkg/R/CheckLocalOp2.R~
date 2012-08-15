@@ -1,0 +1,6 @@
+source("~/proteinevoutk20/pkg/R/pphyproevo.R")
+source("~/proteinevoutk20/pkg/R/plot.R")
+beta.vec <- seq(0,1,0.001)
+gamma.vec <- seq(0,0.2,0.0001)
+system.time(localnum_array_long <- outer(beta.vec,gamma.vec,num.localop.vec))
+save(localnum_array_long,file="~/proteinevoutk20/pkg/Results/LocalOpLong.RData")
