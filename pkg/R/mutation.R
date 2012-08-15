@@ -364,16 +364,16 @@ mat_gen_indep <- function(aa_op,m,s,DisMat,MuMat,formula=1,model=2,a1=2, a2=1, P
 
 ##Given a protein, the optimal protein, and the selection vector (or constant selection)
 ##find the vector of rates of moving from the protein to all its neighbors
-##If the length of the protein is l, then it has (m-1)*l neighbors
+##If the length of the protein is l, then it has (m-1)*l neighbors, m=20 if all amino acids are considered.
 rate_move <- function(protein, protein_op, m, s,DisMat,MuMat,indep=TRUE,formula=1,model=2,a1=2, a2=1, Phi=0.5,q=4e-7, Ne=1.36e7){
-  l <- length(protein) #number of sites
+  l <- length(protein) #number of sites in the protein
   rates <- vector(length=l*(m-1)) # rates of moving to neighboring proteins, vector to return
-  for(i in 1:l){
-	aa <- c(1:m)[-protein[i]]
-	mu_vec <- MuMat[protein[i],aa]
-	rates[((i-1)*(m-1)+1):(i*(m-1))] <- 2*Ne*mu_vec*mapply(fix_protein,rep(protein[i],(m-1)),aa,rep(protein_op[i],m-1),MoreArgs=list(s=s,DisMat=DisMat,indep=indep,
-				formula=formula,model=model,a1=a1,a2=a2,Phi=Phi,q=q,Ne=Ne),SIMPLIFY=TRUE)
-  }
+  for(i in 1:l){ #loop through all the sites
+	aa <- c(1:m)[-protein[i]] #the amino acids other than the one in the sequence
+	mu_vec <- MuMat[protein[i],aa] #mutation rate from current state to another state
+        ## 2*Ne*mu*fixation_prob = rate
+	rates[((i-1)*(m-1)+1):(i*(m-1))] <- 2*Ne*mu_vec*mapply(fix_protein,rep(protein[i],(m-1)),aa,rep(protein_op[i],m-1),MoreArgs=list(s=s,DisMat=DisMat,indep=indep,formula=formula,model=model,a1=a1,a2=a2,Phi=Phi,q=q,Ne=Ne),SIMPLIFY=TRUE)
+      }
   rates
 }
 

@@ -37,16 +37,18 @@ GMcpv <- data.matrix(GMcpv)
 ##The mean of the distance is normalized to 1,(mean of only the upper triangle elements of the matrix)
 ##The parameter values in Grantham matrix are:
 ##alpha=1.833, beta=0.1018,gamma=0.000399
+##First find the avg chemical distance, and then the weight is (1/avg_dis)^2
 
 ##this function computes the weights that are used by Grantham
 ## (dispite the name, they are not the average distances though, instead they are functions of average distances)
 avg_dis <- function(vector){
   l <- length(vector)
   Sum <- 0
+  ## find the sum of all pairwise chemical distances
   for(i in 1:(l-1)){
     Sum <- Sum + sum(abs(vector[i]-vector[(i+1):l]))
   }
-  ct <- l*(l-1)/2
+  ct <- l*(l-1)/2 #total combination count
   return((ct/Sum)^2)
 }
 ##Grantham weights
@@ -55,9 +57,9 @@ be <- avg_dis(GMcpv[,2])
 ga <- avg_dis(GMcpv[,3])
 
 
-#Given the data from Grantham on all three factors, and the weights,
-#Find the distance matrix for all the amino acids (20 by 20) with mean 1
-#Grantham matrix has mean 100 instead of 1
+###Given the data (20 by 3 matrix/data frame) from Grantham on all three factors, and the weights,
+###Find the distance matrix for all the amino acids (20 by 20) with mean 1
+###Grantham matrix has mean 100 instead of 1
 GM_cpv <- function(datamatrix, alpha=al, beta=be, gamma=ga){
   A <- datamatrix
   DistanceMatrix <- matrix(0,nrow=20,ncol=20) #diagonal entries have values 0
@@ -65,9 +67,9 @@ GM_cpv <- function(datamatrix, alpha=al, beta=be, gamma=ga){
   for(j in (i+1):20)
   	DistanceMatrix[i,j] <- (alpha*(A[i,1] - A[j,1])^2 + beta*(A[i,2]-A[j,2])^2+gamma*(A[i,3]-A[j,3])^2)^(1/2)
   }
-##make a symmetric matrix
+  ##make a symmetric matrix
   result <- DistanceMatrix + t(DistanceMatrix)
-##normalize the mean to 1
+  ##normalize the mean to 1
   m <- sum(result)/(400-20) #exclude the diagonal entries
   return(result/m)
 }
@@ -79,7 +81,7 @@ GM <- GM_cpv(GMcpv,al,be,ga)
 ##   construct matrices for mutation and substitution  ##
 ##################################################################
 ##Short names for all the amino acids, in alphabetical order
-aa <- s2c("SRLPTAVGIFYCHQNKDEMW")
+aa <- s2c("SRLPTAVGIFYCHQNKDEMW") #string to character in package "seqinr"
 aa <- levels(factor(aa)) #all the amino acids
 Nu <- s2c("acgt") #nucleotide ACGT - now the order is changed !!!
 stop_cd <- c("taa","tag","tga") #stop codons
@@ -266,7 +268,7 @@ Ftny_protein <- function(protein,protein_op,s,DisMat){
 #s: selection (vector or scalar)
 #Ne: effective population size
 #q, Phi: constants
-#C: cost function, linearly function of the length of the protein
+#C: cost function, linear function of the length of the protein
 #C_n = a1 + a2*n, cost --  linear function of the length
 fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   if((d1==d2)||(s==0)) #When the fitnesses are the same, neutral case, pure drift
