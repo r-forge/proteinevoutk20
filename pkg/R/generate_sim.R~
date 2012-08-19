@@ -1,0 +1,19 @@
+##source("~/proteinevoutk20/pkg/R/simulation.R")
+tips <- c(4,8,12)
+treegen <- function(tip,brlen){
+  rtree(tip,rooted=TRUE,br=brlen*runif(2*tip-2))
+}
+trees <- mapply(treegen,tips,MoreArgs=list(brlen=50),SIMPLIFY=FALSE)
+sites <- c(100,500,1000)
+s <- c(0,0.01,0.1)
+
+line1 <- 'source("~/proteinevoutk20/pkg/R/simulation.R")'
+RCommands = ""
+
+for(k in trees){
+  for(i in sites){
+    for(j in s){
+      
+    }
+  }
+}

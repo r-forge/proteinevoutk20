@@ -1,0 +1,53 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> source("~/proteinevoutk20/pkg/R/simulation.R") 
+Loading required package: ape
+
+Attaching package: ‘ape’
+
+The following object(s) are masked from ‘package:seqinr’:
+
+    as.alignment, consensus
+
+Loading required package: igraph
+Loading required package: Matrix
+Loading required package: lattice
+Loading required package: numDeriv
+
+Attaching package: ‘expm’
+
+The following object(s) are masked from ‘package:Matrix’:
+
+    expm
+
+
+Attaching package: ‘multicore’
+
+The following object(s) are masked from ‘package:lattice’:
+
+    parallel
+
+Loading required package: Rcpp
+This is mgcv 1.7-17. For overview type 'help("mgcv-package")'.
+>  load("~/proteinevoutk20/pkg/R/TreesForSim.RData") 
+>  start_seq=sample(20,500,replace=T) 
+>  op_seq=rep(1,500) 
+>  system.time(sim <- simTree(trees[[2]],500,op_seq,20,0.1,Nu_vec,rootseq=start_seq, ancestral=TRUE)) 
