@@ -1,0 +1,6 @@
+source("~/proteinevoutk20/pkg/R/simulation.R") 
+ load("~/proteinevoutk20/pkg/R/simtrees2.RData") 
+ start_seq=sample(20,100,replace=T) 
+ op_seq=rep(1,100) 
+ system.time(sim <- simTree(trees[[1]],100,op_seq,20,0.01,Nu_vec,rootseq=start_seq, ancestral=TRUE)) 
+ save.image(file="sim2_1_100_0.01.RData",compress=TRUE) 
