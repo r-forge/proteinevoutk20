@@ -68,7 +68,7 @@ simulation <- function(protein,protein_op,t,m,s,DisMat,MuMat, C=2, Phi=0.5,q=4e-
 simTree <- function(tree,l,protein_op=rep(1,l),m,s,GTRvec,alpha=al,
                     beta=be, gamma=ga,scale=T,C=2, 
                     Phi=0.5,q=4e-7, Ne=1.36e7,
-                    bf=NULL,rootseq=NULL,ancestral=FALSE){
+                    bf=NULL,rootseq=NULL,ancestral=FALSE,simple=FALSE){
   ## check if the input tree is rooted binary tree. if not, throw an error.
   ##what if we want simulation on a branch only, i.e., there is only one tip?
 
@@ -91,11 +91,15 @@ simTree <- function(tree,l,protein_op=rep(1,l),m,s,GTRvec,alpha=al,
     from = parent[i] 
     to = child[i]
     ##simulation on this one branch
-    for(j in 1:l){
-      res[to,j] = as.numeric(tail(simulation(res[from,j],protein_op[j],tl[i],m,s,GM1,mumat,indep,
-           formula,model,a1,a2,Phi,q,Ne,record.fitness=FALSE),1)[1])
-      
+    if(simple){
+      for(j in 1:l){
+        res[to,j] = as.numeric(tail(simulation(res[from,j],protein_op[j],tl[i],m,s,GM1,mumat,
+             C,Phi,q,Ne,record.ftny=FALSE),1)[1])
+      }
     }
+    else
+      res[to,] = as.numeric(tail(simulation(res[from,],protein_op,tl[i],m,s,GM1,mumat,
+                        C,Phi,q,Ne,record.ftny=FALSE),1)[1:l])
   }
   k = length(tree$tip)
   label = c(tree$tip, as.character((k+1):nNodes))
