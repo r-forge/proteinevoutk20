@@ -26,9 +26,7 @@ for(k in 1:6){
       pbsCommands=paste(pbsCommands,"\n","/data/apps/R/2.14.0/bin/R CMD BATCH sim2_",k,"_",i,"_",j,".R",sep="")
       cat(pbsCommands,file=paste('runSim2_',k,'_',i,'_',j,'.sh',sep=""),append=FALSE)
       system(paste('chmod u+x runSim2_',k,'_',i,'_',j,'.sh',sep=""))
-      while(as.numeric(system("/opt/sge/bin/lx24-amd64/qstat | grep -c jchai1",intern=TRUE))>1000) {
-        Sys.sleep(37)
-      }
+      system(paste('/opt/sge/bin/lx24-amd64/qsub runSim2_',k,'_',i,'_',j,'.sh',sep=""))
     }
   }
 }
