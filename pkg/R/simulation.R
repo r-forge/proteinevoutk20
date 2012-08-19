@@ -56,7 +56,7 @@ simulation <- function(protein,protein_op,t,m,s,DisMat,MuMat, C=2, Phi=0.5,q=4e-
   }
   ##shift the third column up one step so that the waiting time is the time
   ## spent in the state in the first column
-  path[,3] <- c(path[-1,3],NA)  
+  path[,l+2] <- c(path[-1,l+2],NA)  
   path
 }
 #simulation(c(1,2),c(3,4),1000,10,0.1,GM,mumat,indep=T)

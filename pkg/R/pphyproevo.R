@@ -316,18 +316,6 @@ mat_gen_indep <- function(aa_op,s,DisMat,MuMat,m=20,C=2, Phi=0.5,q=4e-7,Ne=1.36e
   return(mat)
 }
 
-##Given a protein, the optimal protein, and the selection coefficient
-##find the vector of rates of moving from the protein to all its neighbors
-##If the length of the protein is l, then it has (m-1)*l neighbors
-##In this function, the protein length is 1, so number of neighbors is m-1
-rate_move <- function(protein, protein_op,s,DisMat,MuMat,m=20,C=2, Phi=0.5,q=4e-7, Ne=1.36e7){
-  rates <- vector("numeric",m-1) # rates of moving to neighboring proteins, vector to return
-  aa <- c(1:m)[-protein]
-	mu_vec <- MuMat[protein,aa]
-	rates <- 2*Ne*mu_vec*mapply(fix_protein,rep(protein,(m-1)),aa,rep(protein_op,m-1),
-                              MoreArgs=list(s=s,DisMat=DisMat,C=C,Phi=Phi,q=q,Ne=Ne),SIMPLIFY=TRUE)
-  rates
-}
 ######################################################
 ##likelihood function for 1 site
 ll_site <- function(tree,data,optimal,s=1,MuMat,alpha=al, beta=be, gamma=ga,m=20,

@@ -1,0 +1,47 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ##source("~/proteinevoutk20/pkg/R/simulation.R")
+> 
+> 
+> sites <- c(100,500,1000)
+> s <- c(0,0.01,0.1)
+> 
+> line1 <- 'source("~/proteinevoutk20/pkg/R/simulation.R")'
+> line1.1 <- 'load("~/proteinevoutk20/pkg/R/TreesForSim.RData")'
+> bashCommands=""
+> 
+> for(k in 1:3){
++   for(i in sites){
++     for(j in s){
++       line2 <- paste("start_seq=sample(20,",i,",replace=T)",sep="")
++       line3 <- paste("op_seq=rep(1,",i,")",sep="")
++       line4 <- paste("system.time(sim <- simTree(trees[[",k,"]]",",",i,",op_seq,20,",j,",Nu_vec,rootseq=start_seq, ancestral=TRUE))",sep="")
++       line5 <- paste('save.image(file="sim_',k,'_',i,'_',j,'.RData",compress=TRUE)',sep="")
++       cat(line1,"\n",line1.1,"\n",line2,"\n",line3,"\n",line4,"\n",line5,"\n",file=paste("sim_",k,"_",i,"_",j,".R",sep=""))
++       bashCommands=paste(bashCommands,"nohup R CMD BATCH --vanilla sim_",k,"_",i,"_",j,".R > /dev/null &","\n",sep="")
++       cat(bashCommands, file="simjobssub.sh")
++     }
++   }
++ }
+> 
+> proc.time()
+   user  system elapsed 
+  0.222   0.035   0.253 
