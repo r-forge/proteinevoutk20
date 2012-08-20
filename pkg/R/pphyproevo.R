@@ -416,7 +416,7 @@ MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20
   }
   
   if(optim.m==1) #method nlminb using PORT routines
-    #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=FALSE,control=list(trace=trace,kkt=FALSE))
+    #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=TRUE,control=list(trace=trace))
     ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=trace))
     #ans <- nmkb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=TRUE))
   else #Powell method bobyqa
@@ -456,20 +456,37 @@ MLE.bg <- function(start_pt,lowerb,upperb,generange, trace=0,multicore=FALSE){
   return(ans)
 }
 
+##This function finds the MLE estimators for s, and the cpv weights. Here alpha is given, beta and gamma are being
+##estimated, since only 2 of them are free parameters.
+##Brian suggested that the restriction should be that alpha + beta + gamma = 1, DO THIS LATER!
+MLE_sw<- function(start_pt,lowerb,upperb,tree,data,m=20,alpha,MuMat,
+                      protein_op=NULL,root=NULL,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.37e07,trace=0){
+  negloglike <- function(para){
+    s = para[1]
+    beta = para[2]
+    gamma = para[3]
+    return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,C,Phi,q,Ne))
+  }
+  ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=TRUE,control=list(trace=trace))
+  #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,hessian=TRUE,control=list(trace=trace,all.methods=TRUE))
+  #ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=trace))
+  #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=3))
+  return(ans)
+}
 ###############################################################################
 ### objects used in grid search for the best estimates of beta and gamma
-l <- 20
-beta <- seq(0,1,length.out=(l+1))[-1]
-gamma <- seq(0,1,length.out=(l+1))[-1]
-
-grid.1.beta <- seq(0.6,0.75,length.out=(l+1))[-1]
-grid.1.gamma <- seq(0,0.1,length.out=(l+1))[-1]
-
-grid.3.beta <- seq(0.9,1.0,length.out=(l+1))[-1]
-grid.3.gamma <- grid.1.gamma
-
-grid.5.beta <- seq(0.45,0.55,length.out=(l+1))[-1]
-grid.5.gamma <- seq(0.05,0.15,length.out=(l+1))[-1]
-
-grid.6.beta <- seq(0.80,0.90,length.out=(l+1))[-1]
-grid.6.gamma <- grid.5.gamma
+# l <- 20
+# beta <- seq(0,1,length.out=(l+1))[-1]
+# gamma <- seq(0,1,length.out=(l+1))[-1]
+# 
+# grid.1.beta <- seq(0.6,0.75,length.out=(l+1))[-1]
+# grid.1.gamma <- seq(0,0.1,length.out=(l+1))[-1]
+# 
+# grid.3.beta <- seq(0.9,1.0,length.out=(l+1))[-1]
+# grid.3.gamma <- grid.1.gamma
+# 
+# grid.5.beta <- seq(0.45,0.55,length.out=(l+1))[-1]
+# grid.5.gamma <- seq(0.05,0.15,length.out=(l+1))[-1]
+# 
+# grid.6.beta <- seq(0.80,0.90,length.out=(l+1))[-1]
+# grid.6.gamma <- grid.5.gamma
