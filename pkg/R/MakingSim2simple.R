@@ -7,7 +7,7 @@ s <- c(0,0.01,0.1)
 line1 <- 'source("~/proteinevoutk20/pkg/R/simulation.R")'
 line1.1 <- 'load("~/proteinevoutk20/pkg/R/simtrees2.RData")'
 pbsCommands=""
-queue="long*"
+queue="medium*"
 
 for(k in 1:6){
   for(i in sites){
