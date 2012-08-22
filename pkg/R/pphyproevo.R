@@ -467,9 +467,9 @@ MLE_sw<- function(start_pt,lowerb,upperb,tree,data,m=20,alpha,MuMat,
     gamma = para[3]
     return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,C,Phi,q,Ne))
   }
-  ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=TRUE,control=list(trace=trace))
+  #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=TRUE,control=list(trace=trace))
   #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,hessian=TRUE,control=list(trace=trace,all.methods=TRUE))
-  #ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=trace))
+  ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=trace))
   #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=3))
   return(ans)
 }
