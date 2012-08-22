@@ -7,11 +7,28 @@ source("~/proteinevoutk20/pkg/R/pphyproevo.R")
 ## Change: concatenate all the columns in the matrix to a vector, and return as result
 ## possible optimization: if two sites have the same current state and optimal state, the computation is exactly the same, only need once
 
-rate_move <- function(protein, protein_op, s, DisMat, MuMat, m=20, C=2, Phi=0.5, q=4e-7, Ne=1.36e7){
+rate_move_sitewise <- function(protein, protein_op, s, DisMat, MuMat, m=20, C=2, Phi=0.5, q=4e-7, Ne=1.36e7){
   mat_move <- sapply(1:length(protein), function(i) {mat_gen_indep(protein_op[i],s,DisMat, MuMat, m, C, Phi, q, Ne)[protein[i],]}, simplify="array")
-  mat_move[mat_move < 0] <- 0
-  return(c(mat_move))
+  mat_move[mat_move < 0] <- 0 # rate to itself is set to be 0
+  return(c(mat_move)) # convert to a vector from matrix
 }
+
+## The above function works fine when the sequence length is short, but when the length is very long (1000 for example), a lot of time is
+## spent on calculating the rate matrices and lots of them are repetitive since there are only 20 possible matrices. So use the following instead
+## This function depends on the next function rate_move_mat, it is a little slower when the sequence length is very small
+rate_move <- function(protein, protein_op,s, DisMat, MuMat, m=20, C=2, Phi=0.5, q=4e-7, Ne=1.36e07){
+    mat = rate_move_mat(s,DisMat,MuMat,m,C,Phi,q,Ne)
+    vec_list = sapply(1:length(protein),function(i) {mat[[protein_op[i]]][protein[i],]},simplify="array")
+    vec_list[vec_list < 0] = 0
+    return(c(vec_list))
+}
+## Given s, Distance matrix, mutation rate matrix, and other parameters, find the list of 20 rate matrices corresponding to optimal aa 1:20
+rate_move_mat <- function(s, DisMat, MuMat, m=20, C=2, Phi=0.5, q=4e-7, Ne=1.36e07){
+  mat_list = lapply(1:20,function(i) {mat_gen_indep(i,s,DisMat, MuMat, m, C, Phi, q, Ne)})
+  mat_list
+}
+##mat = rate_move_mat(0.1,GM,mumat)
+
 
 #Simulation. Given the starting protein and the optimal protein
 #t: running time of the chain
@@ -25,8 +42,11 @@ simulation <- function(protein,protein_op,t,m,s,DisMat,MuMat, C=2, Phi=0.5,q=4e-
   ##last two columns in the paths, recording Time up to this point and the waiting time at the current state
   colnames(path)[l+1] <- "Time Now"
   colnames(path)[l+2] <- "Waiting Time"
+  rate_move_matlist = rate_move_mat(s,DisMat,MuMat,m,C,Phi,q,Ne)
   while(t_now < t){ #when current time is less than t
-    rates<- rate_move(protein,protein_op,s,DisMat,MuMat,m,C,Phi,q,Ne) #moving rates of a protein to its neighbors
+    vec_list = sapply(1:l,function(i) {rate_move_matlist[[protein_op[i]]][protein[i],]},simplify="array")
+    vec_list[vec_list < 0] = 0
+    rates<- c(vec_list) #moving rates of a protein to its neighbors
     lambda <- sum(rates) #total rates of moving (reaction)
     ## consider modifying this when running parallel, otherwise it'll return the same results
     t_wait <- rexp(1,lambda) #waiting time, coming from exponential distribution with rate lambda
