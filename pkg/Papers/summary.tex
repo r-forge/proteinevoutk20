@@ -21,9 +21,9 @@ We assume that mutations occur on the codon level at the three codon positions i
 
 Consider a protein as a sequence of amino acid, assume that there is an optimal amino acid for each position. Any non-optimal amino acid at a position is subjected to selection, the strength of which depends on the physiochemical distance (Grantham, Science 1974) between the observed and optimal amino acids and magnitude of the selection force. \\
 
-Suppose a protein of length $n$ has a sequence of optimal amino acids $\hat{\mathbf{a}} = (\hat{a}_1, \hat{a}_2, \cdots \hat{a}_n)$  and the observed sequence of amino acids is $\mathbf{a} = (a_1, a_2, \cdots, a_n)$. At position $k$, the selection coefficient is $s_k$ and let $\mathbf{s}=(s_1,s_2,\cdots,s_n)$. The overall physiochemical difference (distance) $d$ between amino acids $i$ and $j$ consist of 3 components: $D_{ij} = [\alpha (c_i-c_j)^2 + \beta (p_i - p_j)^2 + \gamma (v_i - v_j)^2]$, where $c = $ composition, $p = $ polarity, and $v = $ molecular volume and $\alpha, \beta, \gamma$ are the corresponding weights for each component. The values for properties in amino acid difference formula is given by Grantham (1974). \\
+Suppose a protein of length $n$ has a sequence of optimal amino acids $\hat{\mathbf{a}} = (\hat{a}_1, \hat{a}_2, \cdots \hat{a}_n)$  and the observed sequence of amino acids is $\mathbf{a} = (a_1, a_2, \cdots, a_n)$. At position $k$, the selection coefficient is $s_k$ and let $\mathbf{s}=(s_1,s_2,\cdots,s_n)$. The overall physiochemical difference (distance) $d$ between amino acids $i$ and $j$ consist of 3 components: $D_{ij} = [\alpha (c_i-c_j)^2 + \beta (p_i - p_j)^2 + \gamma (v_i - v_j)^2]$, where $c, p$ and $v$ represent composition, polarity and molecular volume, and $\alpha, \beta, \gamma$ are the corresponding weights for each component. The values for properties in amino acid difference formula is given by Grantham (1974). \\
 
-Given the distances $\mathbf{d}$ from the optimal protein and the selection strength $\mathbf{s}$, the functionality of a protein $\mathbf{a}$ with $n$ amino acids is defined as
+Given the distance vector $\mathbf{d} = (d_1, d_2, \cdots, d_n)$ from the optimal protein and the selection strength $\mathbf{s}$, the functionality of a protein $\mathbf{a}$ with $n$ amino acids is defined as
 
 %{\color{blue} Could the functionality function be changed in a better way?}\\
 \begin{equation}
@@ -33,7 +33,7 @@ Given the distances $\mathbf{d}$ from the optimal protein and the selection stre
 %or other candidates:
 %\begin{eqnarray}
 %F(\mathbf{a}) & = & \prod_{k=1}^n \frac{1}{1+d_ks_k}\\
-F(\mathbf{a})  =  \frac{n}{\displaystyle  \sum_{k=1}^n{(1+d_ks_k)}} \label{eq:harmonic}\\
+F(\mathbf{a}| \hat{\mathbf{a}},\mathbf{s})  =  \frac{n}{\displaystyle  \sum_{k=1}^n{(1+d_ks_k)}} \label{eq:harmonic}\\
 %F(\mathbf{a}) & = & \frac{n}{\sum_{k=1}^{n}\frac{1}{e^{-d(a_k, \hat{a}_k)s_k}}}
 %\end{eqnarray}
 \end{equation}
@@ -42,7 +42,7 @@ The condition $\hat{\mathbf{a}},\mathbf{s}$ will be omitted from now on if there
 %fixation probability 
 The fixation probability of a single protein mutant $\mathbf{a}_j$ from a diploid population with wild type $\mathbf{a}_i$ is 
 \begin{equation}
-\pi(\mathbf{a}_i \rightarrow \mathbf{a}_j ) = \frac{1-f(\mathbf{a}_i)/f(\mathbf{a}_j)}{1-(f(\mathbf{a}_i)/f(\mathbf{a}_j))^{2N_e}} = \frac{1-f_i/f_j}{1-(f_i/f_j)^{2N_e}}
+\pi_{ij} = \pi(\mathbf{a}_i \rightarrow \mathbf{a}_j ) = \frac{1-f(\mathbf{a}_i)/f(\mathbf{a}_j)}{1-(f(\mathbf{a}_i)/f(\mathbf{a}_j))^{2N_e}} = \frac{1-f_i/f_j}{1-(f_i/f_j)^{2N_e}}
 \label{eq:fixation}
 \end{equation}
 according to Sella-Hirsh (Add reference)
@@ -53,15 +53,15 @@ where $f(\mathbf{a}_i)$ and $f(\mathbf{a}_j)$ are the fitnesses of $\mathbf{a}_i
 \label{eq:fixcanonical}
 \end{equation}
 
-where $p$ is the initial frequency of the mutant, and $s=(f_j-f_i)/f_i$ is the selection advantage of $\mathbf{a}_j$ comparing to $\mathbf{a}_i$.
+\noindent where $p$ is the initial frequency of the mutant, and $s=(f_j-f_i)/f_i$ is the selection advantage of $\mathbf{a}_j$ comparing to $\mathbf{a}_i$ (note here $s$  is different from the selection strength defined above on the distance from optimal protein).
 When there is a single mutant in the population, i.e. $p=1/(2N_e)$, the formula becomes
-$\frac{1-e^{-s}}{1-e^{-2N_es}}$. Both formulae are valid under the same condition: $s, \frac{1}{N}, Ns^2 \ll 1$.\\
+$(1-e^{-s})/(1-e^{-2N_es})$. Both formulae are valid under the same condition: $s, \frac{1}{N}, Ns^2 \ll 1$.\\
 
 
  
-As in Gilchrist 2007, fitness is a function of cost, functionality and some scaling factors:
+As in Gilchrist 2007, fitness of a protein is proportional to a function of cost, functionality and some scaling factors:
 \[f(\mathbf{a}) \propto \exp\{-\frac{C\Phi q}{F(\mathbf{a})}\}\]
-where $C$ is the expected cost of producing a single complete protein, $q$ is the scaling constant seconds per ATP determining the relationship between the rate of ATP usage and fitness $f$, and $\Phi$ is a measure of gene expression, specifically protein production rate (protein per second). \\
+where $C$ is the expected cost of producing a single complete protein, $q$ is the scaling constant (seconds per ATP) determining the relationship between the rate of ATP usage and fitness $f$, and $\Phi$ is a measure of gene expression, specifically protein production rate (protein per second). \\
 
 Combining $C\Phi q$ as one constant $A$, we have
 \[ f(\mathbf{a}) \propto \exp\{-\frac{A}{F(\mathbf{a})}\} \]
@@ -84,7 +84,7 @@ If the functionality is defined as in Equation \ref{eq:harmonic}, we have the fo
 \end{equation}
 
 
-i.e. the fitness ratio of the whole protein is the geometric mean of the fitness ratios between the two proteins for all sites. Therefore, when $\mathbf{a}_i$ and $\mathbf{a}_j$ only differ at 1 position, it becomes  
+i.e. the fitness ratio of the whole protein is the geometric mean of the fitness ratios between the two proteins for all sites. Therefore, when $\mathbf{a}_i$ and $\mathbf{a}_j$ only differ at position $k$, it becomes  
 \[\frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} = \Big( \frac{f(\mathbf{a}_i^k)}{f(\mathbf{a}_j^k)}\Big)^{\frac{1}{n}}\]
 and
 \begin{eqnarray}
@@ -94,25 +94,31 @@ and
 & = & \exp\Big[ -\frac{C\Phi q s_k}{n}(d_k^i - d_k^j)\Big]
 \end{eqnarray}
 \noindent
-this quantity is only related to site $k$. It is easy to see that all the sites are independent in the sense that if there are more than 1 site that differ, the ratio is simply a product of ratios at all sites. \\
+this quantity is only related to site $k$. It is easy to see that all the sites are independent in the sense that if there are more than 1 site that differ, the ratio is simply a product of ratios at all sites. Therefore we will focus on proteins with only one amino acid site, i.e. a single amino acid.\\
 %and is independent of all other sites. Therefore, the sites are independent. In this case, the parameters $C, \Phi, q$ and $s_k$ are all multiplied together, only $C$ depends on $n$, so they should be treated as a composite parameter, as inseparable. \\
 %{\it Should we relax the condition so that the mutation between proteins with more than 1 different position is also possible?}\\
 
-We assume that the mutation rate $\mu$ between 2 proteins that differ at more than one position is 0. Instantaneous substitution rate from $\mathbf{a}_i$ to $\mathbf{a}_j$ is 
+We assume that the mutation rate $\mu$ between 2 proteins that differ at more than one position is 0. Instantaneous substitution rate from $\mathbf{a}_i$ to $\mathbf{a}_j$ is the product of mutation rate and fixation rate:
 \begin{equation}
-u_{ij} = 2N_e \mu_{ij} \pi(\mathbf{a}_i \rightarrow \mathbf{a}_j | \hat{\mathbf{a}}, \mathbf{s})
+u_{ij} = 2N_e \mu_{ij} \pi_{ij}
 \label{eq:subrate}
 \end{equation}
 
-where $\mu_{ij}$ is the mutation rate from $\mathbf{a}_i$ to $\mathbf{a}_j$. Note that the mutation and fixation are both at amino acid level. \\
+where $\mu_{ij}$ is the mutation rate from $\mathbf{a}_i$ to $\mathbf{a}_j$, and $\mu_{ij} = 0$ when more than 1 position differ in the codons that code for $\mathbf{a}_i$ and $\mathbf{a}_j$ Note that the mutation and fixation are both at amino acid level. \\
+
+With the values for $(s, \alpha, \beta, \gamma, C, \Phi, q, N_e)$, we can find the $20 \times 20$ instantaneous rate matrix $Q$ and have the Markov process set up. Then we can calculate the likelihood given the sequence data on the tips of a phylogenetic tree $T$ with topology and branch lengths given, therefore to find the maximum likelihood estimates for parameters. \\
+
+Identifiability --- Since $C, \Phi, q$ and $s$ are multiplied together as a composite parameter, we fix the values of $C, \Phi, q$ and search for MLE for $s$. For the weights of 3 components in the amino acid distance formula, if they are multiplied by a same constant, the likelihood will not be affected. So we will fix $\alpha$ and look for the MLEs for $\beta, \gamma$ as only the relative ratios are identifiable. Suppose that the tree is given, there are $3$ parameters that we are estimating here: $s, \beta/\alpha$, and $\gamma/\alpha$.
 
 
-Questions:
-\begin{enumerate}
-\item Should the distance between a given protein and the optimal protein be a vector, with an entry for each site, or could it be simplified to a number as a (weighted) sum of the entries of the vector?
-\item In the functionality expression, do we need to put a scaling constant somewhere?
-\item For physiochemical distance, should the mean be 100 as in original Grantham's matrix or 1 as we did in the simulation?
-\end{enumerate}
+
+\section{Results}
+\subsection{Model accuracy}
+To access the model accuracy, we first simulate data using different parameter values, find the MLEs for the parameters from the simulated data, and then investigate the accuracy of the estimates by looking at the mean squared error and confidence intervals.\\
+
+We did simulation with number of sites $100, 500, 1000$, $s = 0, 0.01, 0.1$, under 6 different trees, including 2 with 4 tips, 2 with 8 tips and 2 with 16 tips. 
+
+
 
 \begin{center}
 \line(1,0){250}
