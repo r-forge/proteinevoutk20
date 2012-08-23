@@ -1,0 +1,7 @@
+load("~/proteinevoutk20/pkg/RData/sim_notsimple/sim2_1_100_0.01.RData") 
+ source("~/proteinevoutk20/pkg/R/pphyproevo.R") 
+ source("~/proteinevoutk20/pkg/R/hessian.R") 
+ system.time(mle <- MLE_sw(c(0.1,0.01,0.001),rep(0,3),rep(1,3),trees[[1]],sim[1:4,],m=20,al,mumat,protein_op=op_seq,root=start_seq,trace=1)) 
+ save.image(file="~/proteinevoutk20/pkg/RData/sim_notsimple/sim2Mle_1_100_0.01.RData",compress=TRUE) 
+ hes <- find_hessian(mle$par,trees[[1]],sim[1:tip[1]],al,mumat,20,protein_op=op_seq,root=start_seq) 
+ save.image(file="~/proteinevoutk20/pkg/RData/sim_notsimple/sim2Mle_1_100_0.01.RData",compress=TRUE) 
