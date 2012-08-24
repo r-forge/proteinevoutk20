@@ -474,6 +474,22 @@ MLE_sw<- function(start_pt,lowerb,upperb,tree,data,m=20,alpha,MuMat,
   #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=3))
   return(ans)
 }
+## optimization on the log of parameters, so that constraints won't be needed and no worries about
+## negative parameter values
+MLE_sw_log<- function(start_pt,tree,data,m=20,alpha,MuMat,
+                  protein_op=NULL,root=NULL,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.37e07,trace=0){
+  negloglike <- function(para){
+    s = exp(para[1])
+    beta = exp(para[2])
+    gamma = exp(para[3])
+    return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,C,Phi,q,Ne))
+  }
+  #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=TRUE,control=list(trace=trace))
+  #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,hessian=TRUE,control=list(trace=trace,all.methods=TRUE))
+  ans <- nlminb(start_pt,negloglike,control=list(trace=trace))
+  #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=3))
+  return(ans)
+}
 ###############################################################################
 ### objects used in grid search for the best estimates of beta and gamma
 # l <- 20
