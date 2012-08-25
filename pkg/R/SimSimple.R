@@ -14,8 +14,8 @@ for(k in 1:6){
       line2 <- paste("start_seq=sample(20,",i,",replace=T)",sep="")
       line3 <- paste("op_seq=sample(20,",i,",replace=T)",sep="")
       line4 <- paste("system.time(sim <- simTree(trees[[",k,"]]",",",i,",op_seq,20,",j,",Nu_vec,alpha=1,beta=0.5,gamma=0.1,rootseq=start_seq, ancestral=TRUE, simple=TRUE))",sep="")
-      line5 <- paste("system.time(mle <- MLE_sw(c(0.1,0.01,0.001),rep(0,3),rep(1,3),trees[[",k,"]],sim[1:",tip[k],",],m=20,1,mumat,protein_op=op_seq,root=start_seq,trace=1))",sep="")
-      line6 <- paste("hes <- find_hessian(mle[[1]]$par,trees[[",k,"]],sim[1:tip[",k,"],],1,mumat,20,protein_op=op_seq,root=start_seq)",sep="")
+      line5 <- paste("system.time(mle <- MLE_sw(c(0.1,0.1,0.1),rep(0,3),rep(1,3),trees[[",k,"]],sim[1:",tip[k],",],m=20,1,mumat,protein_op=op_seq,root=start_seq,trace=1))",sep="")
+      line6 <- paste("hes <- find_hessian(mle$par,trees[[",k,"]],sim[1:tip[",k,"],],1,mumat,20,protein_op=op_seq,root=start_seq)",sep="")
       line7 <- paste('save.image(file="~/proteinevoutk20/pkg/RData/sim_simple/simSimple_',k,'_',i,'_',j,'.RData",compress=TRUE)',sep="")
       
       cat(line1,"\n",line1.1,"\n",line1.2,"\n",line2,"\n",line3,"\n",line4,"\n",line5,"\n",line6, "\n",line7, "\n",file=paste("simSimple_",k,"_",i,"_",j,".R",sep=""))
