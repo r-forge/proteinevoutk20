@@ -2,13 +2,13 @@
 ##  need alpha, beta and gamma values to run
 ######################################
 ## load RData file that includes "data_res"
-load("collect_data_log.RData")
+##load("collect_data_log.RData")
 ##numer of sites in the simulation 
 numsites <- c(100,300,500,700,1000)
 ##s values used in simulation                                                      
 svalues <- c(0.1,0.3,0.5,0.7,0.9,1)
 ##tips of trees used in simulation                                                 
-tip <- c(4,4,8,8,12,12)
+tip <- c(4,4,8,8,10,10,12,12,14,14,16,16,18,18)
 
 ## get the mle for the parameter with index paraind
 get.mle <- function(treeind,siteind,sind,paraind){
@@ -25,7 +25,7 @@ vec.hes.eigenval <- Vectorize(get.hes.eigenval,vectorize.args=c("treeind","sitei
 ## paraind specifies the index of parameters(1:s,2:beta,3:gamma)
 plot.s <- function(sind,paraind){
   ## find mle for all the simulations, stored in an array (6*5)
-  d <- outer(1:6,1:5,vec.mle,sind=sind,paraind=paraind)
+  d <- outer(1:14,1:5,vec.mle,sind=sind,paraind=paraind)
   ## parameter s
   if(paraind==1){
     d <- abs(d-log(svalues[sind]))
@@ -51,9 +51,17 @@ plot.s <- function(sind,paraind){
   points(numsites,d[4,],type="l",col="blue")
   points(numsites,d[5,],type="l",col="red")
   points(numsites,d[6,],type="l",col="red")
-  leg.txt <- c("4 tips","8 tips","12 tips")
-  y.leg <- seq(from=max(d)+max(d)*0.1,by=-max(d)*0.1,length.out=3)
-  col.leg <- c("black","blue","red")
+  points(numsites,d[7,],type="l",col="yellow")
+  points(numsites,d[8,],type="l",col="yellow")
+  points(numsites,d[9,],type="l",col="tan")
+  points(numsites,d[10,],type="l",col="tan")
+  points(numsites,d[11,],type="l",col="darkviolet")
+  points(numsites,d[12,],type="l",col="darkviolet")
+  points(numsites,d[13,],type="l",col="seagreen")
+  points(numsites,d[14,],type="l",col="seagreen")
+  leg.txt <- c("4 tips","8 tips","10 tips","12 tips","14 tips","16 tips","18tips")
+  y.leg <- seq(from=max(d)+max(d)*0.1,by=-max(d)*0.1,length.out=7)
+  col.leg <- c("black","blue","red","yellow","tan","darkviolet","seagreen")
   legend("topright",leg.txt,col=col.leg,text.col=col.leg,
            lty=1,bty="n",cex=0.7)
 }
