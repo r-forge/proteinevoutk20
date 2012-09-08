@@ -425,11 +425,37 @@ MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20
     #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb)#does not print out too much information
   return(ans)
 }
+##find the MLE of s on the log scale
+MLE_GTR_log<- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20,optim.m=1,protein_op=NULL,root=NULL,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7,trace=0){
+  negloglike <- function(s){ #The function to minimize
+    return(ll_indep(exp(s),alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,C,Phi,q,Ne))
+  }
+  ## Delete columns with NA in data
+  if(length(which(is.na(data)))!=0) {
+    warning("NA in data, pruning performed")
+    data <- PruneMissing(data)
+  }
+  
+  if(optim.m==1) #method nlminb using PORT routines
+    #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=TRUE,control=list(trace=trace))
+    ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=trace))
+    #ans <- nmkb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=TRUE))
+  else #Powell method bobyqa
+    ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=trace))
+    #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb)#does not print out too much information
+  return(ans)
+}
 #############################################################################
 ##Given values for beta and gamma, find the MLE's of s for all 106 genes
-MLE.s <- function(x,generange,optim.m=1,multicore=FALSE){
-  Beta <- x[1]
-  Gamma <- x[2]
+MLE.s <- function(x,generange,optim.m=1,log=TRUE,multicore=FALSE){
+  if(log){
+    Beta <- exp(x[1])
+    Gamma <- exp(x[2])
+  }
+  else{
+    Beta <- x[1]
+    Gamma <-  x[2]
+  }
   mle.s.one <- function(k){
     #print(paste("start optimization on gene ", k, sep=""))
     mle <- MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat,optim.m=optim.m)
