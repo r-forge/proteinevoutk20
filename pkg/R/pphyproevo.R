@@ -527,10 +527,10 @@ MLE_sw_log<- function(start_pt,tree,data,m=20,alpha,MuMat,
 }
 ###############################################################################
 ### objects used in grid search for the best estimates of beta and gamma
-# l <- 20
-# beta <- seq(0,1,length.out=(l+1))[-1]
-# gamma <- seq(0,1,length.out=(l+1))[-1]
-# 
+#  l <- 15
+#  beta <- seq(-15,0,length.out=(l+1))[-1]
+#  gamma <- seq(-15,0,length.out=(l+1))[-1]
+
 # grid.1.beta <- seq(0.6,0.75,length.out=(l+1))[-1]
 # grid.1.gamma <- seq(0,0.1,length.out=(l+1))[-1]
 # 
