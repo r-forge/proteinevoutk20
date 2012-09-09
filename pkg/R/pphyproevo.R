@@ -406,7 +406,7 @@ ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,roo
 #############################################################################
 ##This function finds the MLE estimator for "s" only, given that all other parameters are known,
 ##including weights(alpha, beta, gamma), mutation rates, C, q, Phi, and Ne
-MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20,optim.m=1,protein_op=NULL,root=NULL,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7,trace=0){
+MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20,protein_op=NULL,root=NULL,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7,trace=0){
   negloglike <- function(s){ #The function to minimize
     return(ll_indep(s,alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,C,Phi,q,Ne))
   }
@@ -416,17 +416,13 @@ MLE_GTR <- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20
     data <- PruneMissing(data)
   }
   
-  if(optim.m==1) #method nlminb using PORT routines
-    #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=TRUE,control=list(trace=trace))
+  #method nlminb using PORT routines
     ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=trace))
     #ans <- nmkb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=TRUE))
-  else #Powell method bobyqa
-    ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=trace))
-    #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb)#does not print out too much information
   return(ans)
 }
 ##find the MLE of s on the log scale
-MLE_GTR_log<- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m=20,optim.m=1,protein_op=NULL,root=NULL,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7,trace=0){
+MLE_GTR_log<- function(start_pt,tree,data,alpha,beta,gamma,MuMat,m=20,protein_op=NULL,root=NULL,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7,trace=0){
   negloglike <- function(s){ #The function to minimize
     return(ll_indep(exp(s),alpha,beta,gamma,MuMat,tree,data,m,protein_op,root,bf,C,Phi,q,Ne))
   }
@@ -436,30 +432,33 @@ MLE_GTR_log<- function(start_pt,lowerb,upperb,tree,data,alpha,beta,gamma,MuMat,m
     data <- PruneMissing(data)
   }
   
-  if(optim.m==1) #method nlminb using PORT routines
-    #ans <- optimx(start_pt,negloglike,lower=lowerb,upper=upperb,method="nlminb",hessian=TRUE,control=list(trace=trace))
-    ans <- nlminb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=trace))
-    #ans <- nmkb(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(trace=TRUE))
-  else #Powell method bobyqa
-    ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb,control=list(iprint=trace))
-    #ans <- bobyqa(start_pt,negloglike,lower=lowerb,upper=upperb)#does not print out too much information
+  ans <- nlminb(start_pt,negloglike,control=list(trace=trace))
   return(ans)
 }
 #############################################################################
 ##Given values for beta and gamma, find the MLE's of s for all 106 genes
-MLE.s <- function(x,generange,optim.m=1,log=TRUE,multicore=FALSE){
-  if(log){
-    Beta <- exp(x[1])
-    Gamma <- exp(x[2])
-  }
-  else{
-    Beta <- x[1]
-    Gamma <-  x[2]
-  }
+MLE.s <- function(x,generange,multicore=FALSE){
+  Beta <- x[1]
+  Gamma <-  x[2]
   mle.s.one <- function(k){
-    #print(paste("start optimization on gene ", k, sep=""))
-    mle <- MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat,optim.m=optim.m)
-    #print(paste("finish optimization on gene ", k, sep=""))
+    print(paste("start optimization on gene ", k, sep=""))
+    mle <- MLE_GTR(1,0,1e5,tree,data[[k]],al,Beta,Gamma,mumat)
+    print(paste("finish optimization on gene ", k, sep=""))
+    return(mle)
+  }
+  if(multicore)
+    mclapply(generange,mle.s.one)
+  else
+    lapply(generange,mle.s.one)
+}
+
+MLE.s_log<- function(x,generange,multicore=FALSE){
+  Beta <- exp(x[1])
+  Gamma <- exp(x[2])
+  mle.s.one <- function(k){
+    print(paste("start optimization on gene ", k, sep=""))
+    mle <- MLE_GTR_log(-1,tree,data[[k]],al,Beta,Gamma,mumat)
+    print(paste("finish optimization on gene ", k, sep=""))
     return(mle)
   }
   if(multicore)
@@ -483,6 +482,16 @@ MLE.bg <- function(start_pt,lowerb,upperb,generange, trace=0,multicore=FALSE){
   return(ans)
 }
 
+MLE.bg_log <- function(start_pt,generange,trace=0,multicore=FALSE){
+  ## a function of x that return the sum of -loglikelihood values for all genes with s optimized separately for different genes
+  mle.bg.s <- function(x){
+    mle <- MLE.s_log(x,generange,multicore=multicore) #call the previous function to optimize s for all genes
+    mle.val <- sapply(1:length(generange),function(ind) mle[[ind]]$objective) # best -loglikelihood values
+    return(sum(mle.val)) #summation of all values
+  }
+  ans <- nlminb(start_pt,mle.bg.s,control=list(trace=trace))
+  return(ans)
+}
 ##This function finds the MLE estimators for s, and the cpv weights. Here alpha is given, beta and gamma are being
 ##estimated, since only 2 of them are free parameters.
 ##Brian suggested that the restriction should be that alpha + beta + gamma = 1, DO THIS LATER!
