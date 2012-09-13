@@ -1,10 +1,22 @@
+filedir <- "~/proteinevoutk20/pkg/scratch/newton/grid_log/"
+prefix <- "bglog"
+suffix <- ".RData"
+separator <- "_"
+
+filedir <- "~/proteinevoutk20/pkg/scratch/newton/RData/FirstRun/"
+prefix <- "bg"
+suffix <- ""
+separator <- "."
+
 get.val <- function(x,y){
-  file <- paste("~/proteinevoutk20/pkg/scratch/newton/RData/FirstRun/bg.",x,".",y,sep="")
+  file <- paste(filedir,prefix,separator,x,separator,y,suffix,sep="")
+  #file <- paste("~/proteinevoutk20/pkg/scratch/newton/RData/FirstRun/bg.",x,".",y,sep="")
   load(file)
 ##  par <- sapply(1:106, function(x) res[[x]]$par)
   val <- sapply(1:106, function(x) res[[x]]$objective) # get the -likelihood values
   sum(val) # sum up all the -likelihood values
 }
+vec.get.val <- Vectorize(get.val, c("x","y"))
 
 ##Check and see if all 106 genes finished running and the .RData files are saved for the particular grid##
 ## 4 big grids: 1,3,5,6; each grid is splitted into 20*20 small grids indexed by x and y##
