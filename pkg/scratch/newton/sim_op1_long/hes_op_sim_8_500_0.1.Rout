@@ -1,0 +1,140 @@
+
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> source("~/proteinevoutk20/pkg/R/hessian.R") 
+Loading required package: ape
+
+Attaching package: ‘ape’
+
+The following object(s) are masked from ‘package:seqinr’:
+
+    as.alignment, consensus
+
+Loading required package: igraph
+Loading required package: Matrix
+Loading required package: lattice
+
+Attaching package: ‘Matrix’
+
+The following object(s) are masked from ‘package:base’:
+
+    det
+
+Loading required package: numDeriv
+Loading required package: BB
+Loading required package: quadprog
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+
+Attaching package: ‘Rvmmin’
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+Loading required package: minqa
+Loading required package: Rcpp
+Loading required package: setRNG
+
+Attaching package: ‘optimx’
+
+The following object(s) are masked from ‘package:Rvmmin’:
+
+    optansout
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+
+Attaching package: ‘expm’
+
+The following object(s) are masked from ‘package:Matrix’:
+
+    expm
+
+
+Attaching package: ‘multicore’
+
+The following object(s) are masked from ‘package:lattice’:
+
+    parallel
+
+This is mgcv 1.7-9. For overview type 'help("mgcv-package")'.
+>  load("op_simu_8_500_0.1.RData") 
+>  hes_op <- find_hessian_log(mle_log_op$par,trees[[8]],sim[1:12,],al,mumat,20,protein_op=op_seq,root=start_seq) 
+[1] -2.343821 -2.543841 -7.919052
+[1] -2.343821 -2.543841 -7.919052
+[1] -2.109439 -2.543841 -7.919052
+[1] -2.578203 -2.543841 -7.919052
+[1] -2.226630 -2.543841 -7.919052
+[1] -2.461012 -2.543841 -7.919052
+[1] -2.285225 -2.543841 -7.919052
+[1] -2.402416 -2.543841 -7.919052
+[1] -2.314523 -2.543841 -7.919052
+[1] -2.373119 -2.543841 -7.919052
+[1] -2.343821 -2.289457 -7.919052
+[1] -2.343821 -2.798225 -7.919052
+[1] -2.343821 -2.416649 -7.919052
+[1] -2.343821 -2.671033 -7.919052
+[1] -2.343821 -2.480245 -7.919052
+[1] -2.343821 -2.607437 -7.919052
+[1] -2.343821 -2.512043 -7.919052
+[1] -2.343821 -2.575639 -7.919052
+[1] -2.343821 -2.543841 -7.127147
+[1] -2.343821 -2.543841 -8.710957
+[1] -2.343821 -2.543841 -7.523099
+[1] -2.343821 -2.543841 -8.315005
+[1] -2.343821 -2.543841 -7.721076
+[1] -2.343821 -2.543841 -8.117028
+[1] -2.343821 -2.543841 -7.820064
+[1] -2.343821 -2.543841 -8.018040
+[1] -2.109439 -2.289457 -7.919052
+[1] -2.578203 -2.798225 -7.919052
+[1] -2.226630 -2.416649 -7.919052
+[1] -2.461012 -2.671033 -7.919052
+[1] -2.285225 -2.480245 -7.919052
+[1] -2.402416 -2.607437 -7.919052
+[1] -2.314523 -2.512043 -7.919052
+[1] -2.373119 -2.575639 -7.919052
+[1] -2.109439 -2.543841 -7.127147
+[1] -2.578203 -2.543841 -8.710957
+[1] -2.226630 -2.543841 -7.523099
+[1] -2.461012 -2.543841 -8.315005
+[1] -2.285225 -2.543841 -7.721076
+[1] -2.402416 -2.543841 -8.117028
+[1] -2.314523 -2.543841 -7.820064
+[1] -2.373119 -2.543841 -8.018040
+[1] -2.343821 -2.289457 -7.127147
+[1] -2.343821 -2.798225 -8.710957
+[1] -2.343821 -2.416649 -7.523099
+[1] -2.343821 -2.671033 -8.315005
+[1] -2.343821 -2.480245 -7.721076
+[1] -2.343821 -2.607437 -8.117028
+[1] -2.343821 -2.512043 -7.820064
+[1] -2.343821 -2.575639 -8.018040
+>  save.image(file="hes_op_simu_8_500_0.1.RData",compress=TRUE) 
+> 
+> proc.time()
+    user   system  elapsed 
+1422.577    0.493 1424.447 

@@ -1,0 +1,233 @@
+
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> source("~/proteinevoutk20/pkg/R/hessian.R") 
+Loading required package: ape
+
+Attaching package: ‘ape’
+
+The following object(s) are masked from ‘package:seqinr’:
+
+    as.alignment, consensus
+
+Loading required package: igraph
+Loading required package: Matrix
+Loading required package: lattice
+
+Attaching package: ‘Matrix’
+
+The following object(s) are masked from ‘package:base’:
+
+    det
+
+Loading required package: numDeriv
+Loading required package: BB
+Loading required package: quadprog
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+
+Attaching package: ‘Rvmmin’
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+Loading required package: minqa
+Loading required package: Rcpp
+Loading required package: setRNG
+
+Attaching package: ‘optimx’
+
+The following object(s) are masked from ‘package:Rvmmin’:
+
+    optansout
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+
+Attaching package: ‘expm’
+
+The following object(s) are masked from ‘package:Matrix’:
+
+    expm
+
+
+Attaching package: ‘multicore’
+
+The following object(s) are masked from ‘package:lattice’:
+
+    parallel
+
+This is mgcv 1.7-9. For overview type 'help("mgcv-package")'.
+>  trees <- read.tree("~/proteinevoutk20/pkg/R/simtrees.tre") 
+>  start_seq=sample(20,700,replace=T) 
+>  op_seq=rep(1,700) 
+>  system.time(sim <- simTree(trees[[2]],700,op_seq,20,0.3,Nu_vec,alpha=al,beta=be,gamma=ga,rootseq=start_seq, ancestral=TRUE)) 
+   user  system elapsed 
+ 94.091   1.511  95.645 
+Warning message:
+In sample(1:length(rates), 1, replace = T, rates) :
+  Walker's alias method used: results are different from R < 2.2.0
+>  system.time(mle_log_op <- MLE_sw_log(c(-2,-1,-8),trees[[2]],sim[1:4,],m=20,al,mumat,protein_op=op_seq,root=start_seq,trace=1)) 
+  0:     4624.7607: -2.00000 -1.00000 -8.00000
+  1:     4318.9266: -1.00088 -1.03680 -7.98004
+  2:     4292.1144: -1.18582 -2.01872 -7.93985
+  3:     4289.8469: -1.08316 -2.02138 -7.92877
+  4:     4289.6392: -1.12368 -2.01339 -7.83408
+  5:     4289.1224: -1.12663 -2.01439 -7.93733
+  6:     4289.0479: -1.11697 -2.01416 -7.93367
+  7:     4289.0219: -1.11804 -2.01206 -7.92362
+  8:     4289.0151: -1.11655 -2.00296 -7.91896
+  9:     4289.0143: -1.11777 -1.99345 -7.91798
+ 10:     4289.0142: -1.11867 -2.00171 -7.91310
+ 11:     4289.0132: -1.11776 -2.00041 -7.91615
+ 12:     4289.0132: -1.11780 -2.00025 -7.91607
+ 13:     4289.0132: -1.11781 -2.00027 -7.91605
+    user   system  elapsed 
+2685.546    0.001 2685.964 
+>  hes_op <- find_hessian_log(mle_log$par,trees[[2]],sim[1:4,],al,mumat,20,protein_op=op_seq,root=start_seq) 
+[1] -4.115669  8.381785  4.303315
+[1] -4.115669  8.381785  4.303315
+[1] -3.704102  8.381785  4.303315
+[1] -4.527236  8.381785  4.303315
+[1] -3.909885  8.381785  4.303315
+[1] -4.321452  8.381785  4.303315
+[1] -4.012777  8.381785  4.303315
+[1] -4.218560  8.381785  4.303315
+[1] -4.064223  8.381785  4.303315
+[1] -4.167115  8.381785  4.303315
+[1] -4.115669  9.219964  4.303315
+[1] -4.115669  7.543607  4.303315
+[1] -4.115669  8.800875  4.303315
+[1] -4.115669  7.962696  4.303315
+[1] -4.115669  8.591330  4.303315
+[1] -4.115669  8.172241  4.303315
+[1] -4.115669  8.486558  4.303315
+[1] -4.115669  8.277013  4.303315
+[1] -4.115669  8.381785  4.733646
+[1] -4.115669  8.381785  3.872983
+[1] -4.115669  8.381785  4.518480
+[1] -4.115669  8.381785  4.088149
+[1] -4.115669  8.381785  4.410897
+[1] -4.115669  8.381785  4.195732
+[1] -4.115669  8.381785  4.357106
+[1] -4.115669  8.381785  4.249523
+[1] -3.704102  9.219964  4.303315
+[1] -4.527236  7.543607  4.303315
+[1] -3.909885  8.800875  4.303315
+[1] -4.321452  7.962696  4.303315
+[1] -4.012777  8.591330  4.303315
+[1] -4.218560  8.172241  4.303315
+[1] -4.064223  8.486558  4.303315
+[1] -4.167115  8.277013  4.303315
+[1] -3.704102  8.381785  4.733646
+[1] -4.527236  8.381785  3.872983
+[1] -3.909885  8.381785  4.518480
+[1] -4.321452  8.381785  4.088149
+[1] -4.012777  8.381785  4.410897
+[1] -4.218560  8.381785  4.195732
+[1] -4.064223  8.381785  4.357106
+[1] -4.167115  8.381785  4.249523
+[1] -4.115669  9.219964  4.733646
+[1] -4.115669  7.543607  3.872983
+[1] -4.115669  8.800875  4.518480
+[1] -4.115669  7.962696  4.088149
+[1] -4.115669  8.591330  4.410897
+[1] -4.115669  8.172241  4.195732
+[1] -4.115669  8.486558  4.357106
+[1] -4.115669  8.277013  4.249523
+>  system.time(mle_log_nop <- MLE_sw_log(c(-2,-1,-8),trees[[2]],sim[1:4,],m=20,al,mumat,trace=1)) 
+  0:     6561.6027: -2.00000 -1.00000 -8.00000
+  1:     6207.8625: -1.00553 -1.10183 -7.97422
+  2:     6188.4111: -1.23207 -2.05078 -7.75476
+  3:     6180.7710: -0.990179 -2.23756 -8.13845
+  4:     6180.1769: -1.18125 -2.28345 -8.58789
+  5:     6169.6955: -1.10415 -2.12573 -8.41662
+  6:     6167.2031: -1.09976 -2.04231 -8.18602
+  7:     6167.1762: -1.10357 -2.03112 -8.19429
+  8:     6167.1689: -1.09478 -2.01971 -8.19520
+  9:     6167.1515: -1.09932 -2.00673 -8.19084
+ 10:     6167.1505: -1.09930 -2.01045 -8.19402
+ 11:     6167.1505: -1.09929 -2.01148 -8.19358
+ 12:     6167.1505: -1.09930 -2.01170 -8.19386
+ 13:     6167.1505: -1.09930 -2.01170 -8.19386
+    user   system  elapsed 
+2459.875    0.000 2460.258 
+>  hes_nop <- find_hessian_log(mle_log_nop$par,trees[[2]],sim[1:4,],al,mumat,20) 
+[1] -1.099301 -2.011704 -8.193859
+[1] -1.099301 -2.011704 -8.193859
+[1] -0.9893711 -2.0117036 -8.1938588
+[1] -1.209231 -2.011704 -8.193859
+[1] -1.044336 -2.011704 -8.193859
+[1] -1.154266 -2.011704 -8.193859
+[1] -1.071819 -2.011704 -8.193859
+[1] -1.126784 -2.011704 -8.193859
+[1] -1.085560 -2.011704 -8.193859
+[1] -1.113043 -2.011704 -8.193859
+[1] -1.099301 -1.810533 -8.193859
+[1] -1.099301 -2.212874 -8.193859
+[1] -1.099301 -1.911118 -8.193859
+[1] -1.099301 -2.112289 -8.193859
+[1] -1.099301 -1.961411 -8.193859
+[1] -1.099301 -2.061996 -8.193859
+[1] -1.099301 -1.986557 -8.193859
+[1] -1.099301 -2.036850 -8.193859
+[1] -1.099301 -2.011704 -7.374473
+[1] -1.099301 -2.011704 -9.013245
+[1] -1.099301 -2.011704 -7.784166
+[1] -1.099301 -2.011704 -8.603552
+[1] -1.099301 -2.011704 -7.989012
+[1] -1.099301 -2.011704 -8.398705
+[1] -1.099301 -2.011704 -8.091436
+[1] -1.099301 -2.011704 -8.296282
+[1] -0.9893711 -1.8105333 -8.1938588
+[1] -1.209231 -2.212874 -8.193859
+[1] -1.044336 -1.911118 -8.193859
+[1] -1.154266 -2.112289 -8.193859
+[1] -1.071819 -1.961411 -8.193859
+[1] -1.126784 -2.061996 -8.193859
+[1] -1.085560 -1.986557 -8.193859
+[1] -1.113043 -2.036850 -8.193859
+[1] -0.9893711 -2.0117036 -7.3744729
+[1] -1.209231 -2.011704 -9.013245
+[1] -1.044336 -2.011704 -7.784166
+[1] -1.154266 -2.011704 -8.603552
+[1] -1.071819 -2.011704 -7.989012
+[1] -1.126784 -2.011704 -8.398705
+[1] -1.085560 -2.011704 -8.091436
+[1] -1.113043 -2.011704 -8.296282
+[1] -1.099301 -1.810533 -7.374473
+[1] -1.099301 -2.212874 -9.013245
+[1] -1.099301 -1.911118 -7.784166
+[1] -1.099301 -2.112289 -8.603552
+[1] -1.099301 -1.961411 -7.989012
+[1] -1.099301 -2.061996 -8.398705
+[1] -1.099301 -1.986557 -8.091436
+[1] -1.099301 -2.036850 -8.296282
+>  save.image(file="op_simu_2_700_0.3.RData",compress=TRUE) 
+> 
+> proc.time()
+    user   system  elapsed 
+8928.048    1.739 8932.796 

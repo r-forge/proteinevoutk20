@@ -1,0 +1,140 @@
+
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> source("~/proteinevoutk20/pkg/R/hessian.R") 
+Loading required package: ape
+
+Attaching package: ‘ape’
+
+The following object(s) are masked from ‘package:seqinr’:
+
+    as.alignment, consensus
+
+Loading required package: igraph
+Loading required package: Matrix
+Loading required package: lattice
+
+Attaching package: ‘Matrix’
+
+The following object(s) are masked from ‘package:base’:
+
+    det
+
+Loading required package: numDeriv
+Loading required package: BB
+Loading required package: quadprog
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+
+Attaching package: ‘Rvmmin’
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+Loading required package: minqa
+Loading required package: Rcpp
+Loading required package: setRNG
+
+Attaching package: ‘optimx’
+
+The following object(s) are masked from ‘package:Rvmmin’:
+
+    optansout
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+
+Attaching package: ‘expm’
+
+The following object(s) are masked from ‘package:Matrix’:
+
+    expm
+
+
+Attaching package: ‘multicore’
+
+The following object(s) are masked from ‘package:lattice’:
+
+    parallel
+
+This is mgcv 1.7-9. For overview type 'help("mgcv-package")'.
+>  load("op_simu_7_500_0.3.RData") 
+>  hes_op <- find_hessian_log(mle_log_op$par,trees[[7]],sim[1:12,],al,mumat,20,protein_op=op_seq,root=start_seq) 
+[1] -1.204754 -2.215801 -7.858004
+[1] -1.204754 -2.215801 -7.858004
+[1] -1.084279 -2.215801 -7.858004
+[1] -1.325230 -2.215801 -7.858004
+[1] -1.144517 -2.215801 -7.858004
+[1] -1.264992 -2.215801 -7.858004
+[1] -1.174636 -2.215801 -7.858004
+[1] -1.234873 -2.215801 -7.858004
+[1] -1.189695 -2.215801 -7.858004
+[1] -1.219814 -2.215801 -7.858004
+[1] -1.204754 -1.994221 -7.858004
+[1] -1.204754 -2.437381 -7.858004
+[1] -1.204754 -2.105011 -7.858004
+[1] -1.204754 -2.326591 -7.858004
+[1] -1.204754 -2.160406 -7.858004
+[1] -1.204754 -2.271196 -7.858004
+[1] -1.204754 -2.188103 -7.858004
+[1] -1.204754 -2.243498 -7.858004
+[1] -1.204754 -2.215801 -7.072204
+[1] -1.204754 -2.215801 -8.643805
+[1] -1.204754 -2.215801 -7.465104
+[1] -1.204754 -2.215801 -8.250905
+[1] -1.204754 -2.215801 -7.661554
+[1] -1.204754 -2.215801 -8.054454
+[1] -1.204754 -2.215801 -7.759779
+[1] -1.204754 -2.215801 -7.956229
+[1] -1.084279 -1.994221 -7.858004
+[1] -1.325230 -2.437381 -7.858004
+[1] -1.144517 -2.105011 -7.858004
+[1] -1.264992 -2.326591 -7.858004
+[1] -1.174636 -2.160406 -7.858004
+[1] -1.234873 -2.271196 -7.858004
+[1] -1.189695 -2.188103 -7.858004
+[1] -1.219814 -2.243498 -7.858004
+[1] -1.084279 -2.215801 -7.072204
+[1] -1.325230 -2.215801 -8.643805
+[1] -1.144517 -2.215801 -7.465104
+[1] -1.264992 -2.215801 -8.250905
+[1] -1.174636 -2.215801 -7.661554
+[1] -1.234873 -2.215801 -8.054454
+[1] -1.189695 -2.215801 -7.759779
+[1] -1.219814 -2.215801 -7.956229
+[1] -1.204754 -1.994221 -7.072204
+[1] -1.204754 -2.437381 -8.643805
+[1] -1.204754 -2.105011 -7.465104
+[1] -1.204754 -2.326591 -8.250905
+[1] -1.204754 -2.160406 -7.661554
+[1] -1.204754 -2.271196 -8.054454
+[1] -1.204754 -2.188103 -7.759779
+[1] -1.204754 -2.243498 -7.956229
+>  save.image(file="hes_op_simu_7_500_0.3.RData",compress=TRUE) 
+> 
+> proc.time()
+    user   system  elapsed 
+1669.753    2.615 1685.649 
