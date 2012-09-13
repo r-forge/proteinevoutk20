@@ -1,0 +1,474 @@
+
+R version 2.11.0 (2010-04-22)
+Copyright (C) 2010 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> sites <- c(100,300,500,700,1000)
+> svalues <- c(0.1,0.3,0.5,0.7,0.9,1)
+> tipnums <- c(4,4,8,8,10,10,12,12,14,14,16,16,18,18)
+> 
+> line1 <- 'source("~/proteinevoutk20/pkg/R/hessian.R")'
+> ##line2 <- 'trees <- read.tree("~/proteinevoutk20/pkg/R/simtrees.tre")'
+> pbsCommands=""
+> queue="short*"
+> 
+> for(k in 1:14){
++   for(i in sites){
++     for(j in svalues){
++       ##load the workspace which stores the simulated data
++       line3 <- paste('load("op_simu','_',k,'_',i,'_',j,'.RData")',sep="")
++       ##recalculate the hessian at the mle_log_op, previous calculation used mle_log$par, which is wrong
++       line4 <-  paste("hes_op <- find_hessian_log(mle_log_op$par,trees[[",k,"]],sim[1:",tipnums[k],",],al,mumat,20,protein_op=op_seq,root=start_seq)",sep="")
++       line5 <- paste('save.image(file="hes_op_simu_',k,'_',i,'_',j,'.RData",compress=TRUE)',sep="")
++        
++       cat(line1,"\n",line3,"\n",line4,"\n",line5,"\n",file=paste("hes_op_sim_",k,"_",i,"_",j,".R",sep=""))
++       
++        pbsCommands=paste('#!/bin/bash','#$ -cwd','#$ -o /dev/null','#$ -e /dev/null',sep="\n")
++        pbsCommands=paste(pbsCommands,'\n#$ -q ',queue,sep="")
++        pbsCommands=paste(pbsCommands,'#$ -M chaij@umail.iu.edu', '#$ -m beas', '#$ -S /bin/bash',sep="\n")
++        pbsCommands=paste(pbsCommands,"\n","#$ -N Op1Sim_",k,"_",i,"_",j,sep="")
++        pbsCommands=paste(pbsCommands,"\n","/data/apps/R/2.14.0/bin/R CMD BATCH hes_op_sim_",k,"_",i,"_",j,".R",sep="")
++        cat(pbsCommands,file=paste('runSimOp_',k,'_',i,'_',j,'.sh',sep=""),append=FALSE)
++        system(paste('chmod u+x runSimOp_',k,'_',i,'_',j,'.sh',sep=""))
++        system(paste('/opt/sge/bin/lx24-amd64/qsub runSimOp_',k,'_',i,'_',j,'.sh',sep=""))
++      }
++   }
++ }
+Your job 7289848 ("Op1Sim_1_100_0.1") has been submitted
+Your job 7289849 ("Op1Sim_1_100_0.3") has been submitted
+Your job 7289850 ("Op1Sim_1_100_0.5") has been submitted
+Your job 7289851 ("Op1Sim_1_100_0.7") has been submitted
+Your job 7289852 ("Op1Sim_1_100_0.9") has been submitted
+Your job 7289853 ("Op1Sim_1_100_1") has been submitted
+Your job 7289854 ("Op1Sim_1_300_0.1") has been submitted
+Your job 7289855 ("Op1Sim_1_300_0.3") has been submitted
+Your job 7289856 ("Op1Sim_1_300_0.5") has been submitted
+Your job 7289857 ("Op1Sim_1_300_0.7") has been submitted
+Your job 7289858 ("Op1Sim_1_300_0.9") has been submitted
+Your job 7289859 ("Op1Sim_1_300_1") has been submitted
+Your job 7289860 ("Op1Sim_1_500_0.1") has been submitted
+Your job 7289861 ("Op1Sim_1_500_0.3") has been submitted
+Your job 7289862 ("Op1Sim_1_500_0.5") has been submitted
+Your job 7289863 ("Op1Sim_1_500_0.7") has been submitted
+Your job 7289864 ("Op1Sim_1_500_0.9") has been submitted
+Your job 7289865 ("Op1Sim_1_500_1") has been submitted
+Your job 7289866 ("Op1Sim_1_700_0.1") has been submitted
+Your job 7289867 ("Op1Sim_1_700_0.3") has been submitted
+Your job 7289868 ("Op1Sim_1_700_0.5") has been submitted
+Your job 7289869 ("Op1Sim_1_700_0.7") has been submitted
+Your job 7289870 ("Op1Sim_1_700_0.9") has been submitted
+Your job 7289871 ("Op1Sim_1_700_1") has been submitted
+Your job 7289872 ("Op1Sim_1_1000_0.1") has been submitted
+Your job 7289873 ("Op1Sim_1_1000_0.3") has been submitted
+Your job 7289874 ("Op1Sim_1_1000_0.5") has been submitted
+Your job 7289875 ("Op1Sim_1_1000_0.7") has been submitted
+Your job 7289876 ("Op1Sim_1_1000_0.9") has been submitted
+Your job 7289877 ("Op1Sim_1_1000_1") has been submitted
+Your job 7289878 ("Op1Sim_2_100_0.1") has been submitted
+Your job 7289879 ("Op1Sim_2_100_0.3") has been submitted
+Your job 7289880 ("Op1Sim_2_100_0.5") has been submitted
+Your job 7289881 ("Op1Sim_2_100_0.7") has been submitted
+Your job 7289882 ("Op1Sim_2_100_0.9") has been submitted
+Your job 7289883 ("Op1Sim_2_100_1") has been submitted
+Your job 7289884 ("Op1Sim_2_300_0.1") has been submitted
+Your job 7289885 ("Op1Sim_2_300_0.3") has been submitted
+Your job 7289886 ("Op1Sim_2_300_0.5") has been submitted
+Your job 7289887 ("Op1Sim_2_300_0.7") has been submitted
+Your job 7289888 ("Op1Sim_2_300_0.9") has been submitted
+Your job 7289889 ("Op1Sim_2_300_1") has been submitted
+Your job 7289890 ("Op1Sim_2_500_0.1") has been submitted
+Your job 7289891 ("Op1Sim_2_500_0.3") has been submitted
+Your job 7289892 ("Op1Sim_2_500_0.5") has been submitted
+Your job 7289893 ("Op1Sim_2_500_0.7") has been submitted
+Your job 7289894 ("Op1Sim_2_500_0.9") has been submitted
+Your job 7289895 ("Op1Sim_2_500_1") has been submitted
+Your job 7289896 ("Op1Sim_2_700_0.1") has been submitted
+Your job 7289897 ("Op1Sim_2_700_0.3") has been submitted
+Your job 7289898 ("Op1Sim_2_700_0.5") has been submitted
+Your job 7289899 ("Op1Sim_2_700_0.7") has been submitted
+Your job 7289900 ("Op1Sim_2_700_0.9") has been submitted
+Your job 7289901 ("Op1Sim_2_700_1") has been submitted
+Your job 7289902 ("Op1Sim_2_1000_0.1") has been submitted
+Your job 7289903 ("Op1Sim_2_1000_0.3") has been submitted
+Your job 7289904 ("Op1Sim_2_1000_0.5") has been submitted
+Your job 7289905 ("Op1Sim_2_1000_0.7") has been submitted
+Your job 7289906 ("Op1Sim_2_1000_0.9") has been submitted
+Your job 7289907 ("Op1Sim_2_1000_1") has been submitted
+Your job 7289908 ("Op1Sim_3_100_0.1") has been submitted
+Your job 7289909 ("Op1Sim_3_100_0.3") has been submitted
+Your job 7289910 ("Op1Sim_3_100_0.5") has been submitted
+Your job 7289911 ("Op1Sim_3_100_0.7") has been submitted
+Your job 7289912 ("Op1Sim_3_100_0.9") has been submitted
+Your job 7289913 ("Op1Sim_3_100_1") has been submitted
+Your job 7289914 ("Op1Sim_3_300_0.1") has been submitted
+Your job 7289915 ("Op1Sim_3_300_0.3") has been submitted
+Your job 7289916 ("Op1Sim_3_300_0.5") has been submitted
+Your job 7289917 ("Op1Sim_3_300_0.7") has been submitted
+Your job 7289918 ("Op1Sim_3_300_0.9") has been submitted
+Your job 7289919 ("Op1Sim_3_300_1") has been submitted
+Your job 7289920 ("Op1Sim_3_500_0.1") has been submitted
+Your job 7289921 ("Op1Sim_3_500_0.3") has been submitted
+Your job 7289922 ("Op1Sim_3_500_0.5") has been submitted
+Your job 7289923 ("Op1Sim_3_500_0.7") has been submitted
+Your job 7289924 ("Op1Sim_3_500_0.9") has been submitted
+Your job 7289925 ("Op1Sim_3_500_1") has been submitted
+Your job 7289926 ("Op1Sim_3_700_0.1") has been submitted
+Your job 7289927 ("Op1Sim_3_700_0.3") has been submitted
+Your job 7289928 ("Op1Sim_3_700_0.5") has been submitted
+Your job 7289929 ("Op1Sim_3_700_0.7") has been submitted
+Your job 7289930 ("Op1Sim_3_700_0.9") has been submitted
+Your job 7289931 ("Op1Sim_3_700_1") has been submitted
+Your job 7289932 ("Op1Sim_3_1000_0.1") has been submitted
+Your job 7289933 ("Op1Sim_3_1000_0.3") has been submitted
+Your job 7289934 ("Op1Sim_3_1000_0.5") has been submitted
+Your job 7289935 ("Op1Sim_3_1000_0.7") has been submitted
+Your job 7289936 ("Op1Sim_3_1000_0.9") has been submitted
+Your job 7289937 ("Op1Sim_3_1000_1") has been submitted
+Your job 7289938 ("Op1Sim_4_100_0.1") has been submitted
+Your job 7289939 ("Op1Sim_4_100_0.3") has been submitted
+Your job 7289940 ("Op1Sim_4_100_0.5") has been submitted
+Your job 7289941 ("Op1Sim_4_100_0.7") has been submitted
+Your job 7289942 ("Op1Sim_4_100_0.9") has been submitted
+Your job 7289943 ("Op1Sim_4_100_1") has been submitted
+Your job 7289944 ("Op1Sim_4_300_0.1") has been submitted
+Your job 7289945 ("Op1Sim_4_300_0.3") has been submitted
+Your job 7289946 ("Op1Sim_4_300_0.5") has been submitted
+Your job 7289947 ("Op1Sim_4_300_0.7") has been submitted
+Your job 7289948 ("Op1Sim_4_300_0.9") has been submitted
+Your job 7289949 ("Op1Sim_4_300_1") has been submitted
+Your job 7289950 ("Op1Sim_4_500_0.1") has been submitted
+Your job 7289951 ("Op1Sim_4_500_0.3") has been submitted
+Your job 7289952 ("Op1Sim_4_500_0.5") has been submitted
+Your job 7289953 ("Op1Sim_4_500_0.7") has been submitted
+Your job 7289954 ("Op1Sim_4_500_0.9") has been submitted
+Your job 7289955 ("Op1Sim_4_500_1") has been submitted
+Your job 7289956 ("Op1Sim_4_700_0.1") has been submitted
+Your job 7289957 ("Op1Sim_4_700_0.3") has been submitted
+Your job 7289958 ("Op1Sim_4_700_0.5") has been submitted
+Your job 7289959 ("Op1Sim_4_700_0.7") has been submitted
+Your job 7289960 ("Op1Sim_4_700_0.9") has been submitted
+Your job 7289961 ("Op1Sim_4_700_1") has been submitted
+Your job 7289962 ("Op1Sim_4_1000_0.1") has been submitted
+Your job 7289963 ("Op1Sim_4_1000_0.3") has been submitted
+Your job 7289964 ("Op1Sim_4_1000_0.5") has been submitted
+Your job 7289965 ("Op1Sim_4_1000_0.7") has been submitted
+Your job 7289966 ("Op1Sim_4_1000_0.9") has been submitted
+Your job 7289967 ("Op1Sim_4_1000_1") has been submitted
+Your job 7289968 ("Op1Sim_5_100_0.1") has been submitted
+Your job 7289969 ("Op1Sim_5_100_0.3") has been submitted
+Your job 7289970 ("Op1Sim_5_100_0.5") has been submitted
+Your job 7289971 ("Op1Sim_5_100_0.7") has been submitted
+Your job 7289972 ("Op1Sim_5_100_0.9") has been submitted
+Your job 7289973 ("Op1Sim_5_100_1") has been submitted
+Your job 7289974 ("Op1Sim_5_300_0.1") has been submitted
+Your job 7289975 ("Op1Sim_5_300_0.3") has been submitted
+Your job 7289976 ("Op1Sim_5_300_0.5") has been submitted
+Your job 7289977 ("Op1Sim_5_300_0.7") has been submitted
+Your job 7289978 ("Op1Sim_5_300_0.9") has been submitted
+Your job 7289979 ("Op1Sim_5_300_1") has been submitted
+Your job 7289980 ("Op1Sim_5_500_0.1") has been submitted
+Your job 7289981 ("Op1Sim_5_500_0.3") has been submitted
+Your job 7289982 ("Op1Sim_5_500_0.5") has been submitted
+Your job 7289983 ("Op1Sim_5_500_0.7") has been submitted
+Your job 7289984 ("Op1Sim_5_500_0.9") has been submitted
+Your job 7289985 ("Op1Sim_5_500_1") has been submitted
+Your job 7289986 ("Op1Sim_5_700_0.1") has been submitted
+Your job 7289987 ("Op1Sim_5_700_0.3") has been submitted
+Your job 7289988 ("Op1Sim_5_700_0.5") has been submitted
+Your job 7289989 ("Op1Sim_5_700_0.7") has been submitted
+Your job 7289990 ("Op1Sim_5_700_0.9") has been submitted
+Your job 7289991 ("Op1Sim_5_700_1") has been submitted
+Your job 7289992 ("Op1Sim_5_1000_0.1") has been submitted
+Your job 7289993 ("Op1Sim_5_1000_0.3") has been submitted
+Your job 7289994 ("Op1Sim_5_1000_0.5") has been submitted
+Your job 7289995 ("Op1Sim_5_1000_0.7") has been submitted
+Your job 7289996 ("Op1Sim_5_1000_0.9") has been submitted
+Your job 7289997 ("Op1Sim_5_1000_1") has been submitted
+Your job 7289998 ("Op1Sim_6_100_0.1") has been submitted
+Your job 7289999 ("Op1Sim_6_100_0.3") has been submitted
+Your job 7290000 ("Op1Sim_6_100_0.5") has been submitted
+Your job 7290001 ("Op1Sim_6_100_0.7") has been submitted
+Your job 7290002 ("Op1Sim_6_100_0.9") has been submitted
+Your job 7290003 ("Op1Sim_6_100_1") has been submitted
+Your job 7290004 ("Op1Sim_6_300_0.1") has been submitted
+Your job 7290005 ("Op1Sim_6_300_0.3") has been submitted
+Your job 7290006 ("Op1Sim_6_300_0.5") has been submitted
+Your job 7290007 ("Op1Sim_6_300_0.7") has been submitted
+Your job 7290008 ("Op1Sim_6_300_0.9") has been submitted
+Your job 7290009 ("Op1Sim_6_300_1") has been submitted
+Your job 7290010 ("Op1Sim_6_500_0.1") has been submitted
+Your job 7290011 ("Op1Sim_6_500_0.3") has been submitted
+Your job 7290012 ("Op1Sim_6_500_0.5") has been submitted
+Your job 7290013 ("Op1Sim_6_500_0.7") has been submitted
+Your job 7290014 ("Op1Sim_6_500_0.9") has been submitted
+Your job 7290015 ("Op1Sim_6_500_1") has been submitted
+Your job 7290016 ("Op1Sim_6_700_0.1") has been submitted
+Your job 7290017 ("Op1Sim_6_700_0.3") has been submitted
+Your job 7290018 ("Op1Sim_6_700_0.5") has been submitted
+Your job 7290019 ("Op1Sim_6_700_0.7") has been submitted
+Your job 7290020 ("Op1Sim_6_700_0.9") has been submitted
+Your job 7290021 ("Op1Sim_6_700_1") has been submitted
+Your job 7290022 ("Op1Sim_6_1000_0.1") has been submitted
+Your job 7290023 ("Op1Sim_6_1000_0.3") has been submitted
+Your job 7290024 ("Op1Sim_6_1000_0.5") has been submitted
+Your job 7290025 ("Op1Sim_6_1000_0.7") has been submitted
+Your job 7290026 ("Op1Sim_6_1000_0.9") has been submitted
+Your job 7290027 ("Op1Sim_6_1000_1") has been submitted
+Your job 7290028 ("Op1Sim_7_100_0.1") has been submitted
+Your job 7290029 ("Op1Sim_7_100_0.3") has been submitted
+Your job 7290030 ("Op1Sim_7_100_0.5") has been submitted
+Your job 7290031 ("Op1Sim_7_100_0.7") has been submitted
+Your job 7290032 ("Op1Sim_7_100_0.9") has been submitted
+Your job 7290033 ("Op1Sim_7_100_1") has been submitted
+Your job 7290034 ("Op1Sim_7_300_0.1") has been submitted
+Your job 7290035 ("Op1Sim_7_300_0.3") has been submitted
+Your job 7290036 ("Op1Sim_7_300_0.5") has been submitted
+Your job 7290037 ("Op1Sim_7_300_0.7") has been submitted
+Your job 7290038 ("Op1Sim_7_300_0.9") has been submitted
+Your job 7290039 ("Op1Sim_7_300_1") has been submitted
+Your job 7290040 ("Op1Sim_7_500_0.1") has been submitted
+Your job 7290041 ("Op1Sim_7_500_0.3") has been submitted
+Your job 7290042 ("Op1Sim_7_500_0.5") has been submitted
+Your job 7290043 ("Op1Sim_7_500_0.7") has been submitted
+Your job 7290044 ("Op1Sim_7_500_0.9") has been submitted
+Your job 7290045 ("Op1Sim_7_500_1") has been submitted
+Your job 7290046 ("Op1Sim_7_700_0.1") has been submitted
+Your job 7290047 ("Op1Sim_7_700_0.3") has been submitted
+Your job 7290048 ("Op1Sim_7_700_0.5") has been submitted
+Your job 7290049 ("Op1Sim_7_700_0.7") has been submitted
+Your job 7290050 ("Op1Sim_7_700_0.9") has been submitted
+Your job 7290051 ("Op1Sim_7_700_1") has been submitted
+Your job 7290052 ("Op1Sim_7_1000_0.1") has been submitted
+Your job 7290053 ("Op1Sim_7_1000_0.3") has been submitted
+Your job 7290054 ("Op1Sim_7_1000_0.5") has been submitted
+Your job 7290055 ("Op1Sim_7_1000_0.7") has been submitted
+Your job 7290056 ("Op1Sim_7_1000_0.9") has been submitted
+Your job 7290057 ("Op1Sim_7_1000_1") has been submitted
+Your job 7290058 ("Op1Sim_8_100_0.1") has been submitted
+Your job 7290059 ("Op1Sim_8_100_0.3") has been submitted
+Your job 7290060 ("Op1Sim_8_100_0.5") has been submitted
+Your job 7290061 ("Op1Sim_8_100_0.7") has been submitted
+Your job 7290062 ("Op1Sim_8_100_0.9") has been submitted
+Your job 7290063 ("Op1Sim_8_100_1") has been submitted
+Your job 7290064 ("Op1Sim_8_300_0.1") has been submitted
+Your job 7290065 ("Op1Sim_8_300_0.3") has been submitted
+Your job 7290066 ("Op1Sim_8_300_0.5") has been submitted
+Your job 7290067 ("Op1Sim_8_300_0.7") has been submitted
+Your job 7290068 ("Op1Sim_8_300_0.9") has been submitted
+Your job 7290069 ("Op1Sim_8_300_1") has been submitted
+Your job 7290070 ("Op1Sim_8_500_0.1") has been submitted
+Your job 7290071 ("Op1Sim_8_500_0.3") has been submitted
+Your job 7290072 ("Op1Sim_8_500_0.5") has been submitted
+Your job 7290073 ("Op1Sim_8_500_0.7") has been submitted
+Your job 7290074 ("Op1Sim_8_500_0.9") has been submitted
+Your job 7290075 ("Op1Sim_8_500_1") has been submitted
+Your job 7290076 ("Op1Sim_8_700_0.1") has been submitted
+Your job 7290077 ("Op1Sim_8_700_0.3") has been submitted
+Your job 7290078 ("Op1Sim_8_700_0.5") has been submitted
+Your job 7290079 ("Op1Sim_8_700_0.7") has been submitted
+Your job 7290080 ("Op1Sim_8_700_0.9") has been submitted
+Your job 7290081 ("Op1Sim_8_700_1") has been submitted
+Your job 7290082 ("Op1Sim_8_1000_0.1") has been submitted
+Your job 7290083 ("Op1Sim_8_1000_0.3") has been submitted
+Your job 7290084 ("Op1Sim_8_1000_0.5") has been submitted
+Your job 7290085 ("Op1Sim_8_1000_0.7") has been submitted
+Your job 7290086 ("Op1Sim_8_1000_0.9") has been submitted
+Your job 7290087 ("Op1Sim_8_1000_1") has been submitted
+Your job 7290088 ("Op1Sim_9_100_0.1") has been submitted
+Your job 7290089 ("Op1Sim_9_100_0.3") has been submitted
+Your job 7290090 ("Op1Sim_9_100_0.5") has been submitted
+Your job 7290091 ("Op1Sim_9_100_0.7") has been submitted
+Your job 7290092 ("Op1Sim_9_100_0.9") has been submitted
+Your job 7290093 ("Op1Sim_9_100_1") has been submitted
+Your job 7290094 ("Op1Sim_9_300_0.1") has been submitted
+Your job 7290095 ("Op1Sim_9_300_0.3") has been submitted
+Your job 7290096 ("Op1Sim_9_300_0.5") has been submitted
+Your job 7290097 ("Op1Sim_9_300_0.7") has been submitted
+Your job 7290098 ("Op1Sim_9_300_0.9") has been submitted
+Your job 7290099 ("Op1Sim_9_300_1") has been submitted
+Your job 7290100 ("Op1Sim_9_500_0.1") has been submitted
+Your job 7290101 ("Op1Sim_9_500_0.3") has been submitted
+Your job 7290102 ("Op1Sim_9_500_0.5") has been submitted
+Your job 7290103 ("Op1Sim_9_500_0.7") has been submitted
+Your job 7290104 ("Op1Sim_9_500_0.9") has been submitted
+Your job 7290105 ("Op1Sim_9_500_1") has been submitted
+Your job 7290106 ("Op1Sim_9_700_0.1") has been submitted
+Your job 7290107 ("Op1Sim_9_700_0.3") has been submitted
+Your job 7290108 ("Op1Sim_9_700_0.5") has been submitted
+Your job 7290109 ("Op1Sim_9_700_0.7") has been submitted
+Your job 7290110 ("Op1Sim_9_700_0.9") has been submitted
+Your job 7290111 ("Op1Sim_9_700_1") has been submitted
+Your job 7290112 ("Op1Sim_9_1000_0.1") has been submitted
+Your job 7290113 ("Op1Sim_9_1000_0.3") has been submitted
+Your job 7290114 ("Op1Sim_9_1000_0.5") has been submitted
+Your job 7290115 ("Op1Sim_9_1000_0.7") has been submitted
+Your job 7290116 ("Op1Sim_9_1000_0.9") has been submitted
+Your job 7290117 ("Op1Sim_9_1000_1") has been submitted
+Your job 7290118 ("Op1Sim_10_100_0.1") has been submitted
+Your job 7290119 ("Op1Sim_10_100_0.3") has been submitted
+Your job 7290120 ("Op1Sim_10_100_0.5") has been submitted
+Your job 7290121 ("Op1Sim_10_100_0.7") has been submitted
+Your job 7290122 ("Op1Sim_10_100_0.9") has been submitted
+Your job 7290123 ("Op1Sim_10_100_1") has been submitted
+Your job 7290124 ("Op1Sim_10_300_0.1") has been submitted
+Your job 7290125 ("Op1Sim_10_300_0.3") has been submitted
+Your job 7290126 ("Op1Sim_10_300_0.5") has been submitted
+Your job 7290127 ("Op1Sim_10_300_0.7") has been submitted
+Your job 7290128 ("Op1Sim_10_300_0.9") has been submitted
+Your job 7290129 ("Op1Sim_10_300_1") has been submitted
+Your job 7290130 ("Op1Sim_10_500_0.1") has been submitted
+Your job 7290131 ("Op1Sim_10_500_0.3") has been submitted
+Your job 7290132 ("Op1Sim_10_500_0.5") has been submitted
+Your job 7290133 ("Op1Sim_10_500_0.7") has been submitted
+Your job 7290134 ("Op1Sim_10_500_0.9") has been submitted
+Your job 7290135 ("Op1Sim_10_500_1") has been submitted
+Your job 7290136 ("Op1Sim_10_700_0.1") has been submitted
+Your job 7290137 ("Op1Sim_10_700_0.3") has been submitted
+Your job 7290138 ("Op1Sim_10_700_0.5") has been submitted
+Your job 7290139 ("Op1Sim_10_700_0.7") has been submitted
+Your job 7290140 ("Op1Sim_10_700_0.9") has been submitted
+Your job 7290141 ("Op1Sim_10_700_1") has been submitted
+Your job 7290142 ("Op1Sim_10_1000_0.1") has been submitted
+Your job 7290143 ("Op1Sim_10_1000_0.3") has been submitted
+Your job 7290144 ("Op1Sim_10_1000_0.5") has been submitted
+Your job 7290145 ("Op1Sim_10_1000_0.7") has been submitted
+Your job 7290146 ("Op1Sim_10_1000_0.9") has been submitted
+Your job 7290147 ("Op1Sim_10_1000_1") has been submitted
+Your job 7290148 ("Op1Sim_11_100_0.1") has been submitted
+Your job 7290149 ("Op1Sim_11_100_0.3") has been submitted
+Your job 7290150 ("Op1Sim_11_100_0.5") has been submitted
+Your job 7290151 ("Op1Sim_11_100_0.7") has been submitted
+Your job 7290152 ("Op1Sim_11_100_0.9") has been submitted
+Your job 7290153 ("Op1Sim_11_100_1") has been submitted
+Your job 7290154 ("Op1Sim_11_300_0.1") has been submitted
+Your job 7290155 ("Op1Sim_11_300_0.3") has been submitted
+Your job 7290156 ("Op1Sim_11_300_0.5") has been submitted
+Your job 7290157 ("Op1Sim_11_300_0.7") has been submitted
+Your job 7290158 ("Op1Sim_11_300_0.9") has been submitted
+Your job 7290159 ("Op1Sim_11_300_1") has been submitted
+Your job 7290160 ("Op1Sim_11_500_0.1") has been submitted
+Your job 7290161 ("Op1Sim_11_500_0.3") has been submitted
+Your job 7290162 ("Op1Sim_11_500_0.5") has been submitted
+Your job 7290163 ("Op1Sim_11_500_0.7") has been submitted
+Your job 7290164 ("Op1Sim_11_500_0.9") has been submitted
+Your job 7290165 ("Op1Sim_11_500_1") has been submitted
+Your job 7290166 ("Op1Sim_11_700_0.1") has been submitted
+Your job 7290167 ("Op1Sim_11_700_0.3") has been submitted
+Your job 7290168 ("Op1Sim_11_700_0.5") has been submitted
+Your job 7290169 ("Op1Sim_11_700_0.7") has been submitted
+Your job 7290170 ("Op1Sim_11_700_0.9") has been submitted
+Your job 7290171 ("Op1Sim_11_700_1") has been submitted
+Your job 7290172 ("Op1Sim_11_1000_0.1") has been submitted
+Your job 7290173 ("Op1Sim_11_1000_0.3") has been submitted
+Your job 7290174 ("Op1Sim_11_1000_0.5") has been submitted
+Your job 7290175 ("Op1Sim_11_1000_0.7") has been submitted
+Your job 7290176 ("Op1Sim_11_1000_0.9") has been submitted
+Your job 7290177 ("Op1Sim_11_1000_1") has been submitted
+Your job 7290178 ("Op1Sim_12_100_0.1") has been submitted
+Your job 7290179 ("Op1Sim_12_100_0.3") has been submitted
+Your job 7290180 ("Op1Sim_12_100_0.5") has been submitted
+Your job 7290181 ("Op1Sim_12_100_0.7") has been submitted
+Your job 7290182 ("Op1Sim_12_100_0.9") has been submitted
+Your job 7290183 ("Op1Sim_12_100_1") has been submitted
+Your job 7290184 ("Op1Sim_12_300_0.1") has been submitted
+Your job 7290185 ("Op1Sim_12_300_0.3") has been submitted
+Your job 7290186 ("Op1Sim_12_300_0.5") has been submitted
+Your job 7290187 ("Op1Sim_12_300_0.7") has been submitted
+Your job 7290188 ("Op1Sim_12_300_0.9") has been submitted
+Your job 7290189 ("Op1Sim_12_300_1") has been submitted
+Your job 7290190 ("Op1Sim_12_500_0.1") has been submitted
+Your job 7290191 ("Op1Sim_12_500_0.3") has been submitted
+Your job 7290192 ("Op1Sim_12_500_0.5") has been submitted
+Your job 7290193 ("Op1Sim_12_500_0.7") has been submitted
+Your job 7290194 ("Op1Sim_12_500_0.9") has been submitted
+Your job 7290195 ("Op1Sim_12_500_1") has been submitted
+Your job 7290196 ("Op1Sim_12_700_0.1") has been submitted
+Your job 7290197 ("Op1Sim_12_700_0.3") has been submitted
+Your job 7290198 ("Op1Sim_12_700_0.5") has been submitted
+Your job 7290199 ("Op1Sim_12_700_0.7") has been submitted
+Your job 7290200 ("Op1Sim_12_700_0.9") has been submitted
+Your job 7290201 ("Op1Sim_12_700_1") has been submitted
+Your job 7290202 ("Op1Sim_12_1000_0.1") has been submitted
+Your job 7290203 ("Op1Sim_12_1000_0.3") has been submitted
+Your job 7290204 ("Op1Sim_12_1000_0.5") has been submitted
+Your job 7290205 ("Op1Sim_12_1000_0.7") has been submitted
+Your job 7290206 ("Op1Sim_12_1000_0.9") has been submitted
+Your job 7290207 ("Op1Sim_12_1000_1") has been submitted
+Your job 7290208 ("Op1Sim_13_100_0.1") has been submitted
+Your job 7290209 ("Op1Sim_13_100_0.3") has been submitted
+Your job 7290210 ("Op1Sim_13_100_0.5") has been submitted
+Your job 7290211 ("Op1Sim_13_100_0.7") has been submitted
+Your job 7290212 ("Op1Sim_13_100_0.9") has been submitted
+Your job 7290213 ("Op1Sim_13_100_1") has been submitted
+Your job 7290214 ("Op1Sim_13_300_0.1") has been submitted
+Your job 7290215 ("Op1Sim_13_300_0.3") has been submitted
+Your job 7290216 ("Op1Sim_13_300_0.5") has been submitted
+Your job 7290217 ("Op1Sim_13_300_0.7") has been submitted
+Your job 7290218 ("Op1Sim_13_300_0.9") has been submitted
+Your job 7290219 ("Op1Sim_13_300_1") has been submitted
+Your job 7290220 ("Op1Sim_13_500_0.1") has been submitted
+Your job 7290221 ("Op1Sim_13_500_0.3") has been submitted
+Your job 7290222 ("Op1Sim_13_500_0.5") has been submitted
+Your job 7290223 ("Op1Sim_13_500_0.7") has been submitted
+Your job 7290224 ("Op1Sim_13_500_0.9") has been submitted
+Your job 7290225 ("Op1Sim_13_500_1") has been submitted
+Your job 7290226 ("Op1Sim_13_700_0.1") has been submitted
+Your job 7290227 ("Op1Sim_13_700_0.3") has been submitted
+Your job 7290228 ("Op1Sim_13_700_0.5") has been submitted
+Your job 7290229 ("Op1Sim_13_700_0.7") has been submitted
+Your job 7290230 ("Op1Sim_13_700_0.9") has been submitted
+Your job 7290231 ("Op1Sim_13_700_1") has been submitted
+Your job 7290232 ("Op1Sim_13_1000_0.1") has been submitted
+Your job 7290233 ("Op1Sim_13_1000_0.3") has been submitted
+Your job 7290234 ("Op1Sim_13_1000_0.5") has been submitted
+Your job 7290235 ("Op1Sim_13_1000_0.7") has been submitted
+Your job 7290236 ("Op1Sim_13_1000_0.9") has been submitted
+Your job 7290237 ("Op1Sim_13_1000_1") has been submitted
+Your job 7290238 ("Op1Sim_14_100_0.1") has been submitted
+Your job 7290239 ("Op1Sim_14_100_0.3") has been submitted
+Your job 7290240 ("Op1Sim_14_100_0.5") has been submitted
+Your job 7290241 ("Op1Sim_14_100_0.7") has been submitted
+Your job 7290242 ("Op1Sim_14_100_0.9") has been submitted
+Your job 7290243 ("Op1Sim_14_100_1") has been submitted
+Your job 7290244 ("Op1Sim_14_300_0.1") has been submitted
+Your job 7290245 ("Op1Sim_14_300_0.3") has been submitted
+Your job 7290246 ("Op1Sim_14_300_0.5") has been submitted
+Your job 7290247 ("Op1Sim_14_300_0.7") has been submitted
+Your job 7290248 ("Op1Sim_14_300_0.9") has been submitted
+Your job 7290249 ("Op1Sim_14_300_1") has been submitted
+Your job 7290250 ("Op1Sim_14_500_0.1") has been submitted
+Your job 7290251 ("Op1Sim_14_500_0.3") has been submitted
+Your job 7290252 ("Op1Sim_14_500_0.5") has been submitted
+Your job 7290253 ("Op1Sim_14_500_0.7") has been submitted
+Your job 7290254 ("Op1Sim_14_500_0.9") has been submitted
+Your job 7290255 ("Op1Sim_14_500_1") has been submitted
+Your job 7290256 ("Op1Sim_14_700_0.1") has been submitted
+Your job 7290257 ("Op1Sim_14_700_0.3") has been submitted
+Your job 7290258 ("Op1Sim_14_700_0.5") has been submitted
+Your job 7290259 ("Op1Sim_14_700_0.7") has been submitted
+Your job 7290260 ("Op1Sim_14_700_0.9") has been submitted
+Your job 7290261 ("Op1Sim_14_700_1") has been submitted
+Your job 7290262 ("Op1Sim_14_1000_0.1") has been submitted
+Your job 7290263 ("Op1Sim_14_1000_0.3") has been submitted
+Your job 7290264 ("Op1Sim_14_1000_0.5") has been submitted
+Your job 7290265 ("Op1Sim_14_1000_0.7") has been submitted
+Your job 7290266 ("Op1Sim_14_1000_0.9") has been submitted
+Your job 7290267 ("Op1Sim_14_1000_1") has been submitted
+> 
+> proc.time()
+   user  system elapsed 
+  1.528   2.320 275.768 

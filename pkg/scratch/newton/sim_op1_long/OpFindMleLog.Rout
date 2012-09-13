@@ -1,0 +1,188 @@
+
+R version 2.11.0 (2010-04-22)
+Copyright (C) 2010 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> sites <- c(100,300,500,700,1000)
+> svalues <- c(0.1,0.3,0.5,0.7,0.9,1)
+> tipnums <- c(16,16,18,18)
+> ##tipnums <- c(4,4,8,8,10,10,12,12,14,14,16,16,18,18)
+> 
+> line1 <- 'source("~/proteinevoutk20/pkg/R/hessian.R")'
+> line2 <- 'trees <- read.tree("~/proteinevoutk20/pkg/R/simtrees_correct.tre")'
+> pbsCommands=""
+> queue="medium*"
+> 
+> for(k in 11:14){
++   for(i in sites){
++     for(j in svalues){
++       ##load the workspace which stores the simulated data
++       ##line1 <- paste('load("~/proteinevoutk20/pkg/scratch/newton/RData/sim_',k+6,'_',i,'_',j,'.RData")',sep="")
++       ## find the mle for s, beta and gamma, given alpha value
++ 
++       ##simulate data on the list of trees, number of sites, and values of s
++        line3 <- paste("start_seq=sample(20,",i,",replace=T)",sep="") #root sequence
++        line4 <- paste("op_seq=rep(1,",i,")",sep="") #optimal aa sequence
++        line5 <- paste("system.time(sim <- simTree(trees[[",k,"]]",",",i,",op_seq,20,",j,",Nu_vec,alpha=al,beta=be,gamma=ga,rootseq=start_seq, ancestral=TRUE))",sep="")
++        ##MLE given optimal sequence and root sequence
++        line6 <- paste("system.time(mle_log_op <- MLE_sw_log(c(-2,-1,-8),trees[[",k,"]],sim[1:",tipnums[k-10],",],m=20,al,mumat,protein_op=op_seq,root=start_seq,trace=1))",sep="")
++        line7 <- paste("hes_op <- find_hessian_log(mle_log_op$par,trees[[",k,"]],sim[1:",tipnums[k-10],",],al,mumat,20,protein_op=op_seq,root=start_seq)",sep="")
++ 
++        ## MLE without optimal and root sequences given
++        line8 <- paste("system.time(mle_log_nop <- MLE_sw_log(c(-2,-1,-8),trees[[",k,"]],sim[1:",tipnums[k-10],",],m=20,al,mumat,trace=1))",sep="")
++        line9 <- paste("hes_nop <- find_hessian_log(mle_log_nop$par,trees[[",k,"]],sim[1:",tipnums[k-10],",],al,mumat,20)",sep="")
++        line10 <- paste('save.image(file="op_simu_',k+4,'_',i,'_',j,'.RData",compress=TRUE)',sep="")
++        
++        cat(line1,"\n",line2,"\n",line3,"\n",line4,"\n",line5,"\n",line6,"\n",line7,"\n",line8,"\n",line9,"\n",line10,"\n",file=paste("op_sim_",k+4,"_",i,"_",j,".R",sep=""))
++       
++        pbsCommands=paste('#!/bin/bash','#$ -cwd','#$ -o /dev/null','#$ -e /dev/null',sep="\n")
++        pbsCommands=paste(pbsCommands,'\n#$ -q ',queue,sep="")
++        pbsCommands=paste(pbsCommands,'#$ -M chaij@umail.iu.edu', '#$ -m beas', '#$ -S /bin/bash',sep="\n")
++        pbsCommands=paste(pbsCommands,"\n","#$ -N OpSim_",k+4,"_",i,"_",j,sep="")
++        pbsCommands=paste(pbsCommands,"\n","/data/apps/R/2.14.0/bin/R CMD BATCH op_sim_",k+4,"_",i,"_",j,".R",sep="")
++        cat(pbsCommands,file=paste('runSimOp_',k+4,'_',i,'_',j,'.sh',sep=""),append=FALSE)
++        system(paste('chmod u+x runSimOp_',k+4,'_',i,'_',j,'.sh',sep=""))
++        system(paste('/opt/sge/bin/lx24-amd64/qsub runSimOp_',k+4,'_',i,'_',j,'.sh',sep=""))
++      }
++   }
++ }
+Your job 7294744 ("OpSim_15_100_0.1") has been submitted
+Your job 7294745 ("OpSim_15_100_0.3") has been submitted
+Your job 7294746 ("OpSim_15_100_0.5") has been submitted
+Your job 7294747 ("OpSim_15_100_0.7") has been submitted
+Your job 7294748 ("OpSim_15_100_0.9") has been submitted
+Your job 7294749 ("OpSim_15_100_1") has been submitted
+Your job 7294750 ("OpSim_15_300_0.1") has been submitted
+Your job 7294751 ("OpSim_15_300_0.3") has been submitted
+Your job 7294752 ("OpSim_15_300_0.5") has been submitted
+Your job 7294753 ("OpSim_15_300_0.7") has been submitted
+Your job 7294754 ("OpSim_15_300_0.9") has been submitted
+Your job 7294755 ("OpSim_15_300_1") has been submitted
+Your job 7294756 ("OpSim_15_500_0.1") has been submitted
+Your job 7294757 ("OpSim_15_500_0.3") has been submitted
+Your job 7294758 ("OpSim_15_500_0.5") has been submitted
+Your job 7294759 ("OpSim_15_500_0.7") has been submitted
+Your job 7294760 ("OpSim_15_500_0.9") has been submitted
+Your job 7294761 ("OpSim_15_500_1") has been submitted
+Your job 7294762 ("OpSim_15_700_0.1") has been submitted
+Your job 7294763 ("OpSim_15_700_0.3") has been submitted
+Your job 7294764 ("OpSim_15_700_0.5") has been submitted
+Your job 7294765 ("OpSim_15_700_0.7") has been submitted
+Your job 7294766 ("OpSim_15_700_0.9") has been submitted
+Your job 7294767 ("OpSim_15_700_1") has been submitted
+Your job 7294768 ("OpSim_15_1000_0.1") has been submitted
+Your job 7294769 ("OpSim_15_1000_0.3") has been submitted
+Your job 7294770 ("OpSim_15_1000_0.5") has been submitted
+Your job 7294771 ("OpSim_15_1000_0.7") has been submitted
+Your job 7294772 ("OpSim_15_1000_0.9") has been submitted
+Your job 7294773 ("OpSim_15_1000_1") has been submitted
+Your job 7294774 ("OpSim_16_100_0.1") has been submitted
+Your job 7294775 ("OpSim_16_100_0.3") has been submitted
+Your job 7294776 ("OpSim_16_100_0.5") has been submitted
+Your job 7294777 ("OpSim_16_100_0.7") has been submitted
+Your job 7294778 ("OpSim_16_100_0.9") has been submitted
+Your job 7294779 ("OpSim_16_100_1") has been submitted
+Your job 7294780 ("OpSim_16_300_0.1") has been submitted
+Your job 7294781 ("OpSim_16_300_0.3") has been submitted
+Your job 7294782 ("OpSim_16_300_0.5") has been submitted
+Your job 7294783 ("OpSim_16_300_0.7") has been submitted
+Your job 7294784 ("OpSim_16_300_0.9") has been submitted
+Your job 7294785 ("OpSim_16_300_1") has been submitted
+Your job 7294786 ("OpSim_16_500_0.1") has been submitted
+Your job 7294787 ("OpSim_16_500_0.3") has been submitted
+Your job 7294788 ("OpSim_16_500_0.5") has been submitted
+Your job 7294789 ("OpSim_16_500_0.7") has been submitted
+Your job 7294790 ("OpSim_16_500_0.9") has been submitted
+Your job 7294791 ("OpSim_16_500_1") has been submitted
+Your job 7294792 ("OpSim_16_700_0.1") has been submitted
+Your job 7294793 ("OpSim_16_700_0.3") has been submitted
+Your job 7294794 ("OpSim_16_700_0.5") has been submitted
+Your job 7294795 ("OpSim_16_700_0.7") has been submitted
+Your job 7294796 ("OpSim_16_700_0.9") has been submitted
+Your job 7294797 ("OpSim_16_700_1") has been submitted
+Your job 7294798 ("OpSim_16_1000_0.1") has been submitted
+Your job 7294799 ("OpSim_16_1000_0.3") has been submitted
+Your job 7294800 ("OpSim_16_1000_0.5") has been submitted
+Your job 7294801 ("OpSim_16_1000_0.7") has been submitted
+Your job 7294802 ("OpSim_16_1000_0.9") has been submitted
+Your job 7294803 ("OpSim_16_1000_1") has been submitted
+Your job 7294804 ("OpSim_17_100_0.1") has been submitted
+Your job 7294805 ("OpSim_17_100_0.3") has been submitted
+Your job 7294806 ("OpSim_17_100_0.5") has been submitted
+Your job 7294807 ("OpSim_17_100_0.7") has been submitted
+Your job 7294808 ("OpSim_17_100_0.9") has been submitted
+Your job 7294809 ("OpSim_17_100_1") has been submitted
+Your job 7294810 ("OpSim_17_300_0.1") has been submitted
+Your job 7294811 ("OpSim_17_300_0.3") has been submitted
+Your job 7294812 ("OpSim_17_300_0.5") has been submitted
+Your job 7294813 ("OpSim_17_300_0.7") has been submitted
+Your job 7294814 ("OpSim_17_300_0.9") has been submitted
+Your job 7294815 ("OpSim_17_300_1") has been submitted
+Your job 7294816 ("OpSim_17_500_0.1") has been submitted
+Your job 7294817 ("OpSim_17_500_0.3") has been submitted
+Your job 7294818 ("OpSim_17_500_0.5") has been submitted
+Your job 7294819 ("OpSim_17_500_0.7") has been submitted
+Your job 7294820 ("OpSim_17_500_0.9") has been submitted
+Your job 7294821 ("OpSim_17_500_1") has been submitted
+Your job 7294822 ("OpSim_17_700_0.1") has been submitted
+Your job 7294823 ("OpSim_17_700_0.3") has been submitted
+Your job 7294824 ("OpSim_17_700_0.5") has been submitted
+Your job 7294825 ("OpSim_17_700_0.7") has been submitted
+Your job 7294826 ("OpSim_17_700_0.9") has been submitted
+Your job 7294827 ("OpSim_17_700_1") has been submitted
+Your job 7294828 ("OpSim_17_1000_0.1") has been submitted
+Your job 7294829 ("OpSim_17_1000_0.3") has been submitted
+Your job 7294830 ("OpSim_17_1000_0.5") has been submitted
+Your job 7294831 ("OpSim_17_1000_0.7") has been submitted
+Your job 7294832 ("OpSim_17_1000_0.9") has been submitted
+Your job 7294833 ("OpSim_17_1000_1") has been submitted
+Your job 7294834 ("OpSim_18_100_0.1") has been submitted
+Your job 7294835 ("OpSim_18_100_0.3") has been submitted
+Your job 7294836 ("OpSim_18_100_0.5") has been submitted
+Your job 7294837 ("OpSim_18_100_0.7") has been submitted
+Your job 7294838 ("OpSim_18_100_0.9") has been submitted
+Your job 7294839 ("OpSim_18_100_1") has been submitted
+Your job 7294840 ("OpSim_18_300_0.1") has been submitted
+Your job 7294841 ("OpSim_18_300_0.3") has been submitted
+Your job 7294842 ("OpSim_18_300_0.5") has been submitted
+Your job 7294843 ("OpSim_18_300_0.7") has been submitted
+Your job 7294844 ("OpSim_18_300_0.9") has been submitted
+Your job 7294845 ("OpSim_18_300_1") has been submitted
+Your job 7294846 ("OpSim_18_500_0.1") has been submitted
+Your job 7294847 ("OpSim_18_500_0.3") has been submitted
+Your job 7294848 ("OpSim_18_500_0.5") has been submitted
+Your job 7294849 ("OpSim_18_500_0.7") has been submitted
+Your job 7294850 ("OpSim_18_500_0.9") has been submitted
+Your job 7294851 ("OpSim_18_500_1") has been submitted
+Your job 7294852 ("OpSim_18_700_0.1") has been submitted
+Your job 7294853 ("OpSim_18_700_0.3") has been submitted
+Your job 7294854 ("OpSim_18_700_0.5") has been submitted
+Your job 7294855 ("OpSim_18_700_0.7") has been submitted
+Your job 7294856 ("OpSim_18_700_0.9") has been submitted
+Your job 7294857 ("OpSim_18_700_1") has been submitted
+Your job 7294858 ("OpSim_18_1000_0.1") has been submitted
+Your job 7294859 ("OpSim_18_1000_0.3") has been submitted
+Your job 7294860 ("OpSim_18_1000_0.5") has been submitted
+Your job 7294861 ("OpSim_18_1000_0.7") has been submitted
+Your job 7294862 ("OpSim_18_1000_0.9") has been submitted
+Your job 7294863 ("OpSim_18_1000_1") has been submitted
+> 
+> proc.time()
+   user  system elapsed 
+  0.989   1.590  63.509 

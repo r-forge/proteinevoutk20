@@ -1,0 +1,140 @@
+
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> source("~/proteinevoutk20/pkg/R/hessian.R") 
+Loading required package: ape
+
+Attaching package: ‘ape’
+
+The following object(s) are masked from ‘package:seqinr’:
+
+    as.alignment, consensus
+
+Loading required package: igraph
+Loading required package: Matrix
+Loading required package: lattice
+
+Attaching package: ‘Matrix’
+
+The following object(s) are masked from ‘package:base’:
+
+    det
+
+Loading required package: numDeriv
+Loading required package: BB
+Loading required package: quadprog
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+
+Attaching package: ‘Rvmmin’
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+Loading required package: minqa
+Loading required package: Rcpp
+Loading required package: setRNG
+
+Attaching package: ‘optimx’
+
+The following object(s) are masked from ‘package:Rvmmin’:
+
+    optansout
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+
+Attaching package: ‘expm’
+
+The following object(s) are masked from ‘package:Matrix’:
+
+    expm
+
+
+Attaching package: ‘multicore’
+
+The following object(s) are masked from ‘package:lattice’:
+
+    parallel
+
+This is mgcv 1.7-9. For overview type 'help("mgcv-package")'.
+>  load("op_simu_11_100_0.1.RData") 
+>  hes_op <- find_hessian_log(mle_log_op$par,trees[[11]],sim[1:16,],al,mumat,20,protein_op=op_seq,root=start_seq) 
+[1] -2.218310 -2.254948 -8.019124
+[1] -2.218310 -2.254948 -8.019124
+[1] -1.996479 -2.254948 -8.019124
+[1] -2.440141 -2.254948 -8.019124
+[1] -2.107394 -2.254948 -8.019124
+[1] -2.329225 -2.254948 -8.019124
+[1] -2.162852 -2.254948 -8.019124
+[1] -2.273768 -2.254948 -8.019124
+[1] -2.190581 -2.254948 -8.019124
+[1] -2.246039 -2.254948 -8.019124
+[1] -2.218310 -2.029453 -8.019124
+[1] -2.218310 -2.480443 -8.019124
+[1] -2.218310 -2.142200 -8.019124
+[1] -2.218310 -2.367695 -8.019124
+[1] -2.218310 -2.198574 -8.019124
+[1] -2.218310 -2.311322 -8.019124
+[1] -2.218310 -2.226761 -8.019124
+[1] -2.218310 -2.283135 -8.019124
+[1] -2.218310 -2.254948 -7.217212
+[1] -2.218310 -2.254948 -8.821037
+[1] -2.218310 -2.254948 -7.618168
+[1] -2.218310 -2.254948 -8.420080
+[1] -2.218310 -2.254948 -7.818646
+[1] -2.218310 -2.254948 -8.219602
+[1] -2.218310 -2.254948 -7.918885
+[1] -2.218310 -2.254948 -8.119363
+[1] -1.996479 -2.029453 -8.019124
+[1] -2.440141 -2.480443 -8.019124
+[1] -2.107394 -2.142200 -8.019124
+[1] -2.329225 -2.367695 -8.019124
+[1] -2.162852 -2.198574 -8.019124
+[1] -2.273768 -2.311322 -8.019124
+[1] -2.190581 -2.226761 -8.019124
+[1] -2.246039 -2.283135 -8.019124
+[1] -1.996479 -2.254948 -7.217212
+[1] -2.440141 -2.254948 -8.821037
+[1] -2.107394 -2.254948 -7.618168
+[1] -2.329225 -2.254948 -8.420080
+[1] -2.162852 -2.254948 -7.818646
+[1] -2.273768 -2.254948 -8.219602
+[1] -2.190581 -2.254948 -7.918885
+[1] -2.246039 -2.254948 -8.119363
+[1] -2.218310 -2.029453 -7.217212
+[1] -2.218310 -2.480443 -8.821037
+[1] -2.218310 -2.142200 -7.618168
+[1] -2.218310 -2.367695 -8.420080
+[1] -2.218310 -2.198574 -7.818646
+[1] -2.218310 -2.311322 -8.219602
+[1] -2.218310 -2.226761 -7.918885
+[1] -2.218310 -2.283135 -8.119363
+>  save.image(file="hes_op_simu_11_100_0.1.RData",compress=TRUE) 
+> 
+> proc.time()
+   user  system elapsed 
+362.627   0.805 368.130 

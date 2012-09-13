@@ -1,0 +1,140 @@
+
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> source("~/proteinevoutk20/pkg/R/hessian.R") 
+Loading required package: ape
+
+Attaching package: ‘ape’
+
+The following object(s) are masked from ‘package:seqinr’:
+
+    as.alignment, consensus
+
+Loading required package: igraph
+Loading required package: Matrix
+Loading required package: lattice
+
+Attaching package: ‘Matrix’
+
+The following object(s) are masked from ‘package:base’:
+
+    det
+
+Loading required package: numDeriv
+Loading required package: BB
+Loading required package: quadprog
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+
+Attaching package: ‘Rvmmin’
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+Loading required package: minqa
+Loading required package: Rcpp
+Loading required package: setRNG
+
+Attaching package: ‘optimx’
+
+The following object(s) are masked from ‘package:Rvmmin’:
+
+    optansout
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+
+Attaching package: ‘expm’
+
+The following object(s) are masked from ‘package:Matrix’:
+
+    expm
+
+
+Attaching package: ‘multicore’
+
+The following object(s) are masked from ‘package:lattice’:
+
+    parallel
+
+This is mgcv 1.7-9. For overview type 'help("mgcv-package")'.
+>  load("op_simu_13_100_1.RData") 
+>  hes_op <- find_hessian_log(mle_log_op$par,trees[[13]],sim[1:18,],al,mumat,20,protein_op=op_seq,root=start_seq) 
+[1]  0.0460354 -1.9172499 -7.8210459
+[1]  0.0460354 -1.9172499 -7.8210459
+[1]  0.05063894 -1.91724989 -7.82104593
+[1]  0.04143186 -1.91724989 -7.82104593
+[1]  0.04833717 -1.91724989 -7.82104593
+[1]  0.04373363 -1.91724989 -7.82104593
+[1]  0.04718629 -1.91724989 -7.82104593
+[1]  0.04488452 -1.91724989 -7.82104593
+[1]  0.04661085 -1.91724989 -7.82104593
+[1]  0.04545996 -1.91724989 -7.82104593
+[1]  0.0460354 -1.7255249 -7.8210459
+[1]  0.0460354 -2.1089749 -7.8210459
+[1]  0.0460354 -1.8213874 -7.8210459
+[1]  0.0460354 -2.0131124 -7.8210459
+[1]  0.0460354 -1.8693186 -7.8210459
+[1]  0.0460354 -1.9651811 -7.8210459
+[1]  0.0460354 -1.8932843 -7.8210459
+[1]  0.0460354 -1.9412155 -7.8210459
+[1]  0.0460354 -1.9172499 -7.0389413
+[1]  0.0460354 -1.9172499 -8.6031505
+[1]  0.0460354 -1.9172499 -7.4299936
+[1]  0.0460354 -1.9172499 -8.2120982
+[1]  0.0460354 -1.9172499 -7.6255198
+[1]  0.0460354 -1.9172499 -8.0165721
+[1]  0.0460354 -1.9172499 -7.7232829
+[1]  0.0460354 -1.9172499 -7.9188090
+[1]  0.05063894 -1.72552490 -7.82104593
+[1]  0.04143186 -2.10897488 -7.82104593
+[1]  0.04833717 -1.82138739 -7.82104593
+[1]  0.04373363 -2.01311238 -7.82104593
+[1]  0.04718629 -1.86931864 -7.82104593
+[1]  0.04488452 -1.96518113 -7.82104593
+[1]  0.04661085 -1.89328426 -7.82104593
+[1]  0.04545996 -1.94121551 -7.82104593
+[1]  0.05063894 -1.91724989 -7.03894134
+[1]  0.04143186 -1.91724989 -8.60315052
+[1]  0.04833717 -1.91724989 -7.42999363
+[1]  0.04373363 -1.91724989 -8.21209823
+[1]  0.04718629 -1.91724989 -7.62551978
+[1]  0.04488452 -1.91724989 -8.01657208
+[1]  0.04661085 -1.91724989 -7.72328285
+[1]  0.04545996 -1.91724989 -7.91880900
+[1]  0.0460354 -1.7255249 -7.0389413
+[1]  0.0460354 -2.1089749 -8.6031505
+[1]  0.0460354 -1.8213874 -7.4299936
+[1]  0.0460354 -2.0131124 -8.2120982
+[1]  0.0460354 -1.8693186 -7.6255198
+[1]  0.0460354 -1.9651811 -8.0165721
+[1]  0.0460354 -1.8932843 -7.7232829
+[1]  0.0460354 -1.9412155 -7.9188090
+>  save.image(file="hes_op_simu_13_100_1.RData",compress=TRUE) 
+> 
+> proc.time()
+   user  system elapsed 
+416.301   0.180 424.386 

@@ -1,0 +1,140 @@
+
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> source("~/proteinevoutk20/pkg/R/hessian.R") 
+Loading required package: ape
+
+Attaching package: ‘ape’
+
+The following object(s) are masked from ‘package:seqinr’:
+
+    as.alignment, consensus
+
+Loading required package: igraph
+Loading required package: Matrix
+Loading required package: lattice
+
+Attaching package: ‘Matrix’
+
+The following object(s) are masked from ‘package:base’:
+
+    det
+
+Loading required package: numDeriv
+Loading required package: BB
+Loading required package: quadprog
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+
+Attaching package: ‘Rvmmin’
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+Loading required package: minqa
+Loading required package: Rcpp
+Loading required package: setRNG
+
+Attaching package: ‘optimx’
+
+The following object(s) are masked from ‘package:Rvmmin’:
+
+    optansout
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+
+Attaching package: ‘expm’
+
+The following object(s) are masked from ‘package:Matrix’:
+
+    expm
+
+
+Attaching package: ‘multicore’
+
+The following object(s) are masked from ‘package:lattice’:
+
+    parallel
+
+This is mgcv 1.7-9. For overview type 'help("mgcv-package")'.
+>  load("op_simu_14_500_0.1.RData") 
+>  hes_op <- find_hessian_log(mle_log_op$par,trees[[14]],sim[1:18,],al,mumat,20,protein_op=op_seq,root=start_seq) 
+[1] -2.353667 -2.544302 -7.726772
+[1] -2.353667 -2.544302 -7.726772
+[1] -2.118300 -2.544302 -7.726772
+[1] -2.589033 -2.544302 -7.726772
+[1] -2.235983 -2.544302 -7.726772
+[1] -2.471350 -2.544302 -7.726772
+[1] -2.294825 -2.544302 -7.726772
+[1] -2.412508 -2.544302 -7.726772
+[1] -2.324246 -2.544302 -7.726772
+[1] -2.383087 -2.544302 -7.726772
+[1] -2.353667 -2.289872 -7.726772
+[1] -2.353667 -2.798733 -7.726772
+[1] -2.353667 -2.417087 -7.726772
+[1] -2.353667 -2.671518 -7.726772
+[1] -2.353667 -2.480695 -7.726772
+[1] -2.353667 -2.607910 -7.726772
+[1] -2.353667 -2.512499 -7.726772
+[1] -2.353667 -2.576106 -7.726772
+[1] -2.353667 -2.544302 -6.954095
+[1] -2.353667 -2.544302 -8.499450
+[1] -2.353667 -2.544302 -7.340434
+[1] -2.353667 -2.544302 -8.113111
+[1] -2.353667 -2.544302 -7.533603
+[1] -2.353667 -2.544302 -7.919942
+[1] -2.353667 -2.544302 -7.630188
+[1] -2.353667 -2.544302 -7.823357
+[1] -2.118300 -2.289872 -7.726772
+[1] -2.589033 -2.798733 -7.726772
+[1] -2.235983 -2.417087 -7.726772
+[1] -2.471350 -2.671518 -7.726772
+[1] -2.294825 -2.480695 -7.726772
+[1] -2.412508 -2.607910 -7.726772
+[1] -2.324246 -2.512499 -7.726772
+[1] -2.383087 -2.576106 -7.726772
+[1] -2.118300 -2.544302 -6.954095
+[1] -2.589033 -2.544302 -8.499450
+[1] -2.235983 -2.544302 -7.340434
+[1] -2.471350 -2.544302 -8.113111
+[1] -2.294825 -2.544302 -7.533603
+[1] -2.412508 -2.544302 -7.919942
+[1] -2.324246 -2.544302 -7.630188
+[1] -2.383087 -2.544302 -7.823357
+[1] -2.353667 -2.289872 -6.954095
+[1] -2.353667 -2.798733 -8.499450
+[1] -2.353667 -2.417087 -7.340434
+[1] -2.353667 -2.671518 -8.113111
+[1] -2.353667 -2.480695 -7.533603
+[1] -2.353667 -2.607910 -7.919942
+[1] -2.353667 -2.512499 -7.630188
+[1] -2.353667 -2.576106 -7.823357
+>  save.image(file="hes_op_simu_14_500_0.1.RData",compress=TRUE) 
+> 
+> proc.time()
+    user   system  elapsed 
+1774.109    0.143 1778.017 
