@@ -1,0 +1,1999 @@
+
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> rm(list=ls()) 
+>  source("pphyproevo.R") 
+Loading required package: ape
+
+Attaching package: ‘ape’
+
+The following object(s) are masked from ‘package:seqinr’:
+
+    as.alignment, consensus
+
+Loading required package: igraph
+Loading required package: Matrix
+Loading required package: lattice
+
+Attaching package: ‘Matrix’
+
+The following object(s) are masked from ‘package:base’:
+
+    det
+
+Loading required package: numDeriv
+Loading required package: BB
+Loading required package: quadprog
+Loading required package: ucminf
+Loading required package: Rcgmin
+Loading required package: Rvmmin
+
+Attaching package: ‘Rvmmin’
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+Loading required package: minqa
+Loading required package: Rcpp
+Loading required package: setRNG
+
+Attaching package: ‘optimx’
+
+The following object(s) are masked from ‘package:Rvmmin’:
+
+    optansout
+
+The following object(s) are masked from ‘package:Rcgmin’:
+
+    optansout
+
+
+Attaching package: ‘expm’
+
+The following object(s) are masked from ‘package:Matrix’:
+
+    expm
+
+
+Attaching package: ‘multicore’
+
+The following object(s) are masked from ‘package:lattice’:
+
+    parallel
+
+This is mgcv 1.7-9. For overview type 'help("mgcv-package")'.
+>  system.time(res <- MLE.s_log(c(-1.6,-5.24),1:106)) 
+[1] "start optimization on gene 1"
+[1] "finish optimization on gene 1"
+[1] "start optimization on gene 2"
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+[1] "finish optimization on gene 2"
+[1] "start optimization on gene 3"
+[1] "finish optimization on gene 3"
+[1] "start optimization on gene 4"
+[1] "finish optimization on gene 4"
+[1] "start optimization on gene 5"
+[1] "finish optimization on gene 5"
+[1] "start optimization on gene 6"
+[1] "finish optimization on gene 6"
+[1] "start optimization on gene 7"
+[1] "finish optimization on gene 7"
+[1] "start optimization on gene 8"
+[1] "finish optimization on gene 8"
+[1] "start optimization on gene 9"
+[1] "finish optimization on gene 9"
+[1] "start optimization on gene 10"
+[1] "finish optimization on gene 10"
+[1] "start optimization on gene 11"
+[1] "finish optimization on gene 11"
+[1] "start optimization on gene 12"
+[1] "finish optimization on gene 12"
+[1] "start optimization on gene 13"
+[1] "finish optimization on gene 13"
+[1] "start optimization on gene 14"
+[1] "finish optimization on gene 14"
+[1] "start optimization on gene 15"
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+[1] "finish optimization on gene 15"
+[1] "start optimization on gene 16"
+[1] "finish optimization on gene 16"
+[1] "start optimization on gene 17"
+[1] "finish optimization on gene 17"
+[1] "start optimization on gene 18"
+[1] "finish optimization on gene 18"
+[1] "start optimization on gene 19"
+[1] "finish optimization on gene 19"
+[1] "start optimization on gene 20"
+[1] "finish optimization on gene 20"
+[1] "start optimization on gene 21"
+[1] "finish optimization on gene 21"
+[1] "start optimization on gene 22"
+[1] "finish optimization on gene 22"
+[1] "start optimization on gene 23"
+[1] "finish optimization on gene 23"
+[1] "start optimization on gene 24"
+[1] "finish optimization on gene 24"
+[1] "start optimization on gene 25"
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+[1] "finish optimization on gene 25"
+[1] "start optimization on gene 26"
+[1] "finish optimization on gene 26"
+[1] "start optimization on gene 27"
+[1] "finish optimization on gene 27"
+[1] "start optimization on gene 28"
+[1] "finish optimization on gene 28"
+[1] "start optimization on gene 29"
+[1] "finish optimization on gene 29"
+[1] "start optimization on gene 30"
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+[1] "finish optimization on gene 30"
+[1] "start optimization on gene 31"
+[1] "finish optimization on gene 31"
+[1] "start optimization on gene 32"
+[1] "finish optimization on gene 32"
+[1] "start optimization on gene 33"
+[1] "finish optimization on gene 33"
+[1] "start optimization on gene 34"
+[1] "finish optimization on gene 34"
+[1] "start optimization on gene 35"
+[1] "finish optimization on gene 35"
+[1] "start optimization on gene 36"
+[1] "finish optimization on gene 36"
+[1] "start optimization on gene 37"
+[1] "finish optimization on gene 37"
+[1] "start optimization on gene 38"
+[1] "finish optimization on gene 38"
+[1] "start optimization on gene 39"
+[1] "finish optimization on gene 39"
+[1] "start optimization on gene 40"
+[1] "finish optimization on gene 40"
+[1] "start optimization on gene 41"
+[1] "finish optimization on gene 41"
+[1] "start optimization on gene 42"
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+[1] "finish optimization on gene 42"
+[1] "start optimization on gene 43"
+[1] "finish optimization on gene 43"
+[1] "start optimization on gene 44"
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+[1] "finish optimization on gene 44"
+[1] "start optimization on gene 45"
+[1] "finish optimization on gene 45"
+[1] "start optimization on gene 46"
+[1] "finish optimization on gene 46"
+[1] "start optimization on gene 47"
+[1] "finish optimization on gene 47"
+[1] "start optimization on gene 48"
+[1] "finish optimization on gene 48"
+[1] "start optimization on gene 49"
+[1] "finish optimization on gene 49"
+[1] "start optimization on gene 50"
+[1] "finish optimization on gene 50"
+[1] "start optimization on gene 51"
+[1] "finish optimization on gene 51"
+[1] "start optimization on gene 52"
+[1] "finish optimization on gene 52"
+[1] "start optimization on gene 53"
+[1] "finish optimization on gene 53"
+[1] "start optimization on gene 54"
+[1] "finish optimization on gene 54"
+[1] "start optimization on gene 55"
+[1] "finish optimization on gene 55"
+[1] "start optimization on gene 56"
+[1] "finish optimization on gene 56"
+[1] "start optimization on gene 57"
+[1] "finish optimization on gene 57"
+[1] "start optimization on gene 58"
+[1] "finish optimization on gene 58"
+[1] "start optimization on gene 59"
+[1] "finish optimization on gene 59"
+[1] "start optimization on gene 60"
+[1] "finish optimization on gene 60"
+[1] "start optimization on gene 61"
+[1] "finish optimization on gene 61"
+[1] "start optimization on gene 62"
+[1] "finish optimization on gene 62"
+[1] "start optimization on gene 63"
+[1] "finish optimization on gene 63"
+[1] "start optimization on gene 64"
+[1] "finish optimization on gene 64"
+[1] "start optimization on gene 65"
+[1] "finish optimization on gene 65"
+[1] "start optimization on gene 66"
+[1] "finish optimization on gene 66"
+[1] "start optimization on gene 67"
+[1] "finish optimization on gene 67"
+[1] "start optimization on gene 68"
+[1] "finish optimization on gene 68"
+[1] "start optimization on gene 69"
+[1] "finish optimization on gene 69"
+[1] "start optimization on gene 70"
+[1] "finish optimization on gene 70"
+[1] "start optimization on gene 71"
+[1] "finish optimization on gene 71"
+[1] "start optimization on gene 72"
+[1] "finish optimization on gene 72"
+[1] "start optimization on gene 73"
+[1] "finish optimization on gene 73"
+[1] "start optimization on gene 74"
+[1] "finish optimization on gene 74"
+[1] "start optimization on gene 75"
+[1] "finish optimization on gene 75"
+[1] "start optimization on gene 76"
+[1] "finish optimization on gene 76"
+[1] "start optimization on gene 77"
+[1] "finish optimization on gene 77"
+[1] "start optimization on gene 78"
+[1] "finish optimization on gene 78"
+[1] "start optimization on gene 79"
+[1] "finish optimization on gene 79"
+[1] "start optimization on gene 80"
+[1] "finish optimization on gene 80"
+[1] "start optimization on gene 81"
+[1] "finish optimization on gene 81"
+[1] "start optimization on gene 82"
+[1] "finish optimization on gene 82"
+[1] "start optimization on gene 83"
+[1] "finish optimization on gene 83"
+[1] "start optimization on gene 84"
+[1] "finish optimization on gene 84"
+[1] "start optimization on gene 85"
+[1] "finish optimization on gene 85"
+[1] "start optimization on gene 86"
+[1] "finish optimization on gene 86"
+[1] "start optimization on gene 87"
+[1] "finish optimization on gene 87"
+[1] "start optimization on gene 88"
+[1] "finish optimization on gene 88"
+[1] "start optimization on gene 89"
+[1] "finish optimization on gene 89"
+[1] "start optimization on gene 90"
+[1] "finish optimization on gene 90"
+[1] "start optimization on gene 91"
+[1] "finish optimization on gene 91"
+[1] "start optimization on gene 92"
+[1] "finish optimization on gene 92"
+[1] "start optimization on gene 93"
+[1] "finish optimization on gene 93"
+[1] "start optimization on gene 94"
+[1] "finish optimization on gene 94"
+[1] "start optimization on gene 95"
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+[1] "finish optimization on gene 95"
+[1] "start optimization on gene 96"
+[1] "finish optimization on gene 96"
+[1] "start optimization on gene 97"
+[1] "finish optimization on gene 97"
+[1] "start optimization on gene 98"
+[1] "finish optimization on gene 98"
+[1] "start optimization on gene 99"
+[1] "finish optimization on gene 99"
+[1] "start optimization on gene 100"
+[1] "finish optimization on gene 100"
+[1] "start optimization on gene 101"
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+Warning in ll_site(tree, data.u[, x], protein_op[x], s, MuMat, alpha, beta,  :
+  numerical overflow
+[1] "finish optimization on gene 101"
+[1] "start optimization on gene 102"
+[1] "finish optimization on gene 102"
+[1] "start optimization on gene 103"
+[1] "finish optimization on gene 103"
+[1] "start optimization on gene 104"
+[1] "finish optimization on gene 104"
+[1] "start optimization on gene 105"
+[1] "finish optimization on gene 105"
+[1] "start optimization on gene 106"
+[1] "finish optimization on gene 106"
+     user    system   elapsed 
+23857.315     0.184 23895.918 
+Warning messages:
+1: In MLE_GTR_log(-1, tree, data[[k]], al, Beta, Gamma, mumat) :
+  NA in data, pruning performed
+2: In MLE_GTR_log(-1, tree, data[[k]], al, Beta, Gamma, mumat) :
+  NA in data, pruning performed
+3: In MLE_GTR_log(-1, tree, data[[k]], al, Beta, Gamma, mumat) :
+  NA in data, pruning performed
+4: In MLE_GTR_log(-1, tree, data[[k]], al, Beta, Gamma, mumat) :
+  NA in data, pruning performed
+5: In MLE_GTR_log(-1, tree, data[[k]], al, Beta, Gamma, mumat) :
+  NA in data, pruning performed
+6: In MLE_GTR_log(-1, tree, data[[k]], al, Beta, Gamma, mumat) :
+  NA in data, pruning performed
+7: In MLE_GTR_log(-1, tree, data[[k]], al, Beta, Gamma, mumat) :
+  NA in data, pruning performed
+8: In MLE_GTR_log(-1, tree, data[[k]], al, Beta, Gamma, mumat) :
+  NA in data, pruning performed
+9: In MLE_GTR_log(-1, tree, data[[k]], al, Beta, Gamma, mumat) :
+  NA in data, pruning performed
+>  save(res,file="bglog_18_12.RData",compress=TRUE) 
+> 
+> proc.time()
+     user    system   elapsed 
+23865.040     0.482 23904.805 
