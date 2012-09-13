@@ -1,8 +1,8 @@
 
-R version 2.13.1 (2011-07-08)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
-Platform: i386-apple-darwin9.8.0/i386 (32-bit)
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -27,18 +27,19 @@ Type 'q()' to quit R.
 +   for(fq in freq){
 +     run.id = paste(mtd,"+",fq,sep="")
 +     ## M - (freq = model estimated) and M + F - (freq=empirical)
-+     line1 = paste("phyml -i rokasAA -d aa -q -m ", mtd, " -f ",fq," -v 0 -c 1 -u gtr_newick -o r --run_id ",run.id," > /dev/null &",sep="")
++     line1 = paste("nohup phyml -i rokasAA -d aa -q -m ", mtd, " -f ",fq," -v 0 -c 1 -u gtr_newick -o r --run_id ",run.id," > /dev/null &",sep="")
 +     ## M + I and M + I + F
-+     line2 = paste("phyml -i rokasAA -d aa -q -m ", mtd, " -f ",fq," -v e -c 1 -u gtr_newick -o r --run_id ",run.id,"+I"," > /dev/null &",sep="")
++     line2 = paste("nohup phyml -i rokasAA -d aa -q -m ", mtd, " -f ",fq," -v e -c 1 -u gtr_newick -o r --run_id ",run.id,"+I"," > /dev/null &",sep="")
 +     ## M + G and M + G + F
-+     line3 = paste("phyml -i rokasAA -d aa -q -m ", mtd, " -f ",fq," -v 0 -c 4 -a e -u gtr_newick -o r --run_id ",run.id,"+G"," > /dev/null &",sep="")
++     line3 = paste("nohup phyml -i rokasAA -d aa -q -m ", mtd, " -f ",fq," -v 0 -c 4 -a e -u gtr_newick -o r --run_id ",run.id,"+G"," > /dev/null &",sep="")
 +     ## M + I + G  and M + I + G + F
-+     line4 = paste("phyml -i rokasAA -d aa -q -m ", mtd, " -f ",fq," -v e -c 4 -a e -u gtr_newick -o r --run_id ",run.id,"+I+G"," > /dev/null &",sep="")
++     line4 = paste("nohup phyml -i rokasAA -d aa -q -m ", mtd, " -f ",fq," -v e -c 4 -a e -u gtr_newick -o r --run_id ",run.id,"+I+G"," > /dev/null &",sep="")
 +     cat(line1,"\n",line2,"\n",line3,"\n",line4,"\n",file=paste("phyml_",mtd,"_",fq,".sh",sep=""))
 +     system(paste('chmod u+x phyml_',mtd,'_',fq,'.sh',sep=""))
++     system(paste('./phyml_',mtd,'_',fq,'.sh',sep=""))
 +   }
 + }
 > 
 > proc.time()
    user  system elapsed 
-  0.426   0.104   0.566 
+  0.400   0.258   2.356 
