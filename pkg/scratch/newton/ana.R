@@ -1,12 +1,12 @@
-filedir <- "~/proteinevoutk20/pkg/scratch/newton/grid_log/"
+filedir <- "~/proteinevoutk20/pkg/scratch/newton/grid_log_0910/"
 prefix <- "bglog"
 suffix <- ".RData"
 separator <- "_"
 
-filedir <- "~/proteinevoutk20/pkg/scratch/newton/RData/FirstRun/"
-prefix <- "bg"
-suffix <- ""
-separator <- "."
+# filedir <- "~/proteinevoutk20/pkg/scratch/newton/RData/FirstRun/"
+# prefix <- "bg"
+# suffix <- ""
+# separator <- "."
 
 get.val <- function(x,y){
   file <- paste(filedir,prefix,separator,x,separator,y,suffix,sep="")
@@ -18,6 +18,32 @@ get.val <- function(x,y){
 }
 vec.get.val <- Vectorize(get.val, c("x","y"))
 
+ll <- 15
+beta <- seq(-15,0,length.out=(ll+1))[-1]
+gamma <- seq(-15,0,length.out=(ll+1))[-1]
+z = c(outer(1:15,1:15,vec.get.val))
+x = rep(beta,15)
+y = rep(gamma, each=15)
+bg.li = interp(x,y,z)
+image(bg.li,main="contour plot on [-15,0] by [-15,0]")
+contour(bg.li,add=T)
+
+ll1 <- 26
+beta1 <- seq(-5,0,length.out=ll1)
+gamma1 <- seq(-7,-3,length.out=ll1)
+z1 = c(outer(1:26,1:26,vec.get.val))
+x1 = rep(beta1,26)
+y1 = rep(gamma1, each=26)
+bg1.li = interp(x1,y1,z1)
+image(bg1.li,main="contour plot on [-5,0] by [-7,-3]")
+contour(bg1.li,add=T)
+
+X = c(x,x1)
+Y = c(y,y1)
+Z = c(z,z1)
+Bg.li = interp(X,Y,Z,duplicate="mean",xo=seq(-14,0,length=100),yo=seq(-14,0,length=100))
+image(Bg.li,main="contour plot combined")
+contour(Bg.li,add=T)
 ##Check and see if all 106 genes finished running and the .RData files are saved for the particular grid##
 ## 4 big grids: 1,3,5,6; each grid is splitted into 20*20 small grids indexed by x and y##
 check.grid <- function(k,x,y){
