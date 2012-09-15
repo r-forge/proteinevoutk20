@@ -329,9 +329,8 @@ ll_site <- function(tree,data,optimal,s=1,MuMat,alpha=al, beta=be, gamma=ga,m=20
       bf[root]=1 #set the frequency of the root aa to be 1, others to be 0
     }
     ##if the base frequencies are not specified, do a uniform distribution
-    if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
+    #if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
     GM1 = GM_cpv(GMcpv,alpha,beta,gamma)
-    ##MuMat = aa_MuMat_form(GTRvec)
     Q = mat_gen_indep(optimal,s,GM1,MuMat,m,C,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
     
     tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
@@ -348,28 +347,29 @@ ll_site <- function(tree,data,optimal,s=1,MuMat,alpha=al, beta=be, gamma=ga,m=20
       vec
     }
     probvec[1:length(tip),] <- t(sapply(1:length(tip),init.tip)) #all tips
-    #or use this to find tips:
-    #tip <- c(1:length(tree$tip.label))
     tl = tree$edge.length #lengths of the edges
     for(i in 1:tree$Nnode){ #for each interior node calculate the probability vector of observing 1 of 20 states
         from = parent[2*i] #parents
         to = child[(2*i-1):(2*i)] #direct descendents
         t_left = tl[2*i-1] #left branch length
         t_right = tl[2*i] #right branch length
-        #save(Q,t_left,optimal,s,GM1,MuMat,m,C,Phi,q,Ne,file="~/Desktop/debugging.Rsave",compress=FALSE)
         v.left <- expm.m(Q*t_left) #probabilities of transition from one state to another after time t
-        #print("did v.left, about to do v.right")
         v.right <- expm.m(Q*t_right)
-        #print("did v.right")
         probvec[from,] <- as.vector((v.left%*%probvec[to[1],])*(v.right%*%probvec[to[2],])) #pruning, vector form
         check.sum <- sum(probvec[from,])
         if(check.sum==0) #probability is very very low
           warning("numerical overflow",immediate.=TRUE)
-#         else if(!is.finite(check.sum))
-#           warning("sum of probability vector is not finite!",immediate.=TRUE)
     }
-    return(as.numeric(probvec[root,] %*% bf))
+    #if the root is specified, or the root frequencies are specified
+    if(!is.null(bf))
+      return(as.numeric(probvec[root,] %*% bf))
+    #if the root is not specified, pick the one that maximizes the liklihood value
+    else
+      #return(list(ll=max(probvec[root,]),root=which.max(probvec[root,]))) #with the corresponding root returned 
+      return(max(probvec[root,])) #just the value
 }
+#vectorized version of  ll_site, on optimal aa and root aa
+ll_site_vec <- Vectorize(ll_site,vectorize.args=c("optimal"))
 #############################################################################
 ## Remove columns with NA in the data
 PruneMissing <- function(x){
@@ -390,10 +390,13 @@ ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,roo
   data.u <- t(uniquecombs(t(data))) # if finds uniqe rows, so use the function on transpose
   ind <- attr(data.u,"index") #corresponding row numbers in unique matrix from original matrix
   occu <- as.numeric(table(ind)) # occurences of each unique column
-  if(is.null(protein_op)) #Use the most frequent amino acid, what if there are more than 1 with highest frequency??
-    protein_op <- apply(data.u,2,Mode)
+#   if(is.null(protein_op)) #Use the most frequent amino acid, what if there are more than 1 with highest frequency??
+#     protein_op <- apply(data.u,2,Mode)
   ll.one <- function(x){ #for each unique data, find ll_site, and multiply the -loglikelihood by the occurance
-    return(-log(ll_site(tree,data.u[,x],protein_op[x],s,MuMat,alpha,beta,gamma,m,root,bf,C,Phi,q,Ne))*occu[x])
+    if(!is.null(protein_op))
+      return(-log(ll_site(tree,data.u[,x],protein_op[x],s,MuMat,alpha,beta,gamma,m,root,bf,C,Phi,q,Ne))*occu[x])
+    else
+      return(-log(max(ll_site_vec(tree,data.u[,x],1:20,s,MuMat,alpha,beta,gamma,m,root,bf,C,Phi,q,Ne)))*occu[x])
   }
   lls <- unlist(lapply(1:length(occu),ll.one))
   if(all(is.finite(lls)==T))
