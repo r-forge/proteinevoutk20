@@ -21,6 +21,7 @@ datadir <- "~/proteinevoutk20/pkg/Data/"
 ##Nuvec <-  c(2.94194,8.23705,1.39133,2.33991,14.86435,1.00000)
 ##Model GTR
 Nu_vec <- c(1.96575,4.08655,1.39431,1.46172,6.36024,1.00000)
+Nu_vec_JC <- rep(1.0,6)
 ##empirical base frequencies
 freq <- c(0.31065,0.18365,0.20955,0.29615)
 ##Best tree with branch lengths output by PAUP
@@ -235,6 +236,7 @@ aa_MuMat_form <- function(vec,scale=T){
 }
 ## Amino acid mutation rate matrix for the GTR model of nucleotide
 mumat <- aa_MuMat_form(Nu_vec)
+mumat_JC <- aa_MuMat_form(Nu_vec_JC)
 #############################################################################
 ##find the physiochemical distance vector between two proteins, given the distance matrix
 pchem_d <- function(protein1, protein2,DisMat){
