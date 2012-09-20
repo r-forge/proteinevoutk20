@@ -83,8 +83,7 @@ GM <- GM_cpv(GMcpv,al,be,ga)
 ##   construct matrices for mutation and substitution  ##
 ##################################################################
 ##Short names for all the amino acids, in alphabetical order
-aa <- s2c("SRLPTAVGIFYCHQNKDEMW") #string to character in package "seqinr"
-aa <- levels(factor(aa)) #all the amino acids
+aa <- s2c("ARNDCQEGHILKMFPSTWYV") #amino aicds in alphabetical order
 Nu <- s2c("acgt") #nucleotide ACGT - now the order is changed !!!
 stop_cd <- c("taa","tag","tga") #stop codons
 nu_list <- NULL #list of all 64 codons (including stop codons)
@@ -306,7 +305,8 @@ fix_protein <- function(protein1, protein2, protein_op, s, DisMat,
 #m: number of states (amino acids) considered
 #DisMat: distance matrix between amino acids
 #MuMat: mutation rate matrix between amino acids
-mat_gen_indep <- function(aa_op,s,DisMat,MuMat,m=20,C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
+mat_gen_indep <- function(aa_op,s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
+  m = 20
   mat <- matrix(0,nrow=m,ncol=m) #set diagonal entries to be 0 at first
   for(i in 1:(m-1)){
     for(j in (i+1):m){
@@ -321,20 +321,16 @@ mat_gen_indep <- function(aa_op,s,DisMat,MuMat,m=20,C=2, Phi=0.5,q=4e-7,Ne=1.36e
 
 ######################################################
 ##likelihood function for 1 site
-ll_site <- function(tree,data,optimal,s=1,MuMat,alpha=al, beta=be, gamma=ga,m=20,
-                    root=NULL,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+ll_site <- function(tree,data,optimal,s,MuMat,alpha=al, beta=be, gamma=ga,
+                    bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
     ##If the given tree is not rooted and binary, then throw error and exit
     if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
-    ##If the amino acid at the root is specified, set the base frequencies
-    if(!is.null(root)){ 
-      bf = rep(0,m)
-      bf[root]=1 #set the frequency of the root aa to be 1, others to be 0
-    }
+    m = 20
     ##if the base frequencies are not specified, do a uniform distribution
-    #if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
+    if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
     GM1 = GM_cpv(GMcpv,alpha,beta,gamma)
-    Q = mat_gen_indep(optimal,s,GM1,MuMat,m,C,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
-    
+    Q = mat_gen_indep(optimal,s,GM1,MuMat,C,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
+    Q = scale(Q,bf)
     tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
     edge = tree$edge #edges
     nNodes = max(edge) #number of nodes in the tree
@@ -362,13 +358,9 @@ ll_site <- function(tree,data,optimal,s=1,MuMat,alpha=al, beta=be, gamma=ga,m=20
         if(check.sum==0) #probability is very very low
           warning("numerical overflow",immediate.=TRUE)
     }
-    #if the root is specified, or the root frequencies are specified
-    if(!is.null(bf))
-      return(as.numeric(probvec[root,] %*% bf))
-    #if the root is not specified, pick the one that maximizes the liklihood value
-    else
+    return(as.numeric(probvec[root,] %*% bf))
       #return(list(ll=max(probvec[root,]),root=which.max(probvec[root,]))) #with the corresponding root returned 
-      return(max(probvec[root,])) #just the value
+      #return(max(probvec[root,])) #just the value
 }
 #vectorized version of  ll_site, on optimal aa and root aa
 ll_site_vec <- Vectorize(ll_site,vectorize.args=c("optimal"))
@@ -385,15 +377,16 @@ PruneMissing <- function(x){
 #############################################################################
 ##Likelihood of data on a tree, given the selection coefficient "s" and the optimal amino acid sequence "protein_op"
 ##If protein_op (optimal protein) is not given, get it from the most frequent amino acids appeared in the data
-ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,m=20,protein_op=NULL,root=NULL,bf=NULL,
-                             C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+ll_indep <- function(s,alpha,beta,gamma,MuMat,tree,data,protein_op=NULL,bf=NULL,
+                             C=2,Phi=0.5,q=4e-7,Ne=1.36e7,majority_op=T){
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
   ##Find the unique columns (site data) and occurences of each unique column
+  m = 20
   data.u <- t(uniquecombs(t(data))) # if finds uniqe rows, so use the function on transpose
   ind <- attr(data.u,"index") #corresponding row numbers in unique matrix from original matrix
   occu <- as.numeric(table(ind)) # occurences of each unique column
-#   if(is.null(protein_op)) #Use the most frequent amino acid, what if there are more than 1 with highest frequency??
-#     protein_op <- apply(data.u,2,Mode)
+  if(majority_op) #Use the most frequent amino acid, what if there are more than 1 with highest frequency??
+     protein_op <- apply(data.u,2,Mode)
   ll.one <- function(x){ #for each unique data, find ll_site, and multiply the -loglikelihood by the occurance
     if(!is.null(protein_op))
       return(-log(ll_site(tree,data.u[,x],protein_op[x],s,MuMat,alpha,beta,gamma,m,root,bf,C,Phi,q,Ne))*occu[x])
