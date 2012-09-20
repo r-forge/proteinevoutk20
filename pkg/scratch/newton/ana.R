@@ -1,4 +1,5 @@
-filedir <- "~/proteinevoutk20/pkg/scratch/newton/grid_log_0910/"
+library(akima) #package for function "interp"
+filedir <- "~/proteinevoutk20/pkg/scratch/newton/grid_log_0914/"
 prefix <- "bglog"
 suffix <- ".RData"
 separator <- "_"
@@ -11,10 +12,14 @@ separator <- "_"
 get.val <- function(x,y){
   file <- paste(filedir,prefix,separator,x,separator,y,suffix,sep="")
   #file <- paste("~/proteinevoutk20/pkg/scratch/newton/RData/FirstRun/bg.",x,".",y,sep="")
+  if(file.exists(file)){
   load(file)
 ##  par <- sapply(1:106, function(x) res[[x]]$par)
   val <- sapply(1:106, function(x) res[[x]]$objective) # get the -likelihood values
   sum(val) # sum up all the -likelihood values
+  }
+  else
+    return (370000)
 }
 vec.get.val <- Vectorize(get.val, c("x","y"))
 
@@ -37,6 +42,16 @@ y1 = rep(gamma1, each=26)
 bg1.li = interp(x1,y1,z1)
 image(bg1.li,main="contour plot on [-5,0] by [-7,-3]")
 contour(bg1.li,add=T)
+
+l <- 26
+beta <- seq(0,5,length.out=l)
+gamma <- seq(-7,-3,length.out=l)
+z2 = c(outer(1:26,1:26,vec.get.val))
+x2 = rep(beta,26)
+y2 = rep(gamma, each=26)
+bg2.li = interp(x2,y2,z2)
+image(bg2.li,main="contour plot on [0,5] by [-7,-3]")
+contour(bg2.li,add=T)
 
 X = c(x,x1)
 Y = c(y,y1)
