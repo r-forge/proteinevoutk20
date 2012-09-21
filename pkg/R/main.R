@@ -1,3 +1,12 @@
+library(seqinr) #package to convert codons to amino acids
+library(phangorn) #phylogenetics package
+library(optimx) #optimization package
+library(expm) #matrix exponentiation
+#library(parallel) #parallel computing
+library(multicore)
+library(minqa) #optimization function bobyqa
+library(mgcv) #find the unique rows in a matrix - uniquecombs
+library(numDeriv) # calculate hessian of a function at a point
 ##################################################################
 #directory of the data need to read, including gene, tree, Grantham data
 datadir <- "~/proteinevoutk20/pkg/Data/"
@@ -85,7 +94,7 @@ for(i in 1:4){
 CDS <- nu_list[!nu_list %in% stop_cd] #61 non-stop codons
 rm(nu_list)
 rm(stop_cd)
-
+CDS_AA = sapply(1:61, function(x) translate(s2c(CDS[x]))) ## amino acids coded by 61 codons in order
 ##################################################################
 ##   Read gene data ##
 ##################################################################
@@ -236,6 +245,35 @@ aa_MuMat_form <- function(vec=rep(1,6),bf=rep(0.25,4)){
   #dimnames(arr) <- NULL
   return(arr)
 }
+
+## given the base frequencies of nucleotides, find base frequencies of codons
+## assuming the codon positions are all independent
+freq_codon <- function(bf){
+  freq = rep(0,61)
+  for(i in 1:61){
+    cd = as.numeric(factor(s2c(CDS[i]),Nu))
+    freq[i] = prod(BF[cd])
+  }
+  freq = as.table(freq)
+  dimnames(freq)[[1]] = CDS
+  return(freq)
+}
+##given the codon base frequencies, find the bf for amino acids
+freq_aa <- function(bf){
+  freq = matrix(0,20,1)
+  dimnames(freq)[[1]] = AA
+  CDS_AA = sapply(1:61, function(x) translate(s2c(CDS[x])))
+  for(i in 1:20)
+    freq[AA[i],1] = sum(bf[CDS_AA==AA[i]])
+  freq = as.table(as.vector(freq))
+  dimnames(freq)[[1]] = AA
+  return(freq)
+}
+
+cdlist <- list()
+for(i in 1:20){
+  cdlist[[i]] = CDS[CDS_AA==AA[i]]
+}
 ## Amino acid mutation rate matrix for the GTR model of nucleotide
 #MUMAT <- aa_MuMat_form(NU_VEC,BF)
 #MUMAT_JC <- aa_MuMat_form()
@@ -364,4 +402,3 @@ ll_site <- function(tree,data,Q,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   #return(max(probvec[root,])) #just the value
 }
 #vectorized version of  ll_site, on optimal aa and root aa
-ll_site_vec <- Vectorize(ll_site,vectorize.args=c("optimal"))
