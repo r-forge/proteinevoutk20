@@ -95,6 +95,11 @@ CDS <- nu_list[!nu_list %in% stop_cd] #61 non-stop codons
 rm(nu_list)
 rm(stop_cd)
 CDS_AA = sapply(1:61, function(x) translate(s2c(CDS[x]))) ## amino acids coded by 61 codons in order
+## list of 20, each includes all the codons coding for the particular amino acid
+cdlist <- list()
+for(i in 1:20){
+  cdlist[[i]] = CDS[CDS_AA==AA[i]]
+}
 ##################################################################
 ##   Read gene data ##
 ##################################################################
@@ -160,55 +165,78 @@ mat_form_lowtriQ <- function(Q=rep(1,6),bf=rep(0.25,4)){
 }
 ## given Q and bf, find scaled Q
 ## Goal: sum(pi_i * Q_ii) = -1
-scaleQ <- function(Q,bf){
+## and return its eigen values, eigen vectors, and inverse of eigen vector matrix
+## These are used to calcualte matrix exponentiation later.
+eigQ <- function(Q,bf=NULL){
+  l = dim(Q)[1]
+  if(is.null(bf)) bf = rep(1/l,l)
   scalefactor = - sum(diag(Q)*bf) 
-  return(Q/scalefactor)
+  Q = Q/scalefactor
+  e = eigen(Q,FALSE)
+  e$inv = solve(e$vectors)
+  return(e)
+}
+#scale Q w.r.t bf, if bf is not given, use equal frequencies
+scaleQ <- function(Q,bf=NULL){
+  l = dim(Q)[1]
+  if(is.null(bf)) bf = rep(1/l,l)
+  scalef = -sum(diag(Q)*bf)
+  Q = Q/scalef
+  return(Q)
 }
 #############################################################################
-##A function I need to do the matrix exponential correctly
-##Check if all the entries in x are finite, if yes, return TRUE, otherwise return FALSE
-is.nan.inf <- function(x){
-  return(all(is.finite(x)==TRUE))
+## given the base frequencies of nucleotides, find base frequencies of codons
+## assuming the codon positions are all independent. Stop codons are excluded
+freq_codon <- function(bf = rep(1/4,4)){
+  freq = rep(0,61)
+  for(i in 1:61){
+    cd = as.numeric(factor(s2c(CDS[i]),Nu))
+    freq[i] = prod(bf[cd])
+  }
+  freq = as.table(freq)
+  freq = freq/sum(freq)
+  dimnames(freq)[[1]] = CDS
+  return(freq)
 }
-## A modified version of expm that make sure there is no Inf and NaN in the result of matrix exponential
-expm.m <- function(x){
-  edefault <- expm(x) #expm from expm package with default method "higham08.b"
-  if(is.nan.inf(edefault)==TRUE) #if there is no Inf or NaN values in the result, return the result
-    return(edefault)
-  else{
-    #print(x)
-    eward77 <- expm(x,method="Ward77") #method Ward77
-    if(is.nan.inf(eward77)==TRUE)
-      return(eward77)
-    else{
-      epade <- expm(x,method="R_Pade") #method Pade
-      if(is.nan.inf(epade)==TRUE)
-        return(epade)
-      else{
-        etaylor <- expm(x,method="taylor") #method Taylor
-        if(is.nan.inf(etaylor)==TRUE)
-          return(etaylor)
-        else{
-          return(eward77)
-          warning("all methods give Inf or NaN",immediate.=TRUE)
-        }
+##given the nucleotide base frequencies, find the bf for amino acids
+freq_aa <- function(nubf=rep(1/4,4)){
+  bf = freq_codon(nubf) #codon frequencies
+  freq = matrix(0,20,1)
+  dimnames(freq)[[1]] = AA
+  CDS_AA = sapply(1:61, function(x) translate(s2c(CDS[x])))
+  for(i in 1:20)
+    freq[AA[i],1] = sum(bf[CDS_AA==AA[i]])
+  freq = as.table(as.vector(freq))
+  dimnames(freq)[[1]] = AA
+  return(freq)
+}
+## Given the rate matrix for 61 codons, and the base frequencies of codons, 
+## find the rate matrix for 20 amino acids. Now the markov process should be time reversible
+## Only mutation is taken into account, not selection and fixation.
+AAMat <- function(CdMat,CdBf){
+  Q = matrix(0,20,20)
+  for(i in 1:19){
+    fcodons = cdlist[[i]]
+    fcfq = CdBf[fcodons] #frequencies of codons coding for this amino acid
+    fcfq = fcfq/sum(fcfq) # normalize the sum to 1
+    for(j in (i+1):20){
+      if(i!=j){
+        tcodons = cdlist[[j]]
+        tcfq = CdBf[tcodons] #frequencies of codons coding for this amino acid
+        tcfq = tcfq/sum(tcfq) # normalize the sum to 1
+        Q[i,j] = sum(diag(fcfq) %*% CdMat[fcodons,tcodons])
+        Q[j,i] = sum(diag(tcfq) %*% CdMat[tcodons,fcodons])
       }
     }
   }
+  diag(Q) = -rowSums(Q)
+  return(Q)
 }
-#############################################################################
-codon_diff <- function(cd1,cd2){
-  cd1 = s2c(cd1)
-  cd2 = s2c(cd2)
-  diff_ind = (cd1 != cd2)
-  if(sum(diff_ind)==1)
-    return(c(cd1[diff_ind],cd2[diff_ind]))
-  else
-    return(NULL)
-}
-#Find the mutation rate matrix (20 by 20) from the 6 rates in GTR mutation rate
-#matrix for nucleotides
+
+#Find the mutation rate matrix (20 by 20) from the 6 rates in GTR mutation rate matrix for nucleotides
 #the rate G<->C is normalized to 1, now the scale is to scale the rates to real values
+## At this point, the process is time reversible. Only mutation is taken into account
+## i.e. diag(bf) %*% Matrix is symmetric
 aa_MuMat_form <- function(vec=rep(1,6),bf=rep(0.25,4)){
   Q <- mat_form_lowtriQ(vec,bf) #rate matrix for nucleotides    
   dimnames(Q) = list(Nu,Nu)
@@ -231,49 +259,18 @@ aa_MuMat_form <- function(vec=rep(1,6),bf=rep(0.25,4)){
     }
   }
   diag(codon_array) <- -rowSums(codon_array) #row sums equal to 0
-  ##20*20 array: mutations rates between amino acids
-  arr <- array(0,dim=c(20,20),dimnames=list(AA,AA)) #mutation rate matrix for amino acids
-  for(i in 1:61){
-    for(j in 1:61){
-      from_codon <- CDS[i]
-      to_codon <- CDS[j]
-      from_aa <- translate(s2c(from_codon))
-      to_aa <- translate(s2c(to_codon))
-      arr[from_aa,to_aa] <- arr[from_aa,to_aa] + codon_array[from_codon,to_codon]
-    }
-  }
-  #dimnames(arr) <- NULL
+  cdbf <- freq_codon(bf)
+  arr <- AAMat(codon_array,cdbf)
   return(arr)
 }
 
-## given the base frequencies of nucleotides, find base frequencies of codons
-## assuming the codon positions are all independent
-freq_codon <- function(bf){
-  freq = rep(0,61)
-  for(i in 1:61){
-    cd = as.numeric(factor(s2c(CDS[i]),Nu))
-    freq[i] = prod(BF[cd])
-  }
-  freq = as.table(freq)
-  dimnames(freq)[[1]] = CDS
-  return(freq)
-}
-##given the codon base frequencies, find the bf for amino acids
-freq_aa <- function(bf){
-  freq = matrix(0,20,1)
-  dimnames(freq)[[1]] = AA
-  CDS_AA = sapply(1:61, function(x) translate(s2c(CDS[x])))
-  for(i in 1:20)
-    freq[AA[i],1] = sum(bf[CDS_AA==AA[i]])
-  freq = as.table(as.vector(freq))
-  dimnames(freq)[[1]] = AA
-  return(freq)
-}
-
-cdlist <- list()
-for(i in 1:20){
-  cdlist[[i]] = CDS[CDS_AA==AA[i]]
-}
+# ##check if the transition between amino acids is time reversible
+# checkSymmetric <- function(nuvec,bf){
+#   bfq = freq_codon(bf)
+#   bfaa = freq_aa(bf)
+#   aaq = aa_MuMat_form(nuvec,bf)
+#   return(isSymmetric(diag(bfaa) %*% aaq))
+# }
 ## Amino acid mutation rate matrix for the GTR model of nucleotide
 #MUMAT <- aa_MuMat_form(NU_VEC,BF)
 #MUMAT_JC <- aa_MuMat_form()
@@ -360,45 +357,250 @@ mat_gen_indep <- function(aa_op,s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
   diag(mat) <- -rowSums(mat)
   return(mat)
 }
-######################################################
-##likelihood function for 1 site
-## Q: normalized (scaled) rate matrix
-ll_site <- function(tree,data,Q,bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
-  ##If the given tree is not rooted and binary, then throw error and exit
-  if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
-  m = 20
-  ##if the base frequencies are not specified, do a uniform distribution
-  if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
-  GM1 = GM_cpv(GMcpv,alpha,beta,gamma)
-  tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
-  edge = tree$edge #edges
-  nNodes = max(edge) #number of nodes in the tree
-  probvec = matrix(NA,nNodes,m) #probability of gettting different states at nodes that evolve to the current sequences
-  parent <- as.integer(edge[, 1]) #parents of the edges
-  child <- as.integer(edge[, 2]) #children of the edges
-  root <- as.integer(parent[!match(parent, child, 0)][1])  
-  tip <- as.integer(child[!match(child,parent,0)])
-  init.tip <- function(x){ #initiate the vector for the tips, 1 for the tip state, 0 otherwise
-    vec <- rep(0,m)
-    vec[data[x]] <- 1
-    vec
-  }
-  probvec[1:length(tip),] <- t(sapply(1:length(tip),init.tip)) #all tips
-  tl = tree$edge.length #lengths of the edges
-  for(i in 1:tree$Nnode){ #for each interior node calculate the probability vector of observing 1 of 20 states
-    from = parent[2*i] #parents
-    to = child[(2*i-1):(2*i)] #direct descendents
-    t_left = tl[2*i-1] #left branch length
-    t_right = tl[2*i] #right branch length
-    v.left <- expm.m(Q*t_left) #probabilities of transition from one state to another after time t
-    v.right <- expm.m(Q*t_right)
-    probvec[from,] <- as.vector((v.left%*%probvec[to[1],])*(v.right%*%probvec[to[2],])) #pruning, vector form
-    check.sum <- sum(probvec[from,])
-    if(check.sum==0) #probability is very very low
-      warning("numerical overflow",immediate.=TRUE)
-  }
-  return(as.numeric(probvec[root,] %*% bf))
-  #return(list(ll=max(probvec[root,]),root=which.max(probvec[root,]))) #with the corresponding root returned 
-  #return(max(probvec[root,])) #just the value
+# given optimal amino acid, find the rate matrix Q and the eigen-decomposition of Q
+eigOp <- function(op_aa,s,DisMat,MuMat,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-07,Ne=1.36e07){
+  mat = mat_gen_indep(op_aa,s,DisMat,MuMat,C,Phi,q,Ne)
+  res = eigQ(mat,bf)
+  return(list(matrix=mat,eig=res))
 }
-#vectorized version of  ll_site, on optimal aa and root aa
+## given s, distance matrix, and mutation rate matrix, find rate matrices for all 20 amino acids as optimal
+## And then find their eigen decomposition 
+eigAllaa <- function(s,DisMat,MuMat,bf=rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
+  res = vector(mode="list",length=20)
+  for(i in 1:20){
+    #print(paste("now ", i, " is the optimal amino acid"))
+    res[[i]] = eigOp(i,s,DisMat,MuMat,bf,C,Phi,q,Ne)
+  }
+  return(as.matrix(res))
+}
+# list of 20 rate matrices, one of each aa as optimal
+QAllaa <- function(s,DisMat,MuMat,bf=rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
+  res = vector(mode="list",length=20)
+  for(i in 1:20){
+    #print(paste("now ", i, " is the optimal amino acid"))
+    res[[i]] = mat_gen_indep(i,s,DisMat,MuMat,C,Phi,q,Ne)
+  }
+  return(as.matrix(res))
+}
+# to parse an object from getPm, say P, do P[i,j][[1]], or P[[i,j]]
+# Q is a scaled matrix
+getPm <- function(el, Q, g){
+  ell = length(el)
+  gl = length(g)
+  res = array(list(NULL),dim=c(gl,ell))
+  for(i in 1:gl){
+    for(j in 1:ell){
+      res[[i,j]] = expm(Q*el[j]*g[i])
+    }
+  }
+  return(res)
+}
+# to parse an object from getPm, say P, do P[i,j][[1]], or P[[i,j]]
+
+ll3m <- function (dat1, tree, bf = rep(1/20,20), g = 1, 
+                  Q, assign.dat = FALSE, 
+                  ...) 
+{
+  if (is.null(attr(tree, "order")) || attr(tree, "order") == 
+    "cladewise") 
+    tree <- reorderPruning(tree)
+  q = length(tree$tip.label)
+  node <- tree$edge[, 1]
+  edge <- tree$edge[, 2]
+  m = length(edge) + 1
+  dat = vector(mode = "list", length = m)
+  Q = scaleQ(Q,bf)
+  el <- tree$edge.length
+  P <- getPm(el,Q,g)
+  nr <- as.integer(attr(dat1, "nr"))
+  nc <- as.integer(attr(dat1, "nc"))
+  node = as.integer(node - min(node))
+  edge = as.integer(edge - 1)
+  nTips = as.integer(length(tree$tip))
+  mNodes = as.integer(max(node) + 1)
+  contrast = attr(dat1, "contrast")
+  nco = as.integer(dim(contrast)[1])
+  res <- .Call("LogLik4", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
+  result = res[[2]][[1]] + log(res[[1]][[1]] %*% bf)     
+  if (assign.dat) {
+    dat[(q + 1):m] <- res
+    attr(dat, "names") = c(tree$tip.label, as.character((q + 
+      1):m))
+    assign("asdf", dat, envir = parent.frame(n = 1))
+  }
+  result
+}
+# loglikelihood given optimal amino acids at each site
+llop <- function(dat1,tree,op,bf=rep(1/20,20),Qall,g=1,C=2,Phi=0.2,q=4e-7,Ne=1.36e7,assign.dat=FALSE){
+  ## tree information is all the same, so do it outside of the loop
+  if (is.null(attr(tree, "order")) || attr(tree, "order") == 
+    "cladewise") 
+    tree <- reorderPruning(tree)
+  q = length(tree$tip.label) #number of tips
+  node <- tree$edge[, 1] #parents
+  edge <- tree$edge[, 2] #children
+  m = length(edge) + 1 #number of interior nodes
+  dat = vector(mode = "list", length = m)
+  el <- tree$edge.length
+  nr <- as.integer(attr(dat1, "nr")) # number of site (patterns)
+  nc <- as.integer(attr(dat1, "nc")) #number of states in data
+  node = as.integer(node - min(node)) #manipulation on the numbering of nodes
+  edge = as.integer(edge - 1)
+  nTips = as.integer(length(tree$tip)) #number of tips
+  mNodes = as.integer(max(node) + 1)
+  contrast = attr(dat1, "contrast")
+  nco = as.integer(dim(contrast)[1])
+  result = matrix(0,nrow=nr,ncol=1)
+  Pall = vector("list",length=20)
+  for(i in 1:20){
+    Q = scaleQ(Qall[[i]],bf)
+    Pall[[i]] = getPm(el,Q,g)
+  }
+  for(i in 1:nr){
+    data = subset(dat1,1:q,i)
+    nri = as.integer(attr(data,"nr"))
+    op_aa = op[i]
+    res <- .Call("LogLik4", data[tree$tip.label], Pall[[op_aa]], nri, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
+    result[i,] = res[[2]][[1]] + log(res[[1]][[1]] %*% bf)
+  }   
+  if (assign.dat) {
+    dat[(q + 1):m] <- res
+    attr(dat, "names") = c(tree$tip.label, as.character((q + 
+      1):m))
+    assign("asdf", dat, envir = parent.frame(n = 1))
+  }
+  result
+}
+
+
+## For all the distinct sites (m), find loglikelihood, result is m * 20 matrix
+## each column stores the loglikelihods when the corresponding amino acid is optimal 
+llaa <- function(tree,data,eigAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
+  result = NULL
+  weight = attr(data,"weight")
+  for(i in 1:20){ #when optimal aa is i
+    llopi = ll3(data,tree,bf=bf,g=1,eig=eigAll[[i]])
+    result = cbind(result,llopi)
+  }
+  opaa = apply(result,1,which.max)
+  sitelik = apply(result,1,max)
+  loglik = sum(weight * sitelik)
+  return(list(loglik= loglik, llmat=result))
+}
+#this one uses expm for matrix exponentiation
+llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
+  result = NULL
+  weight = attr(data,"weight")
+  for(i in 1:20){ #when optimal aa is i
+    llopi = ll3m(data,tree,bf=bf,g=1,Q=QAll[[i]])
+    result = cbind(result,llopi)
+  }
+  opaa = apply(result,1,which.max)
+  sitelik = apply(result,1,max)
+  loglik = sum(weight * sitelik)
+  return(list(loglik= loglik, opaa = opaa, sitelik = sitelik, llmat=result))
+}
+## find the loglikelihood given Q and other paramters
+mll <- function(data,tree,s,beta,gamma,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+  call <- match.call()
+  if(class(tree)!="phylo") stop("tree must be of class phylo") 
+  if (is.null(attr(tree, "order")) || attr(tree, "order") == 
+    "cladewise") 
+    tree <- reorderPruning(tree)
+  if (class(data)[1] != "phyDat") stop("data must be of class phyDat")
+  if(is.null(tree$edge.length)) stop("tree must have edge weights") 
+  if(any(is.na(match(tree$tip, attr(data, "names"))))) stop("tip labels are not in data")
+  if(is.null(Q)) Q = rep(1,6)
+  if(is.null(bfnu)) bfnu = rep(1/4,4)
+  if(is.null(bfaa)) bfaa = freq_aa(bfnu)
+  dismat = GM_cpv(GM_CPV,al,beta,gamma)
+  mumat = aa_MuMat_form(Q,bfnu)
+  eigall = eigAllaa(s,dismat,mumat,bf=bfaa,C,Phi,q,Ne)
+  ll = llaa(tree,data,eigall,bfaa,C,Phi,q,Ne)
+  result = list(loglike=ll$loglik,call=call)
+  return(result)
+}
+## this one uses
+mllm <- function(data,tree,s,beta,gamma,Q=rep(1,6),bfnu=rep(1/4,4),bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+  call <- match.call()
+  if(class(tree)!="phylo") stop("tree must be of class phylo") 
+  if (is.null(attr(tree, "order")) || attr(tree, "order") == 
+    "cladewise") 
+    tree <- reorderPruning(tree)
+  if (class(data)[1] != "phyDat") stop("data must be of class phyDat")
+  if(is.null(tree$edge.length)) stop("tree must have edge weights") 
+  if(any(is.na(match(tree$tip, attr(data, "names"))))) stop("tip labels are not in data")
+  if(is.null(bfaa)) bfaa = freq_aa(bfnu)
+  dismat = GM_cpv(GM_CPV,al,beta,gamma)
+  mumat = aa_MuMat_form(Q,bfnu)
+  Qall = QAllaa(s,dismat,mumat,bf,C,Phi,q,Ne)
+  ll = llaam(tree,data,Qall,bfaa,C,Phi,q,Ne)
+  result = list(ll=ll,data=data,tree=tree,GMweights=c(al,beta,gamma),Q=Q,bfnu=bfnu,bfaa=bfaa,call=call)
+  return(result)
+}
+
+optim.s.weight <- function(object,C=2,Phi=0.5,q=4e-07,Ne=1.36e07, method="Nelder-Mead",trace=1, ...){
+  ab <- numeric(3)
+  if(method != "nlminb"){
+    fn = function(ab,object, ...){
+      ab = exp(ab)
+      result = update(object,s=ab[1],beta=ab[2],gamma=ab[3], ...)$ll$loglik
+      return(result)
+    }
+    res = optim(par=ab,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
+                control=list(fnscale=-1,trace=trace),object=object, ...)
+    res$par = exp(res$par)
+    return(res)
+  }
+  else{
+    fn = function(ab,object, ...){
+      ab = exp(ab)
+      result = update(object,s=ab[1],beta=ab[2],gamma=ab[3], ...)$ll$loglik
+      return(-result)
+    }
+    res = nlminb(start=ab,objective=fn,gradient=NULL,hessian=NULL,
+                 control = list(trace=trace),object=object, lower=-Inf, upper=Inf, ...)
+    res$par = exp(res$par)
+    res$objective = -res$objective
+    return(res)
+  }
+}
+
+## sample call: Q1 = optimQm(rokastree,gene1,Q=NU_VEC,subs=c(1,2,3,4,5,0),trace=1,s=0.1,beta=be,gamma=ga)
+
+optimQm <- function(tree,data,Q=rep(1,6),subs=rep(1,length(Q)),trace=0,method="Nelder-Mead", ...){
+  m = length(Q)
+  n = max(subs)
+  ab = numeric(n)
+  for(i in 1:n) ab[i] = log(Q[which(subs==i)[1]])
+  fn = function(ab,tree,data,m,n,subs, ...){
+    Q = numeric(m)
+    for(i in 1:n) Q[subs==i] = ab[i]
+    result = mllm(data,tree,Q=exp(Q), ...)$ll$loglik
+    return(result)
+  }
+  res = optim(par=ab,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace),tree=tree,data=data,m=m,n=n,subs=subs, ...)
+  Q = rep(1,m)
+  for(i in 1:n) Q[subs==i] = exp(res$par[i])
+  res$par = Q
+  return(res)
+}
+
+optimBranch <- function(data,tree,method="Nelder-Mead",trace = 0, ...){
+  ##s,beta,gamma,Q=rep(1,6),bfnu=rep(1/4,4),bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+  if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
+    tree <- reorderPruning(tree)
+  el <- tree$edge.length
+  tree$edge.length[el < 0] <- 1e-08
+  el <- log(tree$edge.length)
+  fn = function(el,data,tree, ...){
+    tree$edge.length = exp(el)
+    result = mllm(data,tree, ...)$ll$loglik
+    return(result)
+  }
+  res = optim(par=el, fn=fn, gr=NULL,method=method,lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace),tree=tree,data=data, ...)
+  res$par = exp(res$par)
+  return(res)
+}
