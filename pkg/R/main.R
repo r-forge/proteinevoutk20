@@ -284,8 +284,7 @@ reorderPruning <- function (x, ...)
     stop("more than 1 root found")
   n = length(parents)
   m = max(x$edge)  # edge  parents                                                                                                               
-  neworder = .C("reorder", parents, child, as.integer(n), as.integer(m), integer(n), as.integer(root-1L), DUP=FALSE, PACKAGE = "phangorn")[[5]] \
-  
+  neworder = .C("reorder", parents, child, as.integer(n), as.integer(m), integer(n), as.integer(root-1L), DUP=FALSE, PACKAGE = "phangorn")[[5]]
   x$edge = x$edge[neworder,]
   x$edge.length = x$edge.length[neworder]
   attr(x, "order") <- "pruningwise"
