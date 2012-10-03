@@ -274,6 +274,24 @@ aa_MuMat_form <- function(vec=rep(1,6),bf=rep(0.25,4)){
 ## Amino acid mutation rate matrix for the GTR model of nucleotide
 #MUMAT <- aa_MuMat_form(NU_VEC,BF)
 #MUMAT_JC <- aa_MuMat_form()
+
+reorderPruning <- function (x, ...)
+{
+  parents <- as.integer(x$edge[, 1])
+  child <- as.integer(x$edge[, 2])
+  root <- as.integer(parents[!match(parents, child, 0)][1])  # unique out                                                                        
+  if (length(root) > 2)
+    stop("more than 1 root found")
+  n = length(parents)
+  m = max(x$edge)  # edge  parents                                                                                                               
+  neworder = .C("reorder", parents, child, as.integer(n), as.integer(m), integer(n), as.integer(root-1L), DUP=FALSE, PACKAGE = "phangorn")[[5]] \
+  
+  x$edge = x$edge[neworder,]
+  x$edge.length = x$edge.length[neworder]
+  attr(x, "order") <- "pruningwise"
+  x
+}
+
 #############################################################################
 #############################################################################
 ##find the physiochemical distance vector between two proteins, given the distance matrix
@@ -397,6 +415,43 @@ getPm <- function(el, Q, g){
   }
   return(res)
 }
+
+ll3 <- function (dat1, tree, bf = c(0.25, 0.25, 0.25, 0.25), g = 1,
+                 Q = c(1, 1, 1, 1, 1, 1), eig = NULL, assign.dat = FALSE,
+                 ...)
+{
+  if (is.null(attr(tree, "order")) || attr(tree, "order") ==
+    "cladewise")
+    tree <- reorderPruning(tree)
+  q = length(tree$tip.label)
+  node <- tree$edge[, 1]
+  edge <- tree$edge[, 2]
+  m = length(edge) + 1
+  dat = vector(mode = "list", length = m)
+  dat[1:q] = dat1[tree$tip.label]
+  if (is.null(eig))
+    eig = edQt(bf = bf, Q = Q)
+  el <- tree$edge.length
+  P <- getP(el, eig, g)
+  nr <- as.integer(attr(dat1, "nr"))
+  nc <- as.integer(attr(dat1, "nc"))
+  node = as.integer(node - min(node))
+  edge = as.integer(edge - 1)
+  nTips = as.integer(length(tree$tip))
+  mNodes = as.integer(max(node) + 1)
+  contrast = attr(dat1, "contrast")
+  nco = as.integer(dim(contrast)[1])
+  res <- .Call("LogLik4", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
+  result = res[[2]][[1]] + log(res[[1]][[1]] %*% bf)
+  if (assign.dat) {
+    dat[(q + 1):m] <- res
+    attr(dat, "names") = c(tree$tip.label, as.character((q +
+      1):m))
+    assign("asdf", dat, envir = parent.frame(n = 1))
+  }
+  result
+}
+
 
 ll3m <- function (dat1, tree, bf = rep(1/20,20), g = 1, 
                   Q, assign.dat = FALSE, 
