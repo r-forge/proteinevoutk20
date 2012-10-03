@@ -360,8 +360,8 @@ mat_gen_indep <- function(aa_op,s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
 # given optimal amino acid, find the rate matrix Q and the eigen-decomposition of Q
 eigOp <- function(op_aa,s,DisMat,MuMat,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-07,Ne=1.36e07){
   mat = mat_gen_indep(op_aa,s,DisMat,MuMat,C,Phi,q,Ne)
-  res = eigQ(mat,bf)
-  return(list(matrix=mat,eig=res))
+  res = eigQ(t(mat),bf) #in order to use functions (C and R) from phangorn
+  return(res)
 }
 ## given s, distance matrix, and mutation rate matrix, find rate matrices for all 20 amino acids as optimal
 ## And then find their eigen decomposition 
@@ -382,6 +382,8 @@ QAllaa <- function(s,DisMat,MuMat,bf=rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e7)
   }
   return(as.matrix(res))
 }
+# given the edge lengths el, rate matrix Q and rate g, find the probability transition matrices P
+# result is of dimension length(g)*length(el)
 # to parse an object from getPm, say P, do P[i,j][[1]], or P[[i,j]]
 # Q is a scaled matrix
 getPm <- function(el, Q, g){
@@ -395,7 +397,6 @@ getPm <- function(el, Q, g){
   }
   return(res)
 }
-# to parse an object from getPm, say P, do P[i,j][[1]], or P[[i,j]]
 
 ll3m <- function (dat1, tree, bf = rep(1/20,20), g = 1, 
                   Q, assign.dat = FALSE, 
@@ -410,6 +411,7 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20), g = 1,
   m = length(edge) + 1
   dat = vector(mode = "list", length = m)
   Q = scaleQ(Q,bf)
+  Q = t(Q) # in order to use C function in phangorn package
   el <- tree$edge.length
   P <- getPm(el,Q,g)
   nr <- as.integer(attr(dat1, "nr"))
@@ -430,7 +432,8 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20), g = 1,
   }
   result
 }
-# loglikelihood given optimal amino acids at each site
+# loglikelihood given optimal amino acids at each site. This funciton is actually not necessary, since it takes longer than 
+# calculate all the optimal aa possibilities.
 llop <- function(dat1,tree,op,bf=rep(1/20,20),Qall,g=1,C=2,Phi=0.2,q=4e-7,Ne=1.36e7,assign.dat=FALSE){
   ## tree information is all the same, so do it outside of the loop
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -500,7 +503,16 @@ llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
   loglik = sum(weight * sitelik)
   return(list(loglik= loglik, opaa = opaa, sitelik = sitelik, llmat=result))
 }
-## find the loglikelihood given Q and other paramters
+## find the loglikelihood given 20 by 20 rate matrix Q and base frequencies bf
+llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.2,q=4e-7,Ne=1.36e7){
+  result = NULL
+  weight = attr(data,"weight")
+  ll = ll3m(data,tree,bf=bf,g=1,Q=Q)
+  loglik = sum(weight*ll)
+  return(list(loglik=loglik,Q=Q,bf=bf))
+}
+## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
+## nucleotide transition rate matrix of length 6
 mll <- function(data,tree,s,beta,gamma,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
@@ -517,7 +529,8 @@ mll <- function(data,tree,s,beta,gamma,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=
   mumat = aa_MuMat_form(Q,bfnu)
   eigall = eigAllaa(s,dismat,mumat,bf=bfaa,C,Phi,q,Ne)
   ll = llaa(tree,data,eigall,bfaa,C,Phi,q,Ne)
-  result = list(loglike=ll$loglik,call=call)
+  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,bfnu=bfnu,bfaa=bfaa,call=call)
+  class(result) = "mllm"
   return(result)
 }
 ## this one uses expm for matrix exponentiation
@@ -541,8 +554,9 @@ mllm <- function(data,tree,s,beta,gamma,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q
   class(result) = "mllm"
   return(result)
 }
-
-optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",trace=1, ...){
+#MLE for s, beta and gamma, using Nelder-Mead method by default
+#sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,trace=1,Q=NU_VEC,bfnu=BF)
+optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit = 500, trace=0, ...){
   ab <- log(c(s,beta,gamma))
   if(method != "nlminb"){
     fn = function(ab,data,tree, ...){
@@ -551,7 +565,7 @@ optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",trace=1
       return(result)
     }
     res = optim(par=ab,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
-                control=list(fnscale=-1,trace=trace,maxit=50),data=data,tree=tree, ...)
+                control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
     res$par = exp(res$par)
     return(res)
   }
@@ -570,7 +584,7 @@ optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",trace=1
 }
 
 ## sample call: Q1 = optimQm(rokastree,gene1,Q=NU_VEC,subs=c(1,2,3,4,5,0),trace=1,s=0.1,beta=be,gamma=ga)
-optimQm <- function(tree,data,Q=rep(1,6),subs=c(1:(length(Q)-1),0),trace=0,method="Nelder-Mead", ...){
+optimQm <- function(tree,data,Q=rep(1,6),subs=c(1:(length(Q)-1),0),method="Nelder-Mead",maxit=500,trace=0, ...){
   m = length(Q)
   n = max(subs)
   ab = numeric(n)
@@ -582,14 +596,14 @@ optimQm <- function(tree,data,Q=rep(1,6),subs=c(1:(length(Q)-1),0),trace=0,metho
     return(result)
   }
   res = optim(par=ab,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
-              control=list(fnscale=-1,trace=trace,maxit=50),tree=tree,data=data,m=m,n=n,subs=subs, ...)
+              control=list(fnscale=-1,trace=trace,maxit=maxit),tree=tree,data=data,m=m,n=n,subs=subs, ...)
   Q = rep(1,m)
   for(i in 1:n) Q[subs==i] = exp(res$par[i])
   res$par = Q
   return(res)
 }
 
-optimBranch <- function(data,tree,method="Nelder-Mead",trace = 0, ...){
+optimBranch <- function(data,tree,method="Nelder-Mead",maxit=100,trace = 0, ...){
   ##s,beta,gamma,Q=rep(1,6),bfnu=rep(1/4,4),bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
     tree <- reorderPruning(tree)
@@ -602,14 +616,14 @@ optimBranch <- function(data,tree,method="Nelder-Mead",trace = 0, ...){
     return(result)
   }
   res = optim(par=el, fn=fn, gr=NULL,method=method,lower=-Inf,upper=Inf,
-              control=list(fnscale=-1,trace=trace,maxit=50),tree=tree,data=data, ...)
+              control=list(fnscale=-1,trace=trace,maxit=maxit),tree=tree,data=data, ...)
   res$par = exp(res$par)
   return(res)
 }
 
 #optim.mllm <- function(data,tree,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7,){}
 optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, 
-                       control = list(epsilon=1e-08,maxit=10,trace=0,htrace=TRUE),subs=NULL){
+                       control = list(epsilon=1e-08,maxit=50,hmaxit=10,trace=0,htrace=TRUE),subs=NULL){
   tree = object$tree
   call = object$call
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
@@ -621,6 +635,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
     tree$edge.length[tree$edge.length < 1e-08] <- 1e-08
     object <- update(object, tree=tree)
   }
+  maxit = control$maxit
   trace = control$trace
   htrace = control$htrace #print out information about steps or not?
   data = object$data
@@ -637,7 +652,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   rounds = 0
   while(opti){
     if(optsWeight){
-      res = optim.s.weight(data,tree,s=s,beta=beta,gamma=gamma,trace=trace,
+      res = optim.s.weight(data,tree,s=s,beta=beta,gamma=gamma,maxit=maxit,trace=trace,
                            Q=Q,bfnu=bfnu,bfaa=bfaa,C=2,Phi=0.5,q=4e-07,Ne=1.36e07)
       s = res$par[1]
       beta = res$par[2]
@@ -647,7 +662,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       ll = res[[2]]
     }
     if(optQ){
-      res = optimQm(tree,data,Q=Q,subs=subs,trace=trace,s=s,beta=beta,gamma=gamma)
+      res = optimQm(tree,data,Q=Q,subs=subs,maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,bfnu=bfnu,bfaa=bfaa)
       Q = res$par
       if(htrace){
         cat("optimize rate matrix: ", ll, "--->", res[[2]], "\n")
@@ -655,17 +670,18 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       ll = res[[2]]
     }
     if(optBranch){
-      res = optimBranch(data,tree,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfnu=bfnu,bfaa=bfaa)
+      res = optimBranch(data,tree,maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfnu=bfnu,bfaa=bfaa)
       if(htrace)
         cat("optimize branch lengths:", ll, "--->", res[[2]], "\n")
       tree$edge.length = res[[1]]
       ll = res[[2]]
     }
     rounds = rounds + 1
-    if(rounds > control$maxit) opti <- FALSE
+    if(rounds > control$hmaxit) opti <- FALSE
     if((ll1-ll)/ll < control$epsilon) opti <- FALSE
     ll1 = ll
   }
   object = update(object, tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,bfnu=bfnu,bfaa=bfaa)
   return(object)
 }
+#rokasdata = read.phyDat("proteinevoutk20/pkg/Result/rokasAA",format="phylip",type="AA")
