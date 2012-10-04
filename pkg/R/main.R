@@ -116,13 +116,25 @@ conv <- function(filename,type="num"){
     }
     return(aas)
   }
-  seqdata <- t(sapply(1:length(data),dna.to.aa,simplify="array")) #sapply and simplify to array
-  dimnames(seqdata)[[1]]<- attr(data,"name") #Change the dimnames to the species names
+  ## type = AA, return a list of amino acid sequences
+
+  seqdata <- lapply(1:length(data),dna.to.aa)
+  names(seqdata) = attr(data,"name")
+  if(type=="AA")
+    return(seqdata)
+
+  #seqdata <- t(sapply(1:length(data),dna.to.aa,simplify="array")) #sapply and simplify to array
+  #dimnames(seqdata)[[1]]<- attr(data,"name") #Change the dimnames to the species names
   if(type=="phyDat") ## convert amino acid sequences to phyDat type
     seqdata = phyDat(seqdata,type="AA")
   return(seqdata)
 }
 
+# for(i in 1:106){
+#   file = paste("~/proteinevoutk20/pkg/Data/gene",i,".fasta",sep="")
+#   gene = conv(file,"AA")
+#   write.nexus.data(gene,paste("~/proteinevoutk20/pkg/Result/gene",i,"AA.nex",sep=""),format="protein",interleaved=F)
+# }
 ##   Read in 106 gene data  from Rokas's ##
 # l <- 106
 # ROKAS_DATA <- vector("list",length=l)
@@ -141,6 +153,13 @@ PruneMissing <- function(x){
   x[,-naCol]
 }
 #############################################################################
+## find the empirical base frequencies for amino acid list data (not phyDat data)
+findBf <- function(datalist){
+  data = unlist(datalist)
+  datatb = table(data)
+  datatb = datatb[AA]
+  return(datatb/sum(datatb))
+}
 ## Find the most frequent element of a vector
 ## It works for numbers and characters
 Mode <- function(x) {
@@ -555,7 +574,42 @@ llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
   opaa = apply(result,1,which.max)
   sitelik = apply(result,1,max)
   loglik = sum(weight * sitelik)
-  return(list(loglik= loglik, opaa = opaa, sitelik = sitelik, llmat=result))
+  res=list(loglik= loglik, opaa = opaa, sitelik = sitelik, llmat=result)
+  return(res)
+}
+# assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
+# if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
+llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
+  result = NULL
+  weight = attr(data,"weight")
+  nr = attr(data,"nr")
+  opaa = NULL
+  for(i in 1:20){ #when optimal aa is i
+    llopi = ll3m(data,tree,bf=bf,g=1,Q=QAll[[i]])
+    result = cbind(result,llopi)
+  }
+  if(!is.null(opw)){
+    if(sum(opw)!=1) opw = opw/sum(opw)
+    result = result * rep(opw,each=nr)
+    sitelik = apply(result,1,sum)
+    loglik = sum(weight * sitelik)
+  }
+  else{
+    opaa = apply(result,1,which.max)
+    sitelik=apply(result,1,max)
+    loglik = sum(weight*sitelik)
+  }
+  return(list(loglik= loglik, opaa=opaa,weights=opw, sitelik = sitelik, llmat=result))
+}
+# only return the big matrix, with number of rows equal to number of different sites, and cols equal to 20
+llaam1 <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
+  result = NULL
+  weight = attr(data,"weight")
+  for(i in 1:20){ #when optimal aa is i
+    llopi = ll3m(data,tree,bf=bf,g=1,Q=QAll[[i]])
+    result = cbind(result,llopi)
+  }
+  return(result)
 }
 ## find the loglikelihood given 20 by 20 rate matrix Q and base frequencies bf
 llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.2,q=4e-7,Ne=1.36e7){
@@ -588,7 +642,7 @@ mll <- function(data,tree,s,beta,gamma,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=
   return(result)
 }
 ## this one uses expm for matrix exponentiation
-mllm <- function(data,tree,s,beta,gamma,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+mllm <- function(data,tree,s,beta,gamma,Q=NULL,opw=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -603,7 +657,7 @@ mllm <- function(data,tree,s,beta,gamma,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q
   dismat = GM_cpv(GM_CPV,al,beta,gamma)
   mumat = aa_MuMat_form(Q,bfnu)
   Qall = QAllaa(s,dismat,mumat,bf,C,Phi,q,Ne)
-  ll = llaam(tree,data,Qall,bfaa,C,Phi,q,Ne)
+  ll = llaaw(tree,data,Qall,opw,bfaa,C,Phi,q,Ne)
   result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,bfnu=bfnu,bfaa=bfaa,call=call)
   class(result) = "mllm"
   return(result)
