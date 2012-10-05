@@ -158,6 +158,19 @@ findBf <- function(datalist){
   data = unlist(datalist)
   datatb = table(data)
   datatb = datatb[AA]
+  datatb = as.numeric(datatb)
+  return(datatb/sum(datatb))
+}
+## for phyDat format
+findBf2 <- function(data){
+  ind = attr(data,"index")
+  l = length(data)
+  datalist = vector("list",length=l)
+  for(i in 1:l)
+    datalist[[i]] = data[[i]][ind]
+  data = unlist(datalist)
+  datatb = table(data)
+  datatb = as.numeric(datatb)
   return(datatb/sum(datatb))
 }
 ## Find the most frequent element of a vector
@@ -171,7 +184,9 @@ Mode <- function(x) {
 ##given lower triangular part of R (i.e. Q = R %*% diag(bf)), and base frequencies, find the scaled Q
 ## Default: 4 by 4 matrix for Jukes-Cantor model
 mat_form_lowtriQ <- function(Q=rep(1,6),bf=rep(0.25,4)){
+  if(sum(bf==0)) stop("base frequencies can't all be 0!")
   l=length(bf)
+  bf=bf/sum(bf)
   res = matrix(0, l, l)
   res[lower.tri(res)] = Q
   res = res+t(res)
@@ -189,6 +204,7 @@ mat_form_lowtriQ <- function(Q=rep(1,6),bf=rep(0.25,4)){
 eigQ <- function(Q,bf=NULL){
   l = dim(Q)[1]
   if(is.null(bf)) bf = rep(1/l,l)
+  bf=bf/sum(bf)
   scalefactor = - sum(diag(Q)*bf) 
   Q = Q/scalefactor
   e = eigen(Q,FALSE)
@@ -196,9 +212,11 @@ eigQ <- function(Q,bf=NULL){
   return(e)
 }
 #scale Q w.r.t bf, if bf is not given, use equal frequencies
+# bf doesn't have sum to 1
 scaleQ <- function(Q,bf=NULL){
   l = dim(Q)[1]
   if(is.null(bf)) bf = rep(1/l,l)
+  bf = bf/sum(bf)
   scalef = -sum(diag(Q)*bf)
   Q = Q/scalef
   return(Q)
@@ -207,6 +225,7 @@ scaleQ <- function(Q,bf=NULL){
 ## given the base frequencies of nucleotides, find base frequencies of codons
 ## assuming the codon positions are all independent. Stop codons are excluded
 freq_codon <- function(bf = rep(1/4,4)){
+  bf=bf/sum(bf)
   freq = rep(0,61)
   for(i in 1:61){
     cd = as.numeric(factor(s2c(CDS[i]),Nu))
@@ -233,6 +252,7 @@ freq_aa <- function(nubf=rep(1/4,4)){
 ## find the rate matrix for 20 amino acids. Now the markov process should be time reversible
 ## Only mutation is taken into account, not selection and fixation.
 AAMat <- function(CdMat,CdBf){
+  CdBf= CdBf/sum(CdBf)
   Q = matrix(0,20,20)
   for(i in 1:19){
     fcodons = cdlist[[i]]
@@ -410,12 +430,8 @@ eigAllaa <- function(s,DisMat,MuMat,bf=rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e
   return(as.matrix(res))
 }
 # list of 20 rate matrices, one of each aa as optimal
-QAllaa <- function(s,DisMat,MuMat,bf=rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
-  res = vector(mode="list",length=20)
-  for(i in 1:20){
-    #print(paste("now ", i, " is the optimal amino acid"))
-    res[[i]] = mat_gen_indep(i,s,DisMat,MuMat,C,Phi,q,Ne)
-  }
+QAllaa <- function(s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
+  res = lapply(1:20,function(i) {mat_gen_indep(i,s,DisMat, MuMat,C, Phi, q, Ne)})
   return(as.matrix(res))
 }
 # given the edge lengths el, rate matrix Q and rate g, find the probability transition matrices P
@@ -656,7 +672,7 @@ mllm <- function(data,tree,s,beta,gamma,Q=NULL,opw=NULL,bfnu=NULL,bfaa=NULL,C=2,
   if(is.null(bfaa)) bfaa = freq_aa(bfnu)
   dismat = GM_cpv(GM_CPV,al,beta,gamma)
   mumat = aa_MuMat_form(Q,bfnu)
-  Qall = QAllaa(s,dismat,mumat,bf,C,Phi,q,Ne)
+  Qall = QAllaa(s,dismat,mumat,C,Phi,q,Ne)
   ll = llaaw(tree,data,Qall,opw,bfaa,C,Phi,q,Ne)
   result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,bfnu=bfnu,bfaa=bfaa,call=call)
   class(result) = "mllm"
@@ -690,7 +706,51 @@ optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit =
     return(res)
   }
 }
-
+## MLE for opw (weights for optimal amino acids)
+## mllm(data,tree,s,beta,gamma,Q=NULL,opw=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+optim.opw <- function(data, tree,opw=rep(1/20,20),method="Nelder-Mead", maxit=500, trace=0, ...){
+  l = length(opw)
+  nenner = opw[l]
+  lopw = log(opw*nenner)
+  lopw = lopw[-l]
+  fn = function(lopw,data,tree, ...){
+    opw = exp(c(lopw,0))
+    result = mllm(data=data,tree=tree,opw=opw, ...)$ll$loglik
+    return(result)
+  }
+  res = optim(par=lopw,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
+  print(res[[2]])
+  opw = exp(c(res[[1]],0))
+  opw = opw/sum(opw)
+  res$par = opw
+  return(res)
+}
+## mllm(data,tree,s,beta,gamma,Q=NULL,opw=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+optim.sw.opw <- function(data,tree,s,beta,gamma,opw=rep(1/20,20),method="Nelder-Mead",maxit=500,trace=0, ...){
+  ab <- log(c(s,beta,gamma))
+  l = length(opw)
+  nenner = opw[l]
+  lopw = log(opw*nenner)
+  lopw = lopw[-l]
+  fn = function(ablopw,data,tree, ...){
+    ab = ablopw[1:3]
+    lopw = ablopw[-(1:3)]
+    ab = exp(ab)
+    opw = exp(c(lopw,0))
+    result = mllm(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], opw=opw, ...)$ll$loglik
+    return(result)
+  }
+  res = optim(par=c(ab,lopw),fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
+  par = res$par
+  ab = par[1:3]
+  opw = exp(c(par[-(1:3)],0))
+  opw = opw/sum(opw)
+  res$ab = ab
+  res$opw = opw
+  return(res)
+}
 ## sample call: Q1 = optimQm(rokastree,gene1,Q=NU_VEC,subs=c(1,2,3,4,5,0),trace=1,s=0.1,beta=be,gamma=ga)
 optimQm <- function(tree,data,Q=rep(1,6),subs=c(1:(length(Q)-1),0),method="Nelder-Mead",maxit=500,trace=0, ...){
   m = length(Q)
@@ -736,8 +796,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   call = object$call
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if(!is.rooted(tree)) stop("tree must be rooted")
-  if (is.null(attr(tree, "order")) || attr(tree, "order") == 
-    "cladewise") 
+  if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") 
     tree <- reorderPruning(tree)
   if(any(tree$edge.length < 1e-08)){
     tree$edge.length[tree$edge.length < 1e-08] <- 1e-08
@@ -759,6 +818,8 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   opti = TRUE
   rounds = 0
   while(opti){
+    if(htrace)
+      print(paste("iteration",rounds+1,sep=""))
     if(optsWeight){
       res = optim.s.weight(data,tree,s=s,beta=beta,gamma=gamma,maxit=maxit,trace=trace,
                            Q=Q,bfnu=bfnu,bfaa=bfaa,C=2,Phi=0.5,q=4e-07,Ne=1.36e07)
