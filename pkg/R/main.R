@@ -100,6 +100,7 @@ cdlist <- list()
 for(i in 1:20){
   cdlist[[i]] = CDS[CDS_AA==AA[i]]
 }
+names(cdlist) <- AA
 ##################################################################
 ##   Read gene data ##
 ##################################################################
@@ -117,24 +118,22 @@ conv <- function(filename,type="num"){
     return(aas)
   }
   ## type = AA, return a list of amino acid sequences
-
   seqdata <- lapply(1:length(data),dna.to.aa)
   names(seqdata) = attr(data,"name")
   if(type=="AA")
     return(seqdata)
-
-  #seqdata <- t(sapply(1:length(data),dna.to.aa,simplify="array")) #sapply and simplify to array
-  #dimnames(seqdata)[[1]]<- attr(data,"name") #Change the dimnames to the species names
   if(type=="phyDat") ## convert amino acid sequences to phyDat type
     seqdata = phyDat(seqdata,type="AA")
   return(seqdata)
 }
 
-# for(i in 1:106){
-#   file = paste("~/proteinevoutk20/pkg/Data/gene",i,".fasta",sep="")
-#   gene = conv(file,"AA")
-#   write.nexus.data(gene,paste("~/proteinevoutk20/pkg/Result/gene",i,"AA.nex",sep=""),format="protein",interleaved=F)
-# }
+fasta.to.nex <- function(geneNum){
+  for(i in geneNum){
+    file = paste("~/proteinevoutk20/pkg/Data/gene",i,".fasta",sep="")
+    gene = conv(file,"AA")
+    write.nexus.data(gene,paste("~/proteinevoutk20/pkg/Data/gene",i,"AA.nex",sep=""),format="protein",interleaved=F)
+  }
+}
 ##   Read in 106 gene data  from Rokas's ##
 # l <- 106
 # ROKAS_DATA <- vector("list",length=l)
@@ -153,7 +152,7 @@ PruneMissing <- function(x){
   x[,-naCol]
 }
 #############################################################################
-## find the empirical base frequencies for amino acid list data (not phyDat data)
+## find the empirical base frequencies for AMINO ACID list data (not phyDat data)
 findBf <- function(datalist){
   data = unlist(datalist)
   datatb = table(data)
@@ -189,15 +188,15 @@ mat_form_lowtriQ <- function(Q=rep(1,6),bf=rep(0.25,4)){
   bf=bf/sum(bf)
   res = matrix(0, l, l)
   res[lower.tri(res)] = Q
-  res = res+t(res)
-  res = res * rep(bf,each=l)
-  diag(res) = -rowSums(res)
-  res2 = res * rep(bf,l)
+  res = res+t(res) #symmetric matrix with diagonals 0
+  res = res * rep(bf,each=l) #multiply cols by bf
+  diag(res) = -rowSums(res) #set row sum to 0
+  res2 = res * rep(bf,l) #multiply rows by bf
   diag(res2)=0 
-  res = res/sum(res2)
+  res = res/sum(res2) #normalize rate matrix
   return(res)
 }
-## given Q and bf, find scaled Q
+## given matrix Q and bf, find scaled Q
 ## Goal: sum(pi_i * Q_ii) = -1
 ## and return its eigen values, eigen vectors, and inverse of eigen vector matrix
 ## These are used to calcualte matrix exponentiation later.
@@ -220,6 +219,21 @@ scaleQ <- function(Q,bf=NULL){
   scalef = -sum(diag(Q)*bf)
   Q = Q/scalef
   return(Q)
+}
+## from symmetric matrix of rates, find GTR rate matrix
+sym.to.Q <- function(A,bf=NULL){
+  if(!isSymmetric(A)) stop("matrix is not symmetric!")
+  l = dim(A)[1]
+  if(is.null(bf)) bf = rep(1/l,l)
+  if(sum(bf==0)) stop("base frequencies can't all be 0!")
+  bf=bf/sum(bf)
+  diag(A) = 0
+  A = A * rep(bf,each=l) #multiply cols by bf
+  diag(A) = -rowSums(A) #set row sum to 0
+  res2 = A * rep(bf,l) #multiply rows by bf
+  diag(res2)=0 
+  A = A/sum(res2) #normalize rate matrix
+  return(A)
 }
 #############################################################################
 ## given the base frequencies of nucleotides, find base frequencies of codons
@@ -249,60 +263,85 @@ freq_aa <- function(nubf=rep(1/4,4)){
   return(freq)
 }
 ## Given the rate matrix for 61 codons, and the base frequencies of codons, 
-## find the rate matrix for 20 amino acids. Now the markov process should be time reversible
-## Only mutation is taken into account, not selection and fixation.
-AAMat <- function(CdMat,CdBf){
-  CdBf= CdBf/sum(CdBf)
+## find the rate matrix for 20 amino acids.Only mutation is taken into account, not selection and fixation.
+AAMat <- function(CdMat){
   Q = matrix(0,20,20)
   for(i in 1:19){
     fcodons = cdlist[[i]]
-    fcfq = CdBf[fcodons] #frequencies of codons coding for this amino acid
-    fcfq = fcfq/sum(fcfq) # normalize the sum to 1
     for(j in (i+1):20){
-      if(i!=j){
-        tcodons = cdlist[[j]]
-        tcfq = CdBf[tcodons] #frequencies of codons coding for this amino acid
-        tcfq = tcfq/sum(tcfq) # normalize the sum to 1
-        Q[i,j] = sum(diag(fcfq) %*% CdMat[fcodons,tcodons])
-        Q[j,i] = sum(diag(tcfq) %*% CdMat[tcodons,fcodons])
-      }
+      tcodons = cdlist[[j]]
+      Q[i,j] = sum(CdMat[fcodons,tcodons])
     }
   }
-  diag(Q) = -rowSums(Q)
+  #diag(Q) = -rowSums(Q)
+  dimnames(Q) = list(AA,AA)
   return(Q)
 }
 
-#Find the mutation rate matrix (20 by 20) from the 6 rates in GTR mutation rate matrix for nucleotides
-#the rate G<->C is normalized to 1, now the scale is to scale the rates to real values
-## At this point, the process is time reversible. Only mutation is taken into account
-## i.e. diag(bf) %*% Matrix is symmetric
-aa_MuMat_form <- function(vec=rep(1,6),bf=rep(0.25,4)){
-  Q <- mat_form_lowtriQ(vec,bf) #rate matrix for nucleotides    
+## compare 2 codons (in character vectors), return the number of positions that differ and the different positions
+cdcmp <- function(cd1,cd2){
+  cmp = (cd1 != cd2)
+  num = sum(cmp)
+  pos = which(cmp==TRUE)
+  return(list(num=num,pos=pos))
+}
+#Find the mutation rate matrix A (61 by 61) from the 6 rates in the symmetric generating matrix for GTR's Q
+# # result is a symmetric matrix with row sum 0
+cd_MuMat_form <- function(vec=rep(1,6)){
+  l = 4
+  Q = matrix(0, l, l)
+  Q[lower.tri(Q)] = vec
+  Q = Q+t(Q) #symmetric matrix with diagonals 0
   dimnames(Q) = list(Nu,Nu)
   ##mutation matrix for 61 codons
   codon_array <- array(0,dim=c(61,61),dimnames=list(CDS,CDS))
-  for(m in 1:61){                       #loop through all 61 codons
-    cd_str <- CDS[m] #mth codon in string format
-    cd <- s2c(cd_str)   #one codon, convert from string to char vector
-    for(i in 1:3){           #every nucleotide in the codon can mutate
-      ngb <- cd #neighboring codon, set it equal to the starting codon for now
-      for(j in 1:4){
-        if(Nu[j]!=cd[i]){ #nucleotide has to change to a different one
-          ngb[i] <- Nu[j] # change the ith position in codon to jth nucleotide
-          a_new <- translate(ngb)       #new amino acid
-          ngb_str <- c2s(ngb)
-          if(a_new != "*")
-            codon_array[cd_str,ngb_str] <- codon_array[cd_str,ngb_str] + Q[cd[i],Nu[j]]
-        }
+  for(m in 1:60){                       #loop through all 61 codons
+    fcd <- CDS[m]
+    fcd_ch <- s2c(fcd)
+    for(i in (m+1):61){
+      tcd = CDS[i]
+      tcd_ch = s2c(tcd)
+      cmp = cdcmp(fcd_ch,tcd_ch) #compare the 2 codons
+      if(cmp$num==1){
+        pos = cmp$pos
+        codon_array[fcd,tcd] = Q[fcd_ch[pos],tcd_ch[pos]]
       }
     }
   }
-  diag(codon_array) <- -rowSums(codon_array) #row sums equal to 0
-  cdbf <- freq_codon(bf)
-  arr <- AAMat(codon_array,cdbf)
-  return(arr)
+  codon_array = codon_array + t(codon_array)
+  diag(codon_array) = -rowSums(codon_array)
+  return(codon_array)
 }
 
+#Find the mutation rate matrix A (20 by 20) from the 6 rates in GTR mutation rate matrix for nucleotides, row sum is 0
+# result is a symmetric matrix with row sum 0
+aa_MuMat_form <- function(vec=rep(1,6),bfaa=NULL){
+  l = 4
+  Q = matrix(0, l, l)
+  Q[lower.tri(Q)] = vec
+  Q = Q+t(Q) #symmetric matrix with diagonals 0
+  dimnames(Q) = list(Nu,Nu)
+  ##mutation matrix for 61 codons
+  codon_array <- array(0,dim=c(61,61),dimnames=list(CDS,CDS))
+  for(m in 1:60){                       #loop through all 61 codons
+    fcd <- CDS[m]
+    fcd_ch <- s2c(fcd)
+    for(i in (m+1):61){
+        tcd = CDS[i]
+        tcd_ch = s2c(tcd)
+        cmp = cdcmp(fcd_ch,tcd_ch) #compare the 2 codons
+        if(cmp$num==1){
+          pos = cmp$pos
+          codon_array[fcd,tcd] = Q[fcd_ch[pos],tcd_ch[pos]]
+        }
+      }
+    }
+  codon_array = codon_array + t(codon_array)
+  arr = AAMat(codon_array)
+  arr = arr+ t(arr)
+  diag(arr) = -rowSums(arr)
+  return(arr)
+}
 # ##check if the transition between amino acids is time reversible
 # checkSymmetric <- function(nuvec,bf){
 #   bfq = freq_codon(bf)
@@ -311,7 +350,7 @@ aa_MuMat_form <- function(vec=rep(1,6),bf=rep(0.25,4)){
 #   return(isSymmetric(diag(bfaa) %*% aaq))
 # }
 ## Amino acid mutation rate matrix for the GTR model of nucleotide
-#MUMAT <- aa_MuMat_form(NU_VEC,BF)
+#MUMAT <- aa_MuMat_form(NU_VEC)
 #MUMAT_JC <- aa_MuMat_form()
 
 reorderPruning <- function (x, ...)
@@ -499,6 +538,7 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20), g = 1,
   edge <- tree$edge[, 2]
   m = length(edge) + 1
   dat = vector(mode = "list", length = m)
+  bf = bf/sum(bf)
   Q = scaleQ(Q,bf)
   Q = t(Q) # in order to use C function in phangorn package
   el <- tree$edge.length
@@ -593,6 +633,16 @@ llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
   res=list(loglik= loglik, opaa = opaa, sitelik = sitelik, llmat=result)
   return(res)
 }
+# only return the big matrix, with number of rows equal to number of different sites, and cols equal to 20
+llaam1 <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
+  result = NULL
+  weight = attr(data,"weight")
+  for(i in 1:20){ #when optimal aa is i
+    llopi = ll3m(data,tree,bf=bf,g=1,Q=QAll[[i]])
+    result = cbind(result,llopi)
+  }
+  return(result)
+}
 # assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
 # if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
 llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
@@ -617,16 +667,7 @@ llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=
   }
   return(list(loglik= loglik, opaa=opaa,weights=opw, sitelik = sitelik, llmat=result))
 }
-# only return the big matrix, with number of rows equal to number of different sites, and cols equal to 20
-llaam1 <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
-  result = NULL
-  weight = attr(data,"weight")
-  for(i in 1:20){ #when optimal aa is i
-    llopi = ll3m(data,tree,bf=bf,g=1,Q=QAll[[i]])
-    result = cbind(result,llopi)
-  }
-  return(result)
-}
+
 ## find the loglikelihood given 20 by 20 rate matrix Q and base frequencies bf
 llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.2,q=4e-7,Ne=1.36e7){
   result = NULL
@@ -637,7 +678,7 @@ llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.2,q=4e-7,Ne=1.36e
 }
 ## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
 ## nucleotide transition rate matrix of length 6
-mll <- function(data,tree,s,beta,gamma,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+mll <- function(data,tree,s,beta,gamma,Q=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -647,18 +688,18 @@ mll <- function(data,tree,s,beta,gamma,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=
   if(is.null(tree$edge.length)) stop("tree must have edge weights") 
   if(any(is.na(match(tree$tip, attr(data, "names"))))) stop("tip labels are not in data")
   if(is.null(Q)) Q = rep(1,6)
-  if(is.null(bfnu)) bfnu = rep(1/4,4)
-  if(is.null(bfaa)) bfaa = freq_aa(bfnu)
+  if(is.null(bfaa)) bfaa = findBf2(data)
   dismat = GM_cpv(GM_CPV,al,beta,gamma)
-  mumat = aa_MuMat_form(Q,bfnu)
+  mumat = aa_MuMat_form(Q)
+  mumat = sym.to.Q(mumat,bfaa)
   eigall = eigAllaa(s,dismat,mumat,bf=bfaa,C,Phi,q,Ne)
   ll = llaa(tree,data,eigall,bfaa,C,Phi,q,Ne)
-  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,bfnu=bfnu,bfaa=bfaa,call=call)
+  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,bfaa=bfaa,call=call)
   class(result) = "mllm"
   return(result)
 }
 ## this one uses expm for matrix exponentiation
-mllm <- function(data,tree,s,beta,gamma,Q=NULL,opw=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+mllm <- function(data,tree,s,beta,gamma,Q=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -668,13 +709,13 @@ mllm <- function(data,tree,s,beta,gamma,Q=NULL,opw=NULL,bfnu=NULL,bfaa=NULL,C=2,
   if(is.null(tree$edge.length)) stop("tree must have edge weights") 
   if(any(is.na(match(tree$tip, attr(data, "names"))))) stop("tip labels are not in data")
   if(is.null(Q)) Q = rep(1,6)
-  if(is.null(bfnu)) bfnu = rep(1/4,4)
-  if(is.null(bfaa)) bfaa = freq_aa(bfnu)
+  if(is.null(bfaa)) bfaa = findBf2(data)
   dismat = GM_cpv(GM_CPV,al,beta,gamma)
-  mumat = aa_MuMat_form(Q,bfnu)
+  mumat = aa_MuMat_form(Q)
+  mumat = sym.to.Q(mumat,bfaa)
   Qall = QAllaa(s,dismat,mumat,C,Phi,q,Ne)
   ll = llaaw(tree,data,Qall,opw,bfaa,C,Phi,q,Ne)
-  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,bfnu=bfnu,bfaa=bfaa,call=call)
+  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,bfaa=bfaa,call=call)
   class(result) = "mllm"
   return(result)
 }

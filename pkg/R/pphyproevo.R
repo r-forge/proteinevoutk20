@@ -540,3 +540,49 @@ MLE_sw_log<- function(start_pt,tree,data,m=20,alpha,MuMat,
 # 
 # grid.6.beta <- seq(0.80,0.90,length.out=(l+1))[-1]
 # grid.6.gamma <- grid.5.gamma
+# AAMat1 <- function(CdMat,CdBf){
+#   CdBf= CdBf/sum(CdBf)
+#   Q = matrix(0,20,20)
+#   for(i in 1:19){
+#     fcodons = cdlist[[i]]
+#     fcfq = CdBf[fcodons] #frequencies of codons coding for this amino acid
+#     fcfq = fcfq/sum(fcfq) # normalize the sum to 1
+#     for(j in (i+1):20){
+#       if(i!=j){
+#         tcodons = cdlist[[j]]
+#         tcfq = CdBf[tcodons] #frequencies of codons coding for this amino acid
+#         tcfq = tcfq/sum(tcfq) # normalize the sum to 1
+#         Q[i,j] = sum(diag(fcfq) %*% CdMat[fcodons,tcodons])
+#         Q[j,i] = sum(diag(tcfq) %*% CdMat[tcodons,fcodons])
+#       }
+#     }
+#   }
+#   diag(Q) = -rowSums(Q)
+#   return(Q)
+# }
+# aa_MuMat_form1 <- function(vec=rep(1,6),bf=rep(0.25,4)){
+#   Q <- mat_form_lowtriQ(vec,bf) #rate matrix for nucleotides    
+#   dimnames(Q) = list(Nu,Nu)
+#   ##mutation matrix for 61 codons
+#   codon_array <- array(0,dim=c(61,61),dimnames=list(CDS,CDS))
+#   for(m in 1:61){                       #loop through all 61 codons
+#     cd_str <- CDS[m] #mth codon in string format
+#     cd <- s2c(cd_str)   #one codon, convert from string to char vector
+#     for(i in 1:3){           #every nucleotide in the codon can mutate
+#       ngb <- cd #neighboring codon, set it equal to the starting codon for now
+#       for(j in 1:4){
+#         if(Nu[j]!=cd[i]){ #nucleotide has to change to a different one
+#           ngb[i] <- Nu[j] # change the ith position in codon to jth nucleotide
+#           a_new <- translate(ngb)       #new amino acid
+#           ngb_str <- c2s(ngb)
+#           if(a_new != "*")
+#             codon_array[cd_str,ngb_str] <- codon_array[cd_str,ngb_str] + Q[cd[i],Nu[j]]
+#         }
+#       }
+#     }
+#   }
+#   diag(codon_array) <- -rowSums(codon_array) #row sums equal to 0
+#   cdbf <- freq_codon(bf)
+#   arr <- AAMat(codon_array,cdbf)
+#   return(arr)
+# }
