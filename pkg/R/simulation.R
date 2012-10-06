@@ -66,15 +66,16 @@ simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2
 ##Simulation of protein sequences of length "l" on a phylogeny "tree", 
 ##given the ancestral sequence "rootseq", optimal amino acid sequence "protein_op",
 ##selection coefficient "s", here we consider s THE SAME ACROSS ALL THE SITES IN ONE GENE 
-simTree <- function(tree,l,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,bfnu=rep(1/4,4),bfaa=NULL,
+simTree <- function(tree,l,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,bfaa=NULL,
                     C=2,Phi=0.5,q=4e-7, Ne=1.36e7,rootseq=NULL,ancestral=FALSE,simple=FALSE){
   call = match.call()
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
-  if(is.null(bfaa)) bfaa = freq_aa(bfnu) #base frequency, randomly chosen from all states, used to choose root sequence when it's not specified
+  if(is.null(bfaa)) bfaa = rep(1/20,20) #base frequency, randomly chosen from all states, used to choose root sequence when it's not specified
   m=20 # number of amino acids
   if(is.null(rootseq)) rootseq = sample(c(1:m), l, replace=TRUE, prob=bfaa) #sequence at the root
   GM1=GM_cpv(GMcpv,alpha,beta,gamma) #Distance matrix from new weights
-  mumat = aa_MuMat_form(GTRvec,bfnu) #mutation rate matrix, from the GTR matrix
+  mumat = aa_MuMat_form(GTRvec) #mutation rate matrix, from the GTR matrix
+  mumat = sym.to.Q(mumat,bfaa)
   if (is.null(attr(tree, "order")) || attr(tree, "order") !="cladewise") 
     tree <- ape:::reorder.phylo(tree)
   edge = tree$edge #edges
@@ -107,7 +108,7 @@ simTree <- function(tree,l,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,bfnu=r
   rownames(res)=label 
   if(!ancestral)res = res[ tree$tip, , drop=FALSE]
   #res=as.data.frame(res)
-  return(list(data=res,tree=tree,optimal=protein_op,rootseq=rootseq,s=s,Q=GTRvec,GMweights=c(alpha,beta,gamma),bfnu=bfnu,bfaa=bfaa,call=call))
+  return(list(data=res,tree=tree,optimal=protein_op,rootseq=rootseq,s=s,Q=GTRvec,GMweights=c(alpha,beta,gamma),bfaa=bfaa,call=call))
   ##if(pt=="AA") return(phyDat.AA(as.data.frame(res), return.index=TRUE))
 }
 #simTree(tree,5,protein_op=Protein_op[1:5],m=20,s=0.3,Nu_vec,al,be,ga,q=4e-7,Ne=1.36e7,Root[1:5])
