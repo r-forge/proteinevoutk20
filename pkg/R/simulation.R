@@ -66,16 +66,18 @@ simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2
 ##Simulation of protein sequences of length "l" on a phylogeny "tree", 
 ##given the ancestral sequence "rootseq", optimal amino acid sequence "protein_op",
 ##selection coefficient "s", here we consider s THE SAME ACROSS ALL THE SITES IN ONE GENE 
-simTree <- function(tree,l,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,bfaa=NULL,
+simTree <- function(tree,l,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NULL,bfaa=NULL,
                     C=2,Phi=0.5,q=4e-7, Ne=1.36e7,rootseq=NULL,ancestral=FALSE,simple=FALSE){
   call = match.call()
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
   if(is.null(bfaa)) bfaa = rep(1/20,20) #base frequency, randomly chosen from all states, used to choose root sequence when it's not specified
   m=20 # number of amino acids
   if(is.null(rootseq)) rootseq = sample(c(1:m), l, replace=TRUE, prob=bfaa) #sequence at the root
-  GM1=GM_cpv(GMcpv,alpha,beta,gamma) #Distance matrix from new weights
-  mumat = aa_MuMat_form(GTRvec) #mutation rate matrix, from the GTR matrix
-  mumat = sym.to.Q(mumat,bfaa)
+  GM1=GM_cpv(GM_CPV,alpha,beta,gamma) #Distance matrix from new weights
+  if(is.null(mumat)){
+    mumat = aa_MuMat_form(GTRvec) #mutation rate matrix, from the GTR matrix
+    mumat = sym.to.Q(mumat,bfaa)
+  }
   if (is.null(attr(tree, "order")) || attr(tree, "order") !="cladewise") 
     tree <- ape:::reorder.phylo(tree)
   edge = tree$edge #edges
