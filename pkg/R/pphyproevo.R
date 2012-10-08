@@ -330,7 +330,7 @@ ll_site <- function(tree,data,optimal,s,MuMat,alpha=al, beta=be, gamma=ga,
     if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
     GM1 = GM_cpv(GMcpv,alpha,beta,gamma)
     Q = mat_gen_indep(optimal,s,GM1,MuMat,C,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
-    Q = scale(Q,bf)
+    Q = scaleQ(Q,bf)
     tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
     edge = tree$edge #edges
     nNodes = max(edge) #number of nodes in the tree
