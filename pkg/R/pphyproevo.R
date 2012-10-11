@@ -586,3 +586,92 @@ MLE_sw_log<- function(start_pt,tree,data,m=20,alpha,MuMat,
 #   arr <- AAMat(codon_array,cdbf)
 #   return(arr)
 # }
+# given optimal amino acid, find the rate matrix Q and the eigen-decomposition of Q
+eigOp <- function(op_aa,s,DisMat,MuMat,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-07,Ne=1.36e07){
+  mat = mat_gen_indep(op_aa,s,DisMat,MuMat,C,Phi,q,Ne)
+  res = eigQ(t(mat),bf) #in order to use functions (C and R) from phangorn
+  return(res)
+}
+## given s, distance matrix, and mutation rate matrix, find rate matrices for all 20 amino acids as optimal
+## And then find their eigen decomposition 
+eigAllaa <- function(s,DisMat,MuMat,bf=rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
+  res = vector(mode="list",length=20)
+  for(i in 1:20){
+    #print(paste("now ", i, " is the optimal amino acid"))
+    res[[i]] = eigOp(i,s,DisMat,MuMat,bf,C,Phi,q,Ne)
+  }
+  return(as.matrix(res))
+}
+
+ll3 <- function (dat1, tree, bf = c(0.25, 0.25, 0.25, 0.25), g = 1,
+                 Q = c(1, 1, 1, 1, 1, 1), eig = NULL, assign.dat = FALSE,
+                 ...)
+{
+  if (is.null(attr(tree, "order")) || attr(tree, "order") ==
+    "cladewise")
+    tree <- reorderPruning(tree)
+  q = length(tree$tip.label)
+  node <- tree$edge[, 1]
+  edge <- tree$edge[, 2]
+  m = length(edge) + 1
+  dat = vector(mode = "list", length = m)
+  dat[1:q] = dat1[tree$tip.label]
+  if (is.null(eig))
+    eig = edQt(bf = bf, Q = Q)
+  el <- tree$edge.length
+  P <- getP(el, eig, g)
+  nr <- as.integer(attr(dat1, "nr"))
+  nc <- as.integer(attr(dat1, "nc"))
+  node = as.integer(node - min(node))
+  edge = as.integer(edge - 1)
+  nTips = as.integer(length(tree$tip))
+  mNodes = as.integer(max(node) + 1)
+  contrast = attr(dat1, "contrast")
+  nco = as.integer(dim(contrast)[1])
+  res <- .Call("LogLik4", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
+  result = res[[2]][[1]] + log(res[[1]][[1]] %*% bf)
+  if (assign.dat) {
+    dat[(q + 1):m] <- res
+    attr(dat, "names") = c(tree$tip.label, as.character((q +
+      1):m))
+    assign("asdf", dat, envir = parent.frame(n = 1))
+  }
+  result
+}
+## For all the distinct sites (m), find loglikelihood, result is m * 20 matrix
+## each column stores the loglikelihods when the corresponding amino acid is optimal
+llaa <- function(tree,data,eigAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
+  result = NULL
+  weight = attr(data,"weight")
+  for(i in 1:20){ #when optimal aa is i
+    llopi = ll3(data,tree,bf=bf,g=1,eig=eigAll[[i]])
+    result = cbind(result,llopi)
+  }
+  opaa = apply(result,1,which.max)
+  sitelik = apply(result,1,max)
+  loglik = sum(weight * sitelik)
+  return(list(loglik= loglik, llmat=result))
+}
+
+## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
+## nucleotide transition rate matrix of length 6
+mll <- function(data,tree,s,beta,gamma,Q=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+  call <- match.call()
+  if(class(tree)!="phylo") stop("tree must be of class phylo") 
+  if (is.null(attr(tree, "order")) || attr(tree, "order") == 
+    "cladewise") 
+    tree <- reorderPruning(tree)
+  if (class(data)[1] != "phyDat") stop("data must be of class phyDat")
+  if(is.null(tree$edge.length)) stop("tree must have edge weights") 
+  if(any(is.na(match(tree$tip, attr(data, "names"))))) stop("tip labels are not in data")
+  if(is.null(Q)) Q = rep(1,6)
+  if(is.null(bfaa)) bfaa = findBf2(data)
+  dismat = GM_cpv(GM_CPV,al,beta,gamma)
+  mumat = aa_MuMat_form(Q)
+  mumat = sym.to.Q(mumat,bfaa)
+  eigall = eigAllaa(s,dismat,mumat,bf=bfaa,C,Phi,q,Ne)
+  ll = llaa(tree,data,eigall,bfaa,C,Phi,q,Ne)
+  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,bfaa=bfaa,call=call)
+  class(result) = "mllm"
+  return(result)
+}
