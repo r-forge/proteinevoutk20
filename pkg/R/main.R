@@ -780,7 +780,7 @@ optim.sw.opw <- function(data,tree,s,beta,gamma,opw=rep(1/20,20),method="Nelder-
   res = optim(par=c(ab,lopw),fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
               control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
   par = res$par
-  ab = par[1:3]
+  ab = exp(par[1:3])
   opw = exp(c(par[-(1:3)],0))
   opw = opw/sum(opw)
   res$ab = ab
