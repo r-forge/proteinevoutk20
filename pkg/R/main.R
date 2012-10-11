@@ -865,7 +865,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
     }
     if(optsWeight){
       res = optim.s.weight(data,tree,s=s,beta=beta,gamma=gamma,maxit=maxit,trace=trace,
-                           Q=Q,bfaa=bfaa,...)
+                           Q=Q,bfaa=bfaa,opw=opw,...)
       s = res$par[1]
       beta = res$par[2]
       gamma = res$par[3]
@@ -874,7 +874,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       ll = res[[2]]
     }
     if(optQ){
-      res = optimQm(tree,data,Q=Q,subs=subs,maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,bfaa=bfaa,...)
+      res = optimQm(tree,data,Q=Q,subs=subs,maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,bfaa=bfaa,opw=opw, ...)
       Q = res$par
       if(htrace){
         cat("optimize rate matrix: ", ll, "--->", res[[2]], "\n")
@@ -882,7 +882,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       ll = res[[2]]
     }
     if(optBranch){
-      res = optimBranch(data,tree,maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...)
+      res = optimBranch(data,tree,maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw, ...)
       if(htrace)
         cat("optimize branch lengths:", ll, "--->", res[[2]], "\n")
       tree$edge.length = res[[1]]
