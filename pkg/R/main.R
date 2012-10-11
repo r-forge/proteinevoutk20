@@ -169,7 +169,7 @@ findBf2 <- function(data){
     datalist[[i]] = data[[i]][ind]
   data = unlist(datalist)
   datatb = table(data)
-  datatb = as.numeric(datatb)
+  datatb = as.numeric(datatb)[1:20]
   return(datatb/sum(datatb))
 }
 ## Find the most frequent element of a vector
@@ -708,7 +708,7 @@ mllm <- function(data,tree,s=0,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,op
     ll = llop(data,tree,op=opaa,bf=bfaa,Qall=Qall,g=1,C=C,Phi=Phi,q=q,Ne=Ne)
   else 
     ll = llaaw(tree,data,Qall,opw,bfaa,C,Phi,q,Ne)
-  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,dismat=dismat,mumat=mumat,bfaa=bfaa,call=call)
+  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,dismat=dismat,mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,call=call)
   class(result) = "mllm"
   return(result)
 }
@@ -826,7 +826,7 @@ optimBranch <- function(data,tree,method="Nelder-Mead",maxit=100,trace = 0, ...)
 }
 #mllm <- function(data,tree,s=0,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL)
 #optim.mllm <- function(data,tree,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7,){}
-optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, 
+optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, optOpw = FALSE,
                        control = list(epsilon=1e-08,maxit=50,hmaxit=10,trace=0,htrace=TRUE),subs=NULL,...){
   tree = object$tree
   call = object$call
@@ -878,6 +878,13 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       if(htrace)
         cat("optimize branch lengths:", ll, "--->", res[[2]], "\n")
       tree$edge.length = res[[1]]
+      ll = res[[2]]
+    }
+    if(optOpw){
+      res = optim.opw(data,tree,opw=rep(1/20,20),maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa)
+      if(htrace)
+        cat("optimize branch lengths:", ll, "--->", res[[2]], "\n")
+      opw = res[[1]]
       ll = res[[2]]
     }
     rounds = rounds + 1
