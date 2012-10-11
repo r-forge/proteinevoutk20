@@ -894,7 +894,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
     if((ll1-ll)/ll < control$epsilon) opti <- FALSE
     ll1 = ll
   }
-  object = update(object, tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...)
+  object = update(object, tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw,...)
   return(object)
 }
 #rokasdata = read.phyDat("proteinevoutk20/pkg/Result/rokasAA",format="phylip",type="AA")
