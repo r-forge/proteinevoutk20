@@ -855,6 +855,13 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   while(opti){
     if(htrace)
       cat("iteration ",rounds+1,"\n")
+    if(optOpw){
+      res = optim.opw(data,tree,opw=rep(1/20,20),maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa)
+      if(htrace)
+        cat("optimize weights of optimal aa:", ll, "--->", res[[2]], "\n")
+      opw = res[[1]]
+      ll = res[[2]]
+    }
     if(optsWeight){
       res = optim.s.weight(data,tree,s=s,beta=beta,gamma=gamma,maxit=maxit,trace=trace,
                            Q=Q,bfaa=bfaa,...)
@@ -880,13 +887,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       tree$edge.length = res[[1]]
       ll = res[[2]]
     }
-    if(optOpw){
-      res = optim.opw(data,tree,opw=rep(1/20,20),maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa)
-      if(htrace)
-        cat("optimize branch lengths:", ll, "--->", res[[2]], "\n")
-      opw = res[[1]]
-      ll = res[[2]]
-    }
+
     rounds = rounds + 1
     if(rounds > control$hmaxit) opti <- FALSE
     if((ll1-ll)/ll < control$epsilon) opti <- FALSE
