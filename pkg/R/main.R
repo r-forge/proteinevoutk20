@@ -845,6 +845,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   Q = object$Q
   if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
   bfaa = object$bfaa
+  opw = object$opw
   ll = object$ll$loglik
   ll1 = ll
   s = object$s
