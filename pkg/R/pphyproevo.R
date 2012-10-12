@@ -675,3 +675,17 @@ mll <- function(data,tree,s,beta,gamma,Q=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.
   class(result) = "mllm"
   return(result)
 }
+## given matrix Q and bf, find scaled Q
+## Goal: sum(pi_i * Q_ii) = -1
+## and return its eigen values, eigen vectors, and inverse of eigen vector matrix
+## These are used to calcualte matrix exponentiation later.
+eigQ <- function(Q,bf=NULL){
+  l = dim(Q)[1]
+  if(is.null(bf)) bf = rep(1/l,l)
+  bf=bf/sum(bf)
+  scalefactor = - sum(diag(Q)*bf) 
+  Q = Q/scalefactor
+  e = eigen(Q,FALSE)
+  e$inv = solve(e$vectors)
+  return(e)
+}
