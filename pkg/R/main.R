@@ -23,6 +23,7 @@ NU_VEC_JC <- rep(1.0,6)
 BF <- c(0.31065,0.18365,0.20955,0.29615)
 ##Best tree with branch lengths output by PAUP
 ROKAS_TREE <- read.nexus(paste(datadir,"GTR.tre",sep=""))
+TREE <- rtree(16)
 ##Read the properties of amino acids, including c(composition),p(polarity) and 
 ##v(molecular volume), save the data.frame
 GM_CPV <- read.csv(paste(datadir,"Grantham_cpv.csv",sep=""),header=TRUE, sep=",",row.names=1)
