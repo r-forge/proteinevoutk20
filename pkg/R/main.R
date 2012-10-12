@@ -197,20 +197,7 @@ mat_form_lowtriQ <- function(Q=rep(1,6),bf=rep(0.25,4)){
   res = res/sum(res2) #normalize rate matrix
   return(res)
 }
-## given matrix Q and bf, find scaled Q
-## Goal: sum(pi_i * Q_ii) = -1
-## and return its eigen values, eigen vectors, and inverse of eigen vector matrix
-## These are used to calcualte matrix exponentiation later.
-eigQ <- function(Q,bf=NULL){
-  l = dim(Q)[1]
-  if(is.null(bf)) bf = rep(1/l,l)
-  bf=bf/sum(bf)
-  scalefactor = - sum(diag(Q)*bf) 
-  Q = Q/scalefactor
-  e = eigen(Q,FALSE)
-  e$inv = solve(e$vectors)
-  return(e)
-}
+
 #scale Q w.r.t bf, if bf is not given, use equal frequencies
 # bf doesn't have sum to 1
 scaleQ <- function(Q,bf=NULL){
@@ -351,7 +338,8 @@ aa_MuMat_form <- function(vec=rep(1,6)){
 #   return(isSymmetric(diag(bfaa) %*% aaq))
 # }
 ## Amino acid mutation rate matrix for the GTR model of nucleotide
-#MUMAT <- aa_MuMat_form(NU_VEC)
+MUMAT <- aa_MuMat_form(NU_VEC)
+MUMAT <- sym.to.Q(MUMAT)
 #MUMAT_JC <- aa_MuMat_form()
 
 reorderPruning <- function (x, ...)
@@ -411,13 +399,42 @@ fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   if((d1==d2)||(s==0)) #When the fitnesses are the same, neutral case, pure drift
     return(1/(2*Ne))
   else{
-    fit_ratio <- exp(-C*Phi*q*s*(d1-d2))
-    if(fit_ratio==Inf)
+    fit_ratio <- exp(-C*Phi*q*s*(d1-d2)) #f1/f2
+    if(fit_ratio==Inf) #1 is much better than 2 (the mutant)
       return(0)
     else if(fit_ratio==1)
       return(1/(2*Ne))
     else
       return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
+  }
+}
+####################
+#comments: in the fixation probability calculation, should the length of the protein sequence be taken
+#into account? here the length is considered to be 1... which could be wrong...
+####################
+#vector version of the fixation function, d1, d2 and s are vectors instead of numbers
+fix2 <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+  if(length(d1)!=length(d2)) #throw error if length of proteins are not the same
+    stop("error: 2 proteins are of different lengths!")
+  if((length(s)==1)&&(length(d1)!=1)) #if s is given as a scalar, then treat it to be the same across all sites
+    s <- rep(s,length(d1))
+  l = length(d1)
+  cmp = cdcmp(d1,d2)
+  if(cmp$num > 1) return(0) #more than 1 position differ
+  else if((cmp$num ==0)) return(1/(2*Ne)) #same fitness/functionality
+  else{ #exactly 1 position differs
+    pos = cmp$pos 
+    if(s[pos]==0)
+      return(1/(2*Ne))
+    else{
+      fit_ratio <- exp(-C*Phi*q*(sum(s*(d1-d2)))/l) #f1/f2
+      if(fit_ratio==Inf) #1 is much better than 2 (the mutant)
+        return(0)
+      else if(fit_ratio==1)
+        return(1/(2*Ne))
+      else
+        return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
+    }
   }
 }
 
@@ -504,7 +521,7 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20), g = 1,Q)
   result
 }
 # loglikelihood given optimal amino acids at each site. 
-llop <- function(data,tree,op=NULL,bf=rep(1/20,20),Qall,g=1,C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
+llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),g=1,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   result = NULL
   weight = attr(data,"weight")
   nr = attr(data,"nr") #number of different sites
@@ -535,7 +552,7 @@ llop <- function(data,tree,op=NULL,bf=rep(1/20,20),Qall,g=1,C=2,Phi=0.2,q=4e-7,N
 ## For all the distinct sites (m), find loglikelihood, result is m * 20 matrix
 ## each column stores the loglikelihods when the corresponding amino acid is optimal 
 #this one uses expm for matrix exponentiation
-llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
+llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   result = NULL
   weight = attr(data,"weight")
   for(i in 1:20){ #when optimal aa is i
@@ -549,7 +566,7 @@ llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
   return(res)
 }
 # only return the big matrix, with number of rows equal to number of different sites, and cols equal to 20
-llaam1 <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
+llaam1 <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   result = NULL
   weight = attr(data,"weight")
   for(i in 1:20){ #when optimal aa is i
@@ -560,7 +577,7 @@ llaam1 <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
 }
 # assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
 # if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
-llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=1.36e7){
+llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   result = NULL
   weight = attr(data,"weight")
   nr = attr(data,"nr")
@@ -584,7 +601,7 @@ llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.2,q=4e-7,Ne=
 }
 
 ## find the loglikelihood given 20 by 20 rate matrix Q and base frequencies bf
-llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.2,q=4e-7,Ne=1.36e7){
+llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
   result = NULL
   weight = attr(data,"weight")
   ll = ll3m(data,tree,bf=bf,g=1,Q=Q)
@@ -594,7 +611,7 @@ llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.2,q=4e-7,Ne=1.36e
 ## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
 ## nucleotide transition rate matrix of length 6
 ## this one uses expm for matrix exponentiation
-mllm <- function(data,tree,s=0,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -623,11 +640,13 @@ mllm <- function(data,tree,s=0,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,op
   return(result)
 }
 #MLE for s, beta and gamma, using Nelder-Mead method by default
-#mllm <- function(data,tree,s=0,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,
-#opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7) 
-#sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,trace=1,Q=NU_VEC,bfaa=rep(1/20,20))
+#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,trace=1,Q=NU_VEC))
 optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit = 500, trace=0, ...){
-  ab <- log(c(s,beta,gamma))
+  ab <- c(s,beta,gamma)
+  ab[ab==0] <- 1e-08 #take care of log(0)
+  ab <- log(ab)
   if(method != "nlminb"){
     fn = function(ab,data,tree, ...){
       ab = exp(ab)
@@ -653,30 +672,36 @@ optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit =
   }
 }
 ## MLE for opw (weights for optimal amino acids)
-## mllm(data,tree,s,beta,gamma,Q=NULL,opw=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#sample call: optim.opw(data,tree,trace=1,s=0.1,Q=NU_VEC...)
 optim.opw <- function(data, tree,opw=rep(1/20,20),method="Nelder-Mead", maxit=500, trace=0, ...){
   l = length(opw)
-  nenner = opw[l]
-  lopw = log(opw*nenner)
-  lopw = lopw[-l]
+  nenner = 1/opw[l]
+  lopw = log(opw*nenner) #scale the vector by the last entry
+  lopw = lopw[-l] # optimize on the all entries except the last one
   fn = function(lopw,data,tree, ...){
     opw = exp(c(lopw,0))
+    opw=opw/sum(opw)
     result = mllm(data=data,tree=tree,opw=opw, ...)$ll$loglik
     return(result)
   }
   res = optim(par=lopw,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
               control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
-  print(res[[2]])
+  #print(res[[2]])
   opw = exp(c(res[[1]],0))
   opw = opw/sum(opw)
   res$par = opw
   return(res)
 }
-## mllm(data,tree,s,beta,gamma,Q=NULL,opw=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
 optim.sw.opw <- function(data,tree,s,beta,gamma,opw=rep(1/20,20),method="Nelder-Mead",maxit=500,trace=0, ...){
-  ab <- log(c(s,beta,gamma))
+  ab <- c(s,beta,gamma)
+  ab[ab==0] <- 1e-8
+  ab <- log(ab)
   l = length(opw)
-  nenner = opw[l]
+  nenner = 1/opw[l]
   lopw = log(opw*nenner)
   lopw = lopw[-l]
   fn = function(ablopw,data,tree, ...){
@@ -693,15 +718,17 @@ optim.sw.opw <- function(data,tree,s,beta,gamma,opw=rep(1/20,20),method="Nelder-
   ab = exp(par[1:3])
   opw = exp(c(par[-(1:3)],0))
   opw = opw/sum(opw)
-  res$ab = ab
+  res$s = ab[1]
+  res$GMweights = c(al,ab[2:3])
   res$opw = opw
   return(res)
 }
-## sample call: Q1 = optimQm(rokastree,gene1,Q=NU_VEC,subs=c(1,2,3,4,5,0),trace=1,s=0.1,beta=be,gamma=ga)
+#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
 optimQm <- function(tree,data,Q=rep(1,6),subs=c(1:(length(Q)-1),0),method="Nelder-Mead",maxit=500,trace=0, ...){
   m = length(Q)
   n = max(subs)
-  ab = numeric(n)
+  ab = numeric(n) #c(0,0,0,0,0,0)
   for(i in 1:n) ab[i] = log(Q[which(subs==i)[1]])
   fn = function(ab,tree,data,m,n,subs, ...){
     Q = numeric(m)
@@ -716,13 +743,13 @@ optimQm <- function(tree,data,Q=rep(1,6),subs=c(1:(length(Q)-1),0),method="Nelde
   res$par = Q
   return(res)
 }
-
-optimBranch <- function(data,tree,method="Nelder-Mead",maxit=100,trace = 0, ...){
-  ##s,beta,gamma,Q=rep(1,6),bfnu=rep(1/4,4),bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+optimBranch <- function(data,tree,method="Nelder-Mead",maxit=500,trace = 0, ...){
   if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
     tree <- reorderPruning(tree)
   el <- tree$edge.length
-  tree$edge.length[el < 0] <- 1e-08
+  tree$edge.length[el <= 0] <- 1e-08
   el <- log(tree$edge.length)
   fn = function(el,data,tree, ...){
     tree$edge.length = exp(el)
@@ -734,8 +761,8 @@ optimBranch <- function(data,tree,method="Nelder-Mead",maxit=100,trace = 0, ...)
   res$par = exp(res$par)
   return(res)
 }
-#mllm <- function(data,tree,s=0,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL)
-#optim.mllm <- function(data,tree,Q=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7,){}
+#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
 optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, optOpw = FALSE,
                        control = list(epsilon=1e-08,maxit=50,hmaxit=10,trace=0,htrace=TRUE),subs=NULL,...){
   tree = object$tree
@@ -754,7 +781,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   data = object$data
   Q = object$Q
   if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
-  bfaa = object$bfaa
+  bfaa = object$bfaa #this is going to be the same, no matter from data or given
   opw = object$opw
   ll = object$ll$loglik
   ll1 = ll
@@ -767,7 +794,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
     if(htrace)
       cat("iteration ",rounds+1,"\n")
     if(optOpw){
-      res = optim.opw(data,tree,opw=rep(1/20,20),maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa)
+      res = optim.opw(data,tree,opw=rep(1/20,20),maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...)
       if(htrace)
         cat("optimize weights of optimal aa:", ll, "--->", res[[2]], "\n")
       opw = res[[1]]
