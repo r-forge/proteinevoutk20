@@ -775,6 +775,8 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
     tree$edge.length[tree$edge.length < 1e-08] <- 1e-08
     object <- update(object, tree=tree)
   }
+  if(optOpw)
+    object = update(object,opw=rep(1,20))
   maxit = control$maxit
   trace = control$trace
   htrace = control$htrace #print out information about steps or not?
