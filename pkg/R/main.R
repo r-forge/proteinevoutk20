@@ -628,7 +628,7 @@ llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e
 ## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
 ## nucleotide transition rate matrix of length 6
 ## this one uses expm for matrix exponentiation
-mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,optMode=FALSE,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -641,7 +641,6 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
   
   if(is.null(Q)) Q = rep(1,6)
   if(is.null(bfaa)) bfaa = findBf2(data) #if bfaa is not given, use the empirical bf
-  if(optMode==TRUE) opaa = ModeAA(data)
   if(is.null(dismat))
     dismat = GM_cpv(GM_CPV,al,beta,gamma)
   if(is.null(mumat)){
