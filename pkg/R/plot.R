@@ -176,7 +176,7 @@ fmatrix <- function(ftny){
 ## parameters: op - optimal amino acid; s - selection coefficient
 fgraph <- function(op,s,beta=be,gamma=ga,graph=TRUE){
   ftny <- vector("numeric",length=20)
-  GM <- GM_cpv(GMcpv,al,beta,gamma)
+  GM <- GM_cpv(GM_CPV,al,beta,gamma)
   #functionality vector
   for(i in 1:20){
     ftny[i] <- Ftny_protein(i,op,s,GM)
