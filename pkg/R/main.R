@@ -169,9 +169,12 @@ findBf2 <- function(data){
   for(i in 1:l)
     datalist[[i]] = data[[i]][ind]
   data = unlist(datalist)
-  datatb = table(data)
-  datatb = as.numeric(datatb)[1:20]
-  return(datatb/sum(datatb))
+  ## sometimes an amino acid does not appear in the simulated result, then the frequency equals NA
+  ## this is no good
+#   datatb = table(data)
+#   datatb = as.numeric(datatb)[1:20]
+  counts = sapply(1:20,function(i){sum(data==i)})
+  return(counts/sum(counts))
 }
 ## Find the most frequent element of a vector
 ## It works for numbers and characters
