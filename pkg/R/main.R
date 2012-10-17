@@ -183,6 +183,15 @@ Mode <- function(x) {
   ux[which.max(tabulate(match(x, ux)))]
 }
 
+ModeAA <- function(phydata){
+  if(class(phydata)!="phyDat") stop("data must be of class phyDat!")
+  l = length(phydata)
+  mat = NULL
+  for(i in 1:l)
+    mat = rbind(mat,phydata[[i]])
+  modeaa = apply(mat,2,Mode)
+  return(modeaa)
+  }
 #############################################################################
 ##given lower triangular part of R (i.e. Q = R %*% diag(bf)), and base frequencies, find the scaled Q
 ## Default: 4 by 4 matrix for Jukes-Cantor model
@@ -539,8 +548,13 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),g=1,C=2,Phi=0.5,q=4e-7,N
   if(!is.null(op)){
     opaa = op
     optimal_aa = "given"
-    sitelik = sapply(1:ns,function(i) result[index[i],op[i]])
-    loglik = sum(sitelik)
+    if(length(op)==ns){ #opaa is given for every site
+      sitelik = sapply(1:ns,function(i) result[index[i],op[i]])
+      loglik = sum(sitelik)
+    } else if(length(op)==nr){ #opaa is given for each distinct data pattern
+      sitelik = sapply(1:nr,function(i) result[i,op[i]])
+      loglik = sum(weight*sitelik)
+    }
   }
   else{
     optimal_aa = "estimated using maximization"
@@ -614,7 +628,7 @@ llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e
 ## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
 ## nucleotide transition rate matrix of length 6
 ## this one uses expm for matrix exponentiation
-mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,optMode=FALSE,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -627,6 +641,7 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
   
   if(is.null(Q)) Q = rep(1,6)
   if(is.null(bfaa)) bfaa = findBf2(data) #if bfaa is not given, use the empirical bf
+  if(optMode==TRUE) opaa = ModeAA(data)
   if(is.null(dismat))
     dismat = GM_cpv(GM_CPV,al,beta,gamma)
   if(is.null(mumat)){
