@@ -100,18 +100,33 @@ u_{ij} = 2N_e \mu_{ij} \pi_{ij}
 \end{equation}
 where $\mu_{ij}$ is the mutation rate from $\mathbf{a}_i$ to $\mathbf{a}_j$, and $\mu_{ij} = 0$ when more than 1 position differ in the codons that code for $\mathbf{a}_i$ and $\mathbf{a}_j$. Note that the mutation and fixation are both at amino acid level. \\
 
-With the values for $(M_{nu},g, \alpha, \beta, \gamma, C, \Phi, q, N_e)$, we can find the $20 \times 20$ instantaneous substitution rate matrix $Q$ and have the Markov process set up. Then we can calculate the likelihood of observing the sequence data at the tips of a phylogenetic tree $T$ with given topology and branch lengths, therefore find the maximum likelihood estimates for parameters. \\
+With the values for $(M_{nu},g, \alpha, \beta, \gamma, C, \Phi, q, N_e)$, and the optimal amino acid a site, we can find the $20 \times 20$ instantaneous substitution rate matrix $Q$ and have the Markov process set up. $Q$ is scaled by the empirical frequencies of amino acids to satisfy $\sum_{i=1}^{20} \pi_i q_{ii}= -1$. Under this restraint, the length of a branch is equal to the expected number of substitutions on the branch. Since all sites are independent, we can calculate the likelihood of observing the sequence data at the tips of a phylogenetic tree $T$ with given topology and branch lengths, therefore find the maximum likelihood estimates for parameters. \\
+
+As the optimal amino acids are not known for a protein, we need to figure those out in order to calculate the likelihood values. 3 approaches are implemented. First, for each site ( for each distinct data pattern at the tips), we calculate the likelihood values when each of 20 amino acids is optimal and choose the one that maximizes the likelihood. This method treats the optimal amino acids as parameters to be estimated in the maximum likelihood computation. The number of parameters is increased by the number of distinct sequence patterns at the tips, which is often a big number. Second approach uses the majority rule, i.e. we pick the most frequent amino acid in the sequence as the optimal amino acid. When the sequences have evolved long enough to reach equilibrium, the optimal amino acid has the highest probability to be observed. If the evolving time is not long enough, or there are not enough substitutions during evolution process, the optimal amino acids estimated this way can be inaccurate. The third method is to assign weights to 20 amino acids being optimal. If the same weights are used for all sites, then the number of parameters added is 19 compared to hundreds or more in the first approach. The weights are expected to vary with the environment, function of proteins and other factors. Therefore an alternative is to use different weights for different genes (groups) in a protein sequence. It's apparent that the first method will give the best likelihood values but uses most parameters. The third method uses much fewer parameters. However, if the optimal amino acids vary a lot between different sites, the maximum likelihood values will decrease significantly. We'll compare the performance (including AIC scores) of different approaches in the Results section.\\
 
 Identifiability --- Since $C, \Phi, q$ and $g$ are multiplied together as a composite parameter, we fix the values of $C, \Phi, q$ and search for MLE for $g$. For the weights of 3 components in the amino acid difference formula, if they are multiplied by a same constant, the likelihood will not be affected. So we will fix $\alpha$ and look for the MLEs for $\beta, \gamma$ since only the relative ratios are identifiable. In addition, the effective population size is assumed to be fixed in this paper. Suppose the phylogenetic topology is given, the parameters that we are estimating: $s, \beta/\alpha$, $\gamma/\alpha$, branch lengths, and the GTR rate matrix for nucleotides. 
 
 \section{Results}
-\subsection{Model accuracy}
+\subsection{Model consistency}
 To assess the model accuracy, we first simulate data using different parameter values, find the MLEs for the parameters from the simulated data, and then investigate the accuracy of the estimates by looking at the mean squared error and confidence intervals.\\
 
-We did simulation with number of sites 100, 300, 500, 700, 1000, $s =$ 0.1, 0.3, 0.5, 0.7, 0.9, 1, under 14 different trees, including 2 trees for number of tips 4, 8, 10, 12, 14, 16, 18.  
-Simulation is done with different branch lengths: one with all branches of length 10 (expected 10 transitions on each branch) and the other one with shorter (more realistic) lengths randomly chose between 0 and 1. 
 
 \subsection{Results on yeast data}
+The maximum likelihood approach using the new model is used on a real data set. This data set was used in Rokas (2003 Nature) to resolve incongruence in molecular phylogenies. This genome sequence data have been obtained for 7 {\it Saccharomyces} species ({\it S. cerevisiae, S. paradoxus, S. mikatae, S. kudriavzevii, S. bayanus, S.castellii} and {\it S. kluyveri}) as well as for the outgroup fungus {\it Candida albicans}. It includes 106 genes that are distributed throughout the {\it S. cerevisiae} genome on all 16 chromomosomes and comprise a total length of 42,342 amino acids (127,026 nucleotides), corresponding to roughly $1\%$ of the genomic sequence and 2\% of the predicted genes. \\
+
+We first analyze the 106 gene sequences as a whole by concatenating them as 1 sequence. All the parameters are treated the same across all the sites except the optimal amino acids. The loglikelihood and AIC values are also compared with those under empirical models for amino acids from ProtTest (reference). \\
+
+\noindent
+1. Treat the optimal amino acids as parameters to be estimated. The maximized loglikelihood is -236576.6, parameters are: \\
+$g=0.641372, \alpha = 1.83, \beta = 0.116, \gamma =  0.000577$\\
+ $Q = (3.854224, 19.926381,  6.221914, 4.096766,  8.051619,  1)$\\ 
+ and the branch lengths are \\
+ (0.09083797 0.12173561 0.07505142 0.19127314 0.24988114 0.07932873 0.06796140 0.27846822 1.93420199 1.50971356 0.69975745 1.95693652
+1.79405040 3.34394967).
+\begin{figure}[ht]
+\center
+\includegraphics[width=0.8\textwidth,height=4cm]{besttree.pdf}
+\end{figure}
 %\begin{center}
 %\line(1,0){250}
 %\end{center}
