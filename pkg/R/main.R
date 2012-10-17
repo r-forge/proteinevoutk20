@@ -184,7 +184,7 @@ Mode <- function(x) {
 ##given lower triangular part of R (i.e. Q = R %*% diag(bf)), and base frequencies, find the scaled Q
 ## Default: 4 by 4 matrix for Jukes-Cantor model
 mat_form_lowtriQ <- function(Q=rep(1,6),bf=rep(0.25,4)){
-  if(sum(bf==0)) stop("base frequencies can't all be 0!")
+  if(sum(bf)==0) stop("base frequencies can't all be 0!")
   l=length(bf)
   bf=bf/sum(bf)
   res = matrix(0, l, l)
@@ -213,7 +213,7 @@ sym.to.Q <- function(A,bf=NULL){
   if(!isSymmetric(A)) stop("matrix is not symmetric!")
   l = dim(A)[1] #dimension of rate matrix i.e. number of states
   if(is.null(bf)) bf = rep(1/l,l)
-  if(sum(bf==0)) stop("base frequencies can't all be 0!")
+  if(sum(bf)==0) stop("base frequencies can't all be 0!")
   bf=bf/sum(bf)
   diag(A) = 0
   A = A * rep(bf,each=l) #multiply cols by bf
