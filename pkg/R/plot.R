@@ -120,7 +120,7 @@ library("network")
 # ##############################################################
 
 ##set all positive entries in mumat to 1, and others to 0, save it in mumat01
-net <- network(mumat,loops=F)
+net <- network(MUMAT,loops=F)
 mumat01 <- net[,]
 
 #view the color transition in stripes

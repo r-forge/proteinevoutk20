@@ -1,6 +1,6 @@
 ##numer of sites in the simulation
-#numsites <- c(1000,2000,3000)
-numsites <- c(4000,6000,10000,20000)
+numsites <- c(1000,2000,2500,3000)
+#numsites <- c(4000,6000,10000,20000)
 ##s values used in simulation
 svals <- c(0.1,0.5,0.9)
 ##tips of trees used in simulation
@@ -9,13 +9,13 @@ svals <- c(0.1,0.5,0.9)
 #esvalues <- c(1,10)
 ##result to store all the data
 #opaa <- c(1:5)
-datares <- array(list(NULL),dim=c(3,3,5))
+datares <- array(list(NULL),dim=c(4,3,5))
 ##change this to "simMle" for information on MLE without log
 fileprefix <- "sim_"
 DataFile <- "summary.RData"
 
 
-  for(sitesindex in 1:3){
+  for(sitesindex in 1:4){
     for(sindex in 1:3){
       for(opaa in 1:5){
         cat(numsites[sitesindex], "sites, s=",svals[sindex],"optimal amino acid: ",opaa, "\n")
@@ -36,9 +36,9 @@ DataFile <- "summary.RData"
 save(datares,file=DataFile)
 
 getMle <- function(sind,opaa,paraind){
-  res <- matrix(0,4,3)
-  res[1,] <- rep(svals[sind],3)
-  for(i in 1:3){
+  res <- matrix(0,4,4)
+  res[1,] <- rep(svals[sind],4)
+  for(i in 1:4){
     res[2:4,i] = c(datares[[i,sind,opaa]]$est[paraind],datares[[i,sind,opaa]]$op[paraind],datares[[i,sind,opaa]]$opw[paraind])
   }
   return(res)
