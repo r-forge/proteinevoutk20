@@ -667,6 +667,7 @@ optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit =
   if(method != "nlminb"){
     fn = function(ab,data,tree, ...){
       ab = exp(ab)
+      print(ab)
       result = mllm(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], ...)$ll$loglik
       return(result)
     }
