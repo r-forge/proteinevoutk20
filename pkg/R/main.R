@@ -23,7 +23,6 @@ NU_VEC_JC <- rep(1.0,6)
 BF <- c(0.31065,0.18365,0.20955,0.29615)
 ##Best tree with branch lengths output by PAUP
 ROKAS_TREE <- read.nexus(paste(datadir,"GTR.tre",sep=""))
-TREE <- rtree(16)
 ##Read the properties of amino acids, including c(composition),p(polarity) and 
 ##v(molecular volume), save the data.frame
 GM_CPV <- read.csv(paste(datadir,"Grantham_cpv.csv",sep=""),header=TRUE, sep=",",row.names=1)
@@ -656,6 +655,23 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
   class(result) = "mllm"
   return(result)
 }
+
+#MLE for s, given beta and gamma
+#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,trace=1,Q=NU_VEC))
+optim.s <- function(data, tree,s, ...){
+  fn = function(ab,data,tree, ...){
+    print(ab) #track the search path of Nelder-Mead optimizer
+    result = mllm(data=data,tree=tree,s=ab, ...)$ll$loglik
+    return(result)
+  }
+  res = optimize(f=fn,interval=c(-1,10),maximum=TRUE,
+              data=data,tree=tree, ...)
+  #res$par = exp(res$par)
+  return(res)
+}
+
 #MLE for s, beta and gamma, using Nelder-Mead method by default
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
@@ -664,30 +680,16 @@ optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit =
   ab <- c(s,beta,gamma)
   ab[ab==0] <- 1e-08 #take care of log(0)
   ab <- log(ab)
-  if(method != "nlminb"){
-    fn = function(ab,data,tree, ...){
-      ab = exp(ab)
-      print(ab)
-      result = mllm(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], ...)$ll$loglik
-      return(result)
-    }
-    res = optim(par=ab,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
-                control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
-    res$par = exp(res$par)
-    return(res)
+  fn = function(ab,data,tree, ...){
+    ab = exp(ab)
+    print(ab) #track the search path of Nelder-Mead optimizer
+    result = mllm(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], ...)$ll$loglik
+    return(result)
   }
-  else{
-    fn = function(ab,data,tree, ...){
-      ab = exp(ab)
-      result = mllm(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], ...)$ll$loglik
-      return(-result)
-    }
-    res = nlminb(start=ab,objective=fn,gradient=NULL,hessian=NULL,
-                 control = list(trace=trace),data=data,tree=tree, lower=-Inf, upper=Inf, ...)
-    res$par = exp(res$par)
-    res$objective = -res$objective
-    return(res)
-  }
+  res = optim(par=ab,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
+  res$par = exp(res$par)
+  return(res)
 }
 ## MLE for opw (weights for optimal amino acids)
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
