@@ -656,7 +656,7 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
 optim.s <- function(data, tree, ...){
   fn = function(ab,data,tree, ...){
     ab = exp(ab)
-    print(ab) #track the search path of Nelder-Mead optimizer
+    #print(ab) #track the search path of Nelder-Mead optimizer
     result = mllm(data=data,tree=tree,s=ab, ...)$ll$loglik
     return(result)
   }
