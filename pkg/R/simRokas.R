@@ -10,5 +10,5 @@ beta <- res_op$GMweights[2]
 gamma <- res_op$GMweights[3]
 bfaa <- res_op$bfaa
 GTRvec <- res_op$Q
-sim <- simTree(tree,protein_op,s,GTRvec,alpha=al,beta=beta,gamma=gamma,bfaa=bfaa)
+sim <- simTree(tree,protein_op[1:1000],s,GTRvec,alpha=al,beta=beta,gamma=gamma,bfaa=bfaa)
 save.image(file="simRokas.RData",compress=TRUE)

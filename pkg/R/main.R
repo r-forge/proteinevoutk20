@@ -134,13 +134,6 @@ fasta.to.nex <- function(geneNum){
     write.nexus.data(gene,paste("~/proteinevoutk20/pkg/Data/gene",i,"AA.nex",sep=""),format="protein",interleaved=F)
   }
 }
-##   Read in 106 gene data  from Rokas's ##
-# l <- 106
-# ROKAS_DATA <- vector("list",length=l)
-# ##data stores the data of all genes in rokas's data
-#   for(i in 1:l){
-#     ROKAS_DATA[[i]] <- conv(paste(datadir,"gene",i,".fasta",sep=""))
-#   }
 #############################################################################
 ## Remove columns with NA in the data
 PruneMissing <- function(x){
@@ -659,19 +652,50 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
 #MLE for s, given beta and gamma
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
-#sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,trace=1,Q=NU_VEC))
-optim.s <- function(data, tree,s, ...){
+#sample call : optim.s(gene1,ROKAS_TREE,be,ga,Q=NU_VEC))
+optim.s <- function(data, tree, ...){
   fn = function(ab,data,tree, ...){
+    ab = exp(ab)
     print(ab) #track the search path of Nelder-Mead optimizer
     result = mllm(data=data,tree=tree,s=ab, ...)$ll$loglik
     return(result)
   }
-  res = optimize(f=fn,interval=c(-1,10),maximum=TRUE,
+  res = optimize(f=fn,interval=c(-20,10),maximum=TRUE,
               data=data,tree=tree, ...)
-  #res$par = exp(res$par)
+  res$par = exp(res$maximum)
   return(res)
 }
-
+# find mle of s for a range of genes in rokas data, given values of beta and gamma
+optim.s.range<- function(beta,gamma,generange,tree,trace=0,multicore=FALSE, ...){
+  mle.s.one <- function(k){
+    if(trace)
+      print(paste("start optimization on gene ", k, sep=""))
+    mle <- optim.s(ROKAS_DATA[[k]],tree,beta=beta,gamma=gamma,...)
+    if(trace)
+      print(paste("finish optimization on gene ", k, sep=""))
+    return(mle)
+  }
+  if(multicore)
+    mclapply(generange,mle.s.one)
+  else
+    lapply(generange,mle.s.one)
+}
+optim.w <- function(beta,gamma,generange,tree,trace=0,maxit=500,multicore=FALSE,...){
+  ## a function of x that return the sum of -loglikelihood values for all genes with s optimized separately for different genes
+  ab <- c(beta,gamma)
+  ab[ab==0] <- 1e-08
+  ab <- log(ab)
+  fn <- function(ab,generange,tree,...){
+    ab <- exp(ab)
+    print(ab)
+    mle <- optim.s.range(ab[1],ab[2],generange,tree=tree,multicore=multicore,...) #call the previous function to optimize s for all genes
+    mle.val <- sapply(1:length(generange),function(ind) mle[[ind]]$objective) # best -loglikelihood values
+    return(sum(mle.val)) #summation of all values
+  }
+  ans <- optim(par=ab,fn=fn,gr=NULL,method="Nelder-Mead",lower=-Inf,upper=Inf,
+               control=list(fnscale=-1,trace=trace,maxit=maxit),generange=generange,tree=tree,...)
+  return(ans)
+}
 #MLE for s, beta and gamma, using Nelder-Mead method by default
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
