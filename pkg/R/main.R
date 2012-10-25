@@ -695,6 +695,7 @@ optim.w <- function(beta,gamma,generange,tree,trace=0,maxit=500,multicore=FALSE,
   }
   ans <- optim(par=ab,fn=fn,gr=NULL,method="Nelder-Mead",lower=-Inf,upper=Inf,
                control=list(fnscale=-1,trace=trace,maxit=maxit),generange=generange,tree=tree,...)
+  ans$par <- exp(ans$par)
   return(ans)
 }
 #MLE for s, beta and gamma, using Nelder-Mead method by default
