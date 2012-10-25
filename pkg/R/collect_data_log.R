@@ -32,6 +32,7 @@ DataFile <- "summary.RData"
        }
     }
   }
+}
 
 save(datares,file=DataFile)
 
