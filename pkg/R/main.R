@@ -136,13 +136,20 @@ fasta.to.nex <- function(geneNum){
 }
 #############################################################################
 ## Remove columns with NA in the data
-PruneMissing <- function(x){
+PruneMissing <- function(x,return=FALSE){
   ##Find the array indices of the NA entries
   naInd <- which(is.na(x),arr.ind=T)
-  dimnames(naInd) <- NULL
-  ## column indices
-  naCol <- naInd[,2]
-  x[,-naCol]
+  if(length(naInd)>0) {
+    print("NA found!")
+    dimnames(naInd) <- NULL
+    ## column indices
+    naCol <- naInd[,2]
+    x <- x[,-naCol]
+  }
+  else
+    print("no NA found")
+  if(return)
+    return(x)
 }
 #############################################################################
 ## find the empirical base frequencies for AMINO ACID list data (not phyDat data)
@@ -811,8 +818,7 @@ optimBranch <- function(data,tree,method="Nelder-Mead",maxit=500,trace = 0, ...)
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
 optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, optOpw = FALSE,
                        control = list(epsilon=1e-08,maxit=50,hmaxit=10,trace=0,htrace=TRUE),subs=NULL,...){
-  tree = object$tree
-  call = object$call
+
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if(!is.rooted(tree)) stop("tree must be rooted")
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") 
@@ -823,6 +829,8 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   }
   if(optOpw)
     object = update(object,opw=rep(1,20))
+  tree = object$tree
+  call = object$call
   maxit = control$maxit
   trace = control$trace
   htrace = control$htrace #print out information about steps or not?

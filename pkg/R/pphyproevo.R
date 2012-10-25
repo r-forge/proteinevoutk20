@@ -101,7 +101,7 @@ cds <- nu_list[!nu_list %in% stop_cd] #61 non-stop codons
 ##################################################################
 ## read in fasta file of nucleotide, convert it into amino acid data
 conv <- function(filename){
-  levels <- aa #amino acids in alphabeticla order (not the single letter names, the 3-letter names)
+  levels <- AA #amino acids in alphabeticla order (not the single letter names, the 3-letter names)
   data <- read.fasta(file=filename) #read fasta file including nucleotide data
   dna.to.aa <- function(x){ #given the order of the data, convert nucleotide data to amino acid data
      aas <- translate(seq=data[[x]])
