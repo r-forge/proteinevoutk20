@@ -680,6 +680,7 @@ optim.s.range<- function(beta,gamma,generange,tree,trace=0,multicore=FALSE, ...)
   else
     lapply(generange,mle.s.one)
 }
+# find mle for beta and gamma, that maximize the likelihood for all genes
 optim.w <- function(beta,gamma,generange,tree,trace=0,maxit=500,multicore=FALSE,...){
   ## a function of x that return the sum of -loglikelihood values for all genes with s optimized separately for different genes
   ab <- c(beta,gamma)
