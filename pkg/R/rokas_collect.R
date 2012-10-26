@@ -1,4 +1,4 @@
-setwd("~/BackupProEvo/rokas_max/")
+setwd("~/proteinevoutk20/pkg/scratch/newton/rokas_max")
 res_max <- vector("list",length=106)
 for(genect in 1:l){
   filename = paste("gene",genect,"_s_weight.RData",sep="")
