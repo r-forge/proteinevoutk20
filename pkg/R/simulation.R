@@ -20,7 +20,7 @@ rate_move <- function(protein, protein_op,s, DisMat, MuMat, bfaa = rep(1/20,20),
 ########################################################################################################
 #Simulation. Given the starting protein and the optimal protein
 #t should be equal to expected number of substitutions
-simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2, Phi=0.5,q=4e-7, Ne=1.36e7,record.ftny=FALSE){
+simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2, Phi=0.5,q=4e-7, Ne=1.36e7){
   l <- length(protein) #number of sites
   t_now <- 0 #time until the current step of simulation
   path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
@@ -49,12 +49,6 @@ simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2
       path <- rbind(path,c(protein,t,NA)) #record this moving step
     }
   }
-  if(record.ftny){
-    ftny_vec <- NULL
-    ftny_vec <- sapply(1:dim(path)[1],function(i){Ftny_protein(path[i,seq(1:l)],protein_op,s,DisMat)})
-    path <- cbind(path,ftny_vec)
-    colnames(path)[l+3] <- "Functionality"
-  }
   ##shift the third column up one step so that the waiting time is the time
   ## spent in the state in the first column
   path[,l+2] <- c(path[-1,l+2],NA)  
@@ -63,6 +57,7 @@ simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2
 #simulation(c(1,2),c(3,4),1000,10,0.1,GM,mumat,indep=T)
 #mllm(data,tree,s,beta,gamma,Q=NULL,opw=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
 
+## similar to the previous function, instead of getting rate matrices form DisMat and MuMat, these are given as "matall"
 simulation1 <- function(protein,protein_op,t,matall,C=2, Phi=0.5,q=4e-7, Ne=1.36e7){
   l <- length(protein) #number of sites
   t_now <- 0 #time until the current step of simulation
@@ -71,7 +66,6 @@ simulation1 <- function(protein,protein_op,t,matall,C=2, Phi=0.5,q=4e-7, Ne=1.36
   ##last two columns in the paths, recording Time up to this point and the waiting time at the current state
   colnames(path)[l+1] <- "Time Now"
   colnames(path)[l+2] <- "Waiting Time"
-  #matall = rate_move_mat(s,DisMat,MuMat,bfaa,C,Phi,q,Ne) #Q for all optimal aa possibilities
   m = 20
   while(t_now < t){ #when current time is less than t
     vec_list = sapply(1:l,function(i) {matall[[protein_op[i]]][protein[i],]},simplify="array")
@@ -98,10 +92,11 @@ simulation1 <- function(protein,protein_op,t,matall,C=2, Phi=0.5,q=4e-7, Ne=1.36
   return(list(path=path,start_seq=protein,op_seq=protein_op, t=t))
 }
 
-sim_op <- function(opaa, l, t,matall,C=2, Phi=0.5,q=4e-7, Ne=1.36e7,record.ftny=FALSE){
+# simulation with length l, all optimal aa are the same, given by opaa.
+sim_op <- function(opaa, l, t,matall,C=2, Phi=0.5,q=4e-7, Ne=1.36e7){
   mat = matall[[opaa]]
   bf = expm(mat*100)[1,]
-  start_seq = sample(1:20,l,replace=TRUE)
+  start_seq = sample(1:20,l,replace=TRUE,prob=bf)
   return(simulation1(start_seq,rep(opaa,l),t,matall,C,Phi,q,Ne))
 }
 ##Simulation of protein sequences of length "l" on a phylogeny "tree", 
@@ -112,7 +107,7 @@ simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NU
   call = match.call()
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
   if (is.null(attr(tree, "order")) || attr(tree, "order") !="cladewise") 
-    tree <- ape:::reorder.phylo(tree)
+    tree <- ape:::reorder.phylo(tree,order = "cladwise")
   edge = tree$edge #edges
   nNodes = max(edge) #number of nodes in the tree
   parent <- as.integer(edge[, 1]) #parents of the edges
