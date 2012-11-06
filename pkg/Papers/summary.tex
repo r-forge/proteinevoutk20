@@ -28,69 +28,72 @@ In this paper we characterize our amino acid-based model, which incorporates sub
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Model}
-Our model works for homologous protein-coding sequence without gaps or with gaps removed. We use a continuous time Markov process to model substitutions among the amino acids within a protein-coding sequence. The states of the Markov process are the 20 natural amino acids (nonnatural amino acids can be easily added), and we use a $20 \times 20$ rate matrix $Q=(Q_{ij})$ where $Q_{ij}$ represents the instantaneous rate that amino acid $i$ will be substituted by amino acid $j$. As usual the row sum of $(Q_{ij})$ equals $0$ and $P(t) = \exp (tQ)$, where $P_{ij}(t)$ is the probability that amino acid $j$ replaces $i$ after time $t$. Rate matrix $Q$ is obtained by multiplying the mutation rate matrix $M$ and fixation probability matrix $F$.\\
+Our model works for homologous protein-coding sequence without gaps or with gaps removed. We use a continuous time Markov process to model substitutions among the amino acids within a protein coding sequence. The states of the Markov process are the 20 natural amino acids (nonnatural amino acids can be easily added), so we use a $20 \times 20$ rate matrix $Q=(Q_{ij})$ where $Q_{ij}$ represents the instantaneous rate that amino acid $i$ will be substituted by amino acid $j$. The rate matrix $Q$ is obtained by multiplying the mutation rate matrix $M$ and fixation probability matrix $F$. As usual the row sum of $(Q_{ij})$ equals $0$ and $P(t) = \exp (tQ)$, where $P_{ij}(t)$ is the probability that amino acid $j$ replaces $i$ after time $t$.\\
 
-Based on the $4 \times 4$ general time reversible (GTR) mutation rate matrix $M_{nu}$ for nucleotides the mutation rates $\mu_{ij}$ among 20 amino acids are calculated. We assume that mutations occur on the codon level at the three codon positions independently. Therefore, more than one nucleotide substitutions are not allowed to occur instantaneously as mutations involving more than one position during time $\Delta t$ will have probabilities $\Delta t^2$ and should be ignored. The calculation follows two steps. First, a $61 \times 61$ (stopping codons not included) codon mutation rate matrix $M_{\text{codon}}$ is obtained; Second, according to the codon translation table, we can find the mutation rate matrix $M$ ($20 \times 20$) for all amino acids. The mutation process is time reversible, i.e. $\pi_i M_{ij} = \pi_j M_{ji}$ is satisfied for all $1 \le i, j \le 20$.\\
+Based on the $4 \times 4$ general time reversible (GTR) mutation rate matrix $M_{nu}$ for nucleotides the mutation rates $\mu_{ij}$ among 20 amino acids are calculated. We assume that mutations occur independently between nucleotides at the same codon position. Therefore, more than one nucleotide substitutions are not allowed to occur instantaneously as mutations involving more than one position during time $\Delta t$ will have probabilities on the order of $\Delta t^2$ and are, therefore, ignored. The calculation follows two steps. First, a $61 \times 61$ (stop codons not included) codon mutation rate matrix $M_{\text{codon}}$ is obtained; Second, using the genetic code table, we generate the $20 \times 20$ mutation rate matrix $M$ for all amino acids. The mutation process is time reversible, i.e. $\pi_i M_{ij} = \pi_j M_{ji}$ is satisfied for all $1 \le i, j \le 20$.\\
 
-Next we consider the selection. Assume that there is an optimal amino acid for each position in a protein. Any non-optimal amino acid at a position is subjected to selection, the strength of which depends on the physiochemical difference (Grantham, Science 1974) between the observed and optimal amino acids and magnitude of the Grantham sensitivity. \\
+In addition to the effects of mutation bias our model also includes the effects of natural selection on the amino acid sequence of a gene. We begin by assuming that there is an optimal amino acid for each position in a protein and non-optimal amino acids each position are subjected to natural selection. The strength of selection depends on the scaled physiochemical distance (Grantham, Science 1974) between the observed and optimal amino acids, the sensitivity of the protein's function to the physicochemical distance and the protein production rate of the gene. \\
 
-Suppose a protein of length $n$ has a sequence of optimal amino acids $\hat{\mathbf{a}} = (\hat{a}_1, \hat{a}_2, \cdots \hat{a}_n)$, the observed sequence of amino acids is $\mathbf{a} = (a_1, a_2, \cdots, a_n)$, the Grantham sensitivity coefficient is $g_k$ and let $\mathbf{g}=(g_1,g_2,\cdots,g_n)$. The overall physiochemical difference (distance) between amino acids $i$ and $j$ consist of 3 components: $d_{ij} = [\alpha (c_i-c_j)^2 + \beta (p_i - p_j)^2 + \gamma (v_i - v_j)^2]$, where $c, p$ and $v$ represent values of properties composition, polarity and molecular volume, and $\alpha, \beta, \gamma$ are the corresponding weights for the components. The values for properties in the amino acid difference formula is given by Grantham (1974), he presented a way to compute the weights for the 3 components. In our model, the weights are treated as parameters rather than being fixed. \\
+Suppose a protein of length $n$ has the optimal amino acid sequence $\hat{\mathbf{a}} = (\hat{a}_1, \hat{a}_2, \cdots \hat{a}_n)$, the observed sequence of amino acids is $\mathbf{a} = (a_1, a_2, \cdots, a_n)$, the Grantham sensitivity coefficient is $g_k$ and let $\mathbf{g}=(g_1,g_2,\cdots,g_n)$. The overall physiochemical difference (distance) between amino acids $i$ and $j$ consist of 3 components: $d_{ij} = [\alpha (c_i-c_j)^2 + \beta (p_i - p_j)^2 + \gamma (v_i - v_j)^2]$, where $c, p$ and $v$ represent physicochemical properties composition, polarity and molecular volume of the amino acid's side chain, and $\alpha, \beta, \gamma$ are the corresponding weights for the components. The values for physicochemical properties in the amino acid difference formula is given by Grantham (1974), each of them is weighted by dividing by the mean distance found with that property alone. In our model, the weights $\alpha, \beta, \gamma$ are treated as estimable parameters rather than being fixed. \\
 
-Given the distance vector $\mathbf{d} = (d_1, d_2, \cdots, d_n)$ from the optimal protein and the Grantham sensitivity $\mathbf{g}$, the functionality of a protein $\mathbf{a}$ with $n$ amino acids is defined as
+The distance vector $\mathbf{d} = (d_1, d_2, \cdots, d_n)$ represents the distance per amino acid basis from the optimal and the Grantham sensitivity is $\mathbf{g}$. The functionality of a protein $\mathbf{a}$ with $n$ amino acids is defined as
 
 \begin{equation}
 F(\mathbf{a}| \hat{\mathbf{a}},\mathbf{g})  =  \frac{n}{\displaystyle  \sum_{k=1}^n{(1+d_kg_k)}} \label{eq:harmonic}\\
 \end{equation}
-The condition $\hat{\mathbf{a}},\mathbf{g}$ will be omitted from now on if there is no potential confusion.\\
+In order to simplify notation, the parameters $\hat{\mathbf{a}}$ and $\mathbf{g}$ will be omitted from now on if there is no potential confusion.\\
 
 %fixation probability 
-If there is a single mutant $\mathbf{a}_j$ from a diploid population with wild type $\mathbf{a}_i$, the fixation probability is 
+Following Sella-Hirsh (Add reference), if there is a single mutant $\mathbf{a}_j$ from a diploid population with wild type $\mathbf{a}_i$, the fixation probability of it getting fixed is 
 \begin{equation}
 \pi_{ij} = \pi(\mathbf{a}_i \rightarrow \mathbf{a}_j ) = \frac{1-f(\mathbf{a}_i)/f(\mathbf{a}_j)}{1-(f(\mathbf{a}_i)/f(\mathbf{a}_j))^{2N_e}} = \frac{1-f_i/f_j}{1-(f_i/f_j)^{2N_e}}
 \label{eq:fixation}
 \end{equation}
-according to Sella-Hirsh (Add reference)
-where $f(\mathbf{a}_i)$ and $f(\mathbf{a}_j)$ are the fitnesses of $\mathbf{a}_i$ and $\mathbf{a}_j$. It is an approximation to the canonical formula 
+where $f(\mathbf{a}_i)$ and $f(\mathbf{a}_j)$ are the fitnesses of genotypes $\mathbf{a}_i$ and $\mathbf{a}_j$. This formula is valid under the condition $s, \frac{1}{N}, Ns^2 \ll 1$.\\
 
-\begin{equation}
-\pi(\mathbf{a}_i \rightarrow \mathbf{a}_j,p) = \frac{1-e^{-2N_e ps}}{1-e^{-2N_es}}
-\label{eq:fixcanonical}
-\end{equation}
-
-\noindent where $p$ is the initial frequency of the mutant, and $s=(f_j-f_i)/f_i$ is the selection advantage of $\mathbf{a}_j$ comparing to $\mathbf{a}_i$ (note here $s$  is different from the selection strength defined above on the distance from optimal protein).
-When there is a single mutant in the population, i.e. $p=1/(2N_e)$, the formula simplifies to 
-$(1-e^{-s})/(1-e^{-2N_es})$. Both S-H and the canonical formulae are valid under the same condition: $s, \frac{1}{N}, Ns^2 \ll 1$.\\
+%It is an approximation to the canonical formula 
+%
+%\begin{equation}
+%\pi(\mathbf{a}_i \rightarrow \mathbf{a}_j,p) = \frac{1-e^{-2N_e ps}}{1-e^{-2N_es}}
+%\label{eq:fixcanonical}
+%\end{equation}
+%
+%\noindent where $p$ is the initial frequency of the mutant, and $s=(f_j-f_i)/f_i$ is the selection advantage of $\mathbf{a}_j$ comparing to $\mathbf{a}_i$ (note here $s$  is different from the selection strength defined above on the distance from optimal protein).
+%When there is a single mutant in the population, i.e. $p=1/(2N_e)$, the formula simplifies to 
+%$(1-e^{-s})/(1-e^{-2N_es})$. Both S-H and the canonical formulae are valid under the same condition: $s, \frac{1}{N}, Ns^2 \ll 1$.\\
 
 
 As in Gilchrist 2007, fitness of a protein is related to its functionality in the following way:
 \[f(\mathbf{a}) \propto \exp\{-\frac{C\Phi q}{F(\mathbf{a})}\}\]
-where $C$ is the expected cost of producing a single complete protein, $q$ is the scaling constant (seconds per ATP) determining the relationship between the rate of ATP usage and fitness $f$, and $\Phi$ is a measure of gene expression, specifically protein production rate (protein per second). \\
+where $C$ is the expected cost of producing a single complete protein, $q$ is a scaling constant (seconds per ATP) determining the relationship between the rate of ATP usage and fitness $f$, and $\Phi$ is a measure of gene expression, specifically protein production rate for a given gene. \\
 
 Combining $C\Phi q$ as one constant $A$, we have
 $f(\mathbf{a}) \propto \exp\{-\frac{A}{F(\mathbf{a})}\}$.
 Clearly, protein fitness is an increasing function of functionality.\\
 
 
-In either S-H formula or the canonical formula of the fixation probability, the determining value is $f_i/f_j$.
-From the definition of functionality in Equation \ref{eq:harmonic}, we have the following:
+In the S-H formula of the fixation probability, the determining value is $f_i/f_j$.
+Based on the definition of functionality in Equation \ref{eq:harmonic}, we have the following:
 
 \begin{equation}
 \frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} = \prod_{k=1}^n\Big( \frac{f(\mathbf{a}_i^k)}{f(\mathbf{a}_j^k)}\Big)^{\frac{1}{n}}
 \end{equation}
 
 
-i.e. the fitness ratio of the whole protein is the geometric mean of the fitness ratios between the two proteins for all sites. Therefore, when $\mathbf{a}_i$ and $\mathbf{a}_j$ only differ at position $k$, it becomes  
-\[\frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} = \Big( \frac{f(\mathbf{a}_i^k)}{f(\mathbf{a}_j^k)}\Big)^{\frac{1}{n}}\]
-and
+i.e. the fitness ratio of the two genotypes is the geometric mean of the fitness ratios between the two proteins for all sites. Therefore, when $\mathbf{a}_i$ and $\mathbf{a}_j$ only differ at position $k$, this fitness ratio simplifies to  
 \begin{eqnarray}
-\frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} & = &\exp \Big[-A\Big( \frac{1}{F(\mathbf{a}_i )} - \frac{1}{F(\mathbf{a}_j )}\Big)\Big] \nonumber\\
+\frac{f(\mathbf{a}_i)}{f(\mathbf{a}_j)} & = & \Big( \frac{f(\mathbf{a}_i^k)}{f(\mathbf{a}_j^k)}\Big)^{\frac{1}{n}}\\
+ & = &\exp \Big[-A\Big( \frac{1}{F(\mathbf{a}_i )} - \frac{1}{F(\mathbf{a}_j )}\Big)\Big] \nonumber\\
 %& = & \exp\Big[ -\frac{A}{n}(d_k^i s_k - d_k^j s_k)\Big]\\
 %& = & \exp\Big[ -\frac{C\Phi q}{n}(d_k^i s_k - d_k^j s_k)\Big]\\
-& = & \exp\Big[ -\frac{C\Phi q g_k}{n}(d_k^i - d_k^j)\Big] \label{eq: ratio}
+& = & \exp\Big[ -\frac{C\Phi q g_k}{n}(d_k^{(i)} - d_k^{(j)})\Big] \label{eq: ratio}
 \end{eqnarray}
 \noindent
-this quantity is only related to site $k$. It is easy to see that all the sites are independent in the sense that if there are more than 1 site that differ, the ratio is simply a product of ratios at all sites. \\
+this quantity is only related to site $k$. From equation \ref{eq: ratio}, it is easy to see that all the sites are independent in the sense that if there are more than 1 site that differ, the ratio is simply a product of ratios at all sites. \\
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%continue revision from here
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 From above the fixation probability depends on Grantham sensitivity coefficient, the difference between amino acids, therefore the weights for all components, and constants $C, \Phi, q, N_e$.\\
 
 Instantaneous substitution rate $u_{ij}$ from $\mathbf{a}_i$ to $\mathbf{a}_j$ is the product of effective population size, mutation rate and fixation rate:
