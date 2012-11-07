@@ -91,21 +91,46 @@ i.e. the fitness ratio of the two genotypes is the geometric mean of the fitness
 \noindent
 this quantity is only related to site $k$. From equation \ref{eq: ratio}, it is easy to see that all the sites are independent in the sense that if there are more than 1 site that differ, the ratio is simply a product of ratios at all sites. \\
 
+For a single site, we have 
+\begin{equation}
+\frac{f(a_i)}{f(a_j)} = \exp\Big(-C\Phi q g_k(d^{(i)}-d^{(j)})\Big)
+\label{eq: ratiosingle}
+\end{equation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %continue revision from here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-From above the fixation probability depends on Grantham sensitivity coefficient, the difference between amino acids, therefore the weights for all components, and constants $C, \Phi, q, N_e$.\\
+From Equation \ref{eq:fixation} and \ref{eq: ratiosingle}, the fixation probability of a mutation at one site of a protein depends on the physicochemical distances $d$ from the optimal amino acid at this site, sensitivity coefficient $g$ of functionality to the distance $d$, and constants $C$, $\Phi$, $q$, $N_e$.\\
 
-Instantaneous substitution rate $u_{ij}$ from $\mathbf{a}_i$ to $\mathbf{a}_j$ is the product of effective population size, mutation rate and fixation rate:
+
+The instantaneous substitution rate $u_{ij}$ from $\mathbf{a}_i$ to $\mathbf{a}_j$ is the product of effective population size, mutation rate and fixation probability:
 \begin{equation}
 u_{ij} = 2N_e \mu_{ij} \pi_{ij}
 \label{eq:subrate}
 \end{equation}
-where $\mu_{ij}$ is the mutation rate from $\mathbf{a}_i$ to $\mathbf{a}_j$, and $\mu_{ij} = 0$ when more than 1 position differ in the codons that code for $\mathbf{a}_i$ and $\mathbf{a}_j$. Note that the mutation and fixation are both at amino acid level. \\
+where $\mu_{ij}$ is the mutation rate from $\mathbf{a}_i$ to $\mathbf{a}_j$. Note that $\mu_{ij} = 0$ when more than 1 position differ in the codons coding for $\mathbf{a}_i$ and $\mathbf{a}_j$ and that the mutation rate and fixation probability are both amino acid specific. \\
 
-With the values for $(M_{nu},g, \alpha, \beta, \gamma, C, \Phi, q, N_e)$, and the optimal amino acid a site, we can find the $20 \times 20$ instantaneous substitution rate matrix $Q$ and have the Markov process set up. $Q$ is scaled by the empirical frequencies of amino acids to satisfy $\sum_{i=1}^{20} \pi_i q_{ii}= -1$. Under this restraint, the length of a branch is equal to the expected number of substitutions on the branch. Since all sites are independent, we can calculate the likelihood of observing the sequence data at the tips of a phylogenetic tree $T$ with given topology and branch lengths, therefore find the maximum likelihood estimates for parameters. \\
+With the values for $(M_{nu},g, \alpha, \beta, \gamma, C, \Phi, q, N_e)$, and the optimal amino acid a site, we can calculate the $20 \times 20$ instantaneous substitution rate matrix $Q$ for the Markov process. $Q$ is scaled by the frequencies of amino acids to satisfy $\sum_{i=1}^{20} \pi_i q_{ii}= -1$. Under this restraint, the length of a branch represents the expected number of substitutions on the branch. Since all sites are independent, we can calculate the likelihood of observing the sequence data at the tips of a phylogenetic tree $T$ with given topology and branch lengths.\\
 
-As the optimal amino acids are not known for a protein, we need to figure those out in order to calculate the likelihood values. 3 approaches are implemented. First, for each site ( for each distinct data pattern at the tips), we calculate the likelihood values when each of 20 amino acids is optimal and choose the one that maximizes the likelihood. This method treats the optimal amino acids as parameters to be estimated in the maximum likelihood computation. The number of parameters is increased by the number of distinct sequence patterns at the tips, which is often a big number. Second approach uses the majority rule, i.e. we pick the most frequent amino acid in the sequence as the optimal amino acid. When the sequences have evolved long enough to reach equilibrium, the optimal amino acid has the highest probability to be observed. If the evolving time is not long enough, or there are not enough substitutions during evolution process, the optimal amino acids estimated this way can be inaccurate. The third method is to assign weights to 20 amino acids being optimal. If the same weights are used for all sites, then the number of parameters added is 19 compared to hundreds or more in the first approach. The weights are expected to vary with the environment, function of proteins and other factors. Therefore an alternative is to use different weights for different genes (groups) in a protein sequence. It's apparent that the first method will give the best likelihood values but uses most parameters. The third method uses much fewer parameters. However, if the optimal amino acids vary a lot between different sites, the maximum likelihood values will decrease significantly. We'll compare the performance (including AIC scores) of different approaches in the Results section.\\
+%table of parameters in the model%
+\begin{table}[h]
+\centering
+\caption{parameters in the model}
+\begin{tabular}{ c p{6cm} }
+\hline
+$s_{ij}$ & exchange rates between nucleotides\\
+$g$       & sensitivity coefficient of functionality to physicochemical distance \\
+$(\alpha,\beta,\gamma)$ & weights for the 3 physicochemical properties in amino acid distance formula \\
+$C$ & cost of producing a protein\\
+$\Phi$ & expression level \\
+$q$ & scaling factor \\
+$N_e$ & effective population size \\
+\hline
+\end{tabular}
+
+\label{tb: para}
+\end{table}
+
+To calculate the likelihood values, the optimal amino acids need to be specified. We implement 3 approaches to do this. First, for each site ( for each distinct data pattern at the tips), we calculate the likelihood values when each of 20 amino acids is optimal and choose the one that maximizes the likelihood. This method treats the optimal amino acids as parameters to be estimated in the maximum likelihood computation. The number of parameters is increased by the number of distinct sequence patterns at the tips, which is often a big number. Second approach uses the majority rule, i.e. we pick the most frequent amino acid in the sequence as the optimal amino acid. When the sequences have evolved long enough to reach equilibrium, the optimal amino acid has the highest probability to be observed. If the evolving time is not long enough, or there are not enough substitutions during evolution process, the optimal amino acids estimated this way can be inaccurate. The third method is to assign weights to 20 amino acids being optimal. If the same weights are used for all sites, then the number of parameters added is 19 compared to hundreds or more in the first approach. The weights are expected to vary with the environment, function of proteins and other factors. Therefore an alternative is to use different weights for different genes (groups) in a protein sequence. It's apparent that the first method will give the best likelihood values but uses most parameters. The third method uses much fewer parameters. However, if the optimal amino acids vary a lot between different sites, the maximum likelihood values will decrease significantly. We'll compare the performance (including AIC scores) of different approaches in the Results section.\\
 
 Identifiability --- Since $C, \Phi, q$ and $g$ are multiplied together as a composite parameter, we fix the values of $C, \Phi, q$ and search for MLE for $g$. For the weights of 3 components in the amino acid difference formula, if they are multiplied by a same constant, the likelihood will not be affected. So we will fix $\alpha$ and look for the MLEs for $\beta, \gamma$ since only the relative ratios are identifiable. In addition, the effective population size is assumed to be fixed in this paper. Suppose the phylogenetic topology is given, the parameters that we are estimating: $s, \beta/\alpha$, $\gamma/\alpha$, branch lengths, and the GTR rate matrix for nucleotides. 
 
