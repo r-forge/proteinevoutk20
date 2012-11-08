@@ -10,5 +10,22 @@ beta <- res_op$GMweights[2]
 gamma <- res_op$GMweights[3]
 bfaa <- res_op$bfaa
 GTRvec <- res_op$Q
-sim <- simTree(tree,protein_op[1:1000],s,GTRvec,alpha=al,beta=beta,gamma=gamma,bfaa=bfaa)
-save.image(file="simRokas.RData",compress=TRUE)
+
+sim <- vector("list",length=42)
+for(i in 1:42){
+  start_ind <- 1 + (i-1)*1000
+  end_ind <- i*1000
+  cat("the", i, "th simulation:", "\n")
+  sim[[i]] <- simTree(tree,protein_op[start_ind:end_ind],s,GTRvec,alpha=al,beta=beta,gamma=gamma,bfaa=bfaa)
+}
+
+simdata <- sim[[1]]$data
+for(i in 2:42){
+  simdata <- cbind(simdata,sim[[i]]$data)
+}
+simdata.phy <- phyDat(simdata,type="AA")
+sim.res <- mllm(data=simdata.phy,tree=tree,s=s,beta=beta,gamma=gamma,Q=GTRvec,bfaa=bfaa)
+str(sim.res)
+sim.res_op = optim.mllm(sim.res,optQ=T,optBranch=T,optsWeight=T,control=list(epsilon=1e-08,maxit=300,hmaxit=50,trace=0,htrace=1))
+
+save(res_op,sim.res_op,file="simRokas.RData")

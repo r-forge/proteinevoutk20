@@ -107,7 +107,7 @@ simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NU
   call = match.call()
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
   if (is.null(attr(tree, "order")) || attr(tree, "order") !="cladewise") 
-    tree <- ape:::reorder.phylo(tree,order = "cladwise")
+    tree <- ape:::reorder.phylo(tree,order = "cladewise")
   edge = tree$edge #edges
   nNodes = max(edge) #number of nodes in the tree
   parent <- as.integer(edge[, 1]) #parents of the edges
