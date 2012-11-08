@@ -120,7 +120,7 @@ Given the values for $(M_{nu},g, \alpha, \beta, \gamma, C, \Phi, q, N_e)$, the f
 \caption{parameters in the model}
 \begin{tabular}{ c p{6cm} }
 \hline
-$s_{ij}$ & exchange rates between nucleotides\\
+$s_{ij}$ & exchange rates between nucleotides $i$ and $j$ \\
 $g$       & sensitivity coefficient of functionality to physicochemical distance \\
 $(\alpha,\beta,\gamma)$ & weights for the 3 physicochemical properties in amino acid distance formula \\
 $C$ & cost of producing a protein\\
@@ -139,7 +139,7 @@ The third method is ``weighted rule''. 20 amino acids are assigned weights of be
 It's apparent that the first method will give the best likelihood value but uses most parameters. The third method uses a lot fewer parameters. However, if the optimal amino acids vary a lot between different sites, the maximum likelihood values will decrease significantly. We'll compare the performance of different approaches in the Results section.\\
 
 \subsection{Identifiability of parameters}
-Since $C, \Phi, q$ and $g$ are multiplied together as a composite parameter, we fix the values of $C, \Phi, q$ and search for MLE for $g$. For the weights of 3 components in the amino acid difference formula, if they are multiplied by a same constant, the likelihood will not be affected. So we will fix $\alpha$ and look for the MLEs for $\beta, \gamma$ since only the relative ratios are identifiable. In addition, the effective population size is assumed to be fixed in this paper. Suppose the phylogenetic topology is given, the parameters that we are estimating: $s, \beta/\alpha$, $\gamma/\alpha$, branch lengths, and the GTR rate matrix for nucleotides. 
+Since $C, \Phi, q$ and $g$ are multiplied together as a composite parameter, we fix the values of $C, \Phi, q$ and search for MLE for $g$. As mentioned earlier, for the weights used in the Grantham distance formula, $\alpha$ is fixed and $\beta, \gamma$ are estimated.  In addition, the effective population size is assumed to be fixed in this paper. Suppose the phylogenetic topology is given, we are estimating the following parameters: $g, \beta/\alpha$, $\gamma/\alpha$, frequencies of amino acids, branch lengths, and the exchange rate matrix for nucleotides. 
 
 \section{Results}
 \subsection{Model consistency}
