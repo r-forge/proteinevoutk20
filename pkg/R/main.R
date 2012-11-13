@@ -126,12 +126,20 @@ conv <- function(filename,type="num"){
     seqdata = phyDat(seqdata,type="AA")
   return(seqdata)
 }
-
+#convert fasta file to nexus file, for protein data
 fasta.to.nex <- function(geneNum){
   for(i in geneNum){
     file = paste("~/proteinevoutk20/pkg/Data/gene",i,".fasta",sep="")
     gene = conv(file,"AA")
     write.nexus.data(gene,paste("~/proteinevoutk20/pkg/Data/gene",i,"AA.nex",sep=""),format="protein",interleaved=F)
+  }
+}
+#convert fasta file to nexus file, for nucleotide data
+fasta.to.nex.Nuc <- function(geneNum){
+  for(i in geneNum){
+    file = paste("~/proteinevoutk20/pkg/Data/gene",i,".fasta",sep="")
+    gene = read.fasta(file=file)
+    write.nexus.data(gene,paste("~/proteinevoutk20/pkg/Data/gene",i,".nex",sep=""),format="dna",interleaved=F)
   }
 }
 #############################################################################

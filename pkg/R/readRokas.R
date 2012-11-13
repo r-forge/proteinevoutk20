@@ -7,3 +7,4 @@ for(i in 1:l){
   ROKAS_DATA[[i]] <- conv(paste(datadir,"gene",i,".fasta",sep=""),type="phyDat")
 }
 rm(l)
+rokasPhi <- read.csv("~/proteinevoutk20/pkg/Data/genePhi.csv",header=TRUE)
