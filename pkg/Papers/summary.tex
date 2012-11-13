@@ -4,6 +4,7 @@
 \usepackage{amsthm}
 \usepackage{color}
 \usepackage{graphicx}
+\linespread{1.7}
 \title{A phylogenetic and population genetic model of amino acid substitution}
 \author{}
 \begin{document}
@@ -144,205 +145,77 @@ It is apparent that the first method gives the best likelihood value but uses th
 Since $C, \Phi, q$ and $g$ are multiplied together as a composite parameter, we fix the values of $C, \Phi, q$ and search for MLE for $g$. As mentioned earlier, for the weights used in the Grantham distance formula, $\alpha$ is fixed and $\beta, \gamma$ are estimated.  In addition, the effective population size is assumed to be fixed in this paper. Suppose the phylogenetic topology is given, we are estimating the following parameters: $g, \beta/\alpha$, $\gamma/\alpha$, frequencies of amino acids, branch lengths, and the exchange rate matrix for nucleotides. 
 
 \section{Results}
-\subsection{Model consistency}
-To assess the model accuracy, we first simulate data using different parameter values, find the MLEs for the parameters from the simulated data, and then investigate the accuracy of the estimates by looking at the mean squared error and confidence intervals.\\
+%\subsection{Model consistency}
+%To assess the model accuracy, we first simulate data using different parameter values, find the MLEs for the parameters from the simulated data, and then investigate the accuracy of the estimates by looking at the mean squared error and confidence intervals.\\
 
 
-\subsection{Results on yeast data}
-The maximum likelihood approach using the new model is used on a real data set. This data set was used in Rokas (2003 Nature) to resolve incongruence in molecular phylogenies. This genome sequence data have been obtained for 7 {\it Saccharomyces} species ({\it S. cerevisiae, S. paradoxus, S. mikatae, S. kudriavzevii, S. bayanus, S.castellii} and {\it S. kluyveri}) as well as for the outgroup fungus {\it Candida albicans}. It includes 106 genes that are distributed throughout the {\it S. cerevisiae} genome on all 16 chromomosomes and comprise a total length of 42,342 amino acids (127,026 nucleotides), corresponding to roughly $1\%$ of the genomic sequence and 2\% of the predicted genes. \\
+\subsection{Results on Rokas et al.'s data on yeast}
+We analyzed data previously studied by Rokas (2003 Nature). This genome sequence data have been obtained for 7 {\it Saccharomyces} species ({\it S. cerevisiae, S. paradoxus, S. mikatae, S. kudriavzevii, S. bayanus, S.castellii} and {\it S. kluyveri}) as well as for the outgroup fungus {\it Candida albicans}. It includes 106 genes that are distributed throughout the {\it S. cerevisiae} genome on all 16 chromomosomes and comprises a total length of 42,342 amino acids. We use the tree topology that is supported by the concatenated genome sequence.\\
 
-We first analyze the 106 gene sequences as a whole by concatenating them as 1 sequence. All the parameters are treated the same across all the sites except the optimal amino acids. The loglikelihood and AIC values are also compared with those under empirical models for amino acids from ProtTest (reference). \\
+\subsubsection{maximum likelihood estimation}
+First, the 106 gene sequences are concatenated as 1 whole sequence with 42,342 amino acids. We use ProtTest to find maximum log likelihood values under empirical models and compare their AIC values. We also find the maximum log likelihood values under our new model, with all 3 approaches to treat the optimal amino acids. In all the analyses, tree branch lengths are optimized while topology is not. \\
 
-\noindent
-1. Treat the optimal amino acids as parameters to be estimated. The maximized loglikelihood is -236576.6, parameters are: \\
-$g=0.641372, \alpha = 1.83, \beta = 0.116, \gamma =  0.000577$\\
- $Q = (3.854224, 19.926381,  6.221914, 4.096766,  8.051619,  1)$\\ 
- and the branch lengths are \\
- (0.09083797 0.12173561 0.07505142 0.19127314 0.24988114 0.07932873 0.06796140 0.27846822 1.93420199 1.50971356 0.69975745 1.95693652
-1.79405040 3.34394967).
+The log likelihood values and the AIC values are compared in Table 2. Under the empirical models, the substitution rates are fixed instead of being optimized. $I$ denotes that proportion of invariable sites is estimated in the model, $G$ means that the model includes the rate variation as a Gamma distribution across all the sites. In models with $F$, amino acid frequencies are treated as free parameters and estimated by the observed frequencies in the sequence data. Otherwise, the amino acid frequencies are the equilibrium (stationary) frequencies under the substitution rate matrix.\\
+
+Under the new model, amino acid frequencies are treated as 19 free parameters and estimated from the observed frequencies in the sequence data. In addition, 5 free parameters for exchange rates between nucleotides, 14 branch lengths for the 8-species phylogeney, Grantham sensitivity $g$, 2 free parameters for the weights in the physicochemical distance formula $\beta$ and $\gamma$ are optimized in the maximum likelihood analyses.\\
+
+
+All the parameters are treated the same across all the sites except the optimal amino acids. The loglikelihood and AIC values are also compared with those under empirical models for amino acids from ProtTest (reference). \\
+
+\begin{table}[h]
+\begin{center}
+\caption{Log-likelihood values and parameter estimates under empirical models and new model for the amino acid sequences of length 42,342}
+\begin{tabular}{l c c c r}
+\hline
+Model & $\Delta$AIC & $l$ & Tree length & Parameters \\
+\hline
+New+maj & 0.00 & -273239.30 & & 41 \\
+New+max & 11358.60 & -236576.60 & 12.39 & 42,383 \\
+New+weights & 94363.00 & -320401.80 & & 60 \\
+LG+I+G+F & 50905.58 & -298699.09 &  & 34\\
+LG+G+F & 50910.46 & -298699.09 & & 33 \\
+\hline
+\end{tabular}
+\end{center}
+
+Note: The last two models in the table are the best models picked out by ProtTest.
+\label{table:mle}
+\end{table}
+
+If the optimal amino acids are not counted as free parameters being estimated, the majority approach gives the best AIC value. $\Delta$AIC value for the best empirical model LG + I +G + F is about 50,000 units, which indicates a substantially better fit under the new model. One thing need to point out is that under the maximizing approach for identifying optimal amino acids at each position in the sequence, the number of parameters is much bigger. However, the improvement of log likelihood is so big that this model still performs much better than the best empirical model, with AIC value 40,000 units smaller. With the weighted approach, i.e. for each site, every amino acid has the same probability of being optimal, the increase in the log likelihood outweighs the saving in the number of parameters. This also indicates that the optimal amino acids at all sites vary a lot.  
+
+\subsubsection{Parameter variation between genes}
+We also analyzed Rokas et.al.'s data gene by gene. The best tree branch lengths  and the exchange rate matrix for the concatenated genomic sequence are used in the analysis. Grantham sensitivity and the weights in the physicochemical distance formula are optimized for each gene. Under both approaches of obtaining the optimal amino acids, the estimates for all 3 parameters are on the similar scale. As expected, the weights for physicochemical properties are also similar to the ones that Grantham used. Figure \ref{fig:correlation} showed the correlation between $\beta$ and $\gamma$. Linear regression suggests strong linear relationship between the 2 parameters, especially under the maximizing rule where $R^2$ is very close to 1.\\
+
+Since the variation of Grantham weights is small, we fixed $\beta$ and $\gamma$ across all genes and optimized $g$ for each gene given the values of $\beta$ and $\gamma$ to get the maximum likelihood. We then did optimization on the common physicochemical weights $\beta$ and $\gamma$. The ML estimates are $\beta = 0.1244$ and $\beta = 0.0005917$, comparing to Grantham's weights $\beta = 0.1018$ and $\beta = 0.000399$.\\
+
+Notice in Figure \ref{fig:betagamma} and \ref{fig:gvalue}  there is an outlier for the estimates of Grantham weights with the maximizing rule, which corresponds to gene 63; this also happens to gene 48 with estimates of sensitivity values. There are several possible explanations. One is discrepancy between the gene trees. We use the same tree (topology and branch lengths) for all the genes, however, sequences in some genes might support a different phylogeny. Another possibility is that these genes have very different structures from other genes so that the importance of the physicochemical properties is very different. (Look at the gene trees and see if they have different topologies from the one that is used in the ML analysis)\\
+
+
 \begin{figure}[ht]
-\center
-\includegraphics[width=0.8\textwidth,height=4cm]{besttree.pdf}
+\caption{The figures in the first row are the estimates of $\beta$ and $\gamma$ using the maximizing rule, in the second row are the estimates of $\beta$ and $\gamma$ using the majority rule. Notice the difference in the range of y-axis}
+\centering
+\includegraphics[width=\textwidth]{betagamma.pdf}
+\includegraphics[width=\textwidth]{betagamma2.pdf}
+\label{fig:betagamma}
 \end{figure}
-%\begin{center}
-%\line(1,0){250}
-%\end{center}
-%
-%To check if the simulation is done correctly, here are some results. For simplicity, only 3 states (amino acids) are considered now. \\
-%
-%1. Check that the way to do simple simulation and to find the stationary probability is correct.\\
-%
-%Given the instantaneous substitution rate matrix $W$ for a Markov process with stationary probability vector $\mathbf{p}$ , $\mathbf{p}$ can be calculated by taking any row of the matrix $\exp(Wt)$ where $t$ is big enough to guarantee that the process has already reached stationarity. \\
-%
-%On the other hand, if $W$ comes from the mutation and fixation processes, then $\mathbf{p}$ can also be found by S-H's formula of stationary probabilities
-%\begin{equation}
-%\frac{p_i}{p_j} = (\frac{f_i}{f_j})^{\nu} = \frac{W_{ji}}{W_{ij}}
-%\label{eq:stationary}
-%\end{equation}
-%
-%
-%
-%
-%Comparing $\mathbf{p}$ calculated in both ways verifies that S-H's formula is accurate. Next we compare $\mathbf{p}$ calculated from the simulation with that from either of the formulae. The way I found $\mathbf{p}$ is as follows:\\
-%\begin{enumerate}
-%\item Do simulations with long enough time so that there are at least $10,000$ substitutions in the simulated chain.
-%\item Cut off the first 100 observations, before the time when the process reaches stationarity.
-%\item Find the average time $\bar{t}$ taken for a certain number of substitutions (for example, 10), and record the state of the chain when the amount $\bar{t}$ of time passed.
-%\item Find the frequency of the observed states, hence the approximation of $\mathbf{p}$.
-%\end{enumerate}
-%
-%\begin{center}
-%\line(1,0){250}
-%\end{center}
-%
-%Following are some results.\\
-%\begin{enumerate}
-%\item Let $W$ be the substitution rate matrix between all the protein with 2 sites. Since there are only 3 states for each site, total number of protein is 9. Hence the dimension of the matrix $W$ is $9\times 9$.\\
-%\begin{figure}[here]
-%\centering
-%\includegraphics[scale=0.2]{freq_simple_sim.pdf}
-%\caption{Stationary probabilities with 2 sites}
-%\label{fig:freq2sites}
-%\end{figure}
-%
-%In Figure~\ref{fig:freq2sites} on page ~\pageref{fig:freq2sites} the solid line connects the values of stationary probabilities for each state from theoretical calculation, and the red circles from simulation. \\
-%%Obviously the simulation is done correctly and analyzed correctly in this case.\\
-%
-%\item Another simulation is done with 2 sites (3 states for each site) for each protein, starting with $(1,2)$, with optimal protein $(2,2)$, selection coefficient  0.1, running time $10^9$, sites dependent. The stationary probabilities are:
-%\begin{table}[here]
-%\begin{center}
-%\begin{tabular}{rrrrrrrrrr}
-%  \hline
-%  1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\ 
-%  \hline
-% 0.003364677 & 0.057514946 & 0.004235888 & 0.058025656 & 0.727881756 & 0.069636795 & 0.004130742 & 0.070132484 & 0.005077057 \\ 
-%0.003324449 & 0.057134781 & 0.004132447 & 0.057134781 & 0.730153540 & 0.069429813 & 0.004132447 & 0.069429813 & 0.005127929 \\ 
-%   \hline
-%\end{tabular}
-%\end{center}
-%\end{table}
-%
-%First row is from simulation, second row is from Sella-Hirsh's formula. They are very close to each other. The number of steps in this simulation is $669061$, which is relatively big.\\
-%
-%\item A simulation with 3 sites and 3 states for each site confirmed the correctness of simulation. The chain starts with $(1,1,1)$, with optimal protein $(2,2,2)$, selection coefficient $0.01$, running time $10^8$, sites dependent. The number of observations is $216126$. Figure~\ref{fig:freq3sites} on page ~\pageref{fig:freq3sites} is a plot of stationary probabilities from both simulations and Sella-Hirsh's formula.
-%\begin{figure}[here]
-%\centering
-%\includegraphics[scale=0.3]{3sites3states.pdf}
-%\caption{stationary probabilities with 3 sites}
-%\label{fig:freq3sites}
-%\end{figure}
-%
-%\end{enumerate}
-%
-%\begin{center}
-%\line(1,0){250}
-%\end{center}
-%
-%Questions to answer next:
-%\begin{enumerate}
-%\item How to construct phylogeny from the simulated data?\\
-%
-%\item How to approximate the functionality (and other variables of concern) in the site-dependent case using site-independent case?\\
-%
-%In site-independent case, it's equivalent to assuming that every other site is at the optimal amino acid hence the functionality at those sites is 1. When the process has reached stationarity, if $\Phi$ is high and selection is strong, then the frequency of optimal amino acids will be high hence the assumption is reasonable. However, when $\Phi$ is small or selection is very weak, there tend to be more non-optimal amino acids at many sites.\\
-%
-%Consider the case when there are only 2 sites (amino acids) in the protein, fix the second site at a certain amino acid and let only site 1 change. How does site 2 affect the stationary distribution at site 1?\\
-%
-%From \eqref{eq:fitnessratio},
-%\begin{equation}
-%f_{ij} = \frac{f_i}{f_j} = \exp\Big(-\frac{A}{F_2}(e^{d_is_1} - e^{d_js_1})\Big)
-%\label{eq:fitratioindep}
-%\end{equation}
-%In site-independent case, we assume site 2 is at the optimal amino acid, i.e. $F_2 = 1$, therefore
-%\begin{equation}
-%f_{ij}^{\text{ind}} = \exp\Big(-A(e^{d_is_1} - e^{d_js_1})\Big)
-%\end{equation}
-%
-%The relationship between the two fitness ratios is
-%\begin{equation}
-%f_{ij}^{\text{ind}} = (f_{ij})^{F_2}
-%\end{equation}
-%
-%If site 2 is not at the optimal amino acid, then $F_2 < 1$. Now consider the fitness ratios between an amino acid ($aa_i$) and the optimal amino acid ($aa_o$).\\
-%\begin{eqnarray}
-%f_{io} & = & \exp\Big(-\frac{A}{F_2}(e^{d_is_1} - 1)\Big)\\
-%f_{io}^{\text{ind}} & = & (f_{io})^{F_2}
-%\end{eqnarray}
-%Since $f_{io} < 1$, $f_{io}^{\text{ind}} > f_{io}$, the fixation probability from an arbitraty amino acid to the optimal amino acid is higher in the site-dependent case. In other words, the selection strength at one site is {\bf higher} when other sites are not at the optimal amino acids.\\
-%
-%Let's see what happens with stationary distributions under site-independent and -dependent cases. From \eqref{eq:stationary}, 
-%\begin{equation}
-%\frac{p_i}{p_o} = \big(\frac{f_i}{f_o}\big)^\nu = (f_{io})^\nu
-%\end{equation}
-%Therefore 
-%\begin{equation}
-%(\frac{p_i}{p_o})^{\text{ind}} = (f_{io}^{\text{ind}})^\nu = (\frac{p_i}{p_o})^{F_2} > \frac{p_i}{p_o}
-%\end{equation}
-%
-%This result could easily be generalized when the functionality $F_S$ is known for othere sites and only one site is changing, with $F_2$ replaced by $F_S$. Simulations also verified the relation.\\
-%
-%Rewriting the equation \eqref{eq:fitnessratio}, we can see
-%\begin{equation}
-%\frac{f_i}{f_j} = \exp\Big[-A\Big(e^{d_k^i s_k - \ln F_S} - e^{d_k^j s_k -  \ln F_S}\Big)\Big]
-%\end{equation}
-%What does this reflect the effect of $F_S$ on selection strength at site $k$?\\
-%
-%The most essential and what we are most interested in are the fixation rates from one protein to another, under both site-dependent and site-independent cases. If this is clear, the substitution rates and stationary distribution will follow, also the mean fitnesses. On the other hand, fixation probability is a function of fitness ratio, which also determines the stationary probabilities.\\
-%
-%Now we already know how to express the fitness ratio in site-dependent case in terms of that in site-independent case, with functionality at other sites as exponent, when there is only one site that is different between two proteins. \\
-%
-%To get the fitness ratio between any two proteins, we could use proteins that are one site away from them as bridges and represent the ratio as a product of several ratios we already know. For example:
-%
-%\begin{eqnarray*}
-%\frac{f_{AA}}{f_{BB}} & = & \frac{f_{AA}}{f_{AB}} \cdot \frac{f_{AB}}{f_{BB}}\\
-%\frac{f_{AA}}{f_{AB}} & = &(\frac{f^2_A}{f^2_B})^{-F_A}\\
-%\frac{f_{AB}}{f_{BB}} & = &(\frac{f^1_A}{f^1_B})^{-F_B}
-%\end{eqnarray*}
-%
-%If furthermore, the selection coefficients at the first and second positions are the same, then $\frac{f^2_A}{f^2_B} = \frac{f^1_A}{f^1_B} = \frac{f_A}{f_B}$ in site-independent case. Therefore
-%\begin{equation*}
-%\frac{f_{AA}}{f_{BB}} = (\frac{f_A}{f_B})^{-F_A-F_B}
-%\end{equation*}
-%
-%If there are more than 2 sites that are different, then there need to be more than one intermediate proteins to relate them together. For example,
-%\begin{equation*}
-%\frac{f_{AAA}}{f_{BBB}} = \Big(\frac{f_A}{f_B}\Big)^{-F_{AA}-F_{AB}-F_{BB}}
-%\end{equation*}
-%However, if the selection coefficients are not the same across the sites, this relationship does not hold any more. The reason is that even fitness ratio in site-independent case depends on the selection coefficient at that particular site. 
-%\end{enumerate}
-%%Next step: set the mutation rate to be a different number, add mutation bias, move from amino acid level to codon level.
-%
-%\begin{center}
-%\line(1,0){250}
-%\end{center}
-%
-%Parameters to investigate during the optimization (optimx):\\
-%\begin{enumerate}
-%\item $s, \Phi, C, q, N_e$, some of them are correlated to each other and cannot be split separately
-%\item tree topologies (at different extremes), branch lengths, number of tips
-%\item ancestral sequences --- stationary, uniform, same sequence as used in the simulation
-%\end{enumerate}
-%
-%Hessian matrix, variance, information; confidence interval, bootstrapping; ...
-%
-%\begin{center}
-%\line(1,0){250}
-%\end{center}
-%
-%Meeting on Thursday, Mar 8, 1012.
-%\begin{enumerate}
-%\item Do the plots of MLE bias with respect to number of sites (200, 400, 800 or more in between) : first, fix other parameters, estimate $s$; second, estimate $\Phi$ while fix other parameters. Do this for trees with 4 tips and 8 tips.
-%\item Estimate the composite parameter.
-%\item Instead of giving the equilibrium frequencies, make it depend on the parameters as from Sella-Hirsh's formula, and do the optimization that way.
-%\item Let $s$ vary according to Gamma distribution instead of being fixed, and estimate the Gamma parameter(s).
-%\end{enumerate}
-%
-%Profiling R code:
-%
-%> Rprof(file="rprof.out")
-%> R command
-%> Rprof(NULL)
-%
-%under unix, use command:
-%R CMD Rprof rprof.out
+
+\begin{figure}
+\caption{Correlation between $\beta$ and $\gamma$. Blue line is the maximizing rule, with $R^2 = 0.9899$, Red line is the majority rule with $R^2 = 0.3258$}
+\centering
+\includegraphics[width=\textwidth]{GMmaxmaj.pdf}
+\label{fig:correlation}
+\end{figure}
+
+\begin{figure}[ht]
+\caption{Plots of Grantham sensitivity across all the genes. On the left, optimal amino acids are obtained using maximizing rule; on the right majority rule}
+\centering
+\includegraphics[width=\textwidth]{gvalue.pdf}
+\label{fig:gvalue}
+\end{figure}
+
+
+\subsubsection{Model accuracy}
+To assess model accuracy, we did simulations using the maximum likelihood estimates from Rokas et. al. 's data. (waiting on results)
+
 \end{document}
