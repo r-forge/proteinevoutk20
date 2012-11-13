@@ -1,0 +1,657 @@
+
+P A U P *
+Portable version 4.0b10 for Unix
+Mon Nov 12 22:49:47 2012
+
+      -----------------------------NOTICE-----------------------------
+        This is a beta-test version.  Please report any crashes,
+        apparent calculation errors, or other anomalous results.
+        There are no restrictions on publication of results obtained
+        with this version, but you should check the WWW site
+        frequently for bug announcements and/or updated versions.  
+        See the README file on the distribution media for details.
+      ----------------------------------------------------------------
+
+paup> cstatus
+
+
+Character-status summary:
+  Current optimality criterion = parsimony
+  No characters are excluded
+  Of 1701 total characters:
+    All characters are of type 'unord'
+    All characters have equal weight
+    758 characters are constant
+    378 variable characters are parsimony-uninformative
+    Number of parsimony-informative characters = 565
+
+paup> set criterion=likelihood;
+
+
+Optimality criterion set to likelihood.
+
+paup> lset nst=6 basefreq=empirical;
+
+
+paup> hsearch;
+
+
+Heuristic search settings:
+  Optimality criterion = likelihood
+    Likelihood settings:
+      Number of substitution types  = 6
+      User-specified substitution rate matrix =
+                  -   1.000000   1.000000   1.000000
+           1.000000          -   1.000000   1.000000
+           1.000000   1.000000          -   1.000000
+           1.000000   1.000000   1.000000          -
+      Assumed nucleotide frequencies (empirical frequencies):
+        A=0.24419  C=0.21789  G=0.20385  T=0.33407
+      Among-site rate variation:
+        Assumed proportion of invariable sites  = none
+        Distribution of rates at variable sites = equal
+      These settings correspond to the GTR model
+      Number of distinct data patterns under this model = 567
+      Molecular clock not enforced
+      Starting branch lengths obtained using Rogers-Swofford approximation method
+      Trees with approximate likelihoods 5% or further from the target score are rejected
+        without additional iteration
+      Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20,
+                                   delta=1e-06
+      -ln L (unconstrained) = 7789.86151
+  Starting tree(s) obtained via stepwise addition
+  Addition sequence: as-is
+  Number of trees held at each step during stepwise addition = 1
+  Branch-swapping algorithm: tree-bisection-reconnection (TBR)
+  Steepest descent option not in effect
+  Initial 'MaxTrees' setting = 100
+  Branches collapsed (creating polytomies) if branch length is less than or equal to 1e-08
+  'MulTrees' option in effect
+  Topological constraints not enforced
+  Trees are unrooted
+
+Heuristic search completed
+   Total number of rearrangements tried = 130
+   Score of best tree(s) found = 10055.86547
+   Number of trees retained = 1
+   Time used = <1 sec (CPU time = 0.81 sec)
+
+paup> showtrees
+
+
+Tree number 1 (rooted using default outgroup)
+
+/--------------------------------------------------------------------------------------- Scer
+|
++--------------------------------------------------------------------------------------- Spar
+|
+|             /------------------------------------------------------------------------- Smik
+|             |
+\-------------+              /---------------------------------------------------------- Skud
+              |              |
+              \--------------+             /-------------------------------------------- Sbay
+                             |             |
+                             \-------------+              /----------------------------- Scas
+                                           |              |
+                                           \--------------+             /--------------- Sklu
+                                                          \-------------+
+                                                                        \--------------- Calb
+
+paup> outgroup Calb;
+
+
+Outgroup status changed:
+  1 taxon transferred to outgroup
+  Total number of taxa now in outgroup = 1
+  Number of ingroup taxa = 7
+
+paup> showtrees
+
+
+Tree number 1 (rooted using user-specified outgroup)
+
+/--------------------------------------------------------------------------------------- Calb
+|
+|                                                                       /--------------- Scer
+|                                                         /-------------+
+|                                                         |             \--------------- Spar
+|                                          /--------------+
+|                                          |              \----------------------------- Smik
+|                            /-------------+
+|                            |             \-------------------------------------------- Skud
+|             /--------------+
+|             |              \---------------------------------------------------------- Sbay
++-------------+
+|             \------------------------------------------------------------------------- Scas
+|
+\--------------------------------------------------------------------------------------- Sklu
+
+paup> descr 1 / plot=phylogram
+
+
+Tree description:
+
+  Unrooted tree(s) rooted using outgroup method
+  Optimality criterion = likelihood
+    Likelihood settings:
+      Number of substitution types  = 6
+      User-specified substitution rate matrix =
+                  -   1.000000   1.000000   1.000000
+           1.000000          -   1.000000   1.000000
+           1.000000   1.000000          -   1.000000
+           1.000000   1.000000   1.000000          -
+      Assumed nucleotide frequencies (empirical frequencies):
+        A=0.24419  C=0.21789  G=0.20385  T=0.33407
+      Among-site rate variation:
+        Assumed proportion of invariable sites  = none
+        Distribution of rates at variable sites = equal
+      These settings correspond to the GTR model
+      Number of distinct data patterns under this model = 567
+      Molecular clock not enforced
+      Starting branch lengths obtained using Rogers-Swofford approximation method
+      Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20,
+                                   delta=1e-06
+      -ln L (unconstrained) = 7789.86151
+
+Tree number 1 (rooted using user-specified outgroup)
+
+-Ln likelihood = 10055.86547
+
+                                                                         /------------ Scer
+                                                                /-------14
+                                                                |        \-------- Spar
+                                                      /--------13
+                                                      |         \-------------------- Smik
+                                            /--------12
+                                            |         \---------------- Skud
+                  /------------------------11
+                  |                         \------------------- Sbay
+/----------------10
+|                 \--------------------------------------------- Scas
+|
+9--------------------------------------------- Sklu
+|
+\--------------------------------------------------------------------------------------- Calb
+
+paup> savetrees file=gene1Nuc.tre brlens;
+
+
+1 tree saved to file "~/proteinevoutk20/pkg/Data/gene1Nuc.tre"
+
+paup> showtrees
+
+
+Tree number 1 (rooted using user-specified outgroup)
+
+/--------------------------------------------------------------------------------------- Calb
+|
+|                                                                       /--------------- Scer
+|                                                         /-------------+
+|                                                         |             \--------------- Spar
+|                                          /--------------+
+|                                          |              \----------------------------- Smik
+|                            /-------------+
+|                            |             \-------------------------------------------- Skud
+|             /--------------+
+|             |              \---------------------------------------------------------- Sbay
++-------------+
+|             \------------------------------------------------------------------------- Scas
+|
+\--------------------------------------------------------------------------------------- Sklu
+
+paup> lset rmatrix=estimate;
+
+
+paup> hsearch
+
+
+Heuristic search settings:
+  Optimality criterion = likelihood
+    Likelihood settings:
+      Number of substitution types  = 6
+      Substitution rate-matrix parameters estimated via ML
+      Assumed nucleotide frequencies (empirical frequencies):
+        A=0.24419  C=0.21789  G=0.20385  T=0.33407
+      Among-site rate variation:
+        Assumed proportion of invariable sites  = none
+        Distribution of rates at variable sites = equal
+      These settings correspond to the GTR model
+      Number of distinct data patterns under this model = 567
+      Molecular clock not enforced
+      Starting branch lengths obtained using Rogers-Swofford approximation method
+      Trees with approximate likelihoods 5% or further from the target score are rejected
+        without additional iteration
+      Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20,
+                                   delta=1e-06
+      -ln L (unconstrained) = 7789.86151
+  Starting tree(s) obtained via stepwise addition
+  Addition sequence: as-is
+  Number of trees held at each step during stepwise addition = 1
+  Branch-swapping algorithm: tree-bisection-reconnection (TBR)
+  Steepest descent option not in effect
+  Initial 'MaxTrees' setting = 100
+  Branches collapsed (creating polytomies) if branch length is less than or equal to 1e-08
+  'MulTrees' option in effect
+  Topological constraints not enforced
+  Trees are unrooted
+
+Heuristic search completed
+   Total number of rearrangements tried = 130
+   Score of best tree(s) found = 9746.95140
+   Number of trees retained = 1
+   Time used = 54 sec (CPU time = 53.90 sec)
+
+paup> showtrees
+
+
+Tree number 1 (rooted using user-specified outgroup)
+
+/--------------------------------------------------------------------------------------- Calb
+|
+|                                                                       /--------------- Scer
+|                                                         /-------------+
+|                                                         |             \--------------- Spar
+|                                          /--------------+
+|                                          |              \----------------------------- Smik
+|                            /-------------+
+|                            |             \-------------------------------------------- Skud
+|             /--------------+
+|             |              \---------------------------------------------------------- Sbay
++-------------+
+|             \------------------------------------------------------------------------- Scas
+|
+\--------------------------------------------------------------------------------------- Sklu
+
+paup> savetrees file=gene1Nuc.tre brlens;
+
+
+OK to replace file "~/proteinevoutk20/pkg/Data/gene1Nuc.tre"? (Y/n) paup> Y
+
+
+1 tree saved to file "~/proteinevoutk20/pkg/Data/gene1Nuc.tre"
+
+paup> lset ?
+
+
+Usage: LSet [options...] ;
+
+Available options:
+
+Keyword ---- Option type ------------------------ Current default setting --
+NST          1|2|6                                6
+TRatio       <real-value>|Estimate|Previous       2
+RMatrix      (<rAC><rAG><rAT><rCG><rCT>)|        
+             Estimate|Previous                    Estimate
+RClass       (<cAC><cAG><cAT><cCG><cCT><cGT>)     (a b c d e f)
+Variant      HKY|F84                              HKY
+BaseFreq     Empirical|Equal|Estimate|Previous|  
+             (<frqA><frqC><frqG>)                 Empirical
+Rates        Equal|Gamma|SiteSpec                 Equal
+Shape        <real-value>|Estimate|Previous       0.5
+NCat         <integer-value>                      4
+RepRate      Mean|Median                          Mean
+PInvar       <real-value>|Estimate|Previous       0
+SiteRates    Partition[:<charpartition-name>]|   
+             Rateset[:<rateset-name>]|Previous    <none>
+Wts          RepeatCnt|Ignore                     RepeatCnt
+InitBrLen    Rogers|LS|<real-value>               Rogers
+LCollapse    No|Yes                               Yes
+MaxPass      <integer-value>                      20
+Delta        <real-value>                         1e-06
+UseApprox    No|Yes                               Yes
+ApproxLim    <real-value>                         5
+AdjustAppLim No|Yes                               Yes
+LogIter      No|Yes                               No
+ZeroLenTest  No|Full|Crude                        No
+Recon        Marginal|Joint                       Marginal
+AllProbs     No|Yes                               No
+Clock        No|Yes                               No
+UserBrLens   No|Yes                               No
+MinMemReq    No|Yes                               No
+StartVals    ParsApprox|Arbitrary                 ParsApprox
+ParamClock   Standard|Rambaut|BrLens|SplitTimes| 
+             MDRambaut|Thorne                     Standard
+MLDistforLS  No|Yes                               No
+ShowQMatrix  No|Yes                               No
+
+paup> lset ShowQMatrix = Yes;
+
+
+paup> hsearch
+
+
+Heuristic search settings:
+  Optimality criterion = likelihood
+    Likelihood settings:
+      Number of substitution types  = 6
+      Substitution rate-matrix parameters estimated via ML
+      Assumed nucleotide frequencies (empirical frequencies):
+        A=0.24419  C=0.21789  G=0.20385  T=0.33407
+      Among-site rate variation:
+        Assumed proportion of invariable sites  = none
+        Distribution of rates at variable sites = equal
+      These settings correspond to the GTR model
+      Number of distinct data patterns under this model = 567
+      Molecular clock not enforced
+      Starting branch lengths obtained using Rogers-Swofford approximation method
+      Trees with approximate likelihoods 5% or further from the target score are rejected
+        without additional iteration
+      Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20,
+                                   delta=1e-06
+      -ln L (unconstrained) = 7789.86151
+  Starting tree(s) obtained via stepwise addition
+  Addition sequence: as-is
+  Number of trees held at each step during stepwise addition = 1
+  Branch-swapping algorithm: tree-bisection-reconnection (TBR)
+  Steepest descent option not in effect
+  Initial 'MaxTrees' setting = 100
+  Branches collapsed (creating polytomies) if branch length is less than or equal to 1e-08
+  'MulTrees' option in effect
+  Topological constraints not enforced
+  Trees are unrooted
+
+Heuristic search completed
+   Total number of rearrangements tried = 130
+   Score of best tree(s) found = 9746.95140
+   Number of trees retained = 1
+   Time used = 55 sec (CPU time = 54.65 sec)
+
+paup> lscore;
+
+
+Likelihood scores of tree(s) in memory:
+  Likelihood settings:
+    Number of substitution types  = 6
+    Substitution rate-matrix parameters estimated via ML
+    Assumed nucleotide frequencies (empirical frequencies):
+      A=0.24419  C=0.21789  G=0.20385  T=0.33407
+    Among-site rate variation:
+      Assumed proportion of invariable sites  = none
+      Distribution of rates at variable sites = equal
+    These settings correspond to the GTR model
+    Number of distinct data patterns under this model = 567
+    Molecular clock not enforced
+    Starting branch lengths obtained using Rogers-Swofford approximation method
+    Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20,
+                                 delta=1e-06
+    -ln L (unconstrained) = 7789.86151
+
+Tree             1
+------------------
+-ln L   9746.95140
+Rate matrix R:
+  AC       1.44577
+  AG       4.01596
+  AT       0.95389
+  CG       1.33835
+  CT       4.11911
+  GT       1.00000
+
+Time used to compute likelihoods = 1 sec (CPU time = 0.29 sec)
+
+paup> cstate
+
+
+Error(#112): Command "cstate" is unrecognized.
+
+paup> cstatus
+
+
+Character-status summary:
+  Current optimality criterion = likelihood
+  No characters are excluded
+  Observed proportion of constant sites = 0.44562
+
+paup> execute gene2.nex 
+
+
+Processing of file "~/proteinevoutk20/pkg/Data/gene2.nex" begins...
+
+Are you sure you want to reset the active datafile? (Y/n) paup> Y
+
+
+Optimality criterion reset to parsimony.
+Data read in DNA format
+
+Data matrix has 8 taxa, 1458 characters
+Valid character-state symbols: ACGT
+Missing data identified by '?'
+Gaps identified by '-'
+"Equate" macros in effect:
+   R,r ==> {AG}
+   Y,y ==> {CT}
+   M,m ==> {AC}
+   K,k ==> {GT}
+   S,s ==> {CG}
+   W,w ==> {AT}
+   H,h ==> {ACT}
+   B,b ==> {CGT}
+   V,v ==> {ACG}
+   D,d ==> {AGT}
+   N,n ==> {ACGT}
+
+Processing of file "~/proteinevoutk20/pkg/Data/gene2.nex" completed.
+
+paup> showtrees
+
+
+There are no trees in memory (ShowTrees command)
+
+paup> lset ?
+
+
+Usage: LSet [options...] ;
+
+Available options:
+
+Keyword ---- Option type ------------------------ Current default setting --
+NST          1|2|6                                6
+TRatio       <real-value>|Estimate|Previous       2
+RMatrix      (<rAC><rAG><rAT><rCG><rCT>)|        
+             Estimate|Previous                    Estimate
+RClass       (<cAC><cAG><cAT><cCG><cCT><cGT>)     (a b c d e f)
+Variant      HKY|F84                              HKY
+BaseFreq     Empirical|Equal|Estimate|Previous|  
+             (<frqA><frqC><frqG>)                 Empirical
+Rates        Equal|Gamma|SiteSpec                 Equal
+Shape        <real-value>|Estimate|Previous       0.5
+NCat         <integer-value>                      4
+RepRate      Mean|Median                          Mean
+PInvar       <real-value>|Estimate|Previous       0
+SiteRates    Partition[:<charpartition-name>]|   
+             Rateset[:<rateset-name>]|Previous    <none>
+Wts          RepeatCnt|Ignore                     RepeatCnt
+InitBrLen    Rogers|LS|<real-value>               Rogers
+LCollapse    No|Yes                               Yes
+MaxPass      <integer-value>                      20
+Delta        <real-value>                         1e-06
+UseApprox    No|Yes                               Yes
+ApproxLim    <real-value>                         5
+AdjustAppLim No|Yes                               Yes
+LogIter      No|Yes                               No
+ZeroLenTest  No|Full|Crude                        No
+Recon        Marginal|Joint                       Marginal
+AllProbs     No|Yes                               No
+Clock        No|Yes                               No
+UserBrLens   No|Yes                               No
+MinMemReq    No|Yes                               No
+StartVals    ParsApprox|Arbitrary                 ParsApprox
+ParamClock   Standard|Rambaut|BrLens|SplitTimes| 
+             MDRambaut|Thorne                     Standard
+MLDistforLS  No|Yes                               No
+ShowQMatrix  No|Yes                               Yes
+
+paup> hsearch
+
+
+Heuristic search settings:
+  Optimality criterion = parsimony
+    Character-status summary:
+      Of 1458 total characters:
+        All characters are of type 'unord'
+        All characters have equal weight
+        594 characters are constant
+        433 variable characters are parsimony-uninformative
+        Number of parsimony-informative characters = 431
+    Gaps are treated as "missing"
+  Starting tree(s) obtained via stepwise addition
+  Addition sequence: simple (reference taxon = Scer)
+  Number of trees held at each step during stepwise addition = 1
+  Branch-swapping algorithm: tree-bisection-reconnection (TBR)
+  Steepest descent option not in effect
+  Initial 'MaxTrees' setting = 100
+  Branches collapsed (creating polytomies) if maximum branch length is zero
+  'MulTrees' option in effect
+  Topological constraints not enforced
+  Trees are unrooted
+
+Heuristic search completed
+   Total number of rearrangements tried = 130
+   Score of best tree(s) found = 1575
+   Number of trees retained = 1
+   Time used = <1 sec (CPU time = 0.01 sec)
+
+paup> lset criterion=likelihood;
+
+
+Error(#115): Keyword "criterion" is not recognized.
+
+paup> set criterion=likelihood;
+
+
+Optimality criterion set to likelihood.
+
+paup> hsearch
+
+
+Heuristic search settings:
+  Optimality criterion = likelihood
+    Likelihood settings:
+      Number of substitution types  = 6
+      Substitution rate-matrix parameters estimated via ML
+      Assumed nucleotide frequencies (empirical frequencies):
+        A=0.32836  C=0.18716  G=0.20448  T=0.28001
+      Among-site rate variation:
+        Assumed proportion of invariable sites  = none
+        Distribution of rates at variable sites = equal
+      These settings correspond to the GTR model
+      Number of distinct data patterns under this model = 459
+      Molecular clock not enforced
+      Starting branch lengths obtained using Rogers-Swofford approximation method
+      Trees with approximate likelihoods 5% or further from the target score are rejected
+        without additional iteration
+      Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20,
+                                   delta=1e-06
+      -ln L (unconstrained) = 6565.73463
+  Starting tree(s) obtained via stepwise addition
+  Addition sequence: as-is
+  Number of trees held at each step during stepwise addition = 1
+  Branch-swapping algorithm: tree-bisection-reconnection (TBR)
+  Steepest descent option not in effect
+  Initial 'MaxTrees' setting = 100
+  Branches collapsed (creating polytomies) if branch length is less than or equal to 1e-08
+  'MulTrees' option in effect
+  Topological constraints not enforced
+  Trees are unrooted
+
+Heuristic search completed
+   Total number of rearrangements tried = 130
+   Score of best tree(s) found = 7911.10374
+   Number of trees retained = 1
+   Time used = 50 sec (CPU time = 49.93 sec)
+
+paup> lscore
+
+
+Likelihood scores of tree(s) in memory:
+  Likelihood settings:
+    Number of substitution types  = 6
+    Substitution rate-matrix parameters estimated via ML
+    Assumed nucleotide frequencies (empirical frequencies):
+      A=0.32836  C=0.18716  G=0.20448  T=0.28001
+    Among-site rate variation:
+      Assumed proportion of invariable sites  = none
+      Distribution of rates at variable sites = equal
+    These settings correspond to the GTR model
+    Number of distinct data patterns under this model = 459
+    Molecular clock not enforced
+    Starting branch lengths obtained using Rogers-Swofford approximation method
+    Branch-length optimization = one-dimensional Newton-Raphson with pass limit=20,
+                                 delta=1e-06
+    -ln L (unconstrained) = 6565.73463
+
+Tree             1
+------------------
+-ln L   7911.10374
+Rate matrix R:
+  AC       2.52331
+  AG       5.12093
+  AT       1.69552
+  CG       1.90167
+  CT       9.79029
+  GT       1.00000
+
+Time used to compute likelihoods = <1 sec (CPU time = 0.29 sec)
+
+paup> showtree
+
+
+Tree number 1 (rooted using default outgroup)
+
+/--------------------------------------------------------------------------------------- Scer
+|
++--------------------------------------------------------------------------------------- Spar
+|
+|             /------------------------------------------------------------------------- Smik
+|             |
+\-------------+              /---------------------------------------------------------- Skud
+              |              |
+              \--------------+             /-------------------------------------------- Sbay
+                             |             |
+                             \-------------+              /----------------------------- Scas
+                                           |              |
+                                           \--------------+             /--------------- Sklu
+                                                          \-------------+
+                                                                        \--------------- Calb
+
+paup> outgroup=Calb
+
+
+Error(#112): Command "outgroup=Calb" is unrecognized.
+
+paup> outgroup Calb
+
+
+Outgroup status changed:
+  1 taxon transferred to outgroup
+  Total number of taxa now in outgroup = 1
+  Number of ingroup taxa = 7
+
+paup> showtree
+
+
+Tree number 1 (rooted using user-specified outgroup)
+
+/--------------------------------------------------------------------------------------- Calb
+|
+|                                                                       /--------------- Scer
+|                                                         /-------------+
+|                                                         |             \--------------- Spar
+|                                          /--------------+
+|                                          |              \----------------------------- Smik
+|                            /-------------+
+|                            |             \-------------------------------------------- Skud
+|             /--------------+
+|             |              \---------------------------------------------------------- Sbay
++-------------+
+|             \------------------------------------------------------------------------- Scas
+|
+\--------------------------------------------------------------------------------------- Sklu
+
+paup> savetrees file=gene2Nuc.tre brlens;
+
+
+1 tree saved to file "~/proteinevoutk20/pkg/Data/gene2Nuc.tre"
+
+paup> quit
+
