@@ -245,6 +245,8 @@ sym.to.Q <- function(A,bf=NULL){
 #############################################################################
 ## given the base frequencies of nucleotides, find base frequencies of codons
 ## assuming the codon positions are all independent. Stop codons are excluded
+## this is not a good way to find the frequencies of codons, nucleotide freqs
+## usually are not directly related to codon freqs
 freq_codon <- function(bf = rep(1/4,4)){
   bf=bf/sum(bf)
   freq = rep(0,61)
@@ -262,7 +264,7 @@ freq_aa <- function(nubf=rep(1/4,4)){
   bf = freq_codon(nubf) #codon frequencies
   freq = matrix(0,20,1)
   dimnames(freq)[[1]] = AA
-  CDS_AA = sapply(1:61, function(x) translate(s2c(CDS[x])))
+  CDS_AA = sapply(1:61, function(x) translate(s2c(CDS[x]))) #amino acids coded by the list of codons
   for(i in 1:20)
     freq[AA[i],1] = sum(bf[CDS_AA==AA[i]])
   freq = as.table(as.vector(freq))
@@ -274,10 +276,12 @@ freq_aa <- function(nubf=rep(1/4,4)){
 AAMat <- function(CdMat){
   Q = matrix(0,20,20)
   for(i in 1:19){
-    fcodons = cdlist[[i]]
+    fcodons = cdlist[[i]] #codons that code for the amino acid mutate from
+    nfcodons = length(fcodons)
     for(j in (i+1):20){
-      tcodons = cdlist[[j]]
-      Q[i,j] = sum(CdMat[fcodons,tcodons])
+      tcodons = cdlist[[j]] #codons that code for the amino acid mutate to
+      ntcodons = length(tcodons)
+      Q[i,j] = sum(CdMat[fcodons,tcodons])/(nfcodons*ntcodons)
     }
   }
   #diag(Q) = -rowSums(Q)
@@ -303,8 +307,8 @@ cd_MuMat_form <- function(vec=rep(1,6)){
   ##mutation matrix for 61 codons
   codon_array <- array(0,dim=c(61,61),dimnames=list(CDS,CDS))
   for(m in 1:60){                       #loop through all 61 codons
-    fcd <- CDS[m]
-    fcd_ch <- s2c(fcd)
+    fcd <- CDS[m] #codon mutated from
+    fcd_ch <- s2c(fcd) #convert from string to character
     for(i in (m+1):61){
       tcd = CDS[i]
       tcd_ch = s2c(tcd)
@@ -814,6 +818,7 @@ optimBranch <- function(data,tree,method="Nelder-Mead",maxit=500,trace = 0, ...)
   el <- log(tree$edge.length)
   fn = function(el,data,tree, ...){
     tree$edge.length = exp(el)
+    print(tree$edge.length)
     result = mllm(data,tree, ...)$ll$loglik
     return(result)
   }
