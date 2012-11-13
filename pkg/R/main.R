@@ -495,6 +495,7 @@ mat_gen_indep <- function(aa_op,s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
 }
 
 # list of 20 rate matrices, one of each aa as optimal
+# these matrices are not scaled, did not use the base frequencies
 QAllaa <- function(s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
   res = lapply(1:20,function(i) {mat_gen_indep(i,s,DisMat, MuMat,C, Phi, q, Ne)})
   return(as.matrix(res))
@@ -515,8 +516,8 @@ getPm <- function(el, Q, g){
   return(res)
 }
 
-
-ll3m <- function (dat1, tree, bf = rep(1/20,20), g = 1,Q) 
+# Here Q gets scaled in the function, so the given matrix doesn't have to be scaled
+ll3m <- function (dat1, tree, bf = rep(1/20,20), Q, g = 1) 
 {
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
     "cladewise") 
@@ -527,7 +528,7 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20), g = 1,Q)
   m = length(edge) + 1
   dat = vector(mode = "list", length = m)
   bf = bf/sum(bf)
-  Q = scaleQ(Q,bf)
+  Q = scaleQ(Q,bf) #scale the substitution rate matrix
   Q = t(Q) # in order to use C function in phangorn package
   el <- tree$edge.length
   P <- getPm(el,Q,g)
@@ -544,7 +545,7 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20), g = 1,Q)
   result
 }
 # loglikelihood given optimal amino acids at each site. 
-llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),g=1,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   result = NULL
   weight = attr(data,"weight")
   nr = attr(data,"nr") #number of different sites
@@ -553,7 +554,7 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),g=1,C=2,Phi=0.5,q=4e-7,N
   opaa = NULL #optimal amino acids
   optimal_aa = "" #is optimal aa given or not?
   for(i in 1:20){ #when optimal aa is i
-    llopi = ll3m(data,tree,bf=bf,g=1,Q=Qall[[i]])
+    llopi = ll3m(data,tree,bf=bf,Q=Qall[[i]])
     result = cbind(result,llopi)
   }
   if(!is.null(op)){
@@ -584,7 +585,7 @@ llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   result = NULL
   weight = attr(data,"weight")
   for(i in 1:20){ #when optimal aa is i
-    llopi = ll3m(data,tree,bf=bf,g=1,Q=QAll[[i]])
+    llopi = ll3m(data,tree,bf=bf,Q=QAll[[i]])
     result = cbind(result,llopi)
   }
   opaa = apply(result,1,which.max)
@@ -598,7 +599,7 @@ llaam1 <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   result = NULL
   weight = attr(data,"weight")
   for(i in 1:20){ #when optimal aa is i
-    llopi = ll3m(data,tree,bf=bf,g=1,Q=QAll[[i]])
+    llopi = ll3m(data,tree,bf=bf,Q=QAll[[i]])
     result = cbind(result,llopi)
   }
   return(result)
@@ -611,11 +612,11 @@ llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=
   nr = attr(data,"nr")
   opaa = NULL
   for(i in 1:20){ #when optimal aa is i
-    llopi = ll3m(data,tree,bf=bf,g=1,Q=QAll[[i]])
+    llopi = ll3m(data,tree,bf=bf,Q=QAll[[i]])
     result = cbind(result,llopi)
   }
   if(!is.null(opw)){
-    if(sum(opw)!=1) opw = opw/sum(opw)
+    opw = opw/sum(opw)
     result = result * rep(opw,each=nr)
     sitelik = apply(result,1,sum)
     loglik = sum(weight * sitelik)
@@ -632,7 +633,7 @@ llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=
 llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
   result = NULL
   weight = attr(data,"weight")
-  ll = ll3m(data,tree,bf=bf,g=1,Q=Q)
+  ll = ll3m(data,tree,bf=bf,Q=Q)
   loglik = sum(weight*ll)
   return(list(loglik=loglik,Q=Q,bf=bf))
 }
@@ -646,7 +647,7 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
     "cladewise") 
     tree <- reorderPruning(tree)
   if (class(data)[1] != "phyDat") stop("data must be of class phyDat")
-  if(is.null(tree$edge.length)) stop("tree must have edge weights") 
+  if(is.null(tree$edge.length)) stop("tree must have branch length") 
   if(any(is.na(match(tree$tip, attr(data, "names"))))) stop("tip labels are not in data")
   if(!is.null(opaa) && !is.null(opw)) warning("both optimal amino acis and weights are specified, weights are ignored")
   
@@ -660,7 +661,7 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
   }
   Qall = QAllaa(s,dismat,mumat,C,Phi,q,Ne)
   if(!is.null(opaa))
-    ll = llop(data,tree,op=opaa,bf=bfaa,Qall=Qall,g=1,C=C,Phi=Phi,q=q,Ne=Ne)
+    ll = llop(data,tree,op=opaa,bf=bfaa,Qall=Qall,C=C,Phi=Phi,q=q,Ne=Ne)
   else 
     ll = llaaw(tree,data,Qall,opw,bfaa,C,Phi,q,Ne)
   result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,dismat=dismat,mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,call=call)
@@ -672,10 +673,11 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
 #sample call : optim.s(gene1,ROKAS_TREE,be,ga,Q=NU_VEC))
-optim.s <- function(data, tree, ...){
+optim.s <- function(data, tree,trace=0, ...){
   fn = function(ab,data,tree, ...){
     ab = exp(ab)
-    #print(ab) #track the search path of Nelder-Mead optimizer
+    if(trace>0)
+     print(ab) #track the search path of Nelder-Mead optimizer
     result = mllm(data=data,tree=tree,s=ab, ...)$ll$loglik
     return(result)
   }
@@ -687,10 +689,10 @@ optim.s <- function(data, tree, ...){
 # find mle of s for a range of genes in rokas data, given values of beta and gamma
 optim.s.range<- function(beta,gamma,generange,tree,trace=0,multicore=FALSE, ...){
   mle.s.one <- function(k){
-    if(trace)
+    if(trace>0)
       print(paste("start optimization on gene ", k, sep=""))
-    mle <- optim.s(ROKAS_DATA[[k]],tree,beta=beta,gamma=gamma,...)
-    if(trace)
+    mle <- optim.s(ROKAS_DATA[[k]],tree,trace=trace,beta=beta,gamma=gamma,...)
+    if(trace>0)
       print(paste("finish optimization on gene ", k, sep=""))
     return(mle)
   }
@@ -707,7 +709,7 @@ optim.w <- function(beta,gamma,generange,tree,trace=0,maxit=500,multicore=FALSE,
   ab <- log(ab)
   fn <- function(ab,generange,tree,...){
     ab <- exp(ab)
-    print(ab)
+    #print(ab)
     mle <- optim.s.range(ab[1],ab[2],generange,tree=tree,multicore=multicore,...) #call the previous function to optimize s for all genes
     mle.val <- sapply(1:length(generange),function(ind) mle[[ind]]$objective) # best -loglikelihood values
     return(sum(mle.val)) #summation of all values
@@ -727,7 +729,8 @@ optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit =
   ab <- log(ab)
   fn = function(ab,data,tree, ...){
     ab = exp(ab)
-    print(ab) #track the search path of Nelder-Mead optimizer
+    if(trace!=0)
+      print(ab) #track the search path of Nelder-Mead optimizer
     result = mllm(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], ...)$ll$loglik
     return(result)
   }
@@ -825,6 +828,8 @@ optimBranch <- function(data,tree,method="Nelder-Mead",maxit=500,trace = 0, ...)
   res = optim(par=el, fn=fn, gr=NULL,method=method,lower=-Inf,upper=Inf,
               control=list(fnscale=-1,trace=trace,maxit=maxit),tree=tree,data=data, ...)
   res$par = exp(res$par)
+  tree$edge.length = res$par
+  res$tree=tree
   return(res)
 }
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
