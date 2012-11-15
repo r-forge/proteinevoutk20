@@ -331,14 +331,16 @@ ll_site <- function(tree,data,optimal,s,MuMat,alpha=al, beta=be, gamma=ga,
     GM1 = GM_cpv(GMcpv,alpha,beta,gamma)
     Q = mat_gen_indep(optimal,s,GM1,MuMat,C,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
     Q = scaleQ(Q,bf)
+    
     tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
     edge = tree$edge #edges
-    nNodes = max(edge) #number of nodes in the tree
+    nNodes = max(edge) #number of nodes in the tree (including tips)
     probvec = matrix(NA,nNodes,m) #probability of gettting different states at nodes that evolve to the current sequences
     parent <- as.integer(edge[, 1]) #parents of the edges
     child <- as.integer(edge[, 2]) #children of the edges
     root <- as.integer(parent[!match(parent, child, 0)][1])  
     tip <- as.integer(child[!match(child,parent,0)])
+    
     init.tip <- function(x){ #initiate the vector for the tips, 1 for the tip state, 0 otherwise
       vec <- rep(0,m)
       vec[data[x]] <- 1
