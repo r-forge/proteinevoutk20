@@ -1,4 +1,12 @@
-maxdir <- "~/BackupProEvo/rokas_max/"
+##lab9
+# opwdir <- "~/BackupProEvo/rokas_opw/"
+# maxdir <- "~/BackupProEvo/rokas_max/"
+# majdir <- "~/BackupProEvo/rokas_maj/"
+##newton/ betula
+opwdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_opw/"
+maxdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_max/"
+majdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_maj/"
+
 res_max <- vector("list",length=106)
 l <- 106
 for(genect in 1:l){
@@ -15,7 +23,7 @@ GM_max <- sapply(1:106,function(x) res_max[[x]]$GMweights)
 Q_max <- sapply(1:106,function(x) res_max[[x]]$Q)
 br_max <- sapply(1:106,function(x) sum(res_max[[x]]$tree$edge.length))
 
-majdir <- "~/BackupProEvo/rokas_maj/"
+
 res_maj <- vector("list",length=106)
 l <- 106
 for(genect in 1:l){
@@ -33,7 +41,6 @@ Q_maj <- sapply(1:106,function(x) res_maj[[x]]$Q)
 br_maj <- sapply(1:106,function(x) sum(res_maj[[x]]$tree$edge.length))
 
 
-opwdir <- "~/BackupProEvo/rokas_opw/"
 res_opw <- vector("list",length=106)
 l <- 106
 for(genect in 1:l){
@@ -49,3 +56,4 @@ loglik_opw <- sapply(1:106,function(x) res_opw[[x]]$ll$loglik)
 GM_opw <- sapply(1:106,function(x) res_opw[[x]]$GMweights)
 Q_opw <- sapply(1:106,function(x) res_opw[[x]]$Q)
 br_opw <- sapply(1:106,function(x) sum(res_opw[[x]]$tree$edge.length))
+opw <- sapply(1:106,function(x) res_opw[[x]]$opw)
