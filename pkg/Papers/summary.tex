@@ -32,9 +32,17 @@ In this paper we characterize our amino acid-based model, which incorporates sub
 Our model works for homologous protein-coding sequence without gaps or with gaps removed. We use a continuous time Markov process to model substitutions among the amino acids within a protein coding sequence. The states of the Markov process are the 20 natural amino acids (nonnatural amino acids can be easily added), so we use a $20 \times 20$ rate matrix $Q=(Q_{ij})$ where $Q_{ij}$ represents the instantaneous rate that amino acid $i$ will be substituted by amino acid $j$. The rate matrix $Q$ is obtained by multiplying the mutation rate matrix $M$ and fixation probability matrix $F$. As usual the row sum of $(Q_{ij})$ equals $0$ and $P(t) = \exp (tQ)$, where $P_{ij}(t)$ is the probability that amino acid $j$ replaces $i$ after time $t$.\\
 
 \subsection{Methods}
-Based on the $4 \times 4$ exchange rate matrix $S_{nu}$ for nucleotides the mutation rates $\mu_{ij}$ between 20 amino acids are calculated. We assume that mutations occur independently between nucleotides at the same codon position. Therefore, more than one nucleotide substitutions are not allowed to occur instantaneously as mutations involving more than one position during time $\Delta t$ will have probabilities on the order of $\Delta t^2$ and are, therefore, ignored. The calculation follows two steps. First, a $61 \times 61$ (stop codons not included) codon mutation rate matrix $M_{\text{codon}}$ is obtained; Second, using the genetic code table, we groups the codons that coding for the same amino acid to get the $20 \times 20$ mutation rate matrix $M$ for all amino acids. The mutation process is time reversible, i.e. $\pi_i M_{ij} = \pi_j M_{ji}$ is satisfied for all $1 \le i, j \le 20$.\\
+For all time reversible models, the substitution rate matrix is a product of a symmetric matrix $S$ and the the base frequencies of different states: $Q = S\Pi$, where $S$ is called the exchange rate matrix and $\Pi$ is a diagonal matrix of the base frequencies. The mutation rate matrix for 20 amino acids are derived from the $4 \times 4 $ exchange rate matrix for nucleotides. This reduces the number of rate parameters from 190 to 6 comparing to treating all the amino acid exchange rates as parameters.\\
 
-Studies show that fixation of mutations between dissimilar amino acids is generally rare. Therfore, in addition to the effects of mutation bias our model also considers the effects of natural selection on the amino acid sequence of a gene. We begin by assuming that there is an optimal amino acid for each position in a protein and non-optimal amino acids are subjected to natural selection. The functionality of an amino acid depends on the scaled physiochemical distance (Grantham, Science 1974) between the observed and optimal amino acids, the sensitivity of the protein's function to the physicochemical distance and the protein production rate of the gene. \\
+We assume that mutations occur independently between nucleotides at the same codon position. Therefore, mutations involving more than one position during time $\Delta t$ will have probabilities on the order of $\Delta t^2$ and are, therefore, ignored. First, a $61 \times 61$ sense codon exchange rate matrix is obtained. The rate between codon $i$ and $j$ is equal to the rate between the pair of nucleotides if that is the only different pair in all 3 codon positions, and 0 otherwise.\\
+
+
+Second, using the genetic code table, we group the codons that coding for the same amino acid to get the $20 \times 20$ exchange rate matrix $S$ for all amino acids. Suppose the sets of codons for amino acids $i$ and $j$ are $I$ and $J$ correspondingly, i.e. $aa_u = i$ for $u \in I$, and $aa_v = j$ for $v \in J$. Combining synonymous codons that code for amino acid $j$ into one state, we have $\pi_J = \sum_{v \in J} \pi_v$ as the equilibrium frequency of amino acid $j$. The exchange rate matrix for a reversible Markov process of amino acid mutation $S$ has entries:
+\[\mu_{IJ} = \sum_{u \in I} \sum_{v \in J} \pi_u \pi_v s_{uv} / (\pi_I \pi_J)\]
+\noindent
+And $q_{IJ} = s_{IJ} \pi_J$ with $s_{IJ}  = s_{JI}$ constitues the mutation rate matrix $M$. For derivation see Yang(MBE 1998). The mutation process is time reversible, i.e. $\pi_I \mu_{IJ} = \pi_J M_{JI}$ is satisfied for all $1 \le I,J \le 20$.\\
+
+Studies show that fixation of mutations between dissimilar amino acids is generally rare. Therefore, in addition to the effects of mutation bias our model also considers the effects of natural selection on the amino acid sequence of a gene. We begin by assuming that there is an optimal amino acid for each position in a protein and non-optimal amino acids are subjected to natural selection. The functionality of an amino acid depends on the scaled physiochemical distance (Grantham, Science 1974) between the observed and optimal amino acids, the sensitivity of the protein's function to the physicochemical distance and the protein production rate of the gene. \\
 
 %%%intro of the physicochemical distance between amino acids, from Grantham's paper%%%
 Among the properties of amino acid side chain that correlate with relative substitution rate, composition ($c$), polarity ($p$) and molecular volume ($v$) have strongest correlation. Composition is defined as the atomic weight ratio of noncarbon elements in end groups or rings to carbons in the side chain. The last two properties are from published data (add ref). The overall physicochemical difference between any two amino acids $i$ and $j$ combines the three properties: $d_{ij} = [\alpha (c_i-c_j)^2 + \beta (p_i - p_j)^2 + \gamma (v_i - v_j)^2]$ where $\alpha, \beta, \gamma$ are the corresponding weights for the 3 components. Grantham weighted the 3 components by dividing them by the mean distance found with that property alone in the formula. The values of the weights found this way are $\alpha = 1.833$, $\beta = 0.1018$, $\gamma = 0.000399$. These weights are used for amino acids in all genes of any species. However, depending on the functions and environment of amino acids, it is reasonable to assume that the impact of different properties varies. In our model, the weights $\alpha, \beta, \gamma$ are treated as estimable parameters rather than being fixed. The distances are scaled so that the mean pairwise distance is 1. Because of the scaling, only 2 of the 3 weights are free parameters. We fix the weight $\alpha$ to be $1.833$ as in Grantham's weights, and estimate $\beta, \gamma$. \\
@@ -184,38 +192,38 @@ Note: The last two models in the table are the best models picked out by ProtTes
 
 If the optimal amino acids are not counted as free parameters being estimated, the majority approach gives the best AIC value. $\Delta$AIC value for the best empirical model LG + I +G + F is about 50,000 units, which indicates a substantially better fit under the new model. One thing need to point out is that under the maximizing approach for identifying optimal amino acids at each position in the sequence, the number of parameters is much bigger. However, the improvement of log likelihood is so big that this model still performs much better than the best empirical model, with AIC value 40,000 units smaller. With the weighted approach, i.e. for each site, every amino acid has the same probability of being optimal, the increase in the log likelihood outweighs the saving in the number of parameters. This also indicates that the optimal amino acids at all sites vary a lot.  
 
-\subsubsection{Parameter variation between genes}
-We also analyzed Rokas et.al.'s data gene by gene. The best tree branch lengths  and the exchange rate matrix for the concatenated genomic sequence are used in the analysis. Grantham sensitivity and the weights in the physicochemical distance formula are optimized for each gene. Under both approaches of obtaining the optimal amino acids, the estimates for all 3 parameters are on the similar scale. As expected, the weights for physicochemical properties are also similar to the ones that Grantham used. Figure \ref{fig:correlation} showed the correlation between $\beta$ and $\gamma$. Linear regression suggests strong linear relationship between the 2 parameters, especially under the maximizing rule where $R^2$ is very close to 1.\\
-
-Since the variation of Grantham weights is small, we fixed $\beta$ and $\gamma$ across all genes and optimized $g$ for each gene given the values of $\beta$ and $\gamma$ to get the maximum likelihood. We then did optimization on the common physicochemical weights $\beta$ and $\gamma$. The ML estimates are $\beta = 0.1244$ and $\beta = 0.0005917$, comparing to Grantham's weights $\beta = 0.1018$ and $\beta = 0.000399$.\\
-
-Notice in Figure \ref{fig:betagamma} and \ref{fig:gvalue}  there is an outlier for the estimates of Grantham weights with the maximizing rule, which corresponds to gene 63; this also happens to gene 48 with estimates of sensitivity values. There are several possible explanations. One is discrepancy between the gene trees. We use the same tree (topology and branch lengths) for all the genes, however, sequences in some genes might support a different phylogeny. Another possibility is that these genes have very different structures from other genes so that the importance of the physicochemical properties is very different. (Look at the gene trees and see if they have different topologies from the one that is used in the ML analysis)\\
-
-
-\begin{figure}[ht]
-\caption{The figures in the first row are the estimates of $\beta$ and $\gamma$ using the maximizing rule, in the second row are the estimates of $\beta$ and $\gamma$ using the majority rule. Notice the difference in the range of y-axis}
-\centering
-\includegraphics[width=\textwidth]{betagamma.pdf}
-\includegraphics[width=\textwidth]{betagamma2.pdf}
-\label{fig:betagamma}
-\end{figure}
-
-\begin{figure}
-\caption{Correlation between $\beta$ and $\gamma$. Blue line is the maximizing rule, with $R^2 = 0.9899$, Red line is the majority rule with $R^2 = 0.3258$}
-\centering
-\includegraphics[width=\textwidth]{GMmaxmaj.pdf}
-\label{fig:correlation}
-\end{figure}
-
-\begin{figure}[ht]
-\caption{Plots of Grantham sensitivity across all the genes. On the left, optimal amino acids are obtained using maximizing rule; on the right majority rule}
-\centering
-\includegraphics[width=\textwidth]{gvalue.pdf}
-\label{fig:gvalue}
-\end{figure}
-
-
-\subsubsection{Model accuracy}
-To assess model accuracy, we did simulations using the maximum likelihood estimates from Rokas et. al. 's data. (waiting on results)
+%\subsubsection{Parameter variation between genes}
+%We also analyzed Rokas et.al.'s data gene by gene. The best tree branch lengths  and the exchange rate matrix for the concatenated genomic sequence are used in the analysis. Grantham sensitivity and the weights in the physicochemical distance formula are optimized for each gene. Under both approaches of obtaining the optimal amino acids, the estimates for all 3 parameters are on the similar scale. As expected, the weights for physicochemical properties are also similar to the ones that Grantham used. Figure \ref{fig:correlation} showed the correlation between $\beta$ and $\gamma$. Linear regression suggests strong linear relationship between the 2 parameters, especially under the maximizing rule where $R^2$ is very close to 1.\\
+%
+%Since the variation of Grantham weights is small, we fixed $\beta$ and $\gamma$ across all genes and optimized $g$ for each gene given the values of $\beta$ and $\gamma$ to get the maximum likelihood. We then did optimization on the common physicochemical weights $\beta$ and $\gamma$. The ML estimates are $\beta = 0.1244$ and $\beta = 0.0005917$, comparing to Grantham's weights $\beta = 0.1018$ and $\beta = 0.000399$.\\
+%
+%Notice in Figure \ref{fig:betagamma} and \ref{fig:gvalue}  there is an outlier for the estimates of Grantham weights with the maximizing rule, which corresponds to gene 63; this also happens to gene 48 with estimates of sensitivity values. There are several possible explanations. One is discrepancy between the gene trees. We use the same tree (topology and branch lengths) for all the genes, however, sequences in some genes might support a different phylogeny. Another possibility is that these genes have very different structures from other genes so that the importance of the physicochemical properties is very different. (Look at the gene trees and see if they have different topologies from the one that is used in the ML analysis)\\
+%
+%
+%\begin{figure}[ht]
+%\caption{The figures in the first row are the estimates of $\beta$ and $\gamma$ using the maximizing rule, in the second row are the estimates of $\beta$ and $\gamma$ using the majority rule. Notice the difference in the range of y-axis}
+%\centering
+%\includegraphics[width=\textwidth]{betagamma.pdf}
+%\includegraphics[width=\textwidth]{betagamma2.pdf}
+%\label{fig:betagamma}
+%\end{figure}
+%
+%\begin{figure}
+%\caption{Correlation between $\beta$ and $\gamma$. Blue line is the maximizing rule, with $R^2 = 0.9899$, Red line is the majority rule with $R^2 = 0.3258$}
+%\centering
+%\includegraphics[width=\textwidth]{GMmaxmaj.pdf}
+%\label{fig:correlation}
+%\end{figure}
+%
+%\begin{figure}[ht]
+%\caption{Plots of Grantham sensitivity across all the genes. On the left, optimal amino acids are obtained using maximizing rule; on the right majority rule}
+%\centering
+%\includegraphics[width=\textwidth]{gvalue.pdf}
+%\label{fig:gvalue}
+%\end{figure}
+%
+%
+%\subsubsection{Model accuracy}
+%To assess model accuracy, we did simulations using the maximum likelihood estimates from Rokas et. al. 's data. (waiting on results)
 
 \end{document}
