@@ -1,35 +1,25 @@
-load("~/proteinevoutk20/pkg/scratch/newton/rokas_mle_newmat/rokasMLE.RData")
+load("~/proteinevoutk20/pkg/scratch/lab9/bgsearch/bgsearch.RData")
+load("~/proteinevoutk20/pkg/scratch/lab9/bgsearch/bgsearch_svals.RData")
 source("~/proteinevoutk20/pkg/R/main.R")
 source("~/proteinevoutk20/pkg/R/simulation.R")
-rm(.Random.seed)
-index <- attr(res_op$data,"index")
-opaa <- res_op$ll$opaa
-protein_op <- opaa[index]
-tree <- res_op$tree
-s <- res_op$s
-beta <- res_op$GMweights[2]
-gamma <- res_op$GMweights[3]
-bfaa <- res_op$bfaa
-GTRvec <- res_op$Q
-#if the number of sites is not huge, simulate data with the same length of original data
-sim <- simTree(tree,protein_op,s,GTRvec,alpha=al,beta=beta,gamma=gamma,bfaa=bfaa)
-
-
-sim <- vector("list",length=42)
-for(i in 1:42){
-  start_ind <- 1 + (i-1)*1000
-  end_ind <- i*1000
-  cat("the", i, "th simulation:", "\n")
-  sim[[i]] <- simTree(tree,protein_op[start_ind:end_ind],s,GTRvec,alpha=al,beta=beta,gamma=gamma,bfaa=bfaa)
+source("~/proteinevoutk20/pkg/R/readRokas.R")
+# GM weights, same for all the genes
+beta = bg$par[1]
+gamma = bg$par[2]
+# s values for all genes under the values for beta and gamma
+bg.sval = sapply(1:106,function(x) bg.s[[x]]$par)
+simgenes <- vector("list",length=106)
+simdata <- NULL
+for(i in 1:106){
+  cat("start gene",i,"\n")
+  res = mllm(ROKAS_DATA[[i]],tree,s=bg.sval[i],beta=beta,gamma=gamma,Q=GTRvec) #likelihood at the ML estimates, the whole data structure
+  index <- attr(res$data,"index")
+  opaa <- res$ll$opaa
+  protein_op <- opaa[index]
+  simgenes[[i]] <- simTree(tree,protein_op,bg.sval[i],GTRvec,alpha=al,beta=beta,gamma=gamma)
+  cat("finish gene",i,"\n")
+  simdata <- cbind(simdata,simgenes[[i]]$data)
 }
 
-simdata <- sim[[1]]$data
-for(i in 2:42){
-  simdata <- cbind(simdata,sim[[i]]$data)
-}
-simdata.phy <- phyDat(simdata,type="AA")
-sim.res <- mllm(data=simdata.phy,tree=tree,s=s,beta=beta,gamma=gamma,Q=GTRvec,bfaa=bfaa)
-str(sim.res)
-sim.res_op = optim.mllm(sim.res,optQ=T,optBranch=T,optsWeight=T,control=list(epsilon=1e-08,maxit=300,hmaxit=50,trace=0,htrace=1))
 
-save(res_op,sim.res_op,file="simRokas.RData")
+save.image(file="simRokas.RData",compress=TRUE)
