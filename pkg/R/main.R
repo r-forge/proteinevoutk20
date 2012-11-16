@@ -418,7 +418,7 @@ Ftny_protein <- function(protein,protein_op,s,DisMat){
 #q, Phi: constants
 #C: cost function, linear function of the length of the protein
 #C_n = a1 + a2*n, cost --  linear function of the length
-fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   if((d1==d2)||(s==0)) #When the fitnesses are the same, neutral case, pure drift
     return(1/(2*Ne))
   else{
@@ -436,7 +436,7 @@ fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
 #into account? here the length is considered to be 1... which could be wrong...
 ####################
 #vector version of the fixation function, d1, d2 and s are vectors instead of numbers
-fix2 <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+fix2 <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   if(length(d1)!=length(d2)) #throw error if length of proteins are not the same
     stop("error: 2 proteins are of different lengths!")
   if((length(s)==1)&&(length(d1)!=1)) #if s is given as a scalar, then treat it to be the same across all sites
@@ -465,7 +465,7 @@ fix2 <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
 #fixation probability of a mutant with initial freq 1/(2Ne) in a diploid population
 #with proteins as parameteres instead of distance vectors for the proteins
 fix_protein <- function(protein1, protein2, protein_op, s, DisMat,
-                        C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+                        C=2,Phi=0.5,q=4e-7,Ne=5e6){
   d1 <- pchem_d(protein1,protein_op,DisMat)
   d2 <- pchem_d(protein2,protein_op,DisMat)
   return(fix(d1,d2,s,C,Phi,q,Ne))
@@ -479,7 +479,7 @@ fix_protein <- function(protein1, protein2, protein_op, s, DisMat,
 #m: number of states (amino acids) considered
 #DisMat: distance matrix between amino acids
 #MuMat: mutation rate matrix between amino acids
-mat_gen_indep <- function(aa_op,s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
+mat_gen_indep <- function(aa_op,s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=5e6){
   m = 20
   mat <- matrix(0,nrow=m,ncol=m) #set diagonal entries to be 0 at first
   for(i in 1:(m-1)){
@@ -496,7 +496,7 @@ mat_gen_indep <- function(aa_op,s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
 
 # list of 20 rate matrices, one of each aa as optimal
 # these matrices are not scaled, did not use the base frequencies
-QAllaa <- function(s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
+QAllaa <- function(s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=5e6){
   res = lapply(1:20,function(i) {mat_gen_indep(i,s,DisMat, MuMat,C, Phi, q, Ne)})
   return(as.matrix(res))
 }
@@ -545,7 +545,7 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20), Q, g = 1)
   result
 }
 # loglikelihood given optimal amino acids at each site. 
-llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
   nr = attr(data,"nr") #number of different sites
@@ -581,7 +581,7 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.
 ## For all the distinct sites (m), find loglikelihood, result is m * 20 matrix
 ## each column stores the loglikelihods when the corresponding amino acid is optimal 
 #this one uses expm for matrix exponentiation
-llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
   for(i in 1:20){ #when optimal aa is i
@@ -595,7 +595,7 @@ llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
   return(res)
 }
 # only return the big matrix, with number of rows equal to number of different sites, and cols equal to 20
-llaam1 <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+llaam1 <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
   for(i in 1:20){ #when optimal aa is i
@@ -606,7 +606,7 @@ llaam1 <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
 }
 # assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
 # if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
-llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
   nr = attr(data,"nr")
@@ -630,7 +630,7 @@ llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=
 }
 
 ## find the loglikelihood given 20 by 20 rate matrix Q and base frequencies bf
-llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
+llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
   ll = ll3m(data,tree,bf=bf,Q=Q)
@@ -640,7 +640,7 @@ llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=1.36e
 ## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
 ## nucleotide transition rate matrix of length 6
 ## this one uses expm for matrix exponentiation
-mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -671,7 +671,7 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
 
 #MLE for s, given beta and gamma
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call : optim.s(gene1,ROKAS_TREE,be,ga,Q=NU_VEC))
 optim.s <- function(data, tree,trace=0, ...){
   fn = function(ab,data,tree, ...){
@@ -721,7 +721,7 @@ optim.w <- function(beta,gamma,generange,tree,trace=0,maxit=500,multicore=FALSE,
 }
 #MLE for s, beta and gamma, using Nelder-Mead method by default
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,trace=1,Q=NU_VEC))
 optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit = 500, trace=0, ...){
   ab <- c(s,beta,gamma)
@@ -741,7 +741,7 @@ optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit =
 }
 ## MLE for opw (weights for optimal amino acids)
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call: optim.opw(data,tree,trace=1,s=0.1,Q=NU_VEC...)
 optim.opw <- function(data, tree,opw=rep(1/20,20),method="Nelder-Mead", maxit=500, trace=0, ...){
   l = length(opw)
@@ -763,7 +763,7 @@ optim.opw <- function(data, tree,opw=rep(1/20,20),method="Nelder-Mead", maxit=50
   return(res)
 }
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 optim.sw.opw <- function(data,tree,s,beta,gamma,opw=rep(1/20,20),method="Nelder-Mead",maxit=500,trace=0, ...){
   ab <- c(s,beta,gamma)
   ab[ab==0] <- 1e-8
@@ -792,7 +792,7 @@ optim.sw.opw <- function(data,tree,s,beta,gamma,opw=rep(1/20,20),method="Nelder-
   return(res)
 }
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 optimQm <- function(tree,data,Q=rep(1,6),subs=c(1:(length(Q)-1),0),method="Nelder-Mead",maxit=500,trace=0, ...){
   m = length(Q)
   n = max(subs)
@@ -812,7 +812,7 @@ optimQm <- function(tree,data,Q=rep(1,6),subs=c(1:(length(Q)-1),0),method="Nelde
   return(res)
 }
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 optimBranch <- function(data,tree,method="Nelder-Mead",maxit=500,trace = 0, ...){
   if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
     tree <- reorderPruning(tree)
@@ -833,7 +833,7 @@ optimBranch <- function(data,tree,method="Nelder-Mead",maxit=500,trace = 0, ...)
   return(res)
 }
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7)
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, optOpw = FALSE,
                        control = list(epsilon=1e-08,maxit=50,hmaxit=10,trace=0,htrace=TRUE),subs=NULL,...){
   tree = object$tree
