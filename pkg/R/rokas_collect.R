@@ -1,11 +1,11 @@
 ##lab9
-# opwdir <- "~/BackupProEvo/rokas_opw/"
-# maxdir <- "~/BackupProEvo/rokas_max/"
-# majdir <- "~/BackupProEvo/rokas_maj/"
+opwdir <- "~/BackupProEvo/rokas_opw/"
+maxdir <- "~/BackupProEvo/rokas_max_longrun/"
+majdir <- "~/BackupProEvo/rokas_maj_longrun/"
 ##newton/ betula
-opwdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_opw/"
-maxdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_max/"
-majdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_maj/"
+# opwdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_opw/"
+# maxdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_max/"
+# majdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_maj/"
 
 res_max <- vector("list",length=106)
 l <- 106
