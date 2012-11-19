@@ -199,6 +199,14 @@ ModeAA <- function(phydata){
   modeaa = apply(mat,2,Mode)
   return(modeaa)
   }
+
+#find the most frequent patterns from data of phyDat format 
+MostFreq <- function(data,count=10){
+  weight = attr(data,"weight")
+  datamat <- matrix(unlist(data),nrow=length(data),byrow=T)
+  Index = head(order(weight,decreasing=T),n=count)
+  return(list(mat=datamat[,Index],wt=weight[Index]))
+}
 #############################################################################
 ##given lower triangular part of R (i.e. Q = R %*% diag(bf)), and base frequencies, find the scaled Q
 ## Default: 4 by 4 matrix for Jukes-Cantor model
