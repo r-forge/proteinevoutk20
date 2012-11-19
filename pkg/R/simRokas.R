@@ -16,6 +16,8 @@ for(i in 1:106){
   index <- attr(res$data,"index")
   opaa <- res$ll$opaa
   protein_op <- opaa[index]
+  #root sequences are randomly picked, instead of from the equilibrium distribution given the opaa
+  #In that case, only very few states get selected for the root state, therefore very few distinct patterns observed
   simgenes[[i]] <- simTree(tree,protein_op,bg.sval[i],GTRvec,alpha=al,beta=beta,gamma=gamma,
                            rootseq=sample(20,length(protein_op),replace=T))
   cat("finish gene",i,"\n")
