@@ -3,7 +3,7 @@
 ########################################################################################################
 ## Given s, Distance matrix, mutation rate matrix, and other parameters, find the list of 20 rate matrices corresponding to optimal aa 1:20
 ## same function as QAllaa, but all the matrices are scaled in this function
-rate_move_mat <- function(s, DisMat, MuMat,bfaa = rep(1/20,20),C=2, Phi=0.5, q=4e-7, Ne=1.36e07){
+rate_move_mat <- function(s, DisMat, MuMat,bfaa = rep(1/20,20),C=2, Phi=0.5, q=4e-7, Ne=5e6){
   fn = function(i){
     mat = mat_gen_indep(i,s,DisMat,MuMat,C,Phi,q,Ne)
     mat = scaleQ(mat,bfaa)
@@ -11,7 +11,7 @@ rate_move_mat <- function(s, DisMat, MuMat,bfaa = rep(1/20,20),C=2, Phi=0.5, q=4
   mat_list = lapply(1:20,fn)
   mat_list
 }
-rate_move <- function(protein, protein_op,s, DisMat, MuMat, bfaa = rep(1/20,20),C=2, Phi=0.5, q=4e-7, Ne=1.36e07){
+rate_move <- function(protein, protein_op,s, DisMat, MuMat, bfaa = rep(1/20,20),C=2, Phi=0.5, q=4e-7, Ne=5e6){
     mat = rate_move_mat(s,DisMat,MuMat,bfaa,C,Phi,q,Ne)
     vec_list = sapply(1:length(protein),function(i) {mat[[protein_op[i]]][protein[i],]},simplify="array")
     vec_list[vec_list < 0] = 0
@@ -103,7 +103,7 @@ sim_op <- function(opaa, l, t,matall,C=2, Phi=0.5,q=4e-7, Ne=5e6){
 ##given the ancestral sequence "rootseq", optimal amino acid sequence "protein_op",
 ##selection coefficient "s", here we consider s THE SAME ACROSS ALL THE SITES IN ONE GENE 
 simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NULL,bfaa=rep(1/20,20),
-                    C=2,Phi=0.5,q=4e-7, Ne=5e6){
+                    rootseq=NULL,C=2,Phi=0.5,q=4e-7, Ne=5e6){
   call = match.call()
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
   if (is.null(attr(tree, "order")) || attr(tree, "order") !="cladewise") 
@@ -126,12 +126,14 @@ simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NU
   }
   matall = rate_move_mat(s,GM,mumat,bfaa,C,Phi,q,Ne) #all the sub rate matrix
   
-  rootseq = rep(0,l) #root sequence
-  bfall = lapply(1:m,function(i) expm(matall[[i]]*100)[1,]) # all the bf vectors
-  ## figure out the starting sequence
-  for(i in 1:m){
-    index = which(protein_op==i)
-    rootseq[index] = sample(1:m,length(index),replace=TRUE,prob=bfall[[i]])
+  if(is.null(rootseq)){
+    rootseq = rep(0,l) #root sequence
+    bfall = lapply(1:m,function(i) expm(matall[[i]]*100)[1,]) # all the bf vectors
+    ## figure out the starting sequence
+    for(i in 1:m){
+      index = which(protein_op==i)
+      rootseq[index] = sample(1:m,length(index),replace=TRUE,prob=bfall[[i]])
+    }
   }
   res[root,] <- rootseq
   for(i in 1:length(tl)){

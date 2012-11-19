@@ -20,3 +20,7 @@ disaa <- sapply(1:1000,function(x) length(unique(sim1$data[,x])))
 for(i in 1:106){
   Phivals[Phivals[,1]==genenames[i]]
 }
+
+sim1 <- simTree(tree,rep(1,400),s,GTRvec,al,be,ga,rootseq=rep(1:20,20))
+sim1phy <- phyDat(sim1$data,type="AA")
+str(sim1phy)

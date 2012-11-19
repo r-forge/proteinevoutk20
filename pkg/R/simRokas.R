@@ -16,10 +16,9 @@ for(i in 1:106){
   index <- attr(res$data,"index")
   opaa <- res$ll$opaa
   protein_op <- opaa[index]
-  simgenes[[i]] <- simTree(tree,protein_op,bg.sval[i],GTRvec,alpha=al,beta=beta,gamma=gamma)
+  simgenes[[i]] <- simTree(tree,protein_op,bg.sval[i],GTRvec,alpha=al,beta=beta,gamma=gamma,
+                           rootseq=sample(20,length(opaa),replace=T))
   cat("finish gene",i,"\n")
   simdata <- cbind(simdata,simgenes[[i]]$data)
 }
-
-
 save.image(file="simRokas.RData",compress=TRUE)
