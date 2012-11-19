@@ -1,11 +1,11 @@
 ##lab9
-# opwdir <- "~/BackupProEvo/rokas_opw/"
-# maxdir <- "~/BackupProEvo/rokas_max_longrun/"
-# majdir <- "~/BackupProEvo/rokas_maj_longrun/"
+opwdir <- "~/BackupProEvo/rokas_opw/"
+maxdir <- "~/BackupProEvo/rokas_max/"
+majdir <- "~/BackupProEvo/rokas_maj/"
 ##newton/ betula
-opwdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_opw/"
-maxdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_max/"
-majdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_maj/"
+# opwdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_opw/"
+# maxdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_max/"
+# majdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_maj/"
 
 res_max <- vector("list",length=106)
 l <- 106
@@ -58,9 +58,13 @@ Q_opw <- sapply(1:106,function(x) res_opw[[x]]$Q)
 br_opw <- sapply(1:106,function(x) sum(res_opw[[x]]$tree$edge.length))
 opw <- sapply(1:106,function(x) res_opw[[x]]$opw)
 ###########################################################
-opw_Nedir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_opw_Ne/"
-max_Nedir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_max_Ne/"
-maj_Nedir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_maj_Ne/"
+opw_Nedir <- "~/BackupProEvo/rokas_opw_Ne/"
+max_Nedir <- "~/BackupProEvo/rokas_max_Ne/"
+maj_Nedir <- "~/BackupProEvo/rokas_maj_Ne/"
+
+# opw_Nedir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_opw_Ne/"
+# max_Nedir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_max_Ne/"
+# maj_Nedir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_maj_Ne/"
 
 res_max_Ne <- vector("list",length=106)
 l <- 106
