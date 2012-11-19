@@ -24,3 +24,11 @@ for(i in 1:106){
 sim1 <- simTree(tree,rep(1,400),s,GTRvec,al,be,ga,rootseq=rep(1:20,20))
 sim1phy <- phyDat(sim1$data,type="AA")
 str(sim1phy)
+
+#find the most frequent patterns from data of phyDat format 
+MostFreq <- function(data,count=10){
+  weight = attr(data,"weight")
+  datamat <- matrix(unlist(data),nrow=length(data),byrow=T)
+  Index = head(order(weight,decreasing=T),n=count)
+  return(list(mat=datamat[,Index],wt=weight[Index]))
+}
