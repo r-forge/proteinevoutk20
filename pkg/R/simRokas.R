@@ -17,7 +17,7 @@ for(i in 1:106){
   opaa <- res$ll$opaa
   protein_op <- opaa[index]
   simgenes[[i]] <- simTree(tree,protein_op,bg.sval[i],GTRvec,alpha=al,beta=beta,gamma=gamma,
-                           rootseq=sample(20,length(opaa),replace=T))
+                           rootseq=sample(20,length(protein_op),replace=T))
   cat("finish gene",i,"\n")
   simdata <- cbind(simdata,simgenes[[i]]$data)
 }
