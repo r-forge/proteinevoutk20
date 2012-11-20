@@ -7,6 +7,7 @@ library(multicore)
 library(minqa) #optimization function bobyqa
 library(mgcv) #find the unique rows in a matrix - uniquecombs
 library(numDeriv) # calculate hessian of a function at a point
+library(subplex)
 ##################################################################
 #directory of the data need to read, including gene, tree, Grantham data
 datadir <- "~/proteinevoutk20/pkg/Data/"
