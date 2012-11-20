@@ -11,7 +11,7 @@
 \maketitle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Abstract}
-A new mechanistic model for the evolution of amino acid sequences is developed for studying the biological properties of proteins as well as phylogenetic estimation.  Two steps are bridged together to form a Markov process to describe substitutions between amino acids: mutation is based on general time reversible models for underlying nucleotides; fixation is obtained using classical population genetics theory. Selective restraints at amino acid level are characterized by the physiochemical distances between amino acids and the Grantham sensitivity coefficient exerted on the distances. Analysis of a yeast data set shows that the new model provides a better fit to data than the empirical models and reveals the variance of Grantham sensitivities and optimal amino acids at different sites in proteins.\\
+A new mechanistic model for the evolution of amino acid sequences is developed for studying the biological properties of proteins as well as phylogenetic estimation.  Two steps are bridged together to form a Markov process to describe substitutions between amino acids: mutation rates is based on time reversible substitution models for nucleotides; fixation probability is obtained from population genetics theory. We assume there is an optimal amino acid at each position of the protein. Selective restraints at amino acid level are characterized by the physiochemical distances from optimal amino acids and the Grantham sensitivity of protein fitness to the distances. Analysis of a yeast data set shows that the new model provides a better fit to data than the empirical models and reveals the variation of Grantham sensitivities and optimal amino acids at different sites in proteins.\\
 
 \section{Introduction}
 Importance of building accurate model for protein evolution. \\
@@ -128,9 +128,11 @@ Given the values for $(M_{nu},g, \alpha, \beta, \gamma, C, \Phi, q, N_e)$, the f
 \begin{table}[h]
 \centering
 \caption{parameters in the model}
-\begin{tabular}{ c p{6cm} }
+\begin{tabular}{ c p{10cm} }
 \hline
 $s_{ij}$ & exchange rates between nucleotides $i$ and $j$ \\
+$\mu_{ij}$ & mutation rates between nucleotides $i$ and $j$\\
+$\pi_{ij}$ & fixation probability of single mutant $j$ with wild type $i$\\
 $g$       & sensitivity coefficient of functionality to physicochemical distance \\
 $(\alpha,\beta,\gamma)$ & weights for the 3 physicochemical properties in amino acid distance formula \\
 $C$ & cost of producing a protein\\
