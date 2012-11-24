@@ -7,7 +7,7 @@ library(multicore)
 library(minqa) #optimization function bobyqa
 library(mgcv) #find the unique rows in a matrix - uniquecombs
 library(numDeriv) # calculate hessian of a function at a point
-library(subplex)
+library(ppso)
 ##################################################################
 #directory of the data need to read, including gene, tree, Grantham data
 datadir <- "~/proteinevoutk20/pkg/Data/"
@@ -440,6 +440,15 @@ fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
       return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
   }
 }
+
+fix.mpfr <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+  if((d1==d2)||(s==0)) #When the fitnesses are the same, neutral case, pure drift
+    return(1/(2*Ne))
+  else{
+    fit_ratio <- exp(mpfr(-C*Phi*q*s*(d1-d2),prec=10000)) #f1/f2
+    return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
+  }
+}
 ####################
 #comments: in the fixation probability calculation, should the length of the protein sequence be taken
 #into account? here the length is considered to be 1... which could be wrong...
@@ -761,6 +770,7 @@ optim.opw <- function(data, tree,opw=rep(1/20,20),method="Nelder-Mead", maxit=50
     opw = exp(c(lopw,0))
     opw=opw/sum(opw)
     result = mllm(data=data,tree=tree,opw=opw, ...)$ll$loglik
+    cat("par:",opw,"val:",result,"\n")
     return(result)
   }
   res = optim(par=lopw,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
