@@ -7,7 +7,8 @@ library(multicore)
 library(minqa) #optimization function bobyqa
 library(mgcv) #find the unique rows in a matrix - uniquecombs
 library(numDeriv) # calculate hessian of a function at a point
-library(ppso)
+library(Rmpfr)
+#library(ppso)
 ##################################################################
 #directory of the data need to read, including gene, tree, Grantham data
 datadir <- "~/proteinevoutk20/pkg/Data/"
@@ -439,6 +440,10 @@ fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
     else
       return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
   }
+}
+
+fixNe <- function(d1,d2,s,q,Ne){
+  return(fix(d1,d2,s,C=2,Phi=0.5,q=q,Ne=Ne)*Ne)
 }
 
 fix.mpfr <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
