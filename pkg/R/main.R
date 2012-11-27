@@ -441,11 +441,12 @@ fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
       return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
   }
 }
-
+#check the product of fixation probability and population size, 
+# see if it's a constant
 fixNe <- function(d1,d2,s,q,Ne){
   return(fix(d1,d2,s,C=2,Phi=0.5,q=q,Ne=Ne)*Ne)
 }
-
+## Use the Rmpfr package for higher precision
 fix.mpfr <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   if((d1==d2)||(s==0)) #When the fitnesses are the same, neutral case, pure drift
     return(1/(2*Ne))
