@@ -18,14 +18,16 @@ rate_move <- function(protein, protein_op,s, DisMat, MuMat, bfaa = rep(1/20,20),
     return(c(vec_list))
 }
 ##find the equilibrium frequencies for all amino acids as optimal
-bfAll <- function(s,beta,gamma,GTRvec,bfaa=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
+bfAll <- function(s,beta,gamma,GTRvec,opfreq,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   GM=GM_cpv(GM_CPV,al,beta,gamma) #Distance matrix from new weights
   mumat = aa_MuMat_form(GTRvec) #symmetric matrix for the mutation rate matrix, from the GTR matrix
-  mumat = sym.to.Q(mumat,bfaa) #from symmetric matrix to rate matrix
+  fn = function(i){
+    mat = mat_gen_indep(i,s,GM,mumat,C,Phi,q,Ne)
+  }
+  matall = lapply(1:20,fn)
 
-  matall = rate_move_mat(s,GM,mumat,bfaa,C,Phi,q,Ne) #all the sub rate matrix
   bfall = sapply(1:20,function(i) expm(matall[[i]]*100)[1,]) # all the bf vectors
-  bf = bfall * rep(bfaa,each=20)
+  bf = bfall * rep(opfreq,each=20)
   freq = apply(bf,1,sum)
   freq = freq / sum(freq)
   return(list(bfall = bfall,freq = freq))
