@@ -4,21 +4,20 @@
 #sample call: optim.opw.subplex(data,tree,s=0.1,Q=NU_VEC...)
 optim.opw.new <- function(data, tree,opw=rep(1/20,20),method="Nelder-Mead", maxit=500, trace=0, ...){
   l = length(opw)
-  opw = opw/sum(opw)
-  lopw = opw[-l] # optimize on the all entries except the last one
+  nenner = 1/opw[l]
+  lopw = log(opw*nenner) #scale the vector by the last entry
+  lopw = lopw[-l] # optimize on the all entries except the last one
+  res = mllm(data,tree,...)
+  llmat = res$ll$llmat
+  weight = attr(res$data,"weight")
   fn = function(lopw,data,tree, ...){
-    if(sum(lopw)>1){
-      cat("out of bound","\n")
-      return(-1e8)
-    }
-    else{
-      opw = c(lopw,1 - sum(lopw))
-      result = mllm(data=data,tree=tree,opw=opw, ...)$ll$loglik
-      cat("par:",opw,"val:",result,"\n")
-      return(result)
-    }
+    opw = exp(c(lopw,0))
+    opw=opw/sum(opw)
+    result = weight %*% llmat %*% opw
+    cat("par:",opw,"val:",result,"\n")
+    return(result)
   }
-  res = optim(par=lopw,fn=fn,gr=NULL,method=method,lower=0,upper=1,
+  res = optim(par=lopw,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
               control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
   #print(res[[2]])
   opw = exp(c(res[[1]],0))
@@ -57,3 +56,14 @@ f <- function(sd, Ne){
     return((1-exp(sd))/(1-exp(sd*2*Ne)))
   }
 }
+
+source("~/proteinevoutk20/pkg/R/main.R")
+source("~/proteinevoutk20/pkg/R/readRokas.R")
+tree <- ROKAS_TREE
+gene2 <- ROKAS_DATA[[2]]
+#starting point of optimization
+opw.s <- rep(0.001,20)
+opw.s[1] <- 1
+opw.s
+opw = optim.opw(gene2,tree,opw=opw.s,maxit=2500,trace=1,s=0.1,Q=NU_VEC)
+opw
