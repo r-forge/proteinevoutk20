@@ -67,3 +67,29 @@ opw.s[1] <- 1
 opw.s
 opw = optim.opw(gene2,tree,opw=opw.s,maxit=2500,trace=1,s=0.1,Q=NU_VEC)
 opw
+
+#loglikelihoods for gene2 when opaa is a particular amino acid (20 by 1 vector)
+ll <- NULL
+for(i in 1:20){
+  opw = rep(0,20)
+  opw[i] = 1
+  cat(i,":",opw, "\n")
+  res = mllm(ROKAS_DATA[[2]],tree,0.1,be,ga,Q=NU_VEC,opw=opw)
+  ll = c(ll,res$ll$loglik)
+}
+
+#collect results on optimization of opw for gene2, gene1 can be attained similarly
+dir <- "~/proteinevoutk20/pkg/scratch/lab9/RokasOpw/Gene2/"
+res.opw <- vector("list",length=20)
+l <- 20
+for(genect in 1:l){
+  filename = paste(dir,"gene2_",genect,".RData",sep="")
+  if(!file.exists(filename))
+    cat("load RData for gene", genect,"failed, file does not exist","\n")
+  load(filename)
+  res.opw[[genect]] <- opw
+}
+
+opw_par <- sapply(1:20,function(x) res.opw[[x]]$par)
+opw_value <- sapply(1:20,function(x) res.opw[[x]]$value)
+opw_count <- sapply(1:20,function(x) res.opw[[x]]$counts[1])
