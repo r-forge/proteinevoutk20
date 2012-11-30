@@ -781,7 +781,7 @@ optim.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=2000, trac
     opw = exp(c(lopw,0))
     opw=opw/sum(opw)
     result = mllm(data=data,tree=tree,opw=opw, ...)$ll$loglik
-    cat("par:",opw,"val:",result,"\n")
+    #cat("par:",opw,"val:",result,"\n")
     return(result)
   }
   res = optim(par=lopw,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
