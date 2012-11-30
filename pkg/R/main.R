@@ -7,7 +7,7 @@ library(multicore)
 library(minqa) #optimization function bobyqa
 library(mgcv) #find the unique rows in a matrix - uniquecombs
 library(numDeriv) # calculate hessian of a function at a point
-library(Rmpfr)
+#library(Rmpfr)
 #library(ppso)
 ##################################################################
 #directory of the data need to read, including gene, tree, Grantham data
@@ -372,7 +372,7 @@ aa_MuMat_form <- function(vec=rep(1,6)){
 # }
 ## Amino acid mutation rate matrix for the GTR model of nucleotide
 MUMAT <- aa_MuMat_form(NU_VEC)
-MUMAT <- sym.to.Q(MUMAT)
+#MUMAT <- sym.to.Q(MUMAT)
 #MUMAT_JC <- aa_MuMat_form()
 
 reorderPruning <- function (x, ...)
@@ -681,7 +681,6 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
     dismat = GM_cpv(GM_CPV,al,beta,gamma)
   if(is.null(mumat)){
     mumat = aa_MuMat_form(Q)
-    mumat = sym.to.Q(mumat,bfaa)
   }
   Qall = QAllaa(s,dismat,mumat,C,Phi,q,Ne)
   if(!is.null(opaa))

@@ -137,7 +137,7 @@ simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NU
   GM=GM_cpv(GM_CPV,alpha,beta,gamma) #Distance matrix from new weights
   if(is.null(mumat)){
     mumat = aa_MuMat_form(GTRvec) #symmetric matrix for the mutation rate matrix, from the GTR matrix
-    mumat = sym.to.Q(mumat,bfaa) #from symmetric matrix to rate matrix
+    #mumat = sym.to.Q(mumat,bfaa) #from symmetric matrix to rate matrix
   }
   matall = rate_move_mat(s,GM,mumat,bfaa,C,Phi,q,Ne) #all the sub rate matrix
   
