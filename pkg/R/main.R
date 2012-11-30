@@ -639,10 +639,14 @@ llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=
     llopi = ll3m(data,tree,bf=bf,Q=QAll[[i]])
     result = cbind(result,llopi)
   }
+
   if(!is.null(opw)){
     opw = opw/sum(opw)
-    result = result * rep(opw,each=nr)
-    sitelik = apply(result,1,sum)
+#     result = result * rep(opw,each=nr)
+#     sitelik = apply(result,1,sum) ## these two lines are replaced by the following line
+    result = exp(result)
+    sitelik = result %*% opw
+    sitelik = log(sitelik)
     loglik = sum(weight * sitelik)
   }
   else{
@@ -766,7 +770,9 @@ optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit =
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call: optim.opw(data,tree,trace=1,s=0.1,Q=NU_VEC...)
-optim.opw <- function(data, tree,opw=rep(1/20,20),method="Nelder-Mead", maxit=500, trace=0, ...){
+optim.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=2000, trace=0, ...){
+  if(is.null(opw))
+    opw = findBf2(data)
   l = length(opw)
   nenner = 1/opw[l]
   lopw = log(opw*nenner) #scale the vector by the last entry
@@ -784,6 +790,33 @@ optim.opw <- function(data, tree,opw=rep(1/20,20),method="Nelder-Mead", maxit=50
   opw = exp(c(res[[1]],0))
   opw = opw/sum(opw)
   res$par = opw
+  return(res)
+}
+
+## MLE for bfaa (weights for optimal amino acids)
+#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
+#sample call: optim.opw(data,tree,trace=1,s=0.1,Q=NU_VEC...)
+optim.bfaa <- function(data, tree,bfaa=NULL,method="Nelder-Mead", maxit=500, trace=0, ...){
+  if(is.null(bfaa))
+    bfaa=findBf2(data)
+  l = length(bfaa)
+  nenner = 1/bfaa[l]
+  lbf = log(bfaa*nenner) #scale the vector by the last entry
+  lbf = lbf[-l] # optimize on the all entries except the last one
+  fn = function(lbf,data,tree, ...){
+    bfaa = exp(c(lbf,0))
+    bfaa=bfaa/sum(bfaa)
+    result = mllm(data=data,tree=tree,bfaa=bfaa, ...)$ll$loglik
+    cat("par:",bfaa,"val:",result,"\n")
+    return(result)
+  }
+  res = optim(par=lbf,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
+  #print(res[[2]])
+  bfaa = exp(c(res[[1]],0))
+  bfaa = bfaa/sum(bfaa)
+  res$par = bfaa
   return(res)
 }
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
@@ -891,7 +924,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
     if(htrace)
       cat("iteration ",rounds+1,"\n")
     if(optOpw){
-      res = optim.opw(data,tree,opw=rep(1/20,20),maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...)
+      res = optim.opw(data,tree,opw=rep(1/20,20),maxit=2000,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...)
       if(htrace)
         cat("optimize weights of optimal aa:", ll, "--->", res[[2]], "\n")
       opw = res[[1]]
