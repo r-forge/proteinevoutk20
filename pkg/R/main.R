@@ -644,8 +644,8 @@ llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=
     opw = opw/sum(opw)
 #     result = result * rep(opw,each=nr)
 #     sitelik = apply(result,1,sum) ## these two lines are replaced by the following line
-    result = exp(result)
-    sitelik = result %*% opw
+    eresult = exp(result)
+    sitelik = eresult %*% opw
     sitelik = log(sitelik)
     loglik = sum(weight * sitelik)
   }
@@ -770,7 +770,7 @@ optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit =
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call: optim.opw(data,tree,trace=1,s=0.1,Q=NU_VEC...)
-optim.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=2000, trace=0, ...){
+optim.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=3000, trace=0, ...){
   if(is.null(opw))
     opw = findBf2(data)
   l = length(opw)
@@ -781,7 +781,7 @@ optim.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=2000, trac
     opw = exp(c(lopw,0))
     opw=opw/sum(opw)
     result = mllm(data=data,tree=tree,opw=opw, ...)$ll$loglik
-    #cat("par:",opw,"val:",result,"\n")
+    cat("par:",opw,"val:",result,"\n")
     return(result)
   }
   res = optim(par=lopw,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
@@ -923,8 +923,16 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   while(opti){
     if(htrace)
       cat("iteration ",rounds+1,"\n")
-
+    if(optOpw){
+      cat("start optimize weights of optimal aa","\n")
+      res = optim.opw(data,tree,opw=opw,maxit=2000,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...)
+      if(htrace)
+        cat("optimize weights of optimal aa:", ll, "--->", res[[2]], "\n")
+      opw = res[[1]]
+      ll = res[[2]]
+    }
     if(optsWeight){
+      cat("start optimize s and weights","\n")
       res = optim.s.weight(data,tree,s=s,beta=beta,gamma=gamma,maxit=maxit,trace=trace,
                            Q=Q,bfaa=bfaa,opw=opw,...)
       s = res$par[1]
@@ -935,6 +943,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       ll = res[[2]]
     }
     if(optQ){
+      cat("start optimize rate matrix","\n")
       res = optimQm(tree,data,Q=Q,subs=subs,maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,bfaa=bfaa,opw=opw, ...)
       Q = res$par
       if(htrace){
@@ -943,17 +952,11 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       ll = res[[2]]
     }
     if(optBranch){
+      cat("start optimize branch lengths","\n")
       res = optimBranch(data,tree,maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw, ...)
       if(htrace)
         cat("optimize branch lengths:", ll, "--->", res[[2]], "\n")
       tree$edge.length = res[[1]]
-      ll = res[[2]]
-    }
-    if(optOpw){
-      res = optim.opw(data,tree,opw=opw,maxit=2000,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...)
-      if(htrace)
-        cat("optimize weights of optimal aa:", ll, "--->", res[[2]], "\n")
-      opw = res[[1]]
       ll = res[[2]]
     }
     rounds = rounds + 1
