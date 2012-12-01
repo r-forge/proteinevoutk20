@@ -902,8 +902,8 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
     tree$edge.length[tree$edge.length < 1e-08] <- 1e-08
     object <- update(object, tree=tree)
   }
-  if(optOpw)
-    object = update(object,opw=rep(1,20))
+#   if(optOpw)
+#     object = update(object,opw=rep(1,20))
   call = object$call
   maxit = control$maxit
   trace = control$trace
@@ -911,7 +911,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   data = object$data
   Q = object$Q
   if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
-  bfaa = object$bfaa #this is going to be the same, no matter from data or given
+  bfaa = object$bfaa #this is going to be the same, no matter from data or given -- empirical frequencies
   opw = object$opw
   ll = object$ll$loglik
   ll1 = ll
@@ -923,13 +923,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   while(opti){
     if(htrace)
       cat("iteration ",rounds+1,"\n")
-    if(optOpw){
-      res = optim.opw(data,tree,opw=rep(1/20,20),maxit=2000,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...)
-      if(htrace)
-        cat("optimize weights of optimal aa:", ll, "--->", res[[2]], "\n")
-      opw = res[[1]]
-      ll = res[[2]]
-    }
+
     if(optsWeight){
       res = optim.s.weight(data,tree,s=s,beta=beta,gamma=gamma,maxit=maxit,trace=trace,
                            Q=Q,bfaa=bfaa,opw=opw,...)
@@ -955,7 +949,13 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       tree$edge.length = res[[1]]
       ll = res[[2]]
     }
-
+    if(optOpw){
+      res = optim.opw(data,tree,opw=rep(1/20,20),maxit=2000,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...)
+      if(htrace)
+        cat("optimize weights of optimal aa:", ll, "--->", res[[2]], "\n")
+      opw = res[[1]]
+      ll = res[[2]]
+    }
     rounds = rounds + 1
     if(rounds > control$hmaxit) opti <- FALSE
     if((ll1-ll)/ll < control$epsilon) opti <- FALSE
