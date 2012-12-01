@@ -950,7 +950,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       ll = res[[2]]
     }
     if(optOpw){
-      res = optim.opw(data,tree,opw=rep(1/20,20),maxit=2000,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...)
+      res = optim.opw(data,tree,opw=opw,maxit=2000,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...)
       if(htrace)
         cat("optimize weights of optimal aa:", ll, "--->", res[[2]], "\n")
       opw = res[[1]]
