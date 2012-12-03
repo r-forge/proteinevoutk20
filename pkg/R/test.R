@@ -93,3 +93,18 @@ for(genect in 1:l){
 opw_par <- sapply(1:20,function(x) res.opw[[x]]$par)
 opw_value <- sapply(1:20,function(x) res.opw[[x]]$value)
 opw_count <- sapply(1:20,function(x) res.opw[[x]]$counts[1])
+
+#for a given vector of log likelihood, and the corresponding opaa, find the smallest set of aa
+# that cover the 95% of the total likelihood
+aa.set <- function(llvec){
+  lvec = exp(llvec) #likelihood
+  ord = order(llvec,decreasing=T) #order of llvec (increasing)
+  lvec = lvec[ord] # ordered likelihood
+  tol = sum(lvec) #total likelihood
+  CumSum = cumsum(lvec) # cumulative sum 
+  ind = sum(CumSum < tol*0.95) + 1 #the index that gives > 95% totol likelihood
+  Sum = CumSum[ind] # sum of the first "ind" terms
+  #return the set of amino acids that give > 95% likelihood, percentile, and 
+  #the percentile of the likelihood given by the optimal aa (max rule)
+  return(list(aa=ord[1:ind], percentile=Sum/tol,op.percentile=lvec[1]/tol))
+}
