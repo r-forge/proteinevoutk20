@@ -696,6 +696,9 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
   return(result)
 }
 
+##new function: optimize s, GMweights, Q, branch lengths, opw, all together,
+## compare the result with older result
+
 #MLE for s, given beta and gamma
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
