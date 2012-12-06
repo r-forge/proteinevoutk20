@@ -8,4 +8,4 @@ for(i in 1:l){
 }
 rm(l)
 rokasPhi <- read.csv("~/proteinevoutk20/pkg/Data/genePhi.csv",header=TRUE)
-rokasdata = read.phyDat("proteinevoutk20/pkg/Data/rokasAA",type="AA")
+rokasdata = read.phyDat("~/proteinevoutk20/pkg/Data/rokasAA",type="AA")
