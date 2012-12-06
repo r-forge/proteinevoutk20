@@ -698,7 +698,48 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
 
 ##new function: optimize s, GMweights, Q, branch lengths, opw, all together,
 ## compare the result with older result
+optim.all <- function(data,tree,s,beta,gamma,Q,subs=c(1:(length(Q)-1),0),opw=NULL,maxit=500,trace=0,...){
+  br=tree$edge.length
+  br.num = length(br)
+  ab = c(s,beta,gamma,br) #all parameters as a vector
+  ab[ab==0] = 1e-08
+  ab = log(ab)
+  ##opw
+  l = length(opw)
+  nenner=1/opw[l]
+  lopw=log(opw*nenner)
+  lopw=lopw[-l] #first 19 numbers in opw (log scale)
+  ##Q
+  m = length(Q)
+  n = max(subs)
+  Qab = numeric(n)
+  for(i in 1:n) Qab[i] = log(Q[which(subs==i)[1]]) 
+ 
+  para = c(ab,lopw,Qab)
+  
+  fn <- function(para,data,tree,...){
+    ab = para[1:3] #s, beta, gamma
+    ab = exp(ab)
+    
+    br = para[4:(4+br.num-1)]
+    tree$edge.length = exp(br)
+    
+    lopw = para[(4+br.num):(4+br.num+l-2)] #opw
+    opw = exp(c(lopw,0))
+    
+    Qab = para[(4+br.num+l-1):(4+br.num+l+m-3)]#Q
+    Q = numeric(m)
+    for(i in 1:n) Q[subs==i] = Qab[i]
+    Q = exp(Q)
+    
 
+    result = mllm(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3],Q=Q,opw=opw,...)$ll$loglik
+    return(result)
+  }
+  res = optim(par=para,fn=fn,gr=NULL,method="Nelder-Mead",lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace,maxit=maxit),tree=tree,data=data,...)
+  return(res)
+}
 #MLE for s, given beta and gamma
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)

@@ -79,11 +79,11 @@ for(i in 1:20){
 }
 
 #collect results on optimization of opw for gene2, gene1 can be attained similarly
-dir <- "~/proteinevoutk20/pkg/scratch/lab9/RokasOpw/Gene2/"
+dir <- "~/proteinevoutk20/pkg/scratch/lab9/Gene1/"
 res.opw <- vector("list",length=20)
 l <- 20
 for(genect in 1:l){
-  filename = paste(dir,"gene2_",genect,".RData",sep="")
+  filename = paste(dir,"gene1_",genect,".RData",sep="")
   if(!file.exists(filename))
     cat("load RData for gene", genect,"failed, file does not exist","\n")
   load(filename)
