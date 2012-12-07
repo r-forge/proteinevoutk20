@@ -856,6 +856,38 @@ optim.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=3000, trac
   return(res)
 }
 
+optim2.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=3000, trace=0, bad.value=-10000000, ...){
+  if(is.null(opw))
+    opw = findBf2(data)
+  l = length(opw)
+  lopw = log(opw)
+  #nenner = 1/opw[l]
+  #lopw = log(opw*nenner) #scale the vector by the last entry
+  lopw = lopw[-l] # optimize on the all entries except the last one
+  fn = function(lopw,data,tree, bad.value, ...){
+    opw = exp(c(lopw))
+    opw <- append(opw, 1-sum(opw))
+    #opw=opw/sum(opw)
+    result<-NA
+    if(min(opw)<0 || max(opw)>1) {
+      result <- bad.value
+    }
+    else {
+      result = mllm(data=data,tree=tree,opw=opw, ...)$ll$loglik
+    }
+    cat("par:",opw,"val:",result,"\n")
+    return(result)
+  }
+  res = optim(par=lopw,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
+  #print(res[[2]])
+  opw = exp(c(res[[1]],0))
+  opw = opw/sum(opw)
+  res$par = opw
+  return(res)
+}
+
+
 ## MLE for bfaa (weights for optimal amino acids)
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
