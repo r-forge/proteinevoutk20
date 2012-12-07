@@ -79,7 +79,7 @@ for(i in 1:20){
 }
 
 #collect results on optimization of opw for gene2, gene1 can be attained similarly
-dir <- "~/proteinevoutk20/pkg/scratch/lab9/Gene1/"
+dir <- "~/proteinevoutk20/pkg/scratch/lab9/RokasOpw/Gene1/"
 res.opw <- vector("list",length=20)
 l <- 20
 for(genect in 1:l){
