@@ -7,6 +7,7 @@ library(multicore)
 library(minqa) #optimization function bobyqa
 library(mgcv) #find the unique rows in a matrix - uniquecombs
 library(numDeriv) # calculate hessian of a function at a point
+library(gtools) #package used to draw random samples from dirichlet distribution -- rdirichlet, ddirichlet
 #library(Rmpfr)
 #library(ppso)
 ##################################################################
@@ -864,7 +865,7 @@ optim2.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=3000, tra
   #nenner = 1/opw[l]
   #lopw = log(opw*nenner) #scale the vector by the last entry
   lopw = lopw[-l] # optimize on the all entries except the last one
-  fn = function(lopw,data,tree, bad.value, ...){
+  fn = function(lopw,data,tree, ...){
     opw = exp(c(lopw))
     opw <- append(opw, 1-sum(opw))
     #opw=opw/sum(opw)
@@ -881,8 +882,8 @@ optim2.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=3000, tra
   res = optim(par=lopw,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
               control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
   #print(res[[2]])
-  opw = exp(c(res[[1]],0))
-  opw = opw/sum(opw)
+  opw = exp(res[[1]])
+  opw <- append(opw,1-sum(opw))
   res$par = opw
   return(res)
 }
