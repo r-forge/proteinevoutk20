@@ -1,16 +1,54 @@
-##lab9
-opwdir <- "~/BackupProEvo/rokas_opw/"
-maxdir <- "~/BackupProEvo/rokas_max/"
-majdir <- "~/BackupProEvo/rokas_maj/"
+num_sites = sapply(1:106,function(x) length(attr(ROKAS_DATA[[x]],"index")))
+## all parameters are estimated at the same time
+opwdir_all <- "~/BackupProEvo/Newton/rokas_opall_noopw/"
+maxdir_all <- "~/BackupProEvo/Newton/rokas_opall/"
+
 ##newton/ betula
 # opwdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_opw/"
 # maxdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_max/"
 # majdir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_maj/"
 
+res_max_all <- vector("list",length=106)
+l <- 106
+for(genect in 1:l){
+  filename = paste(maxdir_all,"gene",genect,"_s_weight.RData",sep="")
+  if(!file.exists(filename))
+    cat("load RData for gene", genect,"failed, file does not exist","\n")
+  load(filename)
+  res_max_all[[genect]] <- res_op
+}
+
+s_max_all <- sapply(1:106,function(x) res_max_all[[x]]$s)
+loglik_max_all <- sapply(1:106,function(x) res_max_all[[x]]$value)
+GM_max_all <- sapply(1:106,function(x) res_max_all[[x]]$beta_gamma)
+Q_max_all <- sapply(1:106,function(x) res_max_all[[x]]$Q)
+br_max_all <- sapply(1:106,function(x) sum(res_max_all[[x]]$br))
+#################################################################################################################
+res_opw_all <- vector("list",length=106)
+l <- 106
+for(genect in 1:l){
+  filename = paste(opwdir_all,"gene",genect,"_s_weight.RData",sep="")
+  if(!file.exists(filename))
+    cat("load RData for gene", genect,"failed, file does not exist","\n")
+  load(filename)
+  res_opw_all[[genect]] <- res_op
+}
+
+s_opw_all <- sapply(1:106,function(x) res_opw_all[[x]]$s)
+loglik_opw_all <- sapply(1:106,function(x) res_opw_all[[x]]$value)
+GM_opw_all <- sapply(1:106,function(x) res_opw_all[[x]]$beta_gamma)
+Q_opw_all <- sapply(1:106,function(x) res_opw_all[[x]]$Q)
+br_opw_all <- sapply(1:106,function(x) sum(res_opw_all[[x]]$br))
+opw_all <- sapply(1:106,function(x) res_opw_all[[x]]$opw)
+#################################################################################################################
+opwdir <- "~/BackupProEvo/Newton/rokas_opw_Ne/"
+maxdir <- "~/BackupProEvo/Newton/rokas_max_longrun/"
+majdir <- "~/BackupProEvo/Newton/rokas_maj/"
+
 res_max <- vector("list",length=106)
 l <- 106
 for(genect in 1:l){
-  filename = paste(maxdir,"gene",genect,"_s_weight.RData",sep="")
+  filename = paste(maxdir, "gene",genect,"_s_weight.RData",sep="")
   if(!file.exists(filename))
     cat("load RData for gene", genect,"failed, file does not exist","\n")
   load(filename)
@@ -22,6 +60,23 @@ loglik_max <- sapply(1:106,function(x) res_max[[x]]$ll$loglik)
 GM_max <- sapply(1:106,function(x) res_max[[x]]$GMweights)
 Q_max <- sapply(1:106,function(x) res_max[[x]]$Q)
 br_max <- sapply(1:106,function(x) sum(res_max[[x]]$tree$edge.length))
+
+res_opw <- vector("list",length=106)
+l <- 106
+for(genect in 1:l){
+  filename = paste(opwdir, "gene",genect,"_s_weight.RData",sep="")
+  if(!file.exists(filename))
+    cat("load RData for gene", genect,"failed, file does not exist","\n")
+  load(filename)
+  res_opw[[genect]] <- res_op
+}
+
+s_opw <- sapply(1:106,function(x) res_opw[[x]]$s)
+loglik_opw <- sapply(1:106,function(x) res_opw[[x]]$ll$loglik)
+GM_opw <- sapply(1:106,function(x) res_opw[[x]]$GMweights)
+Q_opw <- sapply(1:106,function(x) res_opw[[x]]$Q)
+br_opw <- sapply(1:106,function(x) sum(res_opw[[x]]$tree$edge.length))
+
 
 
 res_maj <- vector("list",length=106)
@@ -41,22 +96,7 @@ Q_maj <- sapply(1:106,function(x) res_maj[[x]]$Q)
 br_maj <- sapply(1:106,function(x) sum(res_maj[[x]]$tree$edge.length))
 
 
-res_opw <- vector("list",length=106)
-l <- 106
-for(genect in 1:l){
-  filename = paste(opwdir,"gene",genect,"_s_weight.RData",sep="")
-  if(!file.exists(filename))
-    cat("load RData for gene", genect,"failed, file does not exist","\n")
-  load(filename)
-  res_opw[[genect]] <- res_op
-}
 
-s_opw <- sapply(1:106,function(x) res_opw[[x]]$s)
-loglik_opw <- sapply(1:106,function(x) res_opw[[x]]$ll$loglik)
-GM_opw <- sapply(1:106,function(x) res_opw[[x]]$GMweights)
-Q_opw <- sapply(1:106,function(x) res_opw[[x]]$Q)
-br_opw <- sapply(1:106,function(x) sum(res_opw[[x]]$tree$edge.length))
-opw <- sapply(1:106,function(x) res_opw[[x]]$opw)
 ###########################################################
 opw_Nedir <- "~/BackupProEvo/rokas_opw_Ne/"
 max_Nedir <- "~/BackupProEvo/rokas_max_Ne/"
@@ -116,3 +156,5 @@ GM_opw_Ne <- sapply(1:106,function(x) res_opw_Ne[[x]]$GMweights)
 Q_opw_Ne <- sapply(1:106,function(x) res_opw_Ne[[x]]$Q)
 br_opw_Ne <- sapply(1:106,function(x) sum(res_opw_Ne[[x]]$tree$edge.length))
 opw_Ne <- sapply(1:106,function(x) res_opw_Ne[[x]]$opw)
+
+
