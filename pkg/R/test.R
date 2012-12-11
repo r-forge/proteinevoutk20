@@ -78,7 +78,7 @@ for(i in 1:20){
 }
 
 #collect results on optimization of opw for gene2, gene1 can be attained similarly
-dir <- "~/proteinevoutk20/pkg/scratch/lab9/RokasOpw/Gene1/"
+dir <- "~/BackupProEvo/Lab9/RokasOpw/Gene1/"
 res.opw <- vector("list",length=20)
 l <- 20
 for(genect in 1:l){
@@ -89,10 +89,29 @@ for(genect in 1:l){
   res.opw[[genect]] <- opw
 }
 
-opw_par <- sapply(1:20,function(x) res.opw[[x]]$par)
-opw_value <- sapply(1:20,function(x) res.opw[[x]]$value)
-opw_count <- sapply(1:20,function(x) res.opw[[x]]$counts[1])
+opw_par <- sapply(1:l,function(x) res.opw[[x]]$par)
+opw_value <- sapply(1:l,function(x) res.opw[[x]]$value)
+opw_count <- sapply(1:l,function(x) res.opw[[x]]$counts[1])
 
+par_avg <- apply(opw_par,1,mean) #mean of the weights, found by starting from different initial weights
+##################################################################################################################
+#collect results on optimization of opw for gene2, gene1 can be attained similarly
+dir <- "~/BackupProEvo/Lab9/RokasOpw/Gene1_dirichlet/"
+res.opw <- vector("list",length=20)
+l <- 300
+for(genect in 1:l){
+  filename = paste(dir,"gene1_",genect,".RData",sep="")
+  if(!file.exists(filename))
+    cat("load RData for gene", genect,"failed, file does not exist","\n")
+  load(filename)
+  res.opw[[genect]] <- opw
+}
+
+opw_par <- sapply(1:l,function(x) res.opw[[x]]$par)
+opw_value <- sapply(1:l,function(x) res.opw[[x]]$value)
+opw_count <- sapply(1:l,function(x) res.opw[[x]]$counts[1])
+
+par_avg <- apply(opw_par,1,mean) #mean of the weights, found by starting from different initial weights
 #for a given vector of log likelihood, and the corresponding opaa, find the smallest set of aa
 # that cover the 95% of the total likelihood
 aa.set <- function(llvec){
