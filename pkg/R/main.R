@@ -8,6 +8,8 @@ library(minqa) #optimization function bobyqa
 library(mgcv) #find the unique rows in a matrix - uniquecombs
 library(numDeriv) # calculate hessian of a function at a point
 library(gtools) #package used to draw random samples from dirichlet distribution -- rdirichlet, ddirichlet
+library(nloptr)
+#library(akima) # gridded bivariate interpolation for irredular data
 #library(Rmpfr)
 #library(ppso)
 ##################################################################
@@ -192,7 +194,8 @@ Mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
-
+## Find the most frequent amino acids for each distince patter in a gene data
+## used for optimal aa in majority rule
 ModeAA <- function(phydata){
   if(class(phydata)!="phyDat") stop("data must be of class phyDat!")
   l = length(phydata)
@@ -203,7 +206,7 @@ ModeAA <- function(phydata){
   return(modeaa)
   }
 
-#find the most frequent patterns from data of phyDat format 
+#find the (default: 10) most frequent patterns from data of phyDat format 
 MostFreq <- function(data,count=10){
   weight = attr(data,"weight")
   datamat <- matrix(unlist(data),nrow=length(data),byrow=T)
@@ -256,6 +259,7 @@ sym.to.Q <- function(A,bf=NULL){
 #############################################################################
 ## given the base frequencies of nucleotides, find base frequencies of codons
 ## assuming the codon positions are all independent. Stop codons are excluded
+
 ## this is not a good way to find the frequencies of codons, nucleotide freqs
 ## usually are not directly related to codon freqs
 freq_codon <- function(bf = rep(1/4,4)){
@@ -271,6 +275,7 @@ freq_codon <- function(bf = rep(1/4,4)){
   return(freq)
 }
 ##given the nucleotide base frequencies, find the bf for amino acids
+##find the codon frequencies first,and sum up those that code for the same protein
 freq_aa <- function(nubf=rep(1/4,4)){
   bf = freq_codon(nubf) #codon frequencies
   freq = matrix(0,20,1)
@@ -282,8 +287,10 @@ freq_aa <- function(nubf=rep(1/4,4)){
   dimnames(freq)[[1]] = AA
   return(freq)
 }
-## Given the rate matrix for 61 codons, and the base frequencies of codons, 
-## find the rate matrix for 20 amino acids.Only mutation is taken into account, not selection and fixation.
+## Given the rate matrix for 61 codons,find the rate matrix for 20 amino acids.
+## Assume all the codons have the same frequencies
+## Only mutation is taken into account, not selection and fixation.
+## time reversible matrix
 AAMat <- function(CdMat){
   Q = matrix(0,20,20)
   for(i in 1:19){
@@ -292,7 +299,7 @@ AAMat <- function(CdMat){
     for(j in (i+1):20){
       tcodons = cdlist[[j]] #codons that code for the amino acid mutate to
       ntcodons = length(tcodons)
-      Q[i,j] = sum(CdMat[fcodons,tcodons])/(nfcodons*ntcodons)
+      Q[i,j] = sum(CdMat[fcodons,tcodons])/(nfcodons*ntcodons) #details in Yang's paper
     }
   }
   #diag(Q) = -rowSums(Q)
@@ -311,7 +318,7 @@ cdcmp <- function(cd1,cd2){
 # # result is a symmetric matrix with row sum 0
 cd_MuMat_form <- function(vec=rep(1,6)){
   l = 4
-  Q = matrix(0, l, l)
+  Q = matrix(0, l, l) # from vector to matrix
   Q[lower.tri(Q)] = vec
   Q = Q+t(Q) #symmetric matrix with diagonals 0
   dimnames(Q) = list(Nu,Nu)
@@ -412,7 +419,7 @@ Ftny <- function(d, s){
   if((length(s)==1)&&(length(d)!=1)){ #if s is given as a scalar, then treat it to be the same across all sites
     s <- rep(s,length(d))
   }
-  result <- length(d)/(sum(1+d*s)) #harmonic mean of ftny at all sites (F_i = 1 + d_i * s_i)
+  result <- length(d)/(sum(1+mpfr(d*s,prec=1000))) #harmonic mean of ftny at all sites (F_i = 1 + d_i * s_i)
   return(result)
 } #d and s are given
 
@@ -429,23 +436,24 @@ Ftny_protein <- function(protein,protein_op,s,DisMat){
 #q, Phi: constants
 #C: cost function, linear function of the length of the protein
 #C_n = a1 + a2*n, cost --  linear function of the length
+#mpfr indicates use of Rmpfr package, with large precision (10000 bit)
 fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   if((d1==d2)||(s==0)) #When the fitnesses are the same, neutral case, pure drift
     return(1/(2*Ne))
   else{
-    fit_ratio <- exp(-C*Phi*q*s*(d1-d2)) #f1/f2
-    if(fit_ratio==Inf) #1 is much better than 2 (the mutant)
-      return(0)
-    else if(fit_ratio==1)
-      return(1/(2*Ne))
-    else
-      return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
+      fit_ratio <- exp(-C*Phi*q*s*(d1-d2)) #f1/f2
+#     if(fit_ratio==Inf) #1 is much better than 2 (the mutant)
+#       return(0)
+#     else if(fit_ratio==1)
+#       return(1/(2*Ne))
+#     else
+    return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
   }
 }
 #check the product of fixation probability and population size, 
 # see if it's a constant
-fixNe <- function(d1,d2,s,q,Ne){
-  return(fix(d1,d2,s,C=2,Phi=0.5,q=q,Ne=Ne)*Ne)
+fixNe <- function(d1,d2,s,q,Ne,mpfr=FALSE){
+  return(fix(d1,d2,s,C=2,Phi=0.5,q=q,Ne=Ne,mpfr=mpfr)*Ne)
 }
 ## Use the Rmpfr package for higher precision
 fix.mpfr <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
@@ -506,7 +514,7 @@ fix_protein <- function(protein1, protein2, protein_op, s, DisMat,
 #MuMat: mutation rate matrix between amino acids
 mat_gen_indep <- function(aa_op,s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=5e6){
   m = 20
-  mat <- matrix(0,nrow=m,ncol=m) #set diagonal entries to be 0 at first
+  mat <- matrix(0,nrow=m,ncol=m)#set diagonal entries to be 0 at first
   for(i in 1:(m-1)){
     for(j in (i+1):m){
       if(MuMat[i,j]!=0){
@@ -542,6 +550,7 @@ getPm <- function(el, Q, g){
 }
 
 # Here Q gets scaled in the function, so the given matrix doesn't have to be scaled
+# returns loglikelihood values for all distinct patterns in the data, matrix with 1 column (or a column vector)
 ll3m <- function (dat1, tree, bf = rep(1/20,20), Q, g = 1) 
 {
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -551,7 +560,6 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20), Q, g = 1)
   node <- tree$edge[, 1]
   edge <- tree$edge[, 2]
   m = length(edge) + 1
-  dat = vector(mode = "list", length = m)
   bf = bf/sum(bf)
   Q = scaleQ(Q,bf) #scale the substitution rate matrix
   Q = t(Q) # in order to use C function in phangorn package
@@ -584,17 +592,18 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e
   }
   if(!is.null(op)){
     opaa = op
-    optimal_aa = "given"
     if(length(op)==ns){ #opaa is given for every site
+      optimal_aa = "given for all sites"
       sitelik = sapply(1:ns,function(i) result[index[i],op[i]])
       loglik = sum(sitelik)
     } else if(length(op)==nr){ #opaa is given for each distinct data pattern
+      optimal_aa = "given for distinct patterns"
       sitelik = sapply(1:nr,function(i) result[i,op[i]])
       loglik = sum(weight*sitelik)
     }
   }
   else{
-    optimal_aa = "estimated using maximization"
+    optimal_aa = "not given, estimated using maximization"
     opaa = apply(result,1,which.max)
     sitelik=apply(result,1,max)
     loglik = sum(weight*sitelik)
@@ -605,7 +614,7 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e
 
 ## For all the distinct sites (m), find loglikelihood, result is m * 20 matrix
 ## each column stores the loglikelihods when the corresponding amino acid is optimal 
-#this one uses expm for matrix exponentiation
+#this one uses expm for matrix exponentiation, maximizing rule for optimal aa
 llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
@@ -620,14 +629,19 @@ llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
   return(res)
 }
 # only return the big matrix, with number of rows equal to number of different sites, and cols equal to 20
-llaam1 <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
-  result = NULL
-  weight = attr(data,"weight")
-  for(i in 1:20){ #when optimal aa is i
-    llopi = ll3m(data,tree,bf=bf,Q=QAll[[i]])
-    result = cbind(result,llopi)
-  }
+llaaw1 <- function(opw,weight,llmat){
+  sitelik = llmat %*% opw
+  sitelik = log(sitelik)
+  result = -sum(sitelik*weight)
+  cat("par:",opw,"val:",result,"\n")
   return(result)
+}
+llaaw_grad <- function(opw,weight,llmat){
+  grad_vec <- rep(0,length(opw))
+  for(i in 1:length(opw)){
+    grad_vec[i] <- -weight%*%(llmat[,i]/(llmat%*%opw))
+  }
+  return(grad_vec)
 }
 # assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
 # if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
@@ -645,7 +659,7 @@ llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=
     opw = opw/sum(opw)
 #     result = result * rep(opw,each=nr)
 #     sitelik = apply(result,1,sum) ## these two lines are replaced by the following line
-    eresult = exp(result)
+    eresult = exp(result) #likelihood values, from exp(loglikelihood)
     sitelik = eresult %*% opw
     sitelik = log(sitelik)
     loglik = sum(weight * sitelik)
@@ -656,15 +670,6 @@ llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=
     loglik = sum(weight*sitelik)
   }
   return(list(loglik= loglik, opaa=opaa,weights=opw, sitelik = sitelik, llmat=result))
-}
-
-## find the loglikelihood given 20 by 20 rate matrix Q and base frequencies bf
-llaaQm <- function(data, tree, Q, bf = rep(1/20,20),C=2, Phi=0.5,q=4e-7,Ne=5e6){
-  result = NULL
-  weight = attr(data,"weight")
-  ll = ll3m(data,tree,bf=bf,Q=Q)
-  loglik = sum(weight*ll)
-  return(list(loglik=loglik,Q=Q,bf=bf))
 }
 ## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
 ## nucleotide transition rate matrix of length 6
@@ -841,10 +846,14 @@ optim.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=3000, trac
   nenner = 1/opw[l]
   lopw = log(opw*nenner) #scale the vector by the last entry
   lopw = lopw[-l] # optimize on the all entries except the last one
+  res = mllm(data=data,tree=tree,opw=opw,...)
+  exp_mat = exp(res$ll$llmat)
+  weight = attr(data,"weight")
   fn = function(lopw,data,tree, ...){
     opw = exp(c(lopw,0))
     opw=opw/sum(opw)
-    result = mllm(data=data,tree=tree,opw=opw, ...)$ll$loglik
+    sitelik = log(exp_mat %*% opw)
+    result = sum(sitelik*weight)
     cat("par:",opw,"val:",result,"\n")
     return(result)
   }
@@ -865,6 +874,11 @@ optim2.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=3000, tra
   #nenner = 1/opw[l]
   #lopw = log(opw*nenner) #scale the vector by the last entry
   lopw = lopw[-l] # optimize on the all entries except the last one
+  
+  res = mllm(data=data,tree=tree,opw=opw,...) #store llmat (loglikelihood values for all opaa) 
+  exp_mat = exp(res$ll$llmat)    #so that they don't need to be evaluated again and again
+  weight = attr(data,"weight")
+  
   fn = function(lopw,data,tree, ...){
     opw = exp(c(lopw))
     opw <- append(opw, 1-sum(opw))
@@ -874,7 +888,8 @@ optim2.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=3000, tra
       result <- bad.value
     }
     else {
-      result = mllm(data=data,tree=tree,opw=opw, ...)$ll$loglik
+      sitelik = log(exp_mat %*% opw)
+      result = sum(sitelik*weight)
     }
     cat("par:",opw,"val:",result,"\n")
     return(result)

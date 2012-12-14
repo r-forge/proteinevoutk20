@@ -78,9 +78,10 @@ for(i in 1:20){
 }
 
 #collect results on optimization of opw for gene2, gene1 can be attained similarly
-dir <- "~/BackupProEvo/Lab9/RokasOpw/Gene1/"
-res.opw <- vector("list",length=20)
+dir <- "~/proteinevoutk20/pkg/scratch/lab9/RokasOpw/Gene1/"
 l <- 20
+res.opw <- vector("list",length=l)
+
 for(genect in 1:l){
   filename = paste(dir,"gene1_",genect,".RData",sep="")
   if(!file.exists(filename))
@@ -92,13 +93,13 @@ for(genect in 1:l){
 opw_par <- sapply(1:l,function(x) res.opw[[x]]$par)
 opw_value <- sapply(1:l,function(x) res.opw[[x]]$value)
 opw_count <- sapply(1:l,function(x) res.opw[[x]]$counts[1])
-
-par_avg <- apply(opw_par,1,mean) #mean of the weights, found by starting from different initial weights
+opw_list<- list(par=opw_par,value=opw_value,count=opw_count)
+#par_avg <- apply(opw_par,1,mean) #mean of the weights, found by starting from different initial weights
 ##################################################################################################################
 #collect results on optimization of opw for gene2, gene1 can be attained similarly
-dir <- "~/BackupProEvo/Lab9/RokasOpw/Gene1_dirichlet/"
-res.opw <- vector("list",length=20)
+dir <- "~/proteinevoutk20/pkg/scratch/lab9/RokasOpw/Gene1_dirichlet/"
 l <- 300
+res.opw <- vector("list",length=l)
 for(genect in 1:l){
   filename = paste(dir,"gene1_",genect,".RData",sep="")
   if(!file.exists(filename))
@@ -110,8 +111,8 @@ for(genect in 1:l){
 opw_par <- sapply(1:l,function(x) res.opw[[x]]$par)
 opw_value <- sapply(1:l,function(x) res.opw[[x]]$value)
 opw_count <- sapply(1:l,function(x) res.opw[[x]]$counts[1])
-
-par_avg <- apply(opw_par,1,mean) #mean of the weights, found by starting from different initial weights
+opw_list <- list(par=opw_par,value=opw_value,count=opw_count)
+#par_avg <- apply(opw_par,1,mean) #mean of the weights, found by starting from different initial weights
 #for a given vector of log likelihood, and the corresponding opaa, find the smallest set of aa
 # that cover the 95% of the total likelihood
 aa.set <- function(llvec){
@@ -130,3 +131,41 @@ aa.conf = apply(X=mat,MARGIN=1,FUN=aa.set) #here mat is the llmat from result
 numaa = sapply(1:9128,function(x) length(aa.conf[[x]]$aa))
 op.lik = sapply(1:9128, function(x) aa.conf[[x]]$op.per)
 
+
+## contour plot of the loglikelihood function. Fix 18 of the 20 weights, and change the other 2 weights, do the contour plot of the slice
+## of the function.
+grid.gen <- function(opw,index,res_op,gridnum=20){
+  data <-  res_op$data
+  tree <- res_op$tree
+  s <- res_op$s
+  beta = res_op$GMweights[2]
+  gamma = res_op$GMweights[3]
+  Q = res_op$Q
+
+  x = opw[index[1]]
+  y = opw[index[2]]
+  xgrid = seq(x*0.7,x*1.3,length.out=gridnum)
+  ygrid = seq(y*0.7,y*1.3,length.out=gridnum)
+  
+  xvals = rep(xgrid,each=gridnum)
+  yvals = rep(ygrid,gridnum)
+  
+  zvals = rep(0,gridnum^2)
+  res = mllm(data,tree,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw)
+  for(i in 1:gridnum^2){
+    print(i)
+    opw[index] = c(xvals[i],yvals[i])
+    opw[20] = 1 - sum(opw[1:19])
+    zvals[i] = llaaw1(weight=attr(data,"weight"),llmat=res$ll$llmat,opw=opw)
+  }
+  return(list(x=xvals,y=yvals,z=zvals))
+}
+plot.grid <- function(index){
+  xyz = grid.gen(opw_mean,index,res_op=res_op,gridnum=20)
+  akima.xyz = interp(xyz$x,xyz$y,xyz$z)
+  image(akima.xyz)
+  contour(akima.xyz,add=TRUE)
+  points(xyz,pch=3,col="blue")
+}
+
+###################################################################
