@@ -765,7 +765,7 @@ optim.all <- function(data,tree,s,beta,gamma,Q,subs=c(1:(length(Q)-1),0),opw=NUL
     res$opw = NULL
   return(res)
 }
-#MLE for s, given beta and gamma
+#MLE for s, given beta and gamma and all other parameter values
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call : optim.s(gene1,ROKAS_TREE,be,ga,Q=NU_VEC))
@@ -838,72 +838,36 @@ optim.s.weight <- function(data, tree, s,beta,gamma,method="Nelder-Mead",maxit =
 ## MLE for opw (weights for optimal amino acids)
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-#sample call: optim.opw(data,tree,trace=1,s=0.1,Q=NU_VEC...)
-optim.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=3000, trace=0, ...){
+#sample call: optim.opw(data,tree,opw=rep(1,20),s=0.1,beta=beta,gamma=gamma,Q=NU_VEC...)
+optim.opw <- function(data, tree,opw=NULL, ...){
   if(is.null(opw))
     opw = findBf2(data)
-  l = length(opw)
-  nenner = 1/opw[l]
-  lopw = log(opw*nenner) #scale the vector by the last entry
-  lopw = lopw[-l] # optimize on the all entries except the last one
-  res = mllm(data=data,tree=tree,opw=opw,...)
-  exp_mat = exp(res$ll$llmat)
-  weight = attr(data,"weight")
-  fn = function(lopw,data,tree, ...){
-    opw = exp(c(lopw,0))
-    opw=opw/sum(opw)
-    sitelik = log(exp_mat %*% opw)
-    result = sum(sitelik*weight)
-    cat("par:",opw,"val:",result,"\n")
-    return(result)
-  }
-  res = optim(par=lopw,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
-              control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
-  #print(res[[2]])
-  opw = exp(c(res[[1]],0))
-  opw = opw/sum(opw)
-  res$par = opw
-  return(res)
-}
-
-optim2.opw <- function(data, tree,opw=NULL,method="Nelder-Mead", maxit=3000, trace=0, bad.value=-10000000, ...){
-  if(is.null(opw))
-    opw = findBf2(data)
-  l = length(opw)
-  lopw = log(opw)
-  #nenner = 1/opw[l]
-  #lopw = log(opw*nenner) #scale the vector by the last entry
-  lopw = lopw[-l] # optimize on the all entries except the last one
+  opw = opw/sum(opw) #opw given in the function call doesn't have to sum to 1
   
   res = mllm(data=data,tree=tree,opw=opw,...) #store llmat (loglikelihood values for all opaa) 
-  exp_mat = exp(res$ll$llmat)    #so that they don't need to be evaluated again and again
+  llmat = exp(res$ll$llmat)    #so that they don't need to be evaluated again and again
   weight = attr(data,"weight")
+  print(res$ll$loglik) #function value at the starting point
   
-  fn = function(lopw,data,tree, ...){
-    opw = exp(c(lopw))
-    opw <- append(opw, 1-sum(opw))
-    #opw=opw/sum(opw)
-    result<-NA
-    if(min(opw)<0 || max(opw)>1) {
-      result <- bad.value
-    }
-    else {
-      sitelik = log(exp_mat %*% opw)
-      result = sum(sitelik*weight)
-    }
-    cat("par:",opw,"val:",result,"\n")
-    return(result)
+  # function to optimize on and its gradient function
+  eval_f_list <- function(opw){
+    return(list("objective"=llaaw1(opw,weight=weight,llmat=llmat),
+                "gradient"=llaaw_grad(opw,weight=weight,llmat=llmat)))
   }
-  res = optim(par=lopw,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
-              control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
-  #print(res[[2]])
-  opw = exp(res[[1]])
-  opw <- append(opw,1-sum(opw))
-  res$par = opw
+  # linear equality constraint, and its jacobian
+  eval_g_list <- function(opw){
+    return(list("constraints"=sum(opw)-1,"jacobian"=rep(1,20)))
+  }
+  lower <- rep(0,20) #lower bound
+  upper <- rep(1,20) #upper bound
+  local_opts <- list("algorithm"="NLOPT_LD_MMA","xtol_rel"=1e-7) #options for local optimizer
+  #options for optimizer
+  opts <- list("algorithm"="NLOPT_LD_AUGLAG","maxeval"="1000000","xtol_rel"=1e-7,"ftol_rel"=.Machine$double.eps,"local_opts"=local_opts)
+  res = nloptr(x0=opw,eval_f=eval_f_list,eval_g_eq=eval_g_list, lb=lower,ub=upper,opts=opts)
+  # res$objective: best function value found
+  # res$solution: best parameter values
   return(res)
 }
-
-
 ## MLE for bfaa (weights for optimal amino acids)
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
