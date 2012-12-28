@@ -37,7 +37,7 @@ optr.s.weight <- function(data, tree, s,beta,gamma, ...){
   return(res)
 }
 
-optimQ <- function(tree,data,Q=rep(1,6), ...){
+optimQ <- function(tree,data,Q=rep(1,6), method="NELDERMEAD",maxeval="100", ...){
   Q = Q/Q[6] #make last rate 1
   #store information from initial condition, with other parameters fixed
   res.initial = mllm1(data=data,tree=tree,Q=Q,...)
@@ -54,14 +54,14 @@ optimQ <- function(tree,data,Q=rep(1,6), ...){
   lower=rep(0,5)
   upper=rep(Inf,5)
   #options for optimizer
-  opts <- list("algorithm"="NLOPT_LN_SBPLX","maxeval"="100","xtol_rel"=1e-5,"ftol_rel"=.Machine$double.eps^0.5,"print_level"=1)
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-5,"ftol_rel"=.Machine$double.eps^0.5,"print_level"=1)
   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
   res$solution = c(res$solution,1) # append the last rate (1) to the rate vector
   #print(res)
   return(res)
 }
 
-optimBr <- function(data,tree,el=NULL, ...){
+optimBr <- function(data,tree,el=NULL,method="COBYLA",maxeval="100", ...){
   if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
     tree <- reorderPruning(tree)
   if(is.null(el))
@@ -81,7 +81,7 @@ optimBr <- function(data,tree,el=NULL, ...){
   lower=rep(0,br.num)
   upper=rep(Inf,br.num)
   #options for optimizer
-  opts <- list("algorithm"="NLOPT_LN_SBPLX","maxeval"="100","xtol_rel"=1e-5,"ftol_rel"=.Machine$double.eps^0.5,
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps,
                "stopval"=-Inf,"print_level"=1)
   res = nloptr(x0=el,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
   print(res)
