@@ -691,3 +691,175 @@ eigQ <- function(Q,bf=NULL){
   e$inv = solve(e$vectors)
   return(e)
 }
+
+#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
+optimBranch <- function(data,tree,method="Nelder-Mead",maxit=500,trace = 0, ...){
+  if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
+    tree <- reorderPruning(tree)
+  el <- tree$edge.length
+  tree$edge.length[el <= 0] <- 1e-08
+  el <- log(tree$edge.length)
+  fn = function(el,data,tree, ...){
+    tree$edge.length = exp(el)
+    print(tree$edge.length)
+    result = mllm(data,tree, ...)$ll$loglik
+    return(result)
+  }
+  res = optim(par=el, fn=fn, gr=NULL,method=method,lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace,maxit=maxit),tree=tree,data=data, ...)
+  res$par = exp(res$par)
+  tree$edge.length = res$par
+  res$tree=tree
+  return(res)
+}
+
+##new function: optimize s, GMweights, Q, branch lengths, opw, all together,
+## compare the result with older result
+## if opw=NULL as in default value, opw is not being optimized
+optim.all <- function(data,tree,s,beta,gamma,Q,subs=c(1:(length(Q)-1),0),opw=NULL,maxit=500,trace=0,...){
+  br=tree$edge.length
+  br.num = length(br)
+  ab = c(s,beta,gamma,br) #all parameters as a vector
+  ab[ab==0] = 1e-08
+  ab = log(ab)
+  ##Q
+  m = length(Q)
+  n = max(subs)
+  Qab = numeric(n)
+  for(i in 1:n) Qab[i] = log(Q[which(subs==i)[1]]) 
+  para = c(ab,Qab)
+  ##opw
+  if(!is.null(opw)){
+    l = length(opw)
+    nenner=1/opw[l]
+    lopw=log(opw*nenner)
+    lopw=lopw[-l] #first 19 numbers in opw (log scale)
+    para = c(para,lopw)
+  }
+  ##Q
+  
+  fn <- function(para,data,tree,...){
+    ab = para[1:3] #s, beta, gamma
+    ab = exp(ab)
+    
+    br = para[4:(4+br.num-1)]
+    tree$edge.length = exp(br)
+    
+    Qab = para[(4+br.num):(4+br.num+m-2)]#Q
+    Q = numeric(m)
+    for(i in 1:n) Q[subs==i] = Qab[i]
+    Q = exp(Q)
+    
+    if(!is.null(opw)){
+      lopw = para[(4+br.num+m-1):(4+br.num+m+l-3)] #opw
+      opw = exp(c(lopw,0))
+    }
+    else{
+      opw=NULL
+    }    
+    
+    result = mllm(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3],Q=Q,opw=opw,...)$ll$loglik
+    return(result)
+  }
+  res = optim(par=para,fn=fn,gr=NULL,method="Nelder-Mead",lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace,maxit=maxit),tree=tree,data=data,...)
+  par_optim = exp(res$par)
+  res$s = par_optim[1]
+  res$beta_gamma = par_optim[2:3]
+  res$br = par_optim[4:(4+br.num-1)]
+  res$Q = c(par_optim[(4+br.num):(4+br.num+m-2)],1)
+  if(!is.null(opw)){
+    opw = c(par_optim[(4+br.num):(4+br.num+l-2)],1)
+    res$opw = opw/sum(opw)
+  }
+  else
+    res$opw = NULL
+  return(res)
+}
+
+optim.w <- function(beta,gamma,generange,tree,trace=0,maxit=500,multicore=FALSE,...){
+  ## a function of x that return the sum of -loglikelihood values for all genes with s optimized separately for different genes
+  ab <- c(beta,gamma)
+  ab[ab==0] <- 1e-08
+  ab <- log(ab)
+  fn <- function(ab,generange,tree,...){
+    ab <- exp(ab)
+    #print(ab)
+    mle <- optim.s.range(ab[1],ab[2],generange,tree=tree,multicore=multicore,...) #call the previous function to optimize s for all genes
+    mle.val <- sapply(1:length(generange),function(ind) mle[[ind]]$objective) # best -loglikelihood values
+    return(sum(mle.val)) #summation of all values
+  }
+  ans <- optim(par=ab,fn=fn,gr=NULL,method="Nelder-Mead",lower=-Inf,upper=Inf,
+               control=list(fnscale=-1,trace=trace,maxit=maxit),generange=generange,tree=tree,...)
+  ans$par <- exp(ans$par)
+  return(ans)
+}
+optim.s.weight <- function(data, tree, s, beta, gamma, method="Nelder-Mead", maxit = 500, trace=0, ...){
+  ab <- c(s,beta,gamma)
+  ab[ab==0] <- 1e-08 #take care of log(0)
+  ab <- log(ab)
+  fn = function(ab,data,tree, ...){
+    ab = exp(ab)
+    if(trace!=0)
+      print(ab) #track the search path of Nelder-Mead optimizer
+    result = mllm(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], ...)$ll$loglik
+    return(result)
+  }
+  res = optim(par=ab,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
+  res$par = exp(res$par)
+  return(res)
+}
+optim.bfaa <- function(data, tree,bfaa=NULL,method="Nelder-Mead", maxit=500, trace=0, ...){
+  if(is.null(bfaa))
+    bfaa=findBf2(data)
+  l = length(bfaa)
+  nenner = 1/bfaa[l]
+  lbf = log(bfaa*nenner) #scale the vector by the last entry
+  lbf = lbf[-l] # optimize on the all entries except the last one
+  fn = function(lbf,data,tree, ...){
+    bfaa = exp(c(lbf,0))
+    bfaa=bfaa/sum(bfaa)
+    result = mllm(data=data,tree=tree,bfaa=bfaa, ...)$ll$loglik
+    cat("par:",bfaa,"val:",result,"\n")
+    return(result)
+  }
+  res = optim(par=lbf,fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
+  #print(res[[2]])
+  bfaa = exp(c(res[[1]],0))
+  bfaa = bfaa/sum(bfaa)
+  res$par = bfaa
+  return(res)
+}
+## optimize on s, beta, gamma and opw
+#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
+optim.sw.opw <- function(data,tree,s,beta,gamma,opw=rep(1/20,20),method="Nelder-Mead",maxit=500,trace=0, ...){
+  ab <- c(s,beta,gamma)
+  ab[ab==0] <- 1e-8
+  ab <- log(ab)
+  l = length(opw)
+  nenner = 1/opw[l]
+  lopw = log(opw*nenner)
+  lopw = lopw[-l]
+  fn = function(ablopw,data,tree, ...){
+    ab = ablopw[1:3]
+    lopw = ablopw[-(1:3)]
+    ab = exp(ab)
+    opw = exp(c(lopw,0))
+    result = mllm(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], opw=opw, ...)$ll$loglik
+    return(result)
+  }
+  res = optim(par=c(ab,lopw),fn=fn,gr=NULL,method=method,lower=-Inf,upper=Inf,
+              control=list(fnscale=-1,trace=trace,maxit=maxit),data=data,tree=tree, ...)
+  par = res$par
+  ab = exp(par[1:3])
+  opw = exp(c(par[-(1:3)],0))
+  opw = opw/sum(opw)
+  res$s = ab[1]
+  res$GMweights = c(al,ab[2:3])
+  res$opw = opw
+  return(res)
+}
