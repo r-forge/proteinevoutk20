@@ -442,11 +442,11 @@ fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
     return(1/(2*Ne))
   else{
       fit_ratio <- exp(-C*Phi*q*s*(d1-d2)) #f1/f2
-#     if(fit_ratio==Inf) #1 is much better than 2 (the mutant)
-#       return(0)
-#     else if(fit_ratio==1)
-#       return(1/(2*Ne))
-#     else
+     if(fit_ratio==Inf) #1 is much better than 2 (the mutant)
+       return(0)
+     else if(fit_ratio==1)
+       return(1/(2*Ne))
+     else
     return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
   }
 }
@@ -568,6 +568,10 @@ getPm <- function(el, Q, g){
   res = array(list(NULL),dim=c(gl,ell))
   for(i in 1:gl){
     for(j in 1:ell){
+#       print(el[j])
+#       print(g[i])
+#       print(Q)
+#       print(Q*el[j]*g[i])
       res[[i,j]] = expm(Q*el[j]*g[i])
     }
   }
@@ -728,6 +732,7 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
   class(result) = "mllm"
   return(result)
 }
+#0.0000001000 0.0018676483 0.0003990333
 #more flexibility on what is provided, good for avoiding unnecessary computations
 mllm1 <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
                   opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
@@ -837,15 +842,15 @@ optim.s.weight <- function(data, tree, s,beta,gamma, method="SBPLX",maxeval="50"
   bfaa=res.initial$bfaa
   
   ab <- c(s,beta,gamma) ##initial value
-  ab[ab<=0] <- 1e-4
-  ab <- log(ab)
+#   ab[ab<=0] <- 1e-4
+#   ab <- log(ab)
   fn = function(ab,data,tree){
-    #print(ab)
-    ab <- exp(ab)
+    #ab <- exp(ab)
+    print(ab)
     result = -mllm1(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], mumat=mumat,bfaa=bfaa, ...)$ll$loglik
     return(result)
   }
-  lower <- rep(-Inf,3)
+  lower <- rep(0,3)
   upper <- rep(Inf,3)
   #options for optimizer
   opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
