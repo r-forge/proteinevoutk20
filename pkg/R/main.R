@@ -771,7 +771,7 @@ mllm1 <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call : optim.s(gene1,ROKAS_TREE,be,ga,Q=NU_VEC))
-optim.s <- function(data, tree, s,method="BOBYQA",maxeval="100", ...){ # s is the initial
+optim.s <- function(data, tree, s,method="BOBYQA",maxeval="100",print_level=0, ...){ # s is the initial
   #store information from initial condition, with other parameters fixed
   res.initial = mllm1(data=data,tree=tree,s=s,...)
   #these don't change with the change of s
@@ -785,15 +785,15 @@ optim.s <- function(data, tree, s,method="BOBYQA",maxeval="100", ...){ # s is th
   lower <- 0 #lower bound
   upper <- Inf #upper bound
   #options for optimizer
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps^0.5,"print_level"=1)
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
   res = nloptr(x0=s,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
   return(res)
 }
 # find mle of s for a range of genes in rokas data, given values of beta and gamma
-optim.s.range<- function(beta,gamma,generange,tree,multicore=FALSE,method="BOBYQA",maxeval="100", ...){
+optim.s.range<- function(beta,gamma,generange,tree,multicore=FALSE,method="BOBYQA",maxeval="100",print_level=0, ...){
   mle.s.one <- function(k){ ## find mle of s for one gene
     ## for now all search start with initial value "1" for s, could let user control the starting value             
-    mle <- optim.s(ROKAS_DATA[[k]],tree,s=1,method=method,maxeval=maxeval,beta=beta,gamma=gamma,...)
+    mle <- optim.s(ROKAS_DATA[[k]],tree,s=1,method=method,maxeval=maxeval,print_level=print_level,beta=beta,gamma=gamma,...)
     return(mle)
   }
   if(multicore)
@@ -805,13 +805,13 @@ optim.s.range<- function(beta,gamma,generange,tree,multicore=FALSE,method="BOBYQ
 }
 ######################################################################################################
 # find mle for beta and gamma, that maximize the likelihood for all genes,Q is given
-optim.w <- function(beta,gamma,generange,tree,multicore=FALSE,method="BOBYQA",maxeval="100",...){
+optim.w <- function(beta,gamma,generange,tree,multicore=FALSE,method="BOBYQA",maxeval="100",print_level=0, ...){
   ## a function of x that return the sum of -loglikelihood values for all genes with s optimized separately for different genes
   ab <- c(beta,gamma)
   fn <- function(ab,generange,tree){
     #print(ab)
     #call the previous function to optimize s for all genes
-    mle <- optim.s.range(ab[1],ab[2],generange,tree=tree,multicore=multicore,method=method,maxeval=maxeval,...) 
+    mle <- optim.s.range(ab[1],ab[2],generange,tree=tree,multicore=multicore,method=method,maxeval=maxeval,print_level=print_level,...) 
     mle.val <- sapply(1:length(generange),function(ind) mle[[ind]]$objective) # best -loglikelihood values
     return(sum(mle.val)) #summation of all values
   }
@@ -825,11 +825,11 @@ optim.w <- function(beta,gamma,generange,tree,multicore=FALSE,method="BOBYQA",ma
 }
 
 ######################################################################################################
-#MLE for s, beta and gamma, using Nelder-Mead method by default
+#MLE for s, beta and gamma, using subplex method by default
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,Q=NU_VEC))
-optim.s.weight <- function(data, tree, s,beta,gamma, method="SBPLX",maxeval="100",...){
+optim.s.weight <- function(data, tree, s,beta,gamma, method="SBPLX",maxeval="50",print_level=0,...){
   #store information from initial condition, with other parameters fixed
   res.initial = mllm1(data=data,tree=tree,s=s,beta=beta,gamma=gamma,...)
   #these don't change with the change of s
@@ -837,25 +837,30 @@ optim.s.weight <- function(data, tree, s,beta,gamma, method="SBPLX",maxeval="100
   bfaa=res.initial$bfaa
   
   ab <- c(s,beta,gamma) ##initial value
+  ab[ab<=0] <- 1e-4
+  ab <- log(ab)
   fn = function(ab,data,tree){
     #print(ab)
+    ab <- exp(ab)
     result = -mllm1(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], mumat=mumat,bfaa=bfaa, ...)$ll$loglik
     return(result)
   }
-  lower <- rep(0,3)
+  lower <- rep(-Inf,3)
   upper <- rep(Inf,3)
   #options for optimizer
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps^0.5,"print_level"=1)
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
+               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
   return(res)
 }
 
 ######################################################################################################
 ## MLE for opw (weights for optimal amino acids)
+## supply the function, the gradient function, and the restriction function (sum=1)
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call: optim.opw(data,tree,opw=rep(1,20),s=0.1,beta=beta,gamma=gamma,Q=NU_VEC...)
-optim.opw <- function(data, tree,opw=NULL, ...){
+optim.opw <- function(data, tree,opw=NULL,print_level=0, ...){
   if(is.null(opw))
     opw = findBf2(data)
   opw = opw/sum(opw) #opw given in the function call doesn't have to sum to 1
@@ -879,18 +884,18 @@ optim.opw <- function(data, tree,opw=NULL, ...){
   local_opts <- list("algorithm"="NLOPT_LD_MMA","xtol_rel"=1e-7) #options for local optimizer
   #options for optimizer
   opts <- list("algorithm"="NLOPT_LD_AUGLAG","maxeval"="1000000","xtol_rel"=1e-7,"ftol_rel"=.Machine$double.eps,
-               "local_opts"=local_opts,"print_level"=1)
+               "local_opts"=local_opts,"print_level"=print_level)
   res = nloptr(x0=opw,eval_f=eval_f_list,eval_g_eq=eval_g_list, lb=lower,ub=upper,opts=opts)
   # res$objective: best function value found
   # res$solution: best parameter values
   return(res)
 }
 ######################################################################################################
-## MLE for bfaa (weights for optimal amino acids)
+## MLE for branch lengths, specify starting values for el, otherwise it starts with the tree supplied with branch length
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call: optim.br(data,tree,el=NULL,s=0.1,beta=be,gamma=ga,Q=NU_VEC...)
-optim.br <- function(data,tree,el=NULL,method="COBYLA",maxeval="100", ...){
+optim.br <- function(data,tree,el=NULL,method="COBYLA",maxeval="100", print_level=0, ...){
   if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
     tree <- reorderPruning(tree)
   if(is.null(el))
@@ -903,7 +908,7 @@ optim.br <- function(data,tree,el=NULL,method="COBYLA",maxeval="100", ...){
   bfaa = res.initial$bfaa
   fn = function(el,data,tree){
     tree$edge.length = el
-    print(el)
+    #print(el)
     result = -mllm1(data,tree, Qall=Qall,bfaa=bfaa,...)$ll$loglik
     return(result)
   }
@@ -911,7 +916,7 @@ optim.br <- function(data,tree,el=NULL,method="COBYLA",maxeval="100", ...){
   upper=rep(Inf,br.num)
   #options for optimizer
   opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps,
-               "stopval"=-Inf,"print_level"=1)
+               "stopval"=-Inf,"print_level"=print_level)
   res = nloptr(x0=el,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
   print(res)
   return(res)
@@ -919,10 +924,11 @@ optim.br <- function(data,tree,el=NULL,method="COBYLA",maxeval="100", ...){
 
 ######################################################################################################
 
-## optimize the mutation rates for nucleotides
+## optimize the mutation rates for nucleotides, this is only for GTR model, with 5 parameters
+## can be easily changed to account for other models, e.g. Jukes-Cantor, etc.
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-optimQ <- function(tree,data,Q=rep(1,6),method="COBYLA",maxeval="100", ...){
+optimQ <- function(tree,data,Q=rep(1,6),method="COBYLA",maxeval="100",print_level=0, ...){
   Q = Q/Q[6] #make last rate 1
   #store information from initial condition, with other parameters fixed
   res.initial = mllm1(data=data,tree=tree,Q=Q,...)
@@ -932,7 +938,7 @@ optimQ <- function(tree,data,Q=rep(1,6),method="COBYLA",maxeval="100", ...){
   
   ab <- Q[1:5] # optimize on the first 5 rates
   fn = function(ab,tree,data){
-    print(ab)
+    #print(ab)
     result = -mllm1(data,tree,Q=c(ab,1),fixmatall=fixmatall,bfaa=bfaa, ...)$ll$loglik
     return(result)
   }
@@ -940,7 +946,7 @@ optimQ <- function(tree,data,Q=rep(1,6),method="COBYLA",maxeval="100", ...){
   upper=rep(Inf,5)
   #options for optimizer
   opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,
-               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=1)
+               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
   res$solution = c(res$solution,1) # append the last rate (1) to the rate vector
   #print(res)
@@ -950,7 +956,7 @@ optimQ <- function(tree,data,Q=rep(1,6),method="COBYLA",maxeval="100", ...){
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, optOpw = FALSE,
-                       control = list(epsilon=1e-08,maxit=50,hmaxit=10,trace=0,htrace=TRUE),subs=NULL,...){
+                       control = list(epsilon=1e-08,hmaxit=10,htrace=TRUE,print_level=0,maxeval="300"),...){
   tree = object$tree
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if(!is.rooted(tree)) stop("tree must be rooted")
@@ -963,12 +969,13 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
 #   if(optOpw)
 #     object = update(object,opw=rep(1,20))
   call = object$call
-  maxit = control$maxit #maximum number of iterations for each sub optimizer
-  trace = control$trace
+  #maxit = control$maxit #maximum number of iterations for each sub optimizer
   htrace = control$htrace #print out information about steps or not?
+  print_level=control$print_level
+  maxeval = control$maxeval
   data = object$data
   Q = object$Q
-  if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
+  #if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
   bfaa = object$bfaa #this is going to be the same, no matter from data or given -- empirical frequencies
   opw = object$opw
   ll = object$ll$loglik
@@ -983,44 +990,46 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       cat("iteration ",rounds+1,"\n")
     if(optOpw){
       cat("start optimize weights of optimal aa","\n")
-      res = optim.opw(data,tree,opw=opw,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...) #new optimizer using nloptr
+      res = optim.opw(data,tree,opw=opw,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...) #new optimizer using nloptr
       if(htrace){
-        cat("optimize weights of optimal aa:", ll, "--->", res[[2]], "\n")
-        cat("counts =", as.numeric(res$counts[1]),"\n")
+        ##notice that the loglikelihood will decrease if the opw is not given in the "object"
+        cat("optimize weights of optimal aa:", ll, "--->", -res$objective, "\n")
       }
-      opw = res[[1]]
-      ll = res[[2]]
+      opw = res$solution
+      ll = -res$objective
     }
     if(optsWeight){
-      cat("start optimize s and weights","\n")
-      res = optim.s.weight(data,tree,s=s,beta=beta,gamma=gamma,maxit=maxit,trace=trace,
-                           Q=Q,bfaa=bfaa,opw=opw,...)
-      s = res$par[1]
-      beta = res$par[2]
-      gamma = res$par[3]
       if(htrace)
-        cat("optimize s and Grantham weights: ", ll, "--->", res[[2]], "\n")
-      ll = res[[2]]
+        cat("start optimize s and weights","\n")
+      res = optim.s.weight(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw,...)
+      s = res$solution[1]
+      beta = res$solution[2]
+      gamma = res$solution[3]
+      if(htrace)
+        cat("optimize s and Grantham weights: ", ll, "--->", -res$objective, "\n")
+      ll = -res$objective
     }
     if(optQ){
-      cat("start optimize rate matrix","\n")
-      res = optimQm(tree,data,Q=Q,subs=subs,maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,bfaa=bfaa,opw=opw, ...)
-      Q = res$par
+      if(htrace)
+        cat("start optimize rate matrix","\n")
+      res = optimQ(tree,data,Q=Q,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,opw=opw, ...)
+      Q = res$solution
       if(htrace){
-        cat("optimize rate matrix: ", ll, "--->", res[[2]], "\n")
+        cat("optimize rate matrix: ", ll, "--->", -res$objective, "\n")
       }
-      ll = res[[2]]
+      ll = -res$objective
     }
     if(optBranch){
-      cat("start optimize branch lengths","\n")
-      res = optimBranch(data,tree,maxit=maxit,trace=trace,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw, ...)
       if(htrace)
-        cat("optimize branch lengths:", ll, "--->", res[[2]], "\n")
-      tree$edge.length = res[[1]]
-      ll = res[[2]]
+        cat("start optimize branch lengths","\n")
+      res = optim.br(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw, ...)
+      if(htrace)
+        cat("optimize branch lengths:", ll, "--->", -res$objective, "\n")
+      tree$edge.length = res$solution
+      ll =-res$objective
     }
     rounds = rounds + 1
-    if(rounds > control$hmaxit) opti <- FALSE
+    if(rounds >= control$hmaxit) opti <- FALSE
     if((ll1-ll)/ll < control$epsilon) opti <- FALSE
     ll1 = ll
   }
