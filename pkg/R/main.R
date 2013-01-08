@@ -194,7 +194,7 @@ Mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
-## Find the most frequent amino acids for each distince patter in a gene data
+## Find the most frequent amino acids for each distince pattern in a gene data
 ## used for optimal aa in majority rule
 ModeAA <- function(phydata){
   if(class(phydata)!="phyDat") stop("data must be of class phyDat!")
@@ -525,7 +525,7 @@ mat_gen_indep <- function(aa_op,s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=5e6){
   diag(mat) <- -rowSums(mat)
   return(mat)
 }
-#matrix of fixation probabilities
+#matrix of fixation probabilities, given optimal aa, sensitivity coefficient, distance matrix and other parameters
 fixmat <- function(aa_op,s,DisMat,C=2, Phi=0.5,q=4e-7,Ne=5e6){
   m = 20
   mat <- matrix(0,nrow=m,ncol=m)#set diagonal entries to be 0 at first
@@ -559,8 +559,8 @@ QAllaa1 <- function(fixall,MuMat,Ne){
   return(as.matrix(res))
 }
 # given the edge lengths el, rate matrix Q and rate g, find the probability transition matrices P
-# result is of dimension length(g)*length(el)
-# to parse an object from getPm, say P, do P[i,j][[1]], or P[[i,j]]
+# result is of dimension length(g)*length(el). Therefore the transition probabilities on all branches
+# To parse an object from getPm, say P, do P[i,j][[1]], or P[[i,j]]
 # Q is a scaled matrix
 getPm <- function(el, Q, g){
   ell = length(el)
@@ -582,8 +582,7 @@ getPm <- function(el, Q, g){
 # returns loglikelihood values for all distinct patterns in the data, matrix with 1 column (or a column vector)
 ll3m <- function (dat1, tree, bf = rep(1/20,20), Q, g = 1) 
 {
-  if (is.null(attr(tree, "order")) || attr(tree, "order") == 
-    "cladewise") 
+  if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise")
     tree <- reorderPruning(tree)
   q = length(tree$tip.label)
   node <- tree$edge[, 1]
@@ -616,7 +615,7 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e
   opaa = NULL #optimal amino acids
   optimal_aa = "" #is optimal aa given or not?
   for(i in 1:20){ #when optimal aa is i
-    llopi = ll3m(data,tree,bf=bf,Q=Qall[[i]])
+    llopi = ll3m(data,tree,bf=bf,Q=Qall[[i]]) #loglikelihood when optimal amino acid is i
     result = cbind(result,llopi)
   }
   if(!is.null(op)){
