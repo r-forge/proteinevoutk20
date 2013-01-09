@@ -1051,7 +1051,7 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
     tree <- reorderPruning(tree)
   if(any(tree$edge.length < 1e-08)){
     tree$edge.length[tree$edge.length < 1e-08] <- 1e-08
-    object <- update(object, tree=tree)
+    #object <- update(object, tree=tree)
   }
 
   call = object$call
@@ -1063,7 +1063,7 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
   Q = object$Q
   #if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
   bfaa = object$bfaa #this is going to be the same, no matter from data or given -- empirical frequencies
-  opw = NULL ## use maximize rule first
+  opw = object$opw ## use maximize rule first
   ll = object$ll$loglik
   ll1 = ll
   s = object$s
@@ -1105,14 +1105,9 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       tree$edge.length = res$solution
       ll =-res$objective
     }
-    rounds = rounds + 1
-    if(rounds >= control$hmaxit) opti <- FALSE
-    if((ll1-ll)/ll < control$epsilon) opti <- FALSE
-    ll1 = ll
-  }
-  
     if(optOpw){
-      cat("start optimize weights of optimal aa","\n")
+      if(htrace)
+        cat("start optimize weights of optimal aa","\n")
       res = optim.opw(data,tree,opw=opw,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...) #new optimizer using nloptr
       if(htrace){
         ##notice that the loglikelihood will decrease, from maximizing rule to weighted rule
@@ -1121,6 +1116,11 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       opw = res$solution
       ll = -res$objective
     }
+    rounds = rounds + 1
+    if(rounds >= control$hmaxit) opti <- FALSE
+    if(((ll1-ll)<=0) && ((ll1-ll)/ll < control$epsilon)) opti <- FALSE
+    ll1 = ll
+  }
   
   object = update(object, tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw,...)
   return(object)
