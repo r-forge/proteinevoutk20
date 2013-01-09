@@ -795,7 +795,7 @@ optim.w <- function(beta,gamma,generange,tree,trace=0,maxit=500,multicore=FALSE,
   ans$par <- exp(ans$par)
   return(ans)
 }
-optim.s.weight <- function(data, tree, s, beta, gamma, method="Nelder-Mead", maxit = 500, trace=0, ...){
+optim.s.weight1 <- function(data, tree, s, beta, gamma, method="Nelder-Mead", maxit = 500, trace=0, ...){
   ab <- c(s,beta,gamma)
   ab[ab==0] <- 1e-08 #take care of log(0)
   ab <- log(ab)

@@ -614,10 +614,13 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e
   ns = length(index) #number of sites
   opaa = NULL #optimal amino acids
   optimal_aa = "" #is optimal aa given or not?
-  for(i in 1:20){ #when optimal aa is i
-    llopi = ll3m(data,tree,bf=bf,Q=Qall[[i]]) #loglikelihood when optimal amino acid is i
-    result = cbind(result,llopi)
-  }
+  ## calculate the loglikelihood for each different site pattern (m), with every amino acid as optimal
+  ## arrange them in a matrix of dimension m * 20
+  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,g=1)
+#   for(i in 1:20){ #when optimal aa is i
+#     llopi = ll3m(data,tree,bf=bf,Q=Qall[[i]]) #loglikelihood when optimal amino acid is i
+#     result = cbind(result,llopi)
+#   }
   if(!is.null(op)){
     opaa = op
     if(length(op)==ns){ #opaa is given for every site
@@ -639,25 +642,21 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e
   return(list(loglik= loglik, optimal_aa = optimal_aa,opaa=opaa,sitelik = sitelik, llmat=result))
 }
 
-
 ## For all the distinct sites (m), find loglikelihood, result is m * 20 matrix
 ## each column stores the loglikelihods when the corresponding amino acid is optimal 
-#this one uses expm for matrix exponentiation, maximizing rule for optimal aa
-llaam <- function(tree,data,QAll,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
+## maximizing rule for optimal aa
+llaam <- function(tree,data,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
-  for(i in 1:20){ #when optimal aa is i
-    llopi = ll3m(data,tree,bf=bf,Q=QAll[[i]])
-    result = cbind(result,llopi)
-  }
+  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,g=1)
   opaa = apply(result,1,which.max)
   sitelik = apply(result,1,max)
   loglik = sum(weight * sitelik)
   res=list(loglik= loglik, opaa = opaa, sitelik = sitelik, llmat=result)
   return(res)
 }
-## given opw (weights of aas being optimal), weights of data patterns and likelihood (not loglikelihood) matrix: n * 20
-## find the loglikelihood for all data
+## given opw (weights of aas being optimal), weights of data patterns and LIKELIHOOD (not loglikelihood) matrix: n * 20
+## find the -loglikelihood for all data
 llaaw1 <- function(opw,weight,llmat){
   sitelik = llmat %*% opw
   sitelik = log(sitelik)
@@ -675,15 +674,12 @@ llaaw_grad <- function(opw,weight,llmat){
 }
 # assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
 # if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
-llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
+llaaw <- function(tree,data,Qall,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
   nr = attr(data,"nr")
   opaa = NULL
-  for(i in 1:20){ #when optimal aa is i
-    llopi = ll3m(data,tree,bf=bf,Q=QAll[[i]])
-    result = cbind(result,llopi)
-  }
+  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,g=1)
 
   if(!is.null(opw)){
     opw = opw/sum(opw)
@@ -699,7 +695,7 @@ llaaw <- function(tree,data,QAll,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=
     sitelik=apply(result,1,max)
     loglik = sum(weight*sitelik)
   }
-  return(list(loglik= loglik, opaa=opaa,weights=opw, sitelik = sitelik, llmat=result))
+  return(list(loglik=loglik, opaa=opaa,weights=opw, sitelik = sitelik, llmat=result))
 }
 ## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
 ## nucleotide transition rate matrix of length 6
@@ -733,7 +729,7 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
 }
 #0.0000001000 0.0018676483 0.0003990333
 #more flexibility on what is provided, good for avoiding unnecessary computations
-mllm1 <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
+mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
                   opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
@@ -774,7 +770,7 @@ mllm1 <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL
 #MLE for s, given beta and gamma and all other parameter values
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-#sample call : optim.s(gene1,ROKAS_TREE,be,ga,Q=NU_VEC))
+#sample call : optim.s(gene1,ROKAS_TREE,print_level=1,beta=be,gamma=ga,Q=NU_VEC))
 optim.s <- function(data, tree, s,method="BOBYQA",maxeval="100",print_level=0, ...){ # s is the initial
   #store information from initial condition, with other parameters fixed
   res.initial = mllm1(data=data,tree=tree,s=s,...)
@@ -789,11 +785,13 @@ optim.s <- function(data, tree, s,method="BOBYQA",maxeval="100",print_level=0, .
   lower <- 0 #lower bound
   upper <- Inf #upper bound
   #options for optimizer
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,
+               "xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
   res = nloptr(x0=s,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
   return(res)
 }
 # find mle of s for a range of genes in rokas data, given values of beta and gamma
+## only apply to rokas data, for other data sets, need to tweak the codes
 optim.s.range<- function(beta,gamma,generange,tree,multicore=FALSE,method="BOBYQA",maxeval="100",print_level=0, ...){
   mle.s.one <- function(k){ ## find mle of s for one gene
     ## for now all search start with initial value "1" for s, could let user control the starting value             
@@ -845,7 +843,7 @@ optim.s.weight <- function(data, tree, s,beta,gamma, method="SBPLX",maxeval="50"
 #   ab <- log(ab)
   fn = function(ab,data,tree){
     #ab <- exp(ab)
-    print(ab)
+    #print(ab)
     result = -mllm1(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], mumat=mumat,bfaa=bfaa, ...)$ll$loglik
     return(result)
   }
@@ -991,7 +989,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   rounds = 0 #index of iterations
   while(opti){
     if(htrace)
-      cat("iteration ",rounds+1,"\n")
+      cat("Round ",rounds+1,"\n")
     if(optOpw){
       cat("start optimize weights of optimal aa","\n")
       res = optim.opw(data,tree,opw=opw,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...) #new optimizer using nloptr
@@ -1041,3 +1039,89 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   return(object)
 }
 #rokasdata = read.phyDat("proteinevoutk20/pkg/Result/rokasAA",format="phylip",type="AA")
+
+## another version of optimization on all parameters: first optimize all parameters except optimal weights
+## then optimize the weights of amino acids being optimal
+optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, optOpw = FALSE,
+                       control = list(epsilon=1e-08,hmaxit=10,htrace=TRUE,print_level=0,maxeval="300"),...){
+  tree = object$tree
+  if(class(tree)!="phylo") stop("tree must be of class phylo") 
+  if(!is.rooted(tree)) stop("tree must be rooted")
+  if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") 
+    tree <- reorderPruning(tree)
+  if(any(tree$edge.length < 1e-08)){
+    tree$edge.length[tree$edge.length < 1e-08] <- 1e-08
+    object <- update(object, tree=tree)
+  }
+
+  call = object$call
+  #maxit = control$maxit #maximum number of iterations for each sub optimizer
+  htrace = control$htrace #print out information about steps or not?
+  print_level=control$print_level
+  maxeval = control$maxeval
+  data = object$data
+  Q = object$Q
+  #if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
+  bfaa = object$bfaa #this is going to be the same, no matter from data or given -- empirical frequencies
+  opw = NULL ## use maximize rule first
+  ll = object$ll$loglik
+  ll1 = ll
+  s = object$s
+  beta = object$GMweights[2]
+  gamma = object$GMweights[3]
+  opti = TRUE # continue optimizing or not
+  rounds = 0 #index of iterations
+  while(opti){
+    if(htrace)
+      cat("Round ",rounds+1,"\n")
+
+    if(optsWeight){
+      if(htrace)
+        cat("start optimize s and weights","\n")
+      res = optim.s.weight(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw,...)
+      s = res$solution[1]
+      beta = res$solution[2]
+      gamma = res$solution[3]
+      if(htrace)
+        cat("optimize s and Grantham weights: ", ll, "--->", -res$objective, "\n")
+      ll = -res$objective
+    }
+    if(optQ){
+      if(htrace)
+        cat("start optimize rate matrix","\n")
+      res = optimQ(tree,data,Q=Q,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,opw=opw, ...)
+      Q = res$solution
+      if(htrace){
+        cat("optimize rate matrix: ", ll, "--->", -res$objective, "\n")
+      }
+      ll = -res$objective
+    }
+    if(optBranch){
+      if(htrace)
+        cat("start optimize branch lengths","\n")
+      res = optim.br(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw, ...)
+      if(htrace)
+        cat("optimize branch lengths:", ll, "--->", -res$objective, "\n")
+      tree$edge.length = res$solution
+      ll =-res$objective
+    }
+    rounds = rounds + 1
+    if(rounds >= control$hmaxit) opti <- FALSE
+    if((ll1-ll)/ll < control$epsilon) opti <- FALSE
+    ll1 = ll
+  }
+  
+    if(optOpw){
+      cat("start optimize weights of optimal aa","\n")
+      res = optim.opw(data,tree,opw=opw,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...) #new optimizer using nloptr
+      if(htrace){
+        ##notice that the loglikelihood will decrease, from maximizing rule to weighted rule
+        cat("optimize weights of optimal aa:", ll, "--->", -res$objective, "\n")
+      }
+      opw = res$solution
+      ll = -res$objective
+    }
+  
+  object = update(object, tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw,...)
+  return(object)
+}
