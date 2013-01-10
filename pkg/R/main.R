@@ -870,7 +870,7 @@ optim.opw <- function(data, tree,opw=NULL,print_level=0, ...){
   res = mllm(data=data,tree=tree,opw=opw,...) #store llmat (loglikelihood values for all opaa) 
   llmat = exp(res$ll$llmat)    #so that they don't need to be evaluated again and again
   weight = attr(data,"weight")
-  cat("starting loglikelihood = ", res$ll$loglik, "\n") #function value at the starting point
+  cat("opw optimization, starting loglikelihood = ", res$ll$loglik, "\n") #function value at the starting point
   
   # function to optimize on and its gradient function
   eval_f_list <- function(opw){
@@ -990,7 +990,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   rounds = 0 #index of iterations
   while(opti){
     if(htrace){
-      cat("Round ",rounds+1,"\n")
+      cat("\n","Round, ",rounds+1,"\n")
       cat("opw = ", opw, "\n")
     }
     if(optOpw){
@@ -1075,7 +1075,7 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
   rounds = 0 #index of iterations
   while(opti){
     if(htrace){
-      cat("Round ",rounds+1,"\n")
+      cat("\n","Round ",rounds+1,"\n")
       cat("opw = ", opw, "\n")
     }
     if(optsWeight){
