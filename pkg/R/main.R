@@ -870,7 +870,7 @@ optim.opw <- function(data, tree,opw=NULL,print_level=0, ...){
   res = mllm(data=data,tree=tree,opw=opw,...) #store llmat (loglikelihood values for all opaa) 
   llmat = exp(res$ll$llmat)    #so that they don't need to be evaluated again and again
   weight = attr(data,"weight")
-  print(res$ll$loglik) #function value at the starting point
+  cat("starting loglikelihood = ", res$ll$loglik, "\n") #function value at the starting point
   
   # function to optimize on and its gradient function
   eval_f_list <- function(opw){
@@ -920,7 +920,7 @@ optim.br <- function(data,tree,el=NULL,method="COBYLA",maxeval="100", print_leve
   opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps,
                "stopval"=-Inf,"print_level"=print_level)
   res = nloptr(x0=el,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
-  print(res)
+  #print(res)
   return(res)
 }
 
@@ -979,7 +979,8 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   Q = object$Q
   #if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
   bfaa = object$bfaa #this is going to be the same, no matter from data or given -- empirical frequencies
-  opw = object$opw
+  if(optOpw)  opw = object$opw
+  else opw = NULL
   ll = object$ll$loglik
   ll1 = ll
   s = object$s
@@ -988,10 +989,11 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
   opti = TRUE # continue optimizing or not
   rounds = 0 #index of iterations
   while(opti){
-    if(htrace)
+    if(htrace){
       cat("Round ",rounds+1,"\n")
+      cat("opw = ", opw, "\n")
+    }
     if(optOpw){
-      cat("start optimize weights of optimal aa","\n")
       res = optim.opw(data,tree,opw=opw,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...) #new optimizer using nloptr
       if(htrace){
         ##notice that the loglikelihood will decrease if the opw is not given in the "object"
@@ -1002,8 +1004,6 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       ll = -res$objective
     }
     if(optsWeight){
-      if(htrace)
-        cat("start optimize s and weights","\n")
       res = optim.s.weight(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw,...)
       s = res$solution[1]
       beta = res$solution[2]
@@ -1015,8 +1015,6 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       ll = -res$objective
     }
     if(optQ){
-      if(htrace)
-        cat("start optimize rate matrix","\n")
       res = optimQ(tree,data,Q=Q,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,opw=opw, ...)
       Q = res$solution
       if(htrace){
@@ -1026,8 +1024,6 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       ll = -res$objective
     }
     if(optBranch){
-      if(htrace)
-        cat("start optimize branch lengths","\n")
       res = optim.br(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw, ...)
       if(htrace){
         cat("optimize branch lengths:", ll, "--->", -res$objective, "\n")
@@ -1038,7 +1034,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
     }
     rounds = rounds + 1
     if(rounds >= control$hmaxit) opti <- FALSE
-    if((ll1-ll)/ll < control$epsilon) opti <- FALSE
+    if(((ll1-ll)<=0) && ((ll1-ll)/ll < control$epsilon)) opti <- FALSE
     ll1 = ll
   }
   object = update(object, tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw,...)
@@ -1069,7 +1065,7 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
   Q = object$Q
   #if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
   bfaa = object$bfaa #this is going to be the same, no matter from data or given -- empirical frequencies
-  opw = object$opw ## use maximize rule first
+  opw = NULL
   ll = object$ll$loglik
   ll1 = ll
   s = object$s
@@ -1078,12 +1074,11 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
   opti = TRUE # continue optimizing or not
   rounds = 0 #index of iterations
   while(opti){
-    if(htrace)
+    if(htrace){
       cat("Round ",rounds+1,"\n")
-
+      cat("opw = ", opw, "\n")
+    }
     if(optsWeight){
-      if(htrace)
-        cat("start optimize s and weights","\n")
       res = optim.s.weight(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw,...)
       s = res$solution[1]
       beta = res$solution[2]
@@ -1095,8 +1090,6 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       ll = -res$objective
     }
     if(optQ){
-      if(htrace)
-        cat("start optimize rate matrix","\n")
       res = optimQ(tree,data,Q=Q,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,opw=opw, ...)
       Q = res$solution
       if(htrace){
@@ -1106,8 +1099,6 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       ll = -res$objective
     }
     if(optBranch){
-      if(htrace)
-        cat("start optimize branch lengths","\n")
       res = optim.br(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw, ...)
       if(htrace){
         cat("optimize branch lengths:", ll, "--->", -res$objective, "\n")
@@ -1117,8 +1108,6 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       ll =-res$objective
     }
     if(optOpw){
-      if(htrace)
-        cat("start optimize weights of optimal aa","\n")
       res = optim.opw(data,tree,opw=opw,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...) #new optimizer using nloptr
       if(htrace){
         ##notice that the loglikelihood will decrease, from maximizing rule to weighted rule
