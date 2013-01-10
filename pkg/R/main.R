@@ -996,6 +996,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       if(htrace){
         ##notice that the loglikelihood will decrease if the opw is not given in the "object"
         cat("optimize weights of optimal aa:", ll, "--->", -res$objective, "\n")
+        cat("weights are now: ", res$solution, "\n")
       }
       opw = res$solution
       ll = -res$objective
@@ -1007,8 +1008,10 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       s = res$solution[1]
       beta = res$solution[2]
       gamma = res$solution[3]
-      if(htrace)
+      if(htrace){
         cat("optimize s and Grantham weights: ", ll, "--->", -res$objective, "\n")
+        cat("s, beta and gamma are now: ", res$solution, "\n")
+      }
       ll = -res$objective
     }
     if(optQ){
@@ -1018,6 +1021,7 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       Q = res$solution
       if(htrace){
         cat("optimize rate matrix: ", ll, "--->", -res$objective, "\n")
+        cat("Q is now: ", res$solution, "\n")
       }
       ll = -res$objective
     }
@@ -1025,8 +1029,10 @@ optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRU
       if(htrace)
         cat("start optimize branch lengths","\n")
       res = optim.br(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw, ...)
-      if(htrace)
+      if(htrace){
         cat("optimize branch lengths:", ll, "--->", -res$objective, "\n")
+        cat("branch lengths are now: ", res$solution, "\n")
+      }
       tree$edge.length = res$solution
       ll =-res$objective
     }
@@ -1082,8 +1088,10 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       s = res$solution[1]
       beta = res$solution[2]
       gamma = res$solution[3]
-      if(htrace)
+      if(htrace){
         cat("optimize s and Grantham weights: ", ll, "--->", -res$objective, "\n")
+        cat("s, beta, gamma are now: ", res$solution, "\n")
+      }
       ll = -res$objective
     }
     if(optQ){
@@ -1093,6 +1101,7 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       Q = res$solution
       if(htrace){
         cat("optimize rate matrix: ", ll, "--->", -res$objective, "\n")
+        cat("Q is now: ", res$solution, "\n")
       }
       ll = -res$objective
     }
@@ -1100,8 +1109,10 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       if(htrace)
         cat("start optimize branch lengths","\n")
       res = optim.br(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw, ...)
-      if(htrace)
+      if(htrace){
         cat("optimize branch lengths:", ll, "--->", -res$objective, "\n")
+        cat("branch lengths are now: ", res$solution, "\n")
+      }
       tree$edge.length = res$solution
       ll =-res$objective
     }
@@ -1112,6 +1123,7 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       if(htrace){
         ##notice that the loglikelihood will decrease, from maximizing rule to weighted rule
         cat("optimize weights of optimal aa:", ll, "--->", -res$objective, "\n")
+        cat("weights are now: ", res$solution, "\n")
       }
       opw = res$solution
       ll = -res$objective
