@@ -811,7 +811,7 @@ optim.w <- function(beta,gamma,generange,tree,multicore=FALSE,method="BOBYQA",ma
   ## a function of x that return the sum of -loglikelihood values for all genes with s optimized separately for different genes
   ab <- c(beta,gamma)
   fn <- function(ab,generange,tree){
-    #print(ab)
+    cat("beta, gamma = ", ab, "\n")
     #call the previous function to optimize s for all genes
     mle <- optim.s.range(ab[1],ab[2],generange,tree=tree,multicore=multicore,method=method,maxeval=maxeval,print_level=print_level,...) 
     mle.val <- sapply(1:length(generange),function(ind) mle[[ind]]$objective) # best -loglikelihood values
