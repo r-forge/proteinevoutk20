@@ -460,7 +460,7 @@ fix.mpfr <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   if((d1==d2)||(s==0)) #When the fitnesses are the same, neutral case, pure drift
     return(1/(2*Ne))
   else{
-    fit_ratio <- exp(mpfr(-C*Phi*q*s*(d1-d2),prec=10000)) #f1/f2
+    fit_ratio <- exp(mpfr(-C*Phi*q*s*(d1-d2),prec=200)) #f1/f2
     return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
   }
 }
@@ -890,6 +890,33 @@ optim.opw <- function(data, tree,opw=NULL,print_level=0, ...){
   res = nloptr(x0=opw,eval_f=eval_f_list,eval_g_eq=eval_g_list, lb=lower,ub=upper,opts=opts)
   # res$objective: best function value found
   # res$solution: best parameter values
+  return(res)
+}
+
+# find mle for beta and gamma, that maximize the likelihood for all genes,Q is given
+optim.opw.range <- function(s,beta,gamma,generange,Q,tree,multicore=FALSE,print_level=0){
+  if(multicore)
+    res <- mclapply(ROKAS_DATA[generange],optim.opw,tree=tree,opw=rep(1,20),
+                    print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q)
+  else
+    res <- lapply(ROKAS_DATA[generange],optim.opw,tree=tree,opw=rep(1,20),
+                  print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q)
+  return(res)
+}
+optim.opw.sbg <- function(s,beta,gamma,Q,tree,generange,multicore=FALSE,print_level=0,...){
+  ab <- c(s,beta,gamma)
+  fn <- function(ab){
+    cat("s,beta,gamma = ", ab, "\n")
+    mle <- optim.opw.range(ab[1],ab[2],ab[3],generange=generange,Q=Q,tree=tree,multicore=multicore,
+                           print_level=print_level,...)
+    mle.val <- sapply(1:length(generange), function(x) mle[[x]]$objective)
+    return(sum(mle.val))
+  }
+  lower <- rep(0,3)
+  upper <- rep(Inf,3)
+  opts <- list("algorithm"="NLOPT_LN_SBPLX","maxeval"="100","xtol_rel"=1e-6,
+               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=1)
+  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts)
   return(res)
 }
 ######################################################################################################
