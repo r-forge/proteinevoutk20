@@ -173,20 +173,20 @@ All the parameters are treated the same across all the sites except the optimal 
 \begin{table}[h]
 \begin{center}
 \caption{Log-likelihood values and parameter estimates under empirical models and new model for the amino acid sequences of length 42,342}
-\begin{tabular}{l c c c r}
+\begin{tabular}{l r c r r}
 \hline
 Model & $\Delta$AIC & $l$ & Tree length & Parameters \\
 \hline
-New+maj & 0.00 & -273239.30 & & 41 \\
-New+max & 11358.60 & -236576.60 & 12.39 & 42,383 \\
-New+weights & 94363.00 & -320401.80 & & 60 \\
-LG+I+G+F & 50905.58 & -298699.09 &  & 34\\
-LG+G+F & 50910.46 & -298699.09 & & 33 \\
+New+maj & 0.00 & -257790.10 &  10.43 & 41 \\
+New+max & 48576.60 & -239736.40 & 11.75 & 42,383 \\
+New+weights & 123709.40 & -319625.80 & 2.74 & 60 \\
+LG+I+G+F & 81803.98 & -298699.09 &  & 34\\
+LG+G+F & 81801.98 & -298699.09 & & 33 \\
 \hline
 \end{tabular}
 \end{center}
 
-Note: The last two models in the table are the best models picked out by ProtTest.
+Note: The last two models in the table are the best models picked out by ProtTest.({\color{blue} What happens when the weights of amino acids being optimal are gene specific and other parameters are fixed across genes? Total number of parameters is 40,369. Better case senario, we estimate different optimal weights and other parameters genewise, this should give a better likelihood value in total compared to only optimal weights are gene specific. In this better case, the total loglikelihood value is -311186. Even with this loglikelihood value and number of parameters 40,369, the $\Delta$AIC value is 187447.8, which means it performs worse than the third model in the table.} The real loglikelihood value under this model is -317214.68; it gives a larger AIC value.)
 \label{table:mle}
 \end{table}
 
