@@ -870,7 +870,7 @@ optim.opw <- function(data, tree,opw=NULL,print_level=0, ...){
   res = mllm(data=data,tree=tree,opw=opw,...) #store llmat (loglikelihood values for all opaa) 
   llmat = exp(res$ll$llmat)    #so that they don't need to be evaluated again and again
   weight = attr(data,"weight")
-  cat("opw optimization, starting loglikelihood = ", res$ll$loglik, "\n") #function value at the starting point
+  #cat("opw optimization, starting loglikelihood = ", res$ll$loglik, "\n") #function value at the starting point
   
   # function to optimize on and its gradient function
   eval_f_list <- function(opw){
@@ -903,6 +903,7 @@ optim.opw.range <- function(s,beta,gamma,generange,Q,tree,multicore=FALSE,print_
                   print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q)
   return(res)
 }
+## optimize beta, gamma and s, for each gene find the best opw for them, instead of using a universal one
 optim.opw.sbg <- function(s,beta,gamma,Q,tree,generange,multicore=FALSE,print_level=0,...){
   ab <- c(s,beta,gamma)
   fn <- function(ab){
@@ -919,6 +920,40 @@ optim.opw.sbg <- function(s,beta,gamma,Q,tree,generange,multicore=FALSE,print_le
   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts)
   return(res)
 }
+optim.all <- function(s,beta,gamma,Q,tree,generange,multicore=FALSE,print_level=0,maxeval="100",...){
+  if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
+    tree <- reorderPruning(tree)
+  br=tree$edge.length
+  br.num = length(br)
+  Q <- Q/Q[6]
+  ab = c(s,beta,gamma,br,Q[1:5]) #all parameters as a vector, length = 3+br.num+5
+  ablen <- length(ab)
+  fn <- function(ab){
+    s <- ab[1]
+    beta <- ab[2]
+    gamma <- ab[3]
+    cat("s,beta,gamma:",s,beta,gamma,"\n")
+    tree$edge.length <- ab[4:(4+br.num-1)]
+    cat("branch lengths:", tree$edge.length,"\n")
+    Q <- c(ab[(4+br.num):ablen],1)
+    cat("Q:",Q,"\n","\n")
+    mle <- optim.opw.range(s,beta,gamma,generange=generange,Q=Q,tree=tree,multicore=multicore,print_level=print_level,...)
+    mle.val <- sapply(1:length(generange), function(x) mle[[x]]$objective)
+    return(sum(mle.val))
+  }
+  lower <- rep(0,ablen)
+  upper <- rep(Inf,ablen)
+  opts <- list("algorithm"="NLOPT_LN_BOBYQA","maxeval"=maxeval,"xtol_rel"=1e-6,
+               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=1)
+  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts)
+  par_optim <- res$solution
+  res$s = par_optim[1]
+  res$GMweights = c(al,par_optim[2:3])
+  res$br = par_optim[4:(4+br.num-1)]
+  res$Q = c(par_optim[(4+br.num):ablen],1)
+  return(res)
+}
+
 ######################################################################################################
 ## MLE for branch lengths, specify starting values for el, otherwise it starts with the tree supplied with branch length
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
