@@ -77,7 +77,8 @@ loglik_opw1 <- sapply(1:106,function(x) res_opw1[[x]]$ll$loglik)
 GM_opw1 <- sapply(1:106,function(x) res_opw1[[x]]$GMweights)
 Q_opw1 <- sapply(1:106,function(x) res_opw1[[x]]$Q)
 br_opw1 <- sapply(1:106,function(x) sum(res_opw1[[x]]$tree$edge.length))
-opw1_opw <- sapply(1:106, function(x) res_opw1[[x]]$opw)
+opw_opw1 <- sapply(1:106, function(x) res_opw1[[x]]$opw)
+sw_opw1 <- rbind(s_opw1,GM_opw1[2,],GM_opw1[3,])
 
 res_opw <- vector("list",length=106)
 l <- 106
