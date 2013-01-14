@@ -61,6 +61,7 @@ loglik_max <- sapply(1:106,function(x) res_max[[x]]$ll$loglik)
 GM_max <- sapply(1:106,function(x) res_max[[x]]$GMweights)
 Q_max <- sapply(1:106,function(x) res_max[[x]]$Q)
 br_max <- sapply(1:106,function(x) sum(res_max[[x]]$tree$edge.length))
+sw_max <- rbind(s_max,GM_max[2,],GM_max[3,])
 
 res_opw1 <- vector("list",length=106)
 l <- 106
@@ -116,7 +117,7 @@ loglik_maj <- sapply(1:106,function(x) res_maj[[x]]$ll$loglik)
 GM_maj <- sapply(1:106,function(x) res_maj[[x]]$GMweights)
 Q_maj <- sapply(1:106,function(x) res_maj[[x]]$Q)
 br_maj <- sapply(1:106,function(x) sum(res_maj[[x]]$tree$edge.length))
-
+sw_maj <- rbind(s_maj,GM_maj[2,],GM_maj[3,])
 
 
 ###########################################################

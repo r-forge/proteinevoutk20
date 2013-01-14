@@ -1,3 +1,4 @@
+library(xlsx)
 ##the order of GO names in Rokas's data
 gonames <- read.csv("~/proteinevoutk20/pkg/Data/GoNames.csv",header=FALSE)
 ##the groups according to GO, functions of genes
