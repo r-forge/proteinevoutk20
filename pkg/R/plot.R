@@ -120,7 +120,8 @@
 # points(GM_maj[3,],col="blue")
 
 ##############################################################################
-## plot simulated data
+## plot simulated data, using gene number
+source("~/proteinevoutk20/pkg/R/rokas_collect.R") #collect results on genes, using max/maj rule
 genenum <- 83
 datafile = paste("~/BackupProEvo/Newton/rokas_max/gene",genenum,"_s_weight.RData",sep="")
 load(datafile)
@@ -129,7 +130,7 @@ data = res_op$data
 index = attr(data,"index")
 opaa = res_op$ll$opaa[index]
 bfaa = findBf2(data)
-root = sample(20,length(index),replace=T,prob=bfaa)
+root = sample(20,length(index),replace=T,prob=bfaa) #sample root sequence
 s = res_op$s
 beta = res_op$GMweights[2]
 gamma = res_op$GMweights[3]
@@ -138,17 +139,17 @@ mumat = aa_MuMat_form(res_op$Q)
 plot.sim <- function(s=1,t=10,root=root,opaa=opaa,beta,gamma,func=TRUE,dist=TRUE){
 #   dismat = GM_cpv(GM_CPV,al,beta,gamma)
 #   mumat = aa_MuMat_form(res_op$Q)
-  sim <- simulation(root,opaa,t=t,s=s,DisMat=dismat,MuMat=mumat,bfaa=bfaa)
+  sim <- simulation(root,opaa,t=t,s=s,DisMat=dismat,MuMat=mumat,bfaa=bfaa) #simulation
   l <- dim(sim)[2] - 2
-  fty <- apply(sim[,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)
-  dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=opaa,DisMat=dismat)
-  dis <- apply(dis,2,sum)
-  ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)
+  fty <- apply(sim[,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
+  dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=opaa,DisMat=dismat)#distance from optimal amino acids
+  dis <- apply(dis,2,sum)#sum of distances for all sites
+  ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
   disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
-  if(func)
+  if(func) #plot functionality vs time
     plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",s,sep=""),pch=20)
-  if(dist)
+  if(dist) #plot distance vs time
     plot(disfun,xlab="time",ylab="distance",main=paste("distance, s=",s,sep=""),pch=20)
-  #return(as.numeric(tail(sim,1)[1:l]))
+  #return(as.numeric(tail(sim,1)[1:l])) #the sequence at the end of simulation
 }
 plot.sim(s=s,t=br_max[genenum],root=root,opaa=opaa,beta,gamma,func=TRUE,dist=TRUE)
