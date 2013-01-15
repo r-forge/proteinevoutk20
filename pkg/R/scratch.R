@@ -37,3 +37,24 @@ gamma_list <- vector(mode="list",length=length(gos))
 for(i in 1:length(gos)){
   gamma_list[[i]] <- GM_max[3,gos[[i]]]
 }
+
+s <- 1.486043
+beta <- 0.1327872 
+gamma <- 0.0009136954
+Q <- c(4.028232, 18.44403, 10.54094, 19.01206, 4.451557, 1)
+brlen <- c(0.2590216, 0.126402, 0.03749147, 0.5138506, 0.1755939, 0.4282816, 0.09928871, 0.2314689, 6.116373, 2.87642, 8.022745, 0.8643566)
+
+sitelikmat <- matrix(0,nrow=107,ncol=20)
+for(i in 1:20){
+  rootbf <- rep(0,20)
+  rootbf[i] <- 1
+  resi <- mllm(data,treeir,s,beta,gamma,Q,opaa=res$ll$opaa,rootbf=rootbf)
+  sitelikes <- resi$ll$sitelik
+  sitelikmat[,i] <- sitelikes
+}
+siteprob <- exp(sitelikmat)
+siteprob = apply(siteprob,1,function(x) x/sum(x))
+indexp = attr(data,"index")
+siteprob = siteprob[,indexp]
+
+startsq <- apply(siteprob,2,sample,x=20,size=1,replace=TRUE)
