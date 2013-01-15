@@ -121,7 +121,10 @@
 
 ##############################################################################
 ## plot simulated data
-load("~/BackupProEvo/Newton/rokas_max/gene7_s_weight.RData")
+genenum <- 83
+datafile = paste("~/BackupProEvo/Newton/rokas_max/gene",genenum,"_s_weight.RData",sep="")
+load(datafile)
+source("~/proteinevoutk20/pkg/R/main.R")
 data = res_op$data
 index = attr(data,"index")
 opaa = res_op$ll$opaa[index]
@@ -132,7 +135,9 @@ beta = res_op$GMweights[2]
 gamma = res_op$GMweights[3]
 dismat = GM_cpv(GM_CPV,al,beta,gamma)
 mumat = aa_MuMat_form(res_op$Q)
-plot.sim <- function(s=1,t=10,root=root,func=TRUE,dist=TRUE){
+plot.sim <- function(s=1,t=10,root=root,opaa=opaa,beta,gamma,func=TRUE,dist=TRUE){
+#   dismat = GM_cpv(GM_CPV,al,beta,gamma)
+#   mumat = aa_MuMat_form(res_op$Q)
   sim <- simulation(root,opaa,t=t,s=s,DisMat=dismat,MuMat=mumat,bfaa=bfaa)
   l <- dim(sim)[2] - 2
   fty <- apply(sim[,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)
@@ -144,4 +149,6 @@ plot.sim <- function(s=1,t=10,root=root,func=TRUE,dist=TRUE){
     plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",s,sep=""),pch=20)
   if(dist)
     plot(disfun,xlab="time",ylab="distance",main=paste("distance, s=",s,sep=""),pch=20)
+  #return(as.numeric(tail(sim,1)[1:l]))
 }
+plot.sim(s=s,t=br_max[genenum],root=root,opaa=opaa,beta,gamma,func=TRUE,dist=TRUE)
