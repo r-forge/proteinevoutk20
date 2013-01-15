@@ -9,6 +9,7 @@ library(mgcv) #find the unique rows in a matrix - uniquecombs
 library(numDeriv) # calculate hessian of a function at a point
 library(gtools) #package used to draw random samples from dirichlet distribution -- rdirichlet, ddirichlet
 library(nloptr)
+library(scatterplot3d)
 #library(akima) # gridded bivariate interpolation for irredular data
 #library(Rmpfr)
 #library(ppso)
@@ -419,7 +420,7 @@ Ftny <- function(d, s){
   if((length(s)==1)&&(length(d)!=1)){ #if s is given as a scalar, then treat it to be the same across all sites
     s <- rep(s,length(d))
   }
-  result <- length(d)/(sum(1+mpfr(d*s,prec=1000))) #harmonic mean of ftny at all sites (F_i = 1 + d_i * s_i)
+  result <- length(d)/(sum(1+d*s)) #harmonic mean of ftny at all sites (F_i = 1 + d_i * s_i)
   return(result)
 } #d and s are given
 
