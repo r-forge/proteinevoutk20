@@ -9,12 +9,12 @@ rate_move_mat <- function(s, DisMat, MuMat,bfaa = rep(1/20,20),C=2, Phi=0.5, q=4
     mat = scaleQ(mat,bfaa)
   }
   mat_list = lapply(1:20,fn)
-  mat_list
+  return(mat_list)
 }
 rate_move <- function(protein, protein_op,s, DisMat, MuMat, bfaa = rep(1/20,20),C=2, Phi=0.5, q=4e-7, Ne=5e6){
     mat = rate_move_mat(s,DisMat,MuMat,bfaa,C,Phi,q,Ne)
     vec_list = sapply(1:length(protein),function(i) {mat[[protein_op[i]]][protein[i],]},simplify="array")
-    vec_list[vec_list < 0] = 0
+    #vec_list[vec_list < 0] = 0
     return(c(vec_list))
 }
 ##find the equilibrium frequencies for all amino acids as optimal
