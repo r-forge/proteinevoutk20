@@ -28,7 +28,7 @@ aa_plot <- function(op=1,s=1,beta=be,gamma=ga,bfaa=rep(1/20,20),Q=NU_VEC,layout=
                   #filetype="pdf",filename=paste("A_op",op,"_Ne",exponent,"_s",s,sep=""))
   return(gpara)
 }
-aa_plot(1,10,beta,gamma,bfaa,res_op$Q,layout=qplot$layout)
+aa_plot()
 
 # ##############################################################
 # #s <- 0.1
