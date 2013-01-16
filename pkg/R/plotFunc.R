@@ -1,6 +1,7 @@
 library("qgraph")
 library("network")
 source("~/proteinevoutk20/pkg/R/main.R")
+Col <- rev(heat.colors(20))
 ##############################################################
 # ##A test plot using "network" package and/or "qgraph" package## --not used later, just a test
 # A <- mat_gen_indep(1,0.1,GM,MUMAT) #transition rate matrix
