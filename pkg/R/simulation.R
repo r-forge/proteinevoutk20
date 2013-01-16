@@ -39,7 +39,7 @@ simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2
   l <- length(protein) #number of sites
   t_now <- 0 #time until the current step of simulation
   path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
-  colnames(path) <- colnames(path,do.NULL = FALSE, prefix = "Site.") #column names
+  colnames(path) <- colnames(path,do.NULL = FALSE, prefix = "Site") #column names
   ##last two columns in the paths, recording Time up to this point and the waiting time at the current state
   colnames(path)[l+1] <- "Time Now"
   colnames(path)[l+2] <- "Waiting Time"
