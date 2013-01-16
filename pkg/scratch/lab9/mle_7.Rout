@@ -1,0 +1,499 @@
+
+R version 2.15.1 (2012-06-22) -- "Roasted Marshmallows"
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> source("~/proteinevoutk20/pkg/R/main.R") 
+Loading required package: ape
+
+Attaching package: ‘ape’
+
+The following object(s) are masked from ‘package:seqinr’:
+
+    as.alignment, consensus
+
+Loading required package: igraph
+
+Attaching package: ‘igraph’
+
+The following object(s) are masked from ‘package:ape’:
+
+    as.igraph, edges
+
+Loading required package: Matrix
+Loading required package: lattice
+Loading required package: numDeriv
+
+Attaching package: ‘expm’
+
+The following object(s) are masked from ‘package:Matrix’:
+
+    expm
+
+The following object(s) are masked from ‘package:ape’:
+
+    balance
+
+
+Attaching package: ‘multicore’
+
+The following object(s) are masked from ‘package:lattice’:
+
+    parallel
+
+Loading required package: Rcpp
+This is mgcv 1.7-21. For overview type 'help("mgcv-package")'.
+Warning messages:
+1: replacing previous import ‘as.igraph’ when loading ‘igraph’ 
+2: replacing previous import ‘edges’ when loading ‘igraph’ 
+>  gene7 = conv("gene7.fasta","phyDat")
+> tree = read.tree("gene7prune.tre")
+>  res=mllm(gene7,tree,0.1,be,ga,Q=NU_VEC) 
+>  res$ll$loglik 
+[1] -1371.476
+>  res_op = optim.mllm(res,optQ=T,optBranch=T,optsWeight=T,optOpw=FALSE,control=list(epsilon=1e-08,hmaxit=500,htrace=1,print_level=0,maxeval="50")) 
+
+ Round,  1 
+opw =  
+optimize s and Grantham weights:  -1371.476 ---> -885.6965 
+s, beta and gamma are now:  1.454347 0.08985221 0.0006983083 
+optimize rate matrix:  -885.6965 ---> -876.2135 
+Q is now:  2.175589 4.2768 3.216162 3.83473 3.07228 1 
+optimize branch lengths: -876.2135 ---> -873.8637 
+branch lengths are now:  0.2180107 0.127325 1.671213e-08 0.6382266 0.2255398 0.5223222 0.01199652 0.2834486 1.436848 4.511992 6.071728 0.9461763 
+
+ Round,  2 
+opw =  
+optimize s and Grantham weights:  -873.8637 ---> -873.3691 
+s, beta and gamma are now:  1.520788 0.1004871 0.0006983083 
+optimize rate matrix:  -873.3691 ---> -870.825 
+Q is now:  3.195735 9.188197 6.404412 10.70507 4.818676 1 
+optimize branch lengths: -870.825 ---> -868.2534 
+branch lengths are now:  0.3614321 0.139607 3.099393e-08 0.568812 0.2031064 0.495095 0.02050841 0.3441483 2.955707 5.31598 6.066991 0.8129949 
+
+ Round,  3 
+opw =  
+optimize s and Grantham weights:  -868.2534 ---> -868.116 
+s, beta and gamma are now:  1.50978 0.1113077 0.0007637747 
+optimize rate matrix:  -868.116 ---> -867.5005 
+Q is now:  3.591408 14.95102 7.785392 13.05266 5.081346 1 
+optimize branch lengths: -867.5005 ---> -865.8046 
+branch lengths are now:  0.3134533 0.1592158 5.951353e-08 0.5218392 0.2033776 0.4672527 0.03966549 0.3417721 5.059108 3.9416 6.021528 0.8925986 
+
+ Round,  4 
+opw =  
+optimize s and Grantham weights:  -865.8046 ---> -865.7138 
+s, beta and gamma are now:  1.506043 0.1210747 0.0008353786 
+optimize rate matrix:  -865.7138 ---> -865.552 
+Q is now:  3.405674 16.29067 9.920171 16.46648 4.676559 1 
+optimize branch lengths: -865.552 ---> -865.0052 
+branch lengths are now:  0.2794598 0.1554962 1.080264e-07 0.5609212 0.1792243 0.4048432 0.06756103 0.2695121 5.76099 3.349956 7.414799 0.9348542 
+
+ Round,  5 
+opw =  
+optimize s and Grantham weights:  -865.0052 ---> -864.8745 
+s, beta and gamma are now:  1.491854 0.1329477 0.0009136954 
+optimize rate matrix:  -864.8745 ---> -864.8037 
+Q is now:  3.767581 17.18353 9.842898 17.38263 4.343962 1 
+optimize branch lengths: -864.8037 ---> -864.7369 
+branch lengths are now:  0.2838793 0.1506792 1.979868e-07 0.5135589 0.1786022 0.4751782 0.07118641 0.2691669 6.104918 3.301769 7.322315 0.8325525 
+
+ Round,  6 
+opw =  
+optimize s and Grantham weights:  -864.7369 ---> -864.7311 
+s, beta and gamma are now:  1.498417 0.1325286 0.0009136954 
+optimize rate matrix:  -864.7311 ---> -864.7253 
+Q is now:  3.818976 17.74084 10.07961 17.71503 4.347138 1 
+optimize branch lengths: -864.7253 ---> -864.6399 
+branch lengths are now:  0.2814766 0.1475986 3.699832e-07 0.5151374 0.1822972 0.4599194 0.07355844 0.2608605 6.19341 3.174572 7.775476 0.8847438 
+
+ Round,  7 
+opw =  
+optimize s and Grantham weights:  -864.6399 ---> -864.6396 
+s, beta and gamma are now:  1.495235 0.1348631 0.0009136954 
+optimize rate matrix:  -864.6396 ---> -864.6346 
+Q is now:  3.84391 18.10271 10.27211 18.30199 4.367853 1 
+optimize branch lengths: -864.6346 ---> -864.6014 
+branch lengths are now:  0.2873355 0.1454142 6.798046e-07 0.5151372 0.1816588 0.431352 0.07537864 0.252819 6.197901 3.04766 8.057553 0.8540342 
+
+ Round,  8 
+opw =  
+optimize s and Grantham weights:  -864.6014 ---> -864.6003 
+s, beta and gamma are now:  1.493811 0.1326949 0.0009136954 
+optimize rate matrix:  -864.6003 ---> -864.5985 
+Q is now:  3.910896 18.60932 10.45441 18.57205 4.428032 1 
+optimize branch lengths: -864.5985 ---> -864.594 
+branch lengths are now:  0.2878657 0.1487501 1.245353e-06 0.5109688 0.1818696 0.4301442 0.07659991 0.2517657 6.197534 3.001906 7.933241 0.8532585 
+
+ Round,  9 
+opw =  
+optimize s and Grantham weights:  -864.594 ---> -864.594 
+s, beta and gamma are now:  1.493811 0.1326949 0.0009136954 
+optimize rate matrix:  -864.594 ---> -864.5935 
+Q is now:  3.956925 18.62405 10.48759 18.61016 4.459085 1 
+optimize branch lengths: -864.5935 ---> -864.5904 
+branch lengths are now:  0.2921503 0.1484349 2.272608e-06 0.5326542 0.1826053 0.4281057 0.07782561 0.251238 6.134001 2.99377 7.937661 0.8612108 
+
+ Round,  10 
+opw =  
+optimize s and Grantham weights:  -864.5904 ---> -864.5904 
+s, beta and gamma are now:  1.493811 0.1326949 0.0009136954 
+optimize rate matrix:  -864.5904 ---> -864.5903 
+Q is now:  3.960666 18.53638 10.47411 18.58951 4.464585 1 
+optimize branch lengths: -864.5903 ---> -864.5837 
+branch lengths are now:  0.2883351 0.1473798 4.146433e-06 0.5121807 0.1833559 0.4262054 0.07923199 0.2478273 6.194397 2.941519 7.827489 0.8706972 
+
+ Round,  11 
+opw =  
+optimize s and Grantham weights:  -864.5837 ---> -864.583 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.583 ---> -864.5828 
+Q is now:  3.971676 18.64024 10.45666 18.616 4.472162 1 
+optimize branch lengths: -864.5828 ---> -864.5795 
+branch lengths are now:  0.2880767 0.1473661 7.56449e-06 0.5129975 0.1833769 0.4243988 0.08028145 0.2468043 6.192234 2.940626 7.847996 0.8715276 
+
+ Round,  12 
+opw =  
+optimize s and Grantham weights:  -864.5795 ---> -864.5795 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.5795 ---> -864.5794 
+Q is now:  3.986721 18.67247 10.48243 18.65501 4.471489 1 
+optimize branch lengths: -864.5794 ---> -864.5759 
+branch lengths are now:  0.2817369 0.1484483 1.351561e-05 0.5199448 0.1848275 0.4247667 0.08143448 0.2455429 6.084761 2.951807 7.833329 0.8702941 
+
+ Round,  13 
+opw =  
+optimize s and Grantham weights:  -864.5759 ---> -864.5759 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.5759 ---> -864.5757 
+Q is now:  3.995917 18.6217 10.45548 18.60892 4.496374 1 
+optimize branch lengths: -864.5757 ---> -864.5732 
+branch lengths are now:  0.2819869 0.1484192 2.475839e-05 0.5188535 0.1849654 0.4237532 0.0824395 0.2442634 6.085423 2.950261 7.827911 0.8703522 
+
+ Round,  14 
+opw =  
+optimize s and Grantham weights:  -864.5732 ---> -864.5732 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.5732 ---> -864.5732 
+Q is now:  4.005058 18.64775 10.45784 18.60219 4.495765 1 
+optimize branch lengths: -864.5732 ---> -864.5706 
+branch lengths are now:  0.2822439 0.1483901 4.535315e-05 0.5177828 0.185104 0.4227221 0.08345519 0.2429182 6.086086 2.948742 7.822739 0.8704297 
+
+ Round,  15 
+opw =  
+optimize s and Grantham weights:  -864.5706 ---> -864.5706 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.5706 ---> -864.5706 
+Q is now:  4.009945 18.64425 10.4524 18.59389 4.497069 1 
+optimize branch lengths: -864.5706 ---> -864.5675 
+branch lengths are now:  0.2822508 0.1483915 8.313357e-05 0.517785 0.1851034 0.4227243 0.08446884 0.2417647 6.086083 2.94787 7.821533 0.87078 
+
+ Round,  16 
+opw =  
+optimize s and Grantham weights:  -864.5675 ---> -864.5675 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.5675 ---> -864.5675 
+Q is now:  4.009789 18.65582 10.44994 18.59148 4.495817 1 
+optimize branch lengths: -864.5675 ---> -864.5632 
+branch lengths are now:  0.2829207 0.1483885 0.0001522877 0.5197155 0.1850006 0.4281738 0.08551491 0.2402931 6.086475 2.947768 7.834651 0.8708113 
+
+ Round,  17 
+opw =  
+optimize s and Grantham weights:  -864.5632 ---> -864.5632 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.5632 ---> -864.5632 
+Q is now:  4.008733 18.6498 10.46355 18.6073 4.487206 1 
+optimize branch lengths: -864.5632 ---> -864.5572 
+branch lengths are now:  0.2852221 0.1476376 0.0002804335 0.5179381 0.1836465 0.4285916 0.08581758 0.2410255 6.090752 2.95316 7.952262 0.8686837 
+
+ Round,  18 
+opw =  
+optimize s and Grantham weights:  -864.5572 ---> -864.5572 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.5572 ---> -864.5569 
+Q is now:  3.994621 18.71875 10.50223 18.71242 4.48099 1 
+optimize branch lengths: -864.5569 ---> -864.5492 
+branch lengths are now:  0.2851885 0.1467606 0.0005119486 0.5180284 0.183644 0.4286208 0.08686367 0.2410859 6.049877 2.952433 7.951928 0.8703123 
+
+ Round,  19 
+opw =  
+optimize s and Grantham weights:  -864.5492 ---> -864.5492 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.5492 ---> -864.5492 
+Q is now:  4.011043 18.69255 10.50484 18.70603 4.489539 1 
+optimize branch lengths: -864.5492 ---> -864.5377 
+branch lengths are now:  0.2851884 0.14676 0.0009377053 0.5180283 0.1836443 0.4286209 0.08686386 0.2412187 6.049877 2.95403 7.95143 0.8703125 
+
+ Round,  20 
+opw =  
+optimize s and Grantham weights:  -864.5377 ---> -864.5377 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.5377 ---> -864.5377 
+Q is now:  4.006106 18.6887 10.49849 18.71643 4.488857 1 
+optimize branch lengths: -864.5377 ---> -864.5176 
+branch lengths are now:  0.2851884 0.14676 0.001717503 0.518028 0.1836446 0.4286208 0.08686425 0.2414518 6.049875 2.956667 7.950651 0.8702962 
+
+ Round,  21 
+opw =  
+optimize s and Grantham weights:  -864.5176 ---> -864.5176 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.5176 ---> -864.5176 
+Q is now:  4.004023 18.67054 10.50918 18.72103 4.490249 1 
+optimize branch lengths: -864.5176 ---> -864.4832 
+branch lengths are now:  0.2851822 0.1459215 0.003145594 0.5197754 0.1836399 0.4285668 0.08686456 0.2418363 6.04794 2.960875 7.948515 0.8698831 
+
+ Round,  22 
+opw =  
+optimize s and Grantham weights:  -864.4832 ---> -864.4832 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.4832 ---> -864.4832 
+Q is now:  4.003163 18.64152 10.51887 18.74996 4.487026 1 
+optimize branch lengths: -864.4832 ---> -864.4257 
+branch lengths are now:  0.2776959 0.1454422 0.005733788 0.5275203 0.1833645 0.4286164 0.08790429 0.2421224 6.047644 2.961926 7.963207 0.8675112 
+
+ Round,  23 
+opw =  
+optimize s and Grantham weights:  -864.4257 ---> -864.4257 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.4257 ---> -864.4256 
+Q is now:  4.009815 18.62885 10.54494 18.8302 4.497439 1 
+optimize branch lengths: -864.4256 ---> -864.3414 
+branch lengths are now:  0.2748185 0.1447504 0.01051529 0.5268346 0.179968 0.4323717 0.08790677 0.2385626 6.052651 2.965877 7.977319 0.869074 
+
+ Round,  24 
+opw =  
+optimize s and Grantham weights:  -864.3414 ---> -864.3414 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.3414 ---> -864.3412 
+Q is now:  4.008987 18.58148 10.56905 18.88981 4.495676 1 
+optimize branch lengths: -864.3412 ---> -864.2377 
+branch lengths are now:  0.2659188 0.1408644 0.01921573 0.5260234 0.1813675 0.4219063 0.08924365 0.2351217 6.11645 2.979516 7.989466 0.8489461 
+
+ Round,  25 
+opw =  
+optimize s and Grantham weights:  -864.2377 ---> -864.2377 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.2377 ---> -864.2376 
+Q is now:  4.003746 18.56287 10.56037 18.9397 4.474607 1 
+optimize branch lengths: -864.2376 ---> -864.1583 
+branch lengths are now:  0.2539344 0.1426667 0.03501512 0.510992 0.1816529 0.4281015 0.09647951 0.2357417 6.116638 2.841226 8.006381 0.8571036 
+
+ Round,  26 
+opw =  
+optimize s and Grantham weights:  -864.1583 ---> -864.1583 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1583 ---> -864.1578 
+Q is now:  4.018418 18.37162 10.48881 18.84954 4.443097 1 
+optimize branch lengths: -864.1578 ---> -864.1452 
+branch lengths are now:  0.2529378 0.1356322 0.03545789 0.5233034 0.1797053 0.4193692 0.09730817 0.235389 6.192005 2.772061 7.975956 0.8495596 
+
+ Round,  27 
+opw =  
+optimize s and Grantham weights:  -864.1452 ---> -864.1452 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1452 ---> -864.1451 
+Q is now:  4.026569 18.37931 10.46868 18.80016 4.433845 1 
+optimize branch lengths: -864.1451 ---> -864.126 
+branch lengths are now:  0.2543118 0.1322298 0.03624966 0.5226763 0.1791842 0.4208805 0.09758687 0.2356901 6.129071 2.780704 8.04148 0.8829009 
+
+ Round,  28 
+opw =  
+optimize s and Grantham weights:  -864.126 ---> -864.126 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.126 ---> -864.1258 
+Q is now:  4.037803 18.31256 10.47005 18.89037 4.433529 1 
+optimize branch lengths: -864.1258 ---> -864.1214 
+branch lengths are now:  0.2557864 0.130431 0.036498 0.5220903 0.1756537 0.4225608 0.09761735 0.2347147 6.171453 2.786149 8.001867 0.8792687 
+
+ Round,  29 
+opw =  
+optimize s and Grantham weights:  -864.1214 ---> -864.1214 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1214 ---> -864.1213 
+Q is now:  4.029372 18.32223 10.46432 18.86133 4.428135 1 
+optimize branch lengths: -864.1213 ---> -864.1135 
+branch lengths are now:  0.2554901 0.1292986 0.03659632 0.521481 0.1759769 0.4268775 0.09922311 0.2308985 6.119914 2.863268 8.145183 0.8687659 
+
+ Round,  30 
+opw =  
+optimize s and Grantham weights:  -864.1135 ---> -864.1135 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1135 ---> -864.1131 
+Q is now:  4.01358 18.43387 10.5355 19.01586 4.436599 1 
+optimize branch lengths: -864.1131 ---> -864.1114 
+branch lengths are now:  0.2578036 0.1284514 0.03659632 0.521481 0.1759769 0.4268775 0.09922311 0.2308985 6.119914 2.873063 8.12275 0.8687659 
+
+ Round,  31 
+opw =  
+optimize s and Grantham weights:  -864.1114 ---> -864.1114 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1114 ---> -864.1114 
+Q is now:  4.016999 18.42803 10.54043 19.01708 4.437685 1 
+optimize branch lengths: -864.1114 ---> -864.1088 
+branch lengths are now:  0.2584641 0.1274231 0.03704302 0.5175469 0.1757884 0.4275147 0.09925441 0.2311772 6.118145 2.875191 8.070422 0.8664823 
+
+ Round,  32 
+opw =  
+optimize s and Grantham weights:  -864.1088 ---> -864.1088 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1088 ---> -864.1088 
+Q is now:  4.028232 18.44403 10.54094 19.01206 4.451557 1 
+optimize branch lengths: -864.1088 ---> -864.1076 
+branch lengths are now:  0.2590216 0.126402 0.03749147 0.5138506 0.1755939 0.4282816 0.09928871 0.2314689 6.116373 2.87642 8.022745 0.8643566 
+
+ Round,  33 
+opw =  
+optimize s and Grantham weights:  -864.1076 ---> -864.1076 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1076 ---> -864.1076 
+Q is now:  4.034536 18.44514 10.5334 18.98313 4.458941 1 
+optimize branch lengths: -864.1076 ---> -864.1072 
+branch lengths are now:  0.2611695 0.1255448 0.03749147 0.5138506 0.1755939 0.4282816 0.09928871 0.2314689 6.116373 2.886197 7.999719 0.8643566 
+
+ Round,  34 
+opw =  
+optimize s and Grantham weights:  -864.1072 ---> -864.1072 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1072 ---> -864.1072 
+Q is now:  4.034629 18.44046 10.53188 18.97303 4.456286 1 
+optimize branch lengths: -864.1072 ---> -864.1054 
+branch lengths are now:  0.2587841 0.1254592 0.03728827 0.513205 0.1797956 0.4280103 0.09929766 0.2326308 6.118578 2.886038 7.99004 0.863999 
+
+ Round,  35 
+opw =  
+optimize s and Grantham weights:  -864.1054 ---> -864.1054 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1054 ---> -864.1054 
+Q is now:  4.033448 18.44591 10.53745 18.97166 4.457747 1 
+optimize branch lengths: -864.1054 ---> -864.1048 
+branch lengths are now:  0.2609621 0.1243626 0.03787829 0.5123772 0.1778596 0.4274637 0.09941076 0.2336334 6.092583 2.883644 7.993766 0.8638288 
+
+ Round,  36 
+opw =  
+optimize s and Grantham weights:  -864.1048 ---> -864.1048 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1048 ---> -864.1047 
+Q is now:  4.038161 18.40064 10.51195 18.94658 4.455038 1 
+optimize branch lengths: -864.1047 ---> -864.1042 
+branch lengths are now:  0.2608471 0.1243294 0.03847167 0.5122863 0.1793772 0.4232003 0.09930711 0.2341503 6.066127 2.883671 7.994261 0.8639049 
+
+ Round,  37 
+opw =  
+optimize s and Grantham weights:  -864.1042 ---> -864.1042 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1042 ---> -864.1042 
+Q is now:  4.039091 18.36887 10.49884 18.88936 4.455564 1 
+optimize branch lengths: -864.1042 ---> -864.1037 
+branch lengths are now:  0.2608445 0.1243285 0.03847149 0.5123345 0.1793761 0.4229568 0.09989623 0.2341519 6.066129 2.891757 7.979826 0.8641957 
+
+ Round,  38 
+opw =  
+optimize s and Grantham weights:  -864.1037 ---> -864.1037 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1037 ---> -864.1037 
+Q is now:  4.038807 18.36976 10.50095 18.88568 4.454162 1 
+optimize branch lengths: -864.1037 ---> -864.1021 
+branch lengths are now:  0.2599739 0.1239042 0.03820319 0.5111976 0.182068 0.4240331 0.09998597 0.2328169 6.06311 2.900277 7.992702 0.8663582 
+
+ Round,  39 
+opw =  
+optimize s and Grantham weights:  -864.1021 ---> -864.1021 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1021 ---> -864.1021 
+Q is now:  4.034847 18.37115 10.50371 18.8902 4.455185 1 
+optimize branch lengths: -864.1021 ---> -864.1018 
+branch lengths are now:  0.2599533 0.1238859 0.03839519 0.5111857 0.1799908 0.4239905 0.09998415 0.2328161 6.061464 2.900258 7.992108 0.8661815 
+
+ Round,  40 
+opw =  
+optimize s and Grantham weights:  -864.1018 ---> -864.1018 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.1018 ---> -864.1018 
+Q is now:  4.036321 18.36961 10.49477 18.88974 4.451046 1 
+optimize branch lengths: -864.1018 ---> -864.0977 
+branch lengths are now:  0.2569836 0.1225813 0.03841899 0.5132849 0.1805337 0.4242742 0.09994997 0.2323813 6.067148 2.900838 7.984294 0.8723928 
+
+ Round,  41 
+opw =  
+optimize s and Grantham weights:  -864.0977 ---> -864.0977 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.0977 ---> -864.0977 
+Q is now:  4.037886 18.3661 10.49486 18.88682 4.453947 1 
+optimize branch lengths: -864.0977 ---> -864.0947 
+branch lengths are now:  0.2558473 0.1202025 0.03862638 0.5132702 0.1783712 0.4246289 0.09994653 0.2323263 6.06605 2.918401 8.001349 0.8715599 
+
+ Round,  42 
+opw =  
+optimize s and Grantham weights:  -864.0947 ---> -864.0947 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.0947 ---> -864.0946 
+Q is now:  4.039356 18.36356 10.49729 18.92181 4.448235 1 
+optimize branch lengths: -864.0946 ---> -864.0933 
+branch lengths are now:  0.2562883 0.1178949 0.03862874 0.5133333 0.178389 0.4248421 0.09995346 0.2323294 6.066756 2.918637 8.00324 0.8756417 
+
+ Round,  43 
+opw =  
+optimize s and Grantham weights:  -864.0933 ---> -864.0933 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.0933 ---> -864.0933 
+Q is now:  4.039037 18.35911 10.4932 18.92701 4.448493 1 
+optimize branch lengths: -864.0933 ---> -864.0924 
+branch lengths are now:  0.2515283 0.1179148 0.03862877 0.514679 0.1783901 0.4248614 0.0999536 0.2323337 6.066779 2.918639 8.00345 0.8756545 
+
+ Round,  44 
+opw =  
+optimize s and Grantham weights:  -864.0924 ---> -864.0924 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.0924 ---> -864.0924 
+Q is now:  4.044306 18.36261 10.48885 18.93907 4.446685 1 
+optimize branch lengths: -864.0924 ---> -864.0908 
+branch lengths are now:  0.2524342 0.1163577 0.0397753 0.5146055 0.1797664 0.4243841 0.0998183 0.2324104 6.055951 2.926322 8.005939 0.8746447 
+
+ Round,  45 
+opw =  
+optimize s and Grantham weights:  -864.0908 ---> -864.0908 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.0908 ---> -864.0908 
+Q is now:  4.044306 18.36261 10.48885 18.93907 4.446685 1 
+optimize branch lengths: -864.0908 ---> -864.0905 
+branch lengths are now:  0.2548812 0.1150493 0.03993796 0.5143958 0.1777087 0.4243447 0.1000352 0.2313439 6.056081 2.914718 8.020115 0.8756822 
+
+ Round,  46 
+opw =  
+optimize s and Grantham weights:  -864.0905 ---> -864.0905 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.0905 ---> -864.0905 
+Q is now:  4.044306 18.36261 10.48885 18.93907 4.446685 1 
+optimize branch lengths: -864.0905 ---> -864.0902 
+branch lengths are now:  0.2548792 0.11505 0.03993842 0.5145825 0.1777091 0.4241261 0.1006464 0.2313464 6.056084 2.920857 8.007003 0.8759498 
+
+ Round,  47 
+opw =  
+optimize s and Grantham weights:  -864.0902 ---> -864.0902 
+s, beta and gamma are now:  1.486043 0.1327872 0.0009136954 
+optimize rate matrix:  -864.0902 ---> -864.0902 
+Q is now:  4.044306 18.36261 10.48885 18.93907 4.446685 1 
+optimize branch lengths: -864.0902 ---> -864.0902 
+branch lengths are now:  0.2548792 0.11505 0.03993842 0.5145825 0.1777091 0.4241261 0.1006464 0.2313464 6.056084 2.920857 8.007003 0.8759498 
+>  res_op$ll$loglik 
+[1] -864.0902
+>  save.image(file="gene7.RData",compress=TRUE) 
+> 
+> proc.time()
+    user   system  elapsed 
+3187.532    3.767 3193.523 
