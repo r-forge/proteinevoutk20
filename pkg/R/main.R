@@ -579,15 +579,59 @@ getPm <- function(el, Q, g){
   return(res)
 }
 
+ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
+                    bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+  ##If the given tree is not rooted and binary, then throw error and exit
+  if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
+  m = 20
+  ##if the base frequencies are not specified, do a uniform distribution
+  if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
+  GM1 = GM_cpv(GM_CPV,alpha,beta,gamma)
+  mumat = aa_MuMat_form(vec=Q)
+  Qmat = mat_gen_indep(optimal,s,GM1,MuMat=mumat,C,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
+  Qmat = scaleQ(Qmat,bf)
+  
+  tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
+  edge = tree$edge #edges
+  nNodes = max(edge) #number of nodes in the tree (including tips)
+  probvec = matrix(NA,nNodes,m) #probability of gettting different states at nodes that evolve to the current sequences
+  parent <- as.integer(edge[, 1]) #parents of the edges
+  child <- as.integer(edge[, 2]) #children of the edges
+  root <- as.integer(parent[!match(parent, child, 0)][1])  
+  tip <- as.integer(child[!match(child,parent,0)])
+  
+  init.tip <- function(x){ #initiate the vector for the tips, 1 for the tip state, 0 otherwise
+    vec <- rep(0,m)
+    vec[data[x]] <- 1
+    vec
+  }
+  probvec[1:length(tip),] <- t(sapply(1:length(tip),init.tip)) #all tips
+  tl = tree$edge.length #lengths of the edges
+  P <- getPm(tl,Qmat,1)
+  for(i in 1:tree$Nnode){ #for each interior node calculate the probability vector of observing 1 of 20 states
+    from = parent[2*i] #parents
+    to = child[(2*i-1):(2*i)] #direct descendents
+    #t_left = tl[2*i-1] #left branch length
+    #t_right = tl[2*i] #right branch length
+    #v.left <- expm.m(Q*t_left) #probabilities of transition from one state to another after time t
+    #v.right <- expm.m(Q*t_right)
+    v.left <- P[[1,2*i-1]]
+    v.right <- P[[1,2*i]]
+    probvec[from,] <- as.vector((v.left%*%probvec[to[1],])*(v.right%*%probvec[to[2],])) #pruning, vector form
+    check.sum <- sum(probvec[from,])
+    if(check.sum==0) #probability is very very low
+      warning("numerical overflow",immediate.=TRUE)
+  }
+  return(probvec[root,])
+  #return(list(ll=max(probvec[root,]),root=which.max(probvec[root,]))) #with the corresponding root returned 
+  #return(max(probvec[root,])) #just the value
+}
 # Here Q gets scaled in the function, so the given matrix doesn't have to be scaled
 # returns loglikelihood values for all distinct patterns in the data, matrix with 1 column (or a column vector)
-ll3m <- function (dat1, tree, bf = rep(1/20,20), rootbf = NULL,Q, g = 1) 
+ll3m <- function (dat1, tree, bf = rep(1/20,20),Q, g = 1) 
 {
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise")
     tree <- reorderPruning(tree)
-  if(is.null(rootbf))
-    rootbf = bf
-  rootbf = rootbf/sum(rootbf)
   q = length(tree$tip.label)
   node <- tree$edge[, 1]
   edge <- tree$edge[, 2]
@@ -606,11 +650,13 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20), rootbf = NULL,Q, g = 1)
   contrast = attr(dat1, "contrast")
   nco = as.integer(dim(contrast)[1])
   res <- .Call("LogLik4", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
-  result = res[[2]][[1]] + log(res[[1]][[1]] %*% rootbf)     
-  result
+  result = res[[2]][[1]] + log(res[[1]][[1]] %*% bf)   
+  #result1 = res[[2]][[1]] + log(res[[1]][[1]])
+  return(result)
+  
 }
 # loglikelihood given optimal amino acids at each site. 
-llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),rootbf=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
   nr = attr(data,"nr") #number of different sites
@@ -620,7 +666,7 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),rootbf=NULL,C=2,Phi=0.5,
   optimal_aa = "" #is optimal aa given or not?
   ## calculate the loglikelihood for each different site pattern (m), with every amino acid as optimal
   ## arrange them in a matrix of dimension m * 20
-  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,rootbf=rootbf,g=1)
+  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,g=1)
 #   for(i in 1:20){ #when optimal aa is i
 #     llopi = ll3m(data,tree,bf=bf,Q=Qall[[i]]) #loglikelihood when optimal amino acid is i
 #     result = cbind(result,llopi)
@@ -649,10 +695,10 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),rootbf=NULL,C=2,Phi=0.5,
 ## For all the distinct sites (m), find loglikelihood, result is m * 20 matrix
 ## each column stores the loglikelihods when the corresponding amino acid is optimal 
 ## maximizing rule for optimal aa
-llaam <- function(tree,data,Qall,bf=rep(1/20,20),rootbf=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+llaam <- function(tree,data,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
-  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,rootbf=rootbf,g=1)
+  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,g=1)
   opaa = apply(result,1,which.max)
   sitelik = apply(result,1,max)
   loglik = sum(weight * sitelik)
@@ -678,12 +724,12 @@ llaaw_grad <- function(opw,weight,llmat){
 }
 # assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
 # if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
-llaaw <- function(tree,data,Qall,opw=NULL,bf=rep(1/20,20),rootbf=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+llaaw <- function(tree,data,Qall,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
   nr = attr(data,"nr")
   opaa = NULL
-  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,rootbf=rootbf,g=1)
+  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,g=1)
 
   if(!is.null(opw)){
     opw = opw/sum(opw)
@@ -704,7 +750,7 @@ llaaw <- function(tree,data,Qall,opw=NULL,bf=rep(1/20,20),rootbf=NULL,C=2,Phi=0.
 ## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
 ## nucleotide transition rate matrix of length 6
 ## this one uses expm for matrix exponentiation
-mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,rootbf=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -724,9 +770,9 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
   }
   Qall = QAllaa(s,dismat,mumat,C,Phi,q,Ne)
   if(!is.null(opaa))
-    ll = llop(data,tree,op=opaa,bf=bfaa,rootbf=rootbf,Qall=Qall,C=C,Phi=Phi,q=q,Ne=Ne)
+    ll = llop(data,tree,op=opaa,bf=bfaa,Qall=Qall,C=C,Phi=Phi,q=q,Ne=Ne)
   else 
-    ll = llaaw(tree,data,Qall,opw,bfaa,rootbf=rootbf,C,Phi,q,Ne)
+    ll = llaaw(tree,data,Qall,opw,bfaa,C,Phi,q,Ne)
   result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,dismat=dismat,mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,call=call)
   class(result) = "mllm"
   return(result)
@@ -734,7 +780,7 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
 #0.0000001000 0.0018676483 0.0003990333
 #more flexibility on what is provided, good for avoiding unnecessary computations
 mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
-                  opaa=NULL,opw=NULL,bfaa=NULL,rootbf=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+                  opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -761,11 +807,11 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall
     Qall = QAllaa1(fixmatall,mumat,Ne=Ne)
   }
   if(!is.null(opaa))
-    ll = llop(data,tree,op=opaa,bf=bfaa,rootbf=rootbf,Qall=Qall,C=C,Phi=Phi,q=q,Ne=Ne)
+    ll = llop(data,tree,op=opaa,bf=bfaa,Qall=Qall,C=C,Phi=Phi,q=q,Ne=Ne)
   else 
-    ll = llaaw(tree,data,Qall,opw,bfaa,rootbf=rootbf,C,Phi,q,Ne)
+    ll = llaaw(tree,data,Qall,opw,bfaa,C,Phi,q,Ne)
   result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,dismat=dismat,fixmatall=fixmatall,Qall=Qall,
-                mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,rootbf=rootbf,call=call)
+                mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,call=call)
   class(result) = "mllm"
   return(result)
 }
