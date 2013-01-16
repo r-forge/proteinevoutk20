@@ -578,7 +578,10 @@ getPm <- function(el, Q, g){
   }
   return(res)
 }
-
+##################################################################
+##   downpass/pruning method to find probabilities of finding each
+##   state at root(ancestral) node. only for one site.
+##################################################################
 ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
                     bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   ##If the given tree is not rooted and binary, then throw error and exit
@@ -611,10 +614,6 @@ ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
   for(i in 1:tree$Nnode){ #for each interior node calculate the probability vector of observing 1 of 20 states
     from = parent[2*i] #parents
     to = child[(2*i-1):(2*i)] #direct descendents
-    #t_left = tl[2*i-1] #left branch length
-    #t_right = tl[2*i] #right branch length
-    #v.left <- expm.m(Q*t_left) #probabilities of transition from one state to another after time t
-    #v.right <- expm.m(Q*t_right)
     v.left <- P[[1,2*i-1]]
     v.right <- P[[1,2*i]]
     probvec[from,] <- as.vector((v.left%*%probvec[to[1],])*(v.right%*%probvec[to[2],])) #pruning, vector form
@@ -626,6 +625,7 @@ ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
   #return(list(ll=max(probvec[root,]),root=which.max(probvec[root,]))) #with the corresponding root returned 
   #return(max(probvec[root,])) #just the value
 }
+####################################################################################################################################
 # Here Q gets scaled in the function, so the given matrix doesn't have to be scaled
 # returns loglikelihood values for all distinct patterns in the data, matrix with 1 column (or a column vector)
 ll3m <- function (dat1, tree, bf = rep(1/20,20),Q, g = 1) 
