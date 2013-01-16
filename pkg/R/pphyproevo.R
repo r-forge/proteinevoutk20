@@ -322,7 +322,7 @@ mat_gen_indep <- function(aa_op,s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=1.36e7){
 ######################################################
 ##likelihood function for 1 site
 ll_site <- function(tree,data,optimal,s,MuMat,alpha=al, beta=be, gamma=ga,
-                    bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=1.36e7){
+                    bf=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
     ##If the given tree is not rooted and binary, then throw error and exit
     if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
     m = 20
@@ -348,13 +348,16 @@ ll_site <- function(tree,data,optimal,s,MuMat,alpha=al, beta=be, gamma=ga,
     }
     probvec[1:length(tip),] <- t(sapply(1:length(tip),init.tip)) #all tips
     tl = tree$edge.length #lengths of the edges
+    P <- getPm(tl,Q,g)
     for(i in 1:tree$Nnode){ #for each interior node calculate the probability vector of observing 1 of 20 states
         from = parent[2*i] #parents
         to = child[(2*i-1):(2*i)] #direct descendents
-        t_left = tl[2*i-1] #left branch length
-        t_right = tl[2*i] #right branch length
-        v.left <- expm.m(Q*t_left) #probabilities of transition from one state to another after time t
-        v.right <- expm.m(Q*t_right)
+        #t_left = tl[2*i-1] #left branch length
+        #t_right = tl[2*i] #right branch length
+        #v.left <- expm.m(Q*t_left) #probabilities of transition from one state to another after time t
+        #v.right <- expm.m(Q*t_right)
+        v.left <- P[[1,2*i-1]]
+        v.right <- P[[1,2*i]]
         probvec[from,] <- as.vector((v.left%*%probvec[to[1],])*(v.right%*%probvec[to[2],])) #pruning, vector form
         check.sum <- sum(probvec[from,])
         if(check.sum==0) #probability is very very low
