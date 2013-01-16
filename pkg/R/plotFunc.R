@@ -15,7 +15,7 @@ Col <- rev(heat.colors(20))
 ##qgraph the substitution rate matrix, given the optimal aa, s, and expoent in Ne and the desired layout
 ##color represents the funtionality
 ##return the qgraph object, with information on layout and etc.
-aa_plot <- function(op,s,beta,gamma,bfaa,Q,layout="spring"){
+aa_plot <- function(op=1,s=1,beta=be,gamma=ga,bfaa=rep(1/20,20),Q=NU_VEC,layout="spring"){
   GM <- GM_cpv(GM_CPV,alpha=al,beta=beta,gamma=gamma)
   mumat = aa_MuMat_form(Q)
   ftny <- sapply(1:20,Ftny_protein,protein_op=op,s=s,DisMat=GM)
