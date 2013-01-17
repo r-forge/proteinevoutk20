@@ -555,7 +555,7 @@ QAllaa <- function(s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=5e6){
   res = lapply(1:20,function(i) {mat_gen_indep(i,s,DisMat, MuMat,C, Phi, q, Ne)})
   return(as.matrix(res))
 }
-QAllaa1 <- function(fixall,MuMat,Ne){
+QAllaa1 <- function(fixall,MuMat,Ne=5e6){
   res <- lapply(1:20, function(x) Qmat(fixall[[x,1]],MuMat,Ne=Ne))
   return(as.matrix(res))
 }
@@ -667,6 +667,8 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e
   ## calculate the loglikelihood for each different site pattern (m), with every amino acid as optimal
   ## arrange them in a matrix of dimension m * 20
   result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,g=1)
+  if(nr==1)
+    result = matrix(result,nrow=1,ncol=20)
 #   for(i in 1:20){ #when optimal aa is i
 #     llopi = ll3m(data,tree,bf=bf,Q=Qall[[i]]) #loglikelihood when optimal amino acid is i
 #     result = cbind(result,llopi)

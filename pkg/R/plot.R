@@ -168,7 +168,7 @@ beta = res_op$GMweights[2]
 gamma = res_op$GMweights[3]
 dismat = GM_cpv(GM_CPV,al,beta,gamma)
 mumat = aa_MuMat_form(res_op$Q)
-plot.sim <- function(s=1,t=10,root=root,opaa=opaa,beta,gamma,func=TRUE,dist=TRUE){
+plot.sim <- function(s=1,t=10,root=root,opaa=opaa,beta,gamma,bfaa=bfaa,func=TRUE,dist=TRUE, add=FALSE){
    dismat = GM_cpv(GM_CPV,al,beta,gamma)
    mumat = aa_MuMat_form(res_op$Q)
   sim <- simulation(root,opaa,t=t,s=s,DisMat=dismat,MuMat=mumat,bfaa=bfaa) #simulation
@@ -179,9 +179,9 @@ plot.sim <- function(s=1,t=10,root=root,opaa=opaa,beta,gamma,func=TRUE,dist=TRUE
   ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
   disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
   if(func) #plot functionality vs time
-    plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i")
+    plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
   if(dist) #plot distance vs time
-    plot(disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i")
+    plot(disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
   #return(as.numeric(tail(sim,1)[1:l])) #the sequence at the end of simulation
    return(list(sim=sim,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
 }
