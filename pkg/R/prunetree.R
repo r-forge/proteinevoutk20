@@ -73,6 +73,10 @@ abline(v=Ftny_protein(protein=gene7num[7,],protein_op=opaa,s=s,DisMat=dismat))
 for(i in 1:10){
   plot(simWag[[i]]$ftyfun,xlab="time",ylab="functionality",main="functionality",pch=20,xlim=c(0,brlen),xaxs="i")
 }
+
+for(i in 1:10){
+  plot(sim[[i]]$ftyfun,xlab="time",ylab="functionality",main="functionality",pch=20,xlim=c(0,brlen),xaxs="i")
+}
 ## simulation based on WAG model, and the plots of functionality along the path using the simulations
 plotWag <- function(t=brlen,protein,bf=bfaa,add=FALSE){
   sim <- simulationQ(protein=protein,t=t,Q=WagMat,bf=bf)
