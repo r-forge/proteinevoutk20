@@ -62,4 +62,91 @@
 # siteprob = siteprob[,indexp]
 # 
 # startsq <- apply(siteprob,2,sample,x=20,size=1,replace=TRUE)
+## Read the WAG matrix (lower triangular part)
+#WagMat <- scan("proteinevoutk20/pkg/Data/wag.txt")
+#Qwag <- mat_form_lowtriQ(Q=WagMat,bf=bfaa)
+ll_site_lowQ <- function(tree,data,Q,bf=rep(1/20,20),g=1){
+  ##If the given tree is not rooted and binary, then throw error and exit
+  if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
+  m = 20
+  ##if the base frequencies are not specified, do a uniform distribution
+  if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
+  Qmat <- mat_form_lowtriQ(Q,bf)
+  
+  tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
+  edge = tree$edge #edges
+  nNodes = max(edge) #number of nodes in the tree (including tips)
+  probvec = matrix(NA,nNodes,m) #probability of gettting different states at nodes that evolve to the current sequences
+  parent <- as.integer(edge[, 1]) #parents of the edges
+  child <- as.integer(edge[, 2]) #children of the edges
+  root <- as.integer(parent[!match(parent, child, 0)][1])  
+  tip <- as.integer(child[!match(child,parent,0)])
+  
+  init.tip <- function(x){ #initiate the vector for the tips, 1 for the tip state, 0 otherwise
+    vec <- rep(0,m)
+    vec[data[x]] <- 1
+    vec
+  }
+  probvec[1:length(tip),] <- t(sapply(1:length(tip),init.tip)) #all tips
+  tl = tree$edge.length #lengths of the edges
+  P <- getPm(tl,Qmat,1)
+  for(i in 1:tree$Nnode){ #for each interior node calculate the probability vector of observing 1 of 20 states
+    from = parent[2*i] #parents
+    to = child[(2*i-1):(2*i)] #direct descendents
+    v.left <- P[[1,2*i-1]]
+    v.right <- P[[1,2*i]]
+    probvec[from,] <- as.vector((v.left%*%probvec[to[1],])*(v.right%*%probvec[to[2],])) #pruning, vector form
+    check.sum <- sum(probvec[from,])
+    if(check.sum==0) #probability is very very low
+      warning("numerical overflow",immediate.=TRUE)
+  }
+  return(probvec[root,])
+  #return(list(ll=max(probvec[root,]),root=which.max(probvec[root,]))) #with the corresponding root returned 
+  #return(max(probvec[root,])) #just the value
+}
 
+simulationQ <- function(protein,t,Q,bf=rep(1/20,20)){
+  Qmat <- mat_form_lowtriQ(Q,bf)
+  l <- length(protein) #number of sites
+  t_now <- 0 #time until the current step of simulation
+  path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
+  colnames(path) <- colnames(path,do.NULL = FALSE, prefix = "Site.") #column names
+  ##last two columns in the paths, recording Time up to this point and the waiting time at the current state
+  colnames(path)[l+1] <- "Time Now"
+  colnames(path)[l+2] <- "Waiting Time"
+  m = 20
+  while(t_now < t){ #when current time is less than t
+#     vec_list = sapply(1:l,function(i) {matall[[protein_op[i]]][protein[i],]},simplify="array")
+#     vec_list[vec_list < 0] = 0
+#     rates<- c(vec_list) #moving rates of a protein to its neighbors
+    rates <- Qmat[protein,]
+    rates <- c(t(rates)) #moving rates of a protein to its neighbors
+    rates[rates < 0] <- 0
+    lambda <- sum(rates) #total rates of moving (reaction)
+    t_wait <- rexp(1,lambda) #waiting time, coming from exponential distribution with rate lambda
+    t_now <- t_now + t_wait # current time after the first transition
+    ##determine where the first transition is
+    if(t_now < t){
+      index <- sample(1:length(rates),1,replace=T,rates) #index of the protein it moves to
+      pos <- (index-1) %/% m + 1 #index of the site that changes
+      rmd <- (index-1) %% m + 1 # the amino acid that site changes to
+      protein[pos] <- seq(1:m)[rmd] #new protein
+      path <- rbind(path,c(protein,t_now,t_wait)) #record this moving step
+    }
+    else{
+      path <- rbind(path,c(protein,t,NA)) #record this moving step
+    }
+  }
+  ##shift the third column up one step so that the waiting time is the time
+  ## spent in the state in the first column
+  path[,l+2] <- c(path[-1,l+2],NA)  
+  return(path)
+  #return(list(path=path,start_seq=protein,op_seq=protein_op, t=t))
+}
+plotWag <- function(t=brlen){
+  root<- sapply(1:length(index),function(x) sample(20,1,replace=TRUE,prob=siteprop[,x]))
+  simWag <- simulationQ(protein=root,t=t,Q=WagMat,bf=bfaa)
+  ftyWag <- apply(simWag[,1:144],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)
+  ftyfunWag <- stepfun(simWag[-1,144+1],ftyWag,f=0,right=FALSE)
+  plot(ftyfunWag,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,brlen),xaxs="i")
+}

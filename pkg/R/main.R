@@ -114,7 +114,7 @@ names(cdlist) <- AA
 ## type = "num" -- integers ; "AA" -- amino acid names; "phyDat" --- phyDat data type used in phangorn
 conv <- function(filename,type="num"){
   levels <- AA #amino acids in alphabeticla order (not the single letter names, the 3-letter names)
-  data <- read.fasta(file=filename) #read fasta file including nucleotide data
+  data <- seqinr::read.fasta(file=filename) #read fasta file including nucleotide data
   dna.to.aa <- function(x){ #given the order of the data, convert nucleotide data to amino acid data
     aas <- translate(seq=data[[x]])
     if(type=="num"){
@@ -589,9 +589,9 @@ ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
   m = 20
   ##if the base frequencies are not specified, do a uniform distribution
   if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
-  GM1 = GM_cpv(GM_CPV,alpha,beta,gamma)
+  GM = GM_cpv(GM_CPV,alpha,beta,gamma)
   mumat = aa_MuMat_form(vec=Q)
-  Qmat = mat_gen_indep(optimal,s,GM1,MuMat=mumat,C,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
+  Qmat = mat_gen_indep(optimal,s,DisMat=GM,MuMat=mumat,C,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
   Qmat = scaleQ(Qmat,bf)
   
   tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
@@ -621,7 +621,7 @@ ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
     if(check.sum==0) #probability is very very low
       warning("numerical overflow",immediate.=TRUE)
   }
-  return(probvec[root,])
+  return(as.numeric(probvec[root,]%*%bfaa))
   #return(list(ll=max(probvec[root,]),root=which.max(probvec[root,]))) #with the corresponding root returned 
   #return(max(probvec[root,])) #just the value
 }

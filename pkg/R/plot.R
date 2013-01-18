@@ -183,7 +183,7 @@ plot.sim <- function(s=1,t=10,root=root,opaa=opaa,beta,gamma,bfaa=bfaa,func=TRUE
   if(dist) #plot distance vs time
     plot(disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
   #return(as.numeric(tail(sim,1)[1:l])) #the sequence at the end of simulation
-   return(list(sim=sim,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
+   return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
 }
 sim <- plot.sim(s=s,t=br_max[genenum],root=root,opaa=opaa,beta,gamma,func=TRUE,dist=TRUE)
 
