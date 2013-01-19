@@ -57,20 +57,33 @@ for(i in 1:nsim){
   roots[[i]] <- root
   sim[[i]] <- plot.sim(s=s,t=brlen,root=root,opaa=opaa,beta=beta,gamma=gamma,bfaa=bfaa,dist=FALSE,add=T)
 }
+##functionalities based on the parameters estimated earlier
 start.ftny.vec <-  sapply(1:nsim,function(i) head(sim[[i]]$fty,1))
 end.ftny.vec <- sapply(1:nsim,function(i) tail(sim[[i]]$fty,1))
-plot.density(density(end.ftny.vec))
-abline(v=Ftny_protein(protein=gene7num[7,],protein_op=opaa,s=s,DisMat=dismat))
+plot.density(density(end.ftny.vec),xlab="Functionality",ylab="density",main="Our model")
+abline(v=Ftny_protein(protein=gene7num[6,],protein_op=opaa,s=s,DisMat=dismat))
+##Grantham distances from optimal aa's
+end.dis.vec <- sapply(1:nsim,function(x) mean(pchem_d(protein1=as.numeric(tail(sim[[x]]$sim[,1:length(index)],1)),protein2=opaa,DisMat=GM)))
+plot.density(density(end.dis.vec),xlab="Avg Distance from optima",ylab="density",main="Our model")
+##Grantham distances from observed sequence
+end.dis.vec <- sapply(1:nsim,function(x) mean(pchem_d(protein1=as.numeric(tail(sim[[x]]$sim[,1:length(index)],1)),protein2=gene7num[6,],DisMat=GM)))
+plot.density(density(end.dis.vec),xlab="Avg Distance from observed seq",ylab="density",main="Our model")
 
 simWag <- vector(mode="list",length=nsim)
 for(i in 1:nsim){
   simWag[[i]] <- plotWag(protein=roots[[i]],t=brlen,bf=bfaa,add=TRUE)
 }
 end.ftny.vec.wag <- sapply(1:nsim,function(i) tail(simWag[[i]]$fty,1))
-plot.density(density(end.ftny.vec.wag))
-abline(v=Ftny_protein(protein=gene7num[7,],protein_op=opaa,s=s,DisMat=dismat))
+plot.density(density(end.ftny.vec.wag),xlab="Functionality",ylab="density",main="WAG model")
+abline(v=Ftny_protein(protein=gene7num[6,],protein_op=opaa,s=s,DisMat=dismat))
+end.dis.vec.wag <- sapply(1:nsim,function(x) mean(pchem_d(protein1=as.numeric(tail(simWag[[x]]$sim[,1:length(index)],1)),protein2=opaa,DisMat=GM)))
+plot.density(density(end.dis.vec.wag),xlab="Avg Distance from optima",ylab="density",main="WAG model")
+##Grantham distances from observed sequence
+end.dis.vec.wag <- sapply(1:nsim,function(x) mean(pchem_d(protein1=as.numeric(tail(simWag[[x]]$sim[,1:length(index)],1)),protein2=gene7num[6,],DisMat=GM)))
+plot.density(density(end.dis.vec.wag),xlab="Avg Distance from observed seq",ylab="density",main="WAG model")
 
-for(i in 1:10){
+
+for(i in 1:9){
   plot(simWag[[i]]$ftyfun,xlab="time",ylab="functionality",main="functionality",pch=20,xlim=c(0,brlen),xaxs="i")
 }
 
@@ -86,7 +99,7 @@ plotWag <- function(t=brlen,protein,bf=bfaa,add=FALSE){
   dis <- apply(dis,2,sum)#sum of distances for all sites
   ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
   disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
-  plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
+  #plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
   return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
 }
 
