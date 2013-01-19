@@ -1,0 +1,12 @@
+#!/bin/bash                                                                       
+cur=`pwd`
+
+for (( i = 2; i <= 106; i++ ))
+do
+    cp prune1.R prune$i.R
+    sed -e 's/gene1/gene'$i'/g' prune$i.R > tmp$i.R
+    mv tmp$i.R prune$i.R
+    echo $i
+done
+
+exit 0
