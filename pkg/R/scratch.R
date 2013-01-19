@@ -63,7 +63,7 @@
 # 
 # startsq <- apply(siteprob,2,sample,x=20,size=1,replace=TRUE)
 ## Read the WAG matrix (lower triangular part)
-#WagMat <- scan("proteinevoutk20/pkg/Data/wag.txt")
+WagMat <- scan("~/proteinevoutk20/pkg/Data/wag.txt")
 #Qwag <- mat_form_lowtriQ(Q=WagMat,bf=bfaa)
 ll_site_lowQ <- function(tree,data,Q,bf=rep(1/20,20),g=1){
   ##If the given tree is not rooted and binary, then throw error and exit
@@ -116,9 +116,6 @@ simulationQ <- function(protein,t,Q,bf=rep(1/20,20)){
   colnames(path)[l+2] <- "Waiting Time"
   m = 20
   while(t_now < t){ #when current time is less than t
-#     vec_list = sapply(1:l,function(i) {matall[[protein_op[i]]][protein[i],]},simplify="array")
-#     vec_list[vec_list < 0] = 0
-#     rates<- c(vec_list) #moving rates of a protein to its neighbors
     rates <- Qmat[protein,]
     rates <- c(t(rates)) #moving rates of a protein to its neighbors
     rates[rates < 0] <- 0
@@ -141,12 +138,35 @@ simulationQ <- function(protein,t,Q,bf=rep(1/20,20)){
   ## spent in the state in the first column
   path[,l+2] <- c(path[-1,l+2],NA)  
   return(path)
-  #return(list(path=path,start_seq=protein,op_seq=protein_op, t=t))
 }
-plotWag <- function(t=brlen){
-  root<- sapply(1:length(index),function(x) sample(20,1,replace=TRUE,prob=siteprop[,x]))
-  simWag <- simulationQ(protein=root,t=t,Q=WagMat,bf=bfaa)
-  ftyWag <- apply(simWag[,1:144],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)
-  ftyfunWag <- stepfun(simWag[-1,144+1],ftyWag,f=0,right=FALSE)
-  plot(ftyfunWag,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,brlen),xaxs="i")
+
+## simulation based on WAG model, and the plots of functionality along the path using the simulations
+sim.Wag <- function(t=brlen,protein,bf=bfaa){
+  sim <- simulationQ(protein=protein,t=t,Q=WagMat,bf=bf)
+  l <- dim(sim)[2] - 2
+  fty <- apply(sim[,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
+  dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=opaa,DisMat=dismat)#distance from optimal amino acids
+  dis <- apply(dis,2,mean)#average distance for all sites
+  ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
+  disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
+  #plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
+  return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
+}
+
+sim.New <- function(s=1,t=10,root=root,opaa=opaa,beta,gamma,bfaa=bfaa){
+  dismat = GM_cpv(GM_CPV,al,beta,gamma)
+  mumat = aa_MuMat_form(res_op$Q)
+  sim <- simulation(root,opaa,t=t,s=s,DisMat=dismat,MuMat=mumat,bfaa=bfaa) #simulation
+  l <- dim(sim)[2] - 2
+  fty <- apply(sim[,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
+  dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=opaa,DisMat=dismat)#distance from optimal amino acids
+  dis <- apply(dis,2,mean)#average distance for all sites
+  ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
+  disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
+  #if(func) #plot functionality vs time
+    #plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
+  #if(dist) #plot distance vs time
+    #plot(disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
+  #return(as.numeric(tail(sim,1)[1:l])) #the sequence at the end of simulation
+  return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
 }
