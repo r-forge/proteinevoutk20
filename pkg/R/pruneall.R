@@ -62,6 +62,7 @@ for(i in 1:nsim){
   sim[[i]] <- sim.New(s=s,t=brlen,root=root,opaa=opaa,beta=beta,gamma=gamma,bfaa=bfaa)
   simWag[[i]] <- sim.Wag(t=brlen,protein=root,bf=bfaa,opaa=opaa,s=s,dismat=dismat)
 }
+
 ##################################################################################################
 ## analysis of the simulated data under both models
 ##################################################################################################
