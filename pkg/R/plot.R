@@ -205,3 +205,25 @@ plot(wsim[[1]]$ftyfun,xlab="time",ylab="functionality",ylim=c(0,1),main=paste("f
 plot(wsimWag[[1]]$ftyfun,xaxs="i",do.points=FALSE,xaxs="i",add=TRUE,col="red")
 plot(sim[[1]]$ftyfun,xaxs="i",do.points=FALSE,xaxs="i",add=TRUE)
 plot(simWag[[1]]$ftyfun,xaxs="i",do.points=FALSE,xaxs="i",add=TRUE,col="red")
+
+plot.func <- function(gene_num,count=3,margin=0.1){
+  #filename <- paste("~/BackupProEvo/Lab9/prunetree/gene",gene_num,".RData",sep="")
+  wfilename <- paste("~/BackupProEvo/Lab9/Wagprunetree/wgene",gene_num,".RData",sep="") #RData file with simulated data
+  #load(filename)
+  load(wfilename)
+  obs.fty <- Ftny_protein(protein=datanum[6,],protein_op=opaa,s=s,DisMat=dismat)
+  ## find the limits for y-axis
+  fty_lim <- rbind(range(wsimWag[[1]]$fty),range(wsim[[1]]$fty),range(sim[[1]]$fty),range(simWag[[1]]$fty),rep(obs.fty,2)) ##ranges of functionalities for several typical simulations
+  ylim <- c(min(fty_lim[,1]),max(fty_lim[,2])) #lower and upper bound
+  ylim <- c(ylim[1]-ylim[1]*margin,ylim[2]+ylim[2]*margin) #extend them with a little margin
+  
+  plot(sim[[1]]$ftyfun,do.points=FALSE,xaxs="i",col="red",xlab="time",ylab="functionality",ylim=ylim,xlim=c(0,brlen),
+       main=paste("gene",gene_num,",  s=",round(s_max[gene_num],2),sep="")) #start a plot
+  abline(h=obs.fty,col="green",lwd=2)
+  for(i in 1:count){
+    plot(sim[[i]]$ftyfun,do.points=FALSE,xaxs="i",col="red",add=TRUE)
+    plot(simWag[[i]]$ftyfun,do.points=FALSE,xaxs="i",col="blue",add=TRUE)
+    plot(wsim[[i]]$ftyfun,do.points=FALSE,xaxs="i",col="red",add=TRUE)
+    plot(wsimWag[[i]]$ftyfun,do.points=FALSE,xaxs="i",col="blue",add=TRUE)
+  }
+}

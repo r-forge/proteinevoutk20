@@ -1,11 +1,11 @@
-system("sed -e '11d;12d' ~/proteinevoutk20/pkg/Data/gene1.fasta > ~/proteinevoutk20/pkg/scratch/lab9/prunetree/gene1p.fasta")
+system("sed -e '11d;12d' ~/proteinevoutk20/pkg/Data/gene88.fasta > ~/proteinevoutk20/pkg/scratch/lab9/prunetree/gene88p.fasta")
 source("~/proteinevoutk20/pkg/R/main.R")
 source("~/proteinevoutk20/pkg/R/simulation.R")
 ## import data on 7 tips and 8 tips
-datap = conv("~/proteinevoutk20/pkg/scratch/lab9/prunetree/gene1p.fasta","phyDat")
-data = conv("~/proteinevoutk20/pkg/Data/gene1.fasta","phyDat")
+datap = conv("~/proteinevoutk20/pkg/scratch/lab9/prunetree/gene88p.fasta","phyDat")
+data = conv("~/proteinevoutk20/pkg/Data/gene88.fasta","phyDat")
 dataPnum <- matrix(unlist(datap),nrow=7,byrow=TRUE) #7-tip data in numbers stored in matrix
-datanum <- conv("~/proteinevoutk20/pkg/Data/gene1.fasta")
+datanum <- conv("~/proteinevoutk20/pkg/Data/gene88.fasta")
 datanum <- matrix(unlist(datanum),nrow=8,byrow=TRUE) #8-tip data in numbers stored in matrix
 ## starting tree with Scas pruned
 tre = read.tree("~/proteinevoutk20/pkg/Data/prune.tre")
@@ -57,6 +57,7 @@ sim <- vector(mode="list",length=nsim)
 simWag <- vector(mode="list",length=nsim)
 roots <- vector(mode="list",length=nsim)
 for(i in 1:nsim){
+  rm(.Random.seed)
   root <- sapply(1:length(index),function(x) sample(20,1,replace=TRUE,prob=siteprop[,x]))
   roots[[i]] <- root
   sim[[i]] <- sim.New(s=s,t=brlen,root=root,opaa=opaa,beta=beta,gamma=gamma,bfaa=bfaa)
@@ -66,7 +67,7 @@ for(i in 1:nsim){
 ##################################################################################################
 ## analysis of the simulated data under both models
 ##################################################################################################
-pdf("~/proteinevoutk20/pkg/Plot/prunetree/gene1.pdf")
+pdf("~/proteinevoutk20/pkg/Plot/prunetree/gene88.pdf")
 ##functionalities based on the parameters estimated earlier
 start.ftny.vec <-  sapply(1:nsim,function(i) head(sim[[i]]$fty,1))
 end.ftny.vec <- sapply(1:nsim,function(i) tail(sim[[i]]$fty,1))
