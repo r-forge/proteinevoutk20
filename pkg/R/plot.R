@@ -194,3 +194,14 @@ legend(5,y=0.7,legend=c("g=1.10, length=417","g=5.49, length=309"),col=c("blue",
 plot(sim83$disfun,xlab="time",ylab="distance",main="Distance from optima",pch=20,xlim=c(0,br_max[83]),ylim=c(0,400),xaxs="i",col="blue")
 plot(sim72$disfun,pch=20,xaxs="i",add=TRUE,col="red")
 legend(5,y=350,legend=c("g=1.10, length=417","g=5.49, length=309"),col=c("blue","red"),lty=1,bty="n")
+
+plot.w <- function(x,add=FALSE){
+  plot(wsim[[x]]$ftyfun,xlab="time",ylab="functionality",ylim=c(0.2,0.8),main=paste("functionality, s=",round(s,3),sep=""),do.points=FALSE,xlim=c(0,brlen),xaxs="i",add=add)
+  plot(wsimWag[[x]]$ftyfun,xaxs="i",do.points=FALSE,xaxs="i",add=TRUE,col="red")
+  plot(sim[[x]]$ftyfun,xaxs="i",do.points=FALSE,xaxs="i",add=TRUE)
+  plot(simWag[[x]]$ftyfun,xaxs="i",do.points=FALSE,xaxs="i",add=TRUE,col="red")
+}
+plot(wsim[[1]]$ftyfun,xlab="time",ylab="functionality",ylim=c(0,1),main=paste("functionality, s=",round(s,3),sep=""),do.points=FALSE,xlim=c(0,brlen),xaxs="i")
+plot(wsimWag[[1]]$ftyfun,xaxs="i",do.points=FALSE,xaxs="i",add=TRUE,col="red")
+plot(sim[[1]]$ftyfun,xaxs="i",do.points=FALSE,xaxs="i",add=TRUE)
+plot(simWag[[1]]$ftyfun,xaxs="i",do.points=FALSE,xaxs="i",add=TRUE,col="red")
