@@ -44,7 +44,7 @@
 # opw1dir <- "~/BackupProEvo/Newton/opwFirst_short/"
 # opwdir <- "~/BackupProEvo/Newton/opw_short/"
 maxdir <- "~/BackupProEvo/Newton/rokas_max/"
-majdir <- "~/BackupProEvo/Newton/rokas_maj/"
+#majdir <- "~/BackupProEvo/Newton/rokas_maj/"
 
 res_max <- vector("list",length=106)
 l <- 106
@@ -62,122 +62,86 @@ GM_max <- sapply(1:106,function(x) res_max[[x]]$GMweights)
 Q_max <- sapply(1:106,function(x) res_max[[x]]$Q)
 br_max <- sapply(1:106,function(x) sum(res_max[[x]]$tree$edge.length))
 sw_max <- rbind(s_max,GM_max[2,],GM_max[3,])
-
-# res_opw1 <- vector("list",length=106)
+# 
+# # res_opw1 <- vector("list",length=106)
+# # l <- 106
+# # for(genect in 1:l){
+# #   filename = paste(opw1dir, "gene",genect,"_s_weight.RData",sep="")
+# #   if(!file.exists(filename))
+# #     cat("load RData for gene", genect,"failed, file does not exist","\n")
+# #   load(filename)
+# #   res_opw1[[genect]] <- res_op
+# # }
+# # 
+# # s_opw1 <- sapply(1:106,function(x) res_opw1[[x]]$s)
+# # loglik_opw1 <- sapply(1:106,function(x) res_opw1[[x]]$ll$loglik)
+# # GM_opw1 <- sapply(1:106,function(x) res_opw1[[x]]$GMweights)
+# # Q_opw1 <- sapply(1:106,function(x) res_opw1[[x]]$Q)
+# # br_opw1 <- sapply(1:106,function(x) sum(res_opw1[[x]]$tree$edge.length))
+# # opw_opw1 <- sapply(1:106, function(x) res_opw1[[x]]$opw)
+# # sw_opw1 <- rbind(s_opw1,GM_opw1[2,],GM_opw1[3,])
+# # 
+# # res_opw <- vector("list",length=106)
+# # l <- 106
+# # for(genect in 1:l){
+# #   filename = paste(opwdir, "gene",genect,"_s_weight.RData",sep="")
+# #   if(!file.exists(filename)){
+# #     cat("load RData for gene", genect,"failed, file does not exist","\n")
+# #     res_opw[[genect]] <- list()
+# #   }
+# #   else{
+# #   load(filename)
+# #   res_opw[[genect]] <- res_op
+# #   }
+# # }
+# # 
+# # s_opw <- sapply(1:106,function(x) res_opw[[x]]$s)
+# # loglik_opw <- sapply(1:106,function(x) res_opw[[x]]$ll$loglik)
+# # GM_opw <- sapply(1:106,function(x) res_opw[[x]]$GMweights)
+# # Q_opw <- sapply(1:106,function(x) res_opw[[x]]$Q)
+# # br_opw <- sapply(1:106,function(x) sum(res_opw[[x]]$tree$edge.length))
+# # opw_opw <- sapply(1:106, function(x) res_opw[[x]]$opw)
+# 
+# res_maj <- vector("list",length=106)
 # l <- 106
 # for(genect in 1:l){
-#   filename = paste(opw1dir, "gene",genect,"_s_weight.RData",sep="")
+#   filename = paste(majdir, "gene",genect,"_s_weight.RData",sep="")
 #   if(!file.exists(filename))
 #     cat("load RData for gene", genect,"failed, file does not exist","\n")
 #   load(filename)
-#   res_opw1[[genect]] <- res_op
+#   res_maj[[genect]] <- res_op
 # }
 # 
-# s_opw1 <- sapply(1:106,function(x) res_opw1[[x]]$s)
-# loglik_opw1 <- sapply(1:106,function(x) res_opw1[[x]]$ll$loglik)
-# GM_opw1 <- sapply(1:106,function(x) res_opw1[[x]]$GMweights)
-# Q_opw1 <- sapply(1:106,function(x) res_opw1[[x]]$Q)
-# br_opw1 <- sapply(1:106,function(x) sum(res_opw1[[x]]$tree$edge.length))
-# opw_opw1 <- sapply(1:106, function(x) res_opw1[[x]]$opw)
-# sw_opw1 <- rbind(s_opw1,GM_opw1[2,],GM_opw1[3,])
-# 
-# res_opw <- vector("list",length=106)
-# l <- 106
-# for(genect in 1:l){
-#   filename = paste(opwdir, "gene",genect,"_s_weight.RData",sep="")
-#   if(!file.exists(filename)){
-#     cat("load RData for gene", genect,"failed, file does not exist","\n")
-#     res_opw[[genect]] <- list()
-#   }
-#   else{
-#   load(filename)
-#   res_opw[[genect]] <- res_op
-#   }
-# }
-# 
-# s_opw <- sapply(1:106,function(x) res_opw[[x]]$s)
-# loglik_opw <- sapply(1:106,function(x) res_opw[[x]]$ll$loglik)
-# GM_opw <- sapply(1:106,function(x) res_opw[[x]]$GMweights)
-# Q_opw <- sapply(1:106,function(x) res_opw[[x]]$Q)
-# br_opw <- sapply(1:106,function(x) sum(res_opw[[x]]$tree$edge.length))
-# opw_opw <- sapply(1:106, function(x) res_opw[[x]]$opw)
-
-res_maj <- vector("list",length=106)
+# s_maj <- sapply(1:106,function(x) res_maj[[x]]$s)
+# loglik_maj <- sapply(1:106,function(x) res_maj[[x]]$ll$loglik)
+# GM_maj <- sapply(1:106,function(x) res_maj[[x]]$GMweights)
+# Q_maj <- sapply(1:106,function(x) res_maj[[x]]$Q)
+# br_maj <- sapply(1:106,function(x) sum(res_maj[[x]]$tree$edge.length))
+# sw_maj <- rbind(s_maj,GM_maj[2,],GM_maj[3,])
+###########################################################
+pruneDir <- "~/BackupProEvo/Lab9/prunetree/"
+diffAA <- vector(mode="numeric",length=106)
+diffAAwag <- vector(mode="numeric",length=106)
+avgDis <- vector(mode="numeric",length=106)
+avgDisWag <- vector(mode="numeric",length=106)
 l <- 106
 for(genect in 1:l){
-  filename = paste(majdir, "gene",genect,"_s_weight.RData",sep="")
-  if(!file.exists(filename))
+  filename = paste(pruneDir, "gene",genect,".RData",sep="")
+  if(!file.exists(filename)){
     cat("load RData for gene", genect,"failed, file does not exist","\n")
-  load(filename)
-  res_maj[[genect]] <- res_op
+    pDiff <- NA
+    pDiffwag <- NA
+    end.dis.obs.vec <- NA
+    end.dis.obs.vec.wag <- NA
+  }
+  else{
+    load(filename)
+    pDiff <- sapply(1:nsim,function(x) sum(as.numeric(tail(sim[[x]]$sim[,1:length(index)],1))!=datanum[6,]))/length(index)
+    pDiffwag <- sapply(1:nsim,function(x) sum(as.numeric(tail(simWag[[x]]$sim[,1:length(index)],1))!=datanum[6,]))/length(index)
+  }
+  diffAA[genect] <- mean(pDiff)
+  diffAAwag[genect] <- mean(pDiffwag)
+  avgDis[genect] <- mean(end.dis.obs.vec)
+  avgDisWag[genect] <- mean(end.dis.obs.vec.wag)
 }
-
-s_maj <- sapply(1:106,function(x) res_maj[[x]]$s)
-loglik_maj <- sapply(1:106,function(x) res_maj[[x]]$ll$loglik)
-GM_maj <- sapply(1:106,function(x) res_maj[[x]]$GMweights)
-Q_maj <- sapply(1:106,function(x) res_maj[[x]]$Q)
-br_maj <- sapply(1:106,function(x) sum(res_maj[[x]]$tree$edge.length))
-sw_maj <- rbind(s_maj,GM_maj[2,],GM_maj[3,])
-
-
-###########################################################
-# opw_Nedir <- "~/BackupProEvo/rokas_opw_Ne/"
-# max_Nedir <- "~/BackupProEvo/rokas_max_Ne/"
-# maj_Nedir <- "~/BackupProEvo/rokas_maj_Ne/"
-# 
-# # opw_Nedir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_opw_Ne/"
-# # max_Nedir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_max_Ne/"
-# # maj_Nedir <- "~/proteinevoutk20/pkg/scratch/newton/rokas_maj_Ne/"
-# 
-# res_max_Ne <- vector("list",length=106)
-# l <- 106
-# for(genect in 1:l){
-#   filename = paste(max_Nedir,"gene",genect,"_s_weight.RData",sep="")
-#   if(!file.exists(filename))
-#     cat("load RData for gene", genect,"failed, file does not exist","\n")
-#   load(filename)
-#   res_max_Ne[[genect]] <- res_op
-# }
-# 
-# s_max_Ne <- sapply(1:106,function(x) res_max_Ne[[x]]$s)
-# loglik_max_Ne <- sapply(1:106,function(x) res_max_Ne[[x]]$ll$loglik)
-# GM_max_Ne <- sapply(1:106,function(x) res_max_Ne[[x]]$GMweights)
-# Q_max_Ne <- sapply(1:106,function(x) res_max_Ne[[x]]$Q)
-# br_max_Ne <- sapply(1:106,function(x) sum(res_max_Ne[[x]]$tree$edge.length))
-# 
-# 
-# res_maj_Ne <- vector("list",length=106)
-# l <- 106
-# for(genect in 1:l){
-#   filename = paste(maj_Nedir, "gene",genect,"_s_weight.RData",sep="")
-#   if(!file.exists(filename))
-#     cat("load RData for gene", genect,"failed, file does not exist","\n")
-#   load(filename)
-#   res_maj_Ne[[genect]] <- res_op
-# }
-# 
-# s_maj_Ne <- sapply(1:106,function(x) res_maj_Ne[[x]]$s)
-# loglik_maj_Ne <- sapply(1:106,function(x) res_maj_Ne[[x]]$ll$loglik)
-# GM_maj_Ne <- sapply(1:106,function(x) res_maj_Ne[[x]]$GMweights)
-# Q_maj_Ne <- sapply(1:106,function(x) res_maj_Ne[[x]]$Q)
-# br_maj_Ne <- sapply(1:106,function(x) sum(res_maj_Ne[[x]]$tree$edge.length))
-# 
-# 
-# res_opw_Ne <- vector("list",length=106)
-# l <- 106
-# for(genect in 1:l){
-#   filename = paste(opw_Nedir,"gene",genect,"_s_weight.RData",sep="")
-#   if(!file.exists(filename))
-#     cat("load RData for gene", genect,"failed, file does not exist","\n")
-#   load(filename)
-#   res_opw_Ne[[genect]] <- res_op
-# }
-# 
-# s_opw_Ne <- sapply(1:106,function(x) res_opw_Ne[[x]]$s)
-# loglik_opw_Ne <- sapply(1:106,function(x) res_opw_Ne[[x]]$ll$loglik)
-# GM_opw_Ne <- sapply(1:106,function(x) res_opw_Ne[[x]]$GMweights)
-# Q_opw_Ne <- sapply(1:106,function(x) res_opw_Ne[[x]]$Q)
-# br_opw_Ne <- sapply(1:106,function(x) sum(res_opw_Ne[[x]]$tree$edge.length))
-# opw_Ne <- sapply(1:106,function(x) res_opw_Ne[[x]]$opw)
-# 
-# 
+save(s_max,diffAA,diffAAwag,avgDis,avgDisWag,file="~/Desktop/prune.RData",compress=TRUE)

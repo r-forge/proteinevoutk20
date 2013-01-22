@@ -79,6 +79,9 @@ abline(v=mean(pchem_d(datanum[6,],opaa,DisMat=dismat)))
 ##Grantham distances from observed sequence
 end.dis.obs.vec <- sapply(1:nsim,function(x) mean(pchem_d(protein1=as.numeric(tail(sim[[x]]$sim[,1:length(index)],1)),protein2=datanum[6,],DisMat=GM)))
 plot.density(density(end.dis.obs.vec),xlab="Avg Distance from observed seq",ylab="density",main="Our model")
+## number of aa differences between the predictions and the observed sequence:
+diffAA <- sum(as.numeric(tail(sim[[1]]$sim[,1:length(index)],1))!=datanum[6,])
+diffAAp <- diffAA/length(index)
 ##################################################################################################
 ##WAG model
 end.ftny.vec.wag <- sapply(1:nsim,function(i) tail(simWag[[i]]$fty,1))
