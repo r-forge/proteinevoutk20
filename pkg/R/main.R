@@ -678,20 +678,20 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e
     if(length(op)==ns){ #opaa is given for every site
       optimal_aa = "given for all sites"
       sitelik = sapply(1:ns,function(i) result[index[i],op[i]])
-      loglik = sum(sitelik)
+      loglik <- sum(sitelik)
     } else if(length(op)==nr){ #opaa is given for each distinct data pattern
       optimal_aa = "given for distinct patterns"
       sitelik = sapply(1:nr,function(i) result[i,op[i]])
-      loglik = sum(weight*sitelik)
+      loglik <- sum(weight*sitelik)
     }
   }
   else{
     optimal_aa = "not given, estimated using maximization"
     opaa = apply(result,1,which.max)
     sitelik=apply(result,1,max)
-    loglik = sum(weight*sitelik)
+    loglik <- sum(weight*sitelik)
   }
-  return(list(loglik= loglik, optimal_aa = optimal_aa,opaa=opaa,sitelik = sitelik, llmat=result))
+  return(list(loglik=loglik, optimal_aa = optimal_aa,opaa=opaa,sitelik = sitelik, llmat=result))
 }
 
 ## For all the distinct sites (m), find loglikelihood, result is m * 20 matrix
@@ -809,7 +809,7 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall
     Qall = QAllaa1(fixmatall,mumat,Ne=Ne)
   }
   if(!is.null(opaa))
-    ll = llop(data,tree,op=opaa,bf=bfaa,Qall=Qall,C=C,Phi=Phi,q=q,Ne=Ne)
+    ll = llop(data,tree,op=opaa,Qall=Qall,bf=bfaa,C=C,Phi=Phi,q=q,Ne=Ne)
   else 
     ll = llaaw(tree,data,Qall,opw,bfaa,C,Phi,q,Ne)
   result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,dismat=dismat,fixmatall=fixmatall,Qall=Qall,
