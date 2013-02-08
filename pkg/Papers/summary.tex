@@ -11,29 +11,31 @@
 \maketitle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Abstract}
-A new mechanistic model for the evolution of amino acid sequences is developed for studying the biological properties of proteins as well as phylogenetic estimation.  Two steps are bridged together to form a Markov process to describe substitutions between amino acids: mutation rates based on time reversible substitution models for nucleotides; fixation probability obtained from population genetics theory. We assume there is an optimal amino acid at each position of a protein sequence. Selective restraints at amino acid level are characterized by the physiochemical distances from optimal amino acids and the Grantham sensitivity of protein fitness to the distances. Analysis of a set of yeast data set shows that the new model provides a better fit to data than the empirical models and reveals the variation of Grantham sensitivities and optimal amino acids at different sites in proteins.\\
+A new population genetics based mechanistic model for the evolution of amino acid sequences is developed for studying the biological properties of amino acids as well as phylogenetic inference.
+Two steps are bridged together to form a Markov process to describe substitutions between amino acids: mutation rates based on time reversible substitution models for nucleotides; fixation probability obtained from population genetics theory. 
+We assume there is an optimal amino acid at each position of a protein sequence. 
+Selective restraints are characterized by the physiochemical distances from optimal amino acids and the Grantham sensitivity of protein fitness to the distances. 
+Analysis of yeast data set shows that the new model provides a better fit to data than the empirical models and reveals the variation of Grantham sensitivities and optimal amino acids at different sites in proteins.\\
 
 \section{Introduction}
 Importance of building accurate model for protein evolution. \\
 
-Known models of amino acid replacement fall into two categories: empirical models and mechanistic models. 
-In empirical models, the substitution rates are based solely on the amino acid frequencies observed in given database
+Known models of amino acid substitution fall into two categories: empirical models and mechanistic models. 
+In empirical models, the substitution rates are based solely on the amino acid frequencies observed in given database.
 %empirical observations of sequence data and, in contrast to mechanistic models, are not 
 Empirical models are commonly used in phylogenetic studies and include  Dayhoff, JTT, WAG, LG, etc. 
 [CAN ONE FORMULATE A NON-MECHANISTIC CODON LEVEL MODEL? AMINO ACID MODEL?]
-In contrast, in mechanistic model the substitution matrices are based on descriptions of the actual biological processes thought to drive sequence evolution, such as natural selection or mutation bias.
+In contrast, in mechanistic model the substitution matrices are based on the actual biological processes thought to drive sequence evolution, such as natural selection and mutation bias.
 Although less commonly used, there are a number of notable models in this area including [CITATIONS].
 
-Among the mechanistic models, they are usually formulated at one of three different levels: the nucleotide level, the codon level, and the amino acid level.
-[USE 'XXX LEVEL MODELS'  OR 'XXX BASED MODELS' WHERE XXX = DNA, CODON, OR AA --CHOOSE ONE AND BE CONSISTENT.]
-Nucleotide level models use the most data and are often the most powerful in terms of their ability to distinguish between closely related sequences [CUT $\rightarrow$?] such as those caused by synonymous substitutions which are invisible at amino acid level [WOULDN''T THIS APPLY TO CODON-LEVEL MODELS AS WELL?].
-[DISCUSSION OF CODON LEVEL MODELS-- HOW DO THEY DIFFER FROM DNA MODELS?]
-A popular example of a mechanistic, codon level model is \citet{YangEtAl98}.
-This implemented a few mechanistic models at the level of codons and explicitly modeled the biological processes involved, including different mutation rates between nucleotides, translation of the codon triplet into an amino acid, and the acceptance or rejection of the amino acid due to selective pressure on the protein. 
-In contrast to codon level models, amino acid level models ignore synonymous differences between sequences by focusing not on the codons themselves but the amino acids they code for.
+Mechanistic models are usually formulated at one of three different levels: DNA, codon and amino acid (AA) level.
+DNA-based models use the most data and are often the most powerful in terms of their ability to distinguish between closely related sequences.
+A popular example of a mechanistic, codon-based model is \cite{YangEtAl98}.
+This implemented a few mechanistic models at the level of codons and explicitly modeled the biological processes involved, including different mutation rates between nucleotides, and the translation of the codon triplet into an amino acid. 
+In contrast to codon-based models, AA-based models ignore synonymous differences between sequences by focusing not on the codons themselves but the amino acids they code for.
 Since synonymous codon usage is largely driven by mutation bias in low expression genes and selection on translational efficiency for high expression genes [CITATIONS], ignoring this aspect of the data has the advantage of reducing the noise in sequence data for low expression genes but at the cost of losing potentially useful information held in the high expression genes.
 Such an approach makes sense for most phylogenetic models since they ignore the effect of gene expression on sequence evolution [EXCEPTIONS?].
-However, as we show here, our models provide a natural framework for including information and the effect of gene expression on sequence evolution.
+However, as we show here, our models provide a natural framework for including the effect of gene expression on sequence evolution.
 %So even though we only focus on the effects of non-synonymous substitutions, incorporating the effects of synonymous substitutions should be straight forward in future work. 
 
 
@@ -44,11 +46,11 @@ The selective restraints at the amino acid level was accounted for by multiplyin
 
 
 It is important to note that whether empirical or mechanistic, most phylogenetic models, including the GY model, are general time reversible (GTR).
-In GTR models, the substitution matrix used is symmetric such that the rate of any given site going from state $i$ to state $j$ is equal to the rate of that site going from state $j$ to state $i$.
-While time reversibility provides substantial mathematical and computational advantages, the substitution matricies that result are difficult to interpret biologically if one assumes natural selection is acting consistently on a given site.
+In GTR models, the substitution rate matrix used is symmetric such that the exchange rate of any given site going from state $i$ to state $j$ is equal to the rate of that site going from state $j$ to state $i$.
+While time reversibility provides substantial mathematical and computational advantages, the substitution rate matrices are difficult to interpret biologically if one assumes natural selection is acting consistently on a given site.
 Surprisingly this lack of inconsistency has gone largely unrecognized.
-By definition, if the substitution of state $i$ to $j$ is favored by natural selection, in the absence of mutation bias it must occur at a faster rate than the converse substitution of $j$ to $i$.
-While mutation bias can alter this requirement when selection is weak, it can only do so when the assumption is GTR is violated.
+By definition, if the substitution of state $i$ to $j$ is favored by natural selection, in the absence of mutation bias it must occur at a faster rate than the reverse substitution of $j$ to $i$.
+While mutation bias can alter this requirement when selection is weak, it can only do so when the assumption of GTR is violated.
 For example, consider a GTR codon-level substitution models where synonymous substitutions occur at a faster rate than non-synonymous substitutions.
 For any given state of the system, such a model implies that the current amino acid is optimal since synonymous substitutions occur at a faster rate than non-synonymous ones.
 However, once a non-synonymous substitution has occurred (and as time goes to infinity it will),  the time reversible aspects of the model now imply that the new state is the optimal state and the old state is sub-optimal.
@@ -56,22 +58,22 @@ Thus, the only reasonable way to interpret such a GTR model is that the substitu
 If, in contrast, one were to assume the converse, that non-synonymous substitution occur at a faster rate than synonymous, then the interpretation of GTR models becomes even more problematic from a biological perspective.
 In such a scenario, not only is the optimal state constantly changing, the current state of any given site is always sub-optimal.
 
-While GTR models have played an important role in the development of the field of phylogenetics,  in order be able to model natural selection and mutation bias in a realistic manner the assumption of time reversibility must be relaxed as we do here.
+While GTR models have played an important role in the development of the field of phylogenetics,  in order be able to model natural selection and mutation bias in a realistic manner the assumption of time reversibility must be relaxed.
 In this study we develop an amino-acid based model in which we assume that for each individual site there's a corresponding optimal amino acid $\hat{a}$.
 The optimal state can be assigned or, as we demonstrate, estimated from the data itself.
-As with the GY model, we assume that the substitution rate between amino acids at a given site is a function of their Grantham distances $d_{i,j}$ differences and, in a similar manner, assume genes can vary in there sensitivities to such changes.
+As with the GY model, we assume that the substitution rate between amino acids at a given site is a function of their Grantham distances $d_{i,j}$ from optimal amino acids and, in a similar manner, assume genes can vary in their sensitivities to such changes.
 Here the sensitivity to amino acid changes is calculated using a cost-benefit framework we have developed previously for studying the evolution codon usage bias \cite{Gilchrist07, GilchristEtAl09,ShahAndGilchrist11}.
-More specifically, the cost represents the cost of protein synthesis while the benefit represents the utility provided by the protein encoded by the sequence.
-For simplicity, we assume that the synthesis cost is proportional to the length of the coding sequence and that utility of the protein produced is an inverse function of the distances between its sequence and the optimal amino acid sequence for a that locus.
+More specifically, the cost represents the cost of protein synthesis while the benefit represents the functionality provided by the protein encoded by the sequence.
+For simplicity, we assume that the synthesis cost is proportional to the length of the coding sequence, and that utility of the protein produced is an inverse function of its distances from the optimal amino acid sequence.
 Unlike the GY model, we also incorporate the effects of gene expression on the substitution rate, with higher expression genes being under stronger selection to be at the optimal state $\hat{a}$.
-Furthermore, unlike most models in phylogenetics, we define the fitness of a given genotype explicitly.
-We then use a model from population genetics to calculate the substitution rate between any two genotypes explicitly taking into account the fitness differences between genotypes as well as the effects of mutation bias and genetic drift.
-We illustrate our approach by fitting our model's likelihood function to the \citet{RokasEtAl03} data set of 103[?] genes sequenced from 8 different species of yeast.
-When fitting our model, we can estimate the phylogenies of the yeast species as well as additional model parameters such as the a Grantham sensitivity of a gene (roughly comparable to $1/V$ in the GY model), as well as state optimal amino acid $\hat{a}$ for any given site in a coding sequence.
-Using AIC we compare our model's fit to the Rokas data to other commonly used GTR amino acid level models [LIST MODELS -- IF WE STICK TO AA MODELS, WHY DO WE SPEND SO MUCH TIME DISCUSSING THE GY MODEL WHICH IS A CODON LEVEL MODEL?].
+Furthermore, unlike most models in phylogenetics, we define the fitness of a given protein explicitly.
+We then use a model from population genetics to calculate the substitution rate between any two genotypes by explicitly taking into account the fitness differences between genotypes as well as the effects of mutation bias and genetic drift.
+We illustrate our approach by fitting our model's likelihood function to the \cite{RokasEtAl03} data set of 106 genes sequenced from 8 different species of yeast.
+When fitting our model, we can estimate the phylogenies of the yeast species, the Grantham sensitivity $g$ of a gene (roughly comparable to $1/V$ in the GY model), as well as state optimal amino acid $\hat{a}$ for any given site in a coding sequence.
+Using AIC we compare our model's fit to the Rokas data to other commonly used GTR AA-based models [LIST MODELS -- IF WE STICK TO AA MODELS, WHY DO WE SPEND SO MUCH TIME DISCUSSING THE GY MODEL WHICH IS A CODON LEVEL MODEL?].
 These results show that even with our most parameter rich model in which we estimate the optimal amino acid at every site, thereby introducing tens of thousands of additional parameters, our model does a substantially better job fitting the Rokas dataset.
-So although the computational cost of our model is substantially greater than most GTR models,  our ability to fit the phylogenetic data and extract biologically meaningful information is substantially greater than other models.
-Furthermore, because our approach explicitly links genotype to phenotype, phenotype to fitness, and fitness to fixation rate, the biological assumptions underlying our model are clearly stated and our ability to incorporate additional biological factors, such as selection on codon usage bias, greatly enhanced.
+So although the computational cost of our model is greater than most GTR models,  our ability to fit the phylogenetic data and extract biologically meaningful information is substantially greater than other models.
+Furthermore, because our approach explicitly links genotype to phenotype, phenotype to fitness, and fitness to fixation rate, the biological assumptions underlying our model are clearly stated and our ability to incorporate additional biological factors, such as selection on codon usage bias, are greatly enhanced.
  
 ADDITIONAL POINTS?
 \begin{itemize}
@@ -227,8 +229,9 @@ Since all sites are independent, we can calculate the likelihood of observing th
 \begin{tabular}{ c p{10cm} }
 \hline
 $s_{ij}$ & exchange rates between nucleotides $i$ and $j$ \\
-$\mu_{ij}$ & mutation rates between nucleotides $i$ and $j$\\
-$\pi_{ij}$ & fixation probability of single mutant $j$ with wild type $i$\\
+$\mu_{ij}$ & mutation rates from nucleotides $i$ to $j$\\
+$\pi_{ij}$ & fixation probability of single mutant $j$ from $i$\\
+$u_{ij}$ & substitution rate from amino acid $i$ to amino acid $j$\\
 $g$       & sensitivity coefficient of functionality to physicochemical distance \\
 $(\alpha,\beta,\gamma)$ & weights for the 3 physicochemical properties in amino acid distance formula \\
 $C$ & cost of producing a protein\\
@@ -277,7 +280,7 @@ We analyzed data previously studied by Rokas (2003 Nature).
 This genome sequence data have been obtained for 7 {\it Saccharomyces} species ({\it S. cerevisiae, S. paradoxus, S. mikatae, S. kudriavzevii, S. bayanus, S.castellii} and {\it S. kluyveri}) as well as for the outgroup fungus {\it Candida albicans}.
 It includes 106 genes that are distributed throughout the {\it S. cerevisiae} genome on all 16 chromomosomes and comprises a total length of 42,342 amino acids.
 Rokas et.al analyzed this data set to investigate the conflict of gene trees.
-We use the tree topology that is supported by the concatenated genome sequence, which is also supported by the majority of the genes.
+We use the tree topology that is supported by the concatenated genome sequence, which is also supported by the majority of the genes as found in Rokas et al.'s paper.
 Since the new model is not time reversible the tree is rooted at the out group {\it C.alb}.\\
 
 \subsubsection{maximum likelihood estimation}
@@ -290,18 +293,18 @@ The log likelihood values and the AIC values are compared in Table 2.
 Under the empirical models, the substitution rates are fixed instead of being optimized. 
 $I$ denotes that proportion of invariable sites is estimated in the model, $G$ means that Gamma distributed rate variation across all sites is included in the model.
 In models with $F$, amino acid frequencies are treated as free parameters and estimated by the observed frequencies in the sequence data.
-Otherwise, the amino acid frequencies are the equilibrium (stationary) frequencies under the substitution rate matrix.\\
+Otherwise, the equilibrium frequencies under the substitution rate matrix are used.\\
 
 Under the new model, amino acid frequencies are treated as 19 free parameters and estimated from the observed frequencies in the sequence data.
-In addition, 5 free parameters for exchange rates between nucleotides, 14 branch lengths for the 8-species phylogeney, Grantham sensitivity $g$, 2 free parameters for the weights in the physicochemical distance formula $\beta$ and $\gamma$ are optimized in the maximum likelihood analyses.\\
+In addition, there are 5 free parameters for exchange rates between nucleotides with the rate between G and T fixed as 1, 14 branch lengths for the 8-species rooted phylogeney, Grantham sensitivity $g$, 2 free parameters for the weights in the physicochemical distance formula $\beta$ and $\gamma$. These 41 parameters are optimized in the maximum likelihood analyses as well as the optimal amino acids.\\
 
 
 All the parameters are treated the same across all the sites except the optimal amino acids.
-The loglikelihood and AIC values are also compared with those under empirical models for amino acids from ProtTest (reference). \\
+The loglikelihood and AIC values are also compared with those under empirical amino acid based models from ProtTest (reference). \\
 
 \begin{table}[h]
 \begin{center}
-\caption{Log-likelihood values and parameter estimates under empirical models and new model for the amino acid sequences of length 42,342}
+\caption{Log-likelihood values and parameter estimates under empirical models and new model for the sequence with 42,342 amino acids}
 \begin{tabular}{l r c r r}
 \hline
 Model & $\Delta$AIC & $l$ & Tree length & Parameters \\
@@ -316,48 +319,27 @@ LG+G+F & 81801.98 & -298699.09 & & 33 \\
 \end{center}
 
 Note: The last two models in the table are the best models picked out by ProtTest.({\color{blue} What happens when the weights of amino acids being optimal are gene specific and other parameters are fixed across genes? Total number of parameters is 40,369.
-Better case senario, we estimate different optimal weights and other parameters genewise, this should give a better likelihood value in total compared to only optimal weights are gene specific.
+Better case scenario, we estimate different optimal weights and other parameters genewise, this should give a better likelihood value in total compared to only optimal weights are gene specific.
 In this better case, the total loglikelihood value is -311186.
 Even with this loglikelihood value and number of parameters 40,369, the $\Delta$AIC value is 187447.8, which means it performs worse than the third model in the table.} The real loglikelihood value under this model is -317214.68; it gives a larger AIC value.)
 \label{table:mle}
 \end{table}
 
-If the optimal amino acids are not counted as free parameters being estimated, the majority approach gives the best AIC value. $\Delta$AIC value for the best empirical model LG + I + G + F is about 50,000 units, which indicates a substantially better fit under the new model.
-One thing need to point out is that under the maximizing approach for identifying optimal amino acids at each position in the sequence, the number of parameters is much bigger.
+If the optimal amino acids are not counted as free parameters being estimated, the majority approach gives the best AIC value. $\Delta$AIC value for the best empirical model LG+I+G+F is more than 8,0000 units, which indicates a substantially better fit under the new model.
+One thing that needs to point out is that under the maximizing approach for identifying optimal amino acids at each position in the sequence, the number of parameters is much greater since we add 1 parameter at each site.
 However, the improvement of log likelihood is so big that this model still performs much better than the best empirical model, with AIC value 40,000 units smaller.
-With the weighted approach, i.e. across all sites, every amino acid has the same probability of being optimal, the increase in the log likelihood outweighs the reduction in the number of parameters.
+With the weighted approach, i.e. across all sites, every amino acid has the same probability of being optimal, the decrease in the log likelihood outweighs the reduction in the number of parameters.
 This also indicates that the optimal amino acids vary a lot across the sites.  
 
 \subsubsection{Parameter variation between genes}
 We also analyzed Rokas et.al.'s data gene by gene.
-The best tree branch lengths  and the exchange rate matrix for the concatenated genomic sequence are used in the analysis.
-Grantham sensitivity and the weights in the physicochemical distance formula are optimized for each gene.
-Under both approaches  (max and maj) of obtaining the optimal amino acids, the estimates for all 3 parameters are on the similar scale.
-As expected, the weights for physicochemical properties are also similar to the ones that Grantham used.
+Under both approaches  (max and maj) of obtaining the optimal amino acids, the estimates for Grantham sensitivity and weights are on the similar scale.
+As expected, the weights for physicochemical properties are also similar to the ones that Grantham proposed.
 Figure \ref{fig:correlation} showed the correlation between $\beta$ and $\gamma$.
-Linear regression suggests strong linear relationship between the 2 parameters, especially under the maximizing rule where $R^2$ is very close to 1.\\
-
-Since the variation of Grantham weights across genes is small, we set $\beta$ and $\gamma$ across all genes to be the same and optimized $g$ for each gene to get the maximum likelihood.
-We then did optimization on the common physicochemical weights $\beta$ and $\gamma$.
-The ML estimates are $\beta = 0.1244$ and $\beta = 0.0005917$, comparing to Grantham's weights $\beta = 0.1018$ and $\gamma = 0.000399$.\\
-
-Notice in Figure \ref{fig:betagamma} and \ref{fig:gvalue}  there is an outlier for the estimates of Grantham weights with the maximizing rule, which corresponds to gene 63; this also happens to gene 48 with estimates of sensitivity values.
-There are several possible explanations.
-One is discrepancy between the gene trees.
-We use the same tree (topology and branch lengths) for all the genes, however, sequences in some gene might support a different phylogeny.
-Another possibility is that these genes have very different structures from other genes so that the importance of the physicochemical properties is very different. (Look at the gene trees and see if they have different topologies from the one that is used in the ML analysis)\\
-
+Linear regression suggests strong linear relationship between the 2 parameters, especially under the maximizing rule where $R^2$ is very close to 1.
+Note that $\alpha$ value is fixed for all sites as 1.833, the results indicate that the ratios between weights for the 3 components in the distance formula do not vary a lot.\\
 
 \begin{figure}[h]
-\caption{The figures in the first row are the estimates of $\beta$ and $\gamma$ using the maximizing rule, in the second row are the estimates of $\beta$ and $\gamma$ using the majority rule.
-Notice the difference in the range of y-axis}
-\centering
-\includegraphics[width=\textwidth]{betagamma.pdf}
-\includegraphics[width=\textwidth]{betagamma2.pdf}
-\label{fig:betagamma}
-\end{figure}
-
-\begin{figure}
 \caption{Correlation between $\beta$ and $\gamma$.
 Blue line is the maximizing rule, with $R^2 = 0.9899$, Red line is the majority rule with $R^2 = 0.3258$}
 \centering
@@ -365,19 +347,42 @@ Blue line is the maximizing rule, with $R^2 = 0.9899$, Red line is the majority 
 \label{fig:correlation}
 \end{figure}
 
+Since the variation of Grantham weights across genes is small, we set $\beta$ and $\gamma$ across all genes to be the same and optimized $g$ for each gene to get the maximum likelihood. 
+Other parameters values are retained from the maximum likelihood estimates in the max approach.
+We then did optimization on the common physicochemical weights $\beta$ and $\gamma$.
+The ML estimates are $\beta = 0.1182$ and $\beta = 0.000574$, comparing to Grantham's weights $\beta = 0.1018$ and $\gamma = 0.000399$; and the log likelihood value is -236935.65. 
+The log likelihood value increased by 2800 units comparing to the max approach when $g$ is the same across all genes. 
+If other parameters including tree branch lengths and exchange rates between nucleotides are also optimized the likelihood will be increased further.
+Since the number of genes is 106, allowing each gene to have different Grantham sensitivities increases the AIC value. \\
+
+There are several reasons to explain the variation of g values between genes. 
+One, these genes have different structures, which caused the different degrees of sensitivity to the difference from the optimal amino acids. 
+For example, hydrophobic cores of proteins can be efficiently repacked with different hydrophobic sequences. All polar amino acids can form hydrogen bonds whose thermodynamic energy varies sharply with distance and angle, providing a rationale for the greater variability of the fitness of polar amino acids.
+Two, we use the same tree topology for all genes. However, sequences in some gene might better support a different  tree topology, therefore causes other parameter estimates to be inaccurate.\\
+
+Next we examine the g values across all 106 genes in the data by estimating all the parameters in the model separately for each gene. 
+From figure \ref{fig:gvalue}, we can see that the estimates of g values under max and maj rule are consistent with max rule having a slight bigger variation. 
+Figure \ref{fig:gvaluecorr} confirms the linear correlation between the estimates under the 2 approaches for finding optimal amino acids. 
+
 \begin{figure}[h]
-\caption{Plots of Grantham sensitivity across all the genes.
-On the left, optimal amino acids are obtained using maximizing rule; on the right majority rule}
+\caption{Plots of Grantham sensitivities across all the genes. Red are the values under max rule, and blue are under maj rule.}
+\centering
+\includegraphics[width=\textwidth]{gvalue_max_maj.pdf}
+\label{fig:gvalue}
+\end{figure}
+
+\begin{figure}[h]
+\caption{Plots of Grantham sensitivities across all the genes. Values under max rule are plotted against under maj rule and the linear regression line is shown in red.}
 \centering
 \includegraphics[width=\textwidth]{gvalue.pdf}
-\label{fig:gvalue}
+\label{fig:gvaluecorr}
 \end{figure}
 
 
 \subsubsection{Confidence of estimates of optimal amino acids}
 To get the confidence level of the estimates for optimal amino acid at each site with the maximizing approach, we found the smallest set of amino acids being optimal that cover more than 95\% of the total likelihood.
 In Rokas's data there are about 9000 different state patterns at the 8 species.
-For each of the 9000+ sites, the likelihood values achieved by assuming each amino acid as optimal is ordered decreasingly, therefore the first is the likelihood under the max optimal amino acid.
+For each of the 9000+ sites, the likelihood values achieved by assuming each amino acid as optimal is ordered decreasingly, therefore the likelihood under the max optimal amino acid is ranked the first.
 Then the next amino acid is included in the optimal set of amino acids until the total likelihood exceeds 95\% of the total likelihood.
 Figure \ref{fig:AAnum} shows the histogram of numbers of optimal amino acids in the set.
 The mean value for all 9000+ patterns is 5.855, and mode is 6.
@@ -403,5 +408,30 @@ Mean percentage is 0.4749 and the peak of the density distribution is between 0.
 
 %\subsubsection{Model accuracy}
 %To assess model accuracy, we did simulations using the maximum likelihood estimates from Rokas et. al. 's data. (waiting on results)
+
+\subsection{Simulated data vs. observed data}
+We also evaluate the models by simulating data under models and comparing them with the observed data. 
+First, a single taxon (Scas) is deleted from the Rokas's yeast gene tree, model parameters are estimated from the data on the remaining taxa. 
+Then the ancestral sequence where the missing taxon is attached is estimated, where the probabilities of observing all 20 amino acids at each site are calculated. 
+Then the deleted data is put back and the length of the truncated branch earlier is estimated using the parameters on the pruned tree. 
+With the parameter values, the length of the missing branch, and the sequence at the start of the branch, we simulate the evolution of a gene's coding sequence from the reconstructed taxon to the deleted taxon from our analysis.
+We then compare the simulated sequence at the deleted taxon with the real data. 
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{simulation.png}
+\label{fig:simulation}
+\end{figure}
+The results are shown in Figure \ref{fig:simulation}. 
+On the left, each dot represents the proportion of amino acids that differ between the simulated and the observed sequence for a given gene. 
+Our new model performed much better than the standard WAG model in matching sequences, especially for genes under high selection that are shown in brighter dots. 
+On the right repeated simulations are plotted under our new model (red) and WAG model (blue) starting from the ancestral sequence estimated under the estimated sequences under the new model (upper lines) and WAG model (lower lines) for a single gene. 
+The dotted line represents the functionality for the observed sequence.
+When the ancestral sequences are estimated from WAG model, they have much lower fitnesses. 
+If evolved under WAG model, the fitness does not improve much at the end of the branch.
+On the other hand there is directional selection leading to an increase in fitness if the sequences evolve under the new model. 
+When the ancestral sequences are estimated from the new model the fitness is significantly higher. 
+And WAG simulation leads to a decrease in fitness while the fitness is maintained under simulation with the new model.
+No matter how the ancestral sequences are obtained, the new model presents a better match to the observed data.
+This realistic behavior shows that the new model is more adequate than the WAG model for Rokas's data.
 
 \end{document}
