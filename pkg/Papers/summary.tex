@@ -83,49 +83,81 @@ ADDITIONAL POINTS?
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Model}
-Our model works for homologous protein-coding sequence without gaps or with gaps removed.
-We use a continuous time Markov process to model substitutions among the amino acids within a protein coding sequence.
-The states of the Markov process are the 20 natural amino acids (nonnatural amino acids can be easily added), so we use a $20 \times 20$ rate matrix $Q=(Q_{ij})$ where $Q_{ij}$ represents the instantaneous rate that amino acid $i$ will be substituted by amino acid $j$.
-We view the substitution as a 2-step process.
-First, mutations occur in the population according to certain rates.
-Second, the newly arisen amino acid mutant gets fixed with different probabilities depending on its fitness, which completes the substitution.
-Therefore, the rate matrix $Q$ is obtained by multiplying the mutation rate matrix $M$ and fixation probability matrix $F$.
-As usual the row sums of $Q$ equal $0$ and $P(t) = \exp (tQ)$, where $P_{ij}(t)$ is the probability that amino acid $j$ replaces $i$ after time $t$.\\
+\section{Methods \& Materials}
+In this study we use a series of continuous time Markov models to describe the process of amino acid substitution for a given protein.
+As a result, our approach is applicable to any homologous protein-coding DNA sequence dataset where any gaps have been removed.
+In our model we assume that for any given site there is an optimal amino acid for that site.
+The strength of natural selection for the optimal amino acid can vary between sites and genes.
+The strength of selection is modeled to be a function of the gene's expression level, the physiochemical properties of a given amino acid, and the sensitivity of the gene's functionality to changes in these properties.
+As a result, our approach uses 20 different substitution rate matricies, one for each amino acid. 
+The states of the substitution matrices these same 20 amino acids.
+Additional, nonnatural amino acids can be easily incorporated into our framework.
+Each substitution matrix consists of a  $20 \times 20$ rate matrix $Q^k(\vec{\Lambda})=\{Q^k_{i,j}(\vec{\Lambda})\}$ where $Q^k_{ij}(\vec{\Lambda})$ represents the instantaneous rate that amino acid $i$ will be substituted by amino acid $j$ given a set of parameters $\vec{\Lambda}$.[WE COULD FORMULATE THIS MORE GENERALLY, I.E. AT THE CODON LEVEL (61x61) AND THEN SIMPLIFY TO IGNORE CODON DIFFERENCES AA.]
 
-\subsection{Methods}
+Conceptually, we subdivide the parameter set $\vec{\Lambda}$ into two different groups $\vec{\Lambda}_1}$ and $\vec{\Lambda}_1}$.
+$\vec{\Lambda}_1$ contains the mutation rates between the different codons while $\vec{\Lambda}_2$ contains terms related to genotype fitness and fixation probability.
+More specificially, $\vec{\Lambda}_1$ includes parameters describing the sensitivity of the protein's function to the differences in the physiochemical properties of the optimal and observed amino acid, the average expression level of the gene, specifically protein production rate $\phi$, and effective population size $N_e$.
+The separation of the parameters in $\vec{\Lambda}$ reflects the two step manner in which we chose to calculate the terms of a given rate matrix $Q^k$.
+The first step is calculating the rate at which a given amino acid $i$ mutates into amino acid $j$, $M(\vec{\Lambda}_1) = \{M_{i,j}(\vec{\Lambda}_1)\}$, given the mutation rates between nucleotides and the structure of the genetic code.
+The second step is calculating the probability that the newly introduced allele goes to fixation   $F(\vec{\Lambda}_2) = F^k_{i,j}(\vec{\Lambda}_2)$ given the wild type amino acid $j$, the mutant amino acid $j$, and the optimal amino acid $k$ for the site, and $\vec{\Lambda}_2$.
+Unlike most other work in the field of phylogenetics, the fixation probability $F_{i,j}$ is based on models in the field of population genetics and includes the effects of both natural selection for the optimal amino acid and genetic drift.
+Unlike most other work in the field of phylogenetics, the fixation probability $F_{i,j}$ is based on models in the field of population genetics and includes the effects of both natural selection for the optimal amino acid and genetic drift.
+The elements of the substitution matricies are, therefore, defined as  $Q^k_{i,j} = M_{i,j}(\vec{\Lambda}_1) F^k_{i,j}(\vec{\Lambda}_2)$ for $i \neq j$.
+The diagonal elements of $Q$ are equal to the opposite of their off diagonal row sums.
+As a result, as usual, the row sums of $Q^k$ equal 0.
+Furthermore, the matrix describing the substitution probability of amino acid $i$ to amino acid $j$ as a function of time is $P^k(t|\vec{\Lambda}) = \exp\left[Q^k(\vec{\Lambda}) t\right]$. [IS MY PHRASING CORRECT?] % such that $P^k_{i,j}(t|\vec{\Lambda})= M_{i,j}(\vec{\Lambda}_1) F^k_{i,j}(\vec{\Lambda}_2)$
+
+
+\subsection*{Calculating the Mutation Rate Matrix $M$}
+For simplicity, in this study we assume an underlying time reversible model of mutaton. [IS THIS TRUE?]
+Our current model formulation is at the amino acid level, but in order to properly construct $M$ we need to consider the structure of the genetic code so we begin with a $61 \times 61$ sense codon mutation rate matrix.
+In order to calculate the terms of this matrix, we first assume that mutations occur independently between nucleotides within a codon.
+For codons that differ by only one nucleotide, the mutation rate between codon $i$ and $j$ is equal to the mutation rate between these nucleotide.
+For all other codons, because changes involving two or more nucleotides during time $\Delta t$ will have probabilities on the order of $\Delta t^2$, we set their mutation rates to 0.
+
+For simplicity, we also assume that synonymous codon frequency for any given amino acid is uniform.
+Therefore, the equilibrium mutation rates between amino acids only depend on the frequencies of amino acids.
+This assumption of uniform codon usage can be relaxed in future studies.
+
+
 For all time reversible models, the substitution rate matrix is a product of a symmetric matrix $S$ and the the base frequencies of different states: $Q = S\Pi$, where $S$ is called the exchange rate matrix and $\Pi$ is a diagonal matrix of the base frequencies.
 The mutation rate matrix for 20 amino acids are derived from the $4 \times 4 $ exchange rate matrix for nucleotides.
-This reduces the number of rate parameters from 190 to 6 comparing to treating all the amino acid exchange rates as parameters.\\
+This reduces the number of rate parameters from 190 to 6 comparing to treating all the amino acid exchange rates as parameters.[THE FACT THAT WE ARE DEFINING A NEW Q IS CONFUSING.]
 
-We assume that mutations occur independently between nucleotides at the same codon position.
-Therefore, mutations involving more than one position during time $\Delta t$ will have probabilities on the order of $\Delta t^2$ and are, therefore, ignored.
-First, a $61 \times 61$ sense codon exchange rate matrix is obtained.
-The rate between codon $i$ and $j$ is equal to the rate between the pair of nucleotides if that is the only different pair in all 3 codon positions, and 0 otherwise.\\
-
-
-Second, using the genetic code table, we group the codons that coding for the same amino acid to get the $20 \times 20$ exchange rate matrix $S$ for all amino acids.
-Suppose the sets of codons for amino acids $i$ and $j$ are $I$ and $J$ correspondingly, i.e. $aa_u = i$ for $u \in I$, and $aa_v = j$ for $v \in J$.
-Combining synonymous codons that code for amino acid $j$ into one state, we have $\pi_J = \sum_{v \in J} \pi_v$ as the equilibrium frequency of amino acid $j$.
+From this somewhat sparse $61 \times 61$ codon level mutation rate matrix we can obtain $20 \times 20$ amino acid exchange rate matrix $M$ by grouping together the synonymous codons for each amino acid.
+For example, suppose the sets of synonymous codons for amino acids $i$ and $j$ are $I$ and $J$ correspondingly, i.e. $c_u = i$ for $u \in I$, and $c_v = j$ for $v \in J$.[I GOT LOST AFTER THIS. NOTE THAT $\pi_i$ IS NEVER CLEARLY DEFINED.]
+Combining synonymous codons $J$ into one state, we have $\pi_J = \sum_{v \in J} \pi_v$ as the equilibrium frequency of amino acid $j$.
 The exchange rate matrix for a reversible Markov process of amino acid mutation $S$ has entries:
 \[\mu_{IJ} = \sum_{u \in I} \sum_{v \in J} \pi_u \pi_v s_{uv} / (\pi_I \pi_J)\]
 \noindent
 And $q_{IJ} = s_{IJ} \pi_J$ with $s_{IJ}  = s_{JI}$ constitutes the mutation rate matrix $M$.
 For detailed derivation see Yang(MBE 1998).
 The mutation process is time reversible, i.e. $\pi_I \mu_{IJ} = \pi_J M_{JI}$ is satisfied for all $1 \leq I,J \leq 20$.
-We assume that for each amino acid its different genetic codes have the same frequency.
-Therefore, the mutation rates between amino acids only depend on the frequencies of amino acids. \\
+[THIS SECTION STILL NEEDS WORK]
 
-Studies show that fixation of mutations between dissimilar amino acids is generally rare.
-Therefore, in addition to the effects of mutation bias our model also considers the effects of natural selection on the amino acid sequence of a gene.
-We begin by assuming that there is an optimal amino acid for each position in a protein and non-optimal amino acids are subjected to natural selection.
-The functionality of an amino acid depends on its scaled physiochemical distance (Grantham, Science 1974) from the optimal amino acid, the sensitivity of the protein's functionality to the physicochemical distance and the protein production rate of the gene. \\
+\subsection*{Calculating the Fixation Probability Matrix $F$}
+While the mutation rate matrix $M$ accounts for the effects of the structure of the genetic code and mutation bias on the generation of new alleles,  $F$ describes the probability any such mutation will go to fixation.
+Unlike most models in phylogenetics, we calculate $F$ based on the results from models in population genetics which explicitly include the effects of natural selection and genetic drift. 
+
+% (Grantham, Science 1974) from the optimal amino acid, the sensitivity of the protein's functionality to the physicochemical distance and the protein production rate of the gene.
+
+Modeling the relationship between amino acid sequence and protein function is a complex and challenging problem [CITATION].
+No general techniques that accurately predict a protein's structure, much less function currently exist.
+However, empirical data indicates that the positive or negative effect of an amino acid on a protein's function depends largely on its physiochemical properties.
+As a result, we assume that for each site $i$ in the protein there is an optimal amino acid $k_i$ and that the substitution of non-optimal amino acids at a given site reduces the protein's functionality.
+While the biological role of a protein varies between genes, we define a protein as having 100\% functionality if it consists solely of the optimal amino acid at every site.
+As a result, non-optimal amino acids are subjected to purifying selection.
+As we explain below, the strength of this selection is a function of the physiochemical differences between the non-optimal amino acid and the optimal amino acid, as well as a functional sensitivity term, and the expression level of the gene, specifically its average protein production rate.
+
 
 %%%intro of the physicochemical distance between amino acids, from Grantham's paper%%%
-Among the properties of amino acid side chain that correlate with relative substitution rate, composition ($c$), polarity ($p$) and molecular volume ($v$) have strongest correlation.
+\citet{Grantham74} developed a set of scaled physiochemical distance metrics based on the composition ($c$), polarity ($p$) and molecular volume ($v$) of an amino acid's side chain.
 Composition is defined as the atomic weight ratio of noncarbon elements in end groups or rings to carbons in the side chain.
 The last two properties are from published data (add ref).
-The overall physicochemical difference between any two amino acids $i$ and $j$ combines the three properties: $d_{ij} = [\alpha (c_i-c_j)^2 + \beta (p_i - p_j)^2 + \gamma (v_i - v_j)^2]$ where $\alpha, \beta, \gamma$ are the corresponding weights for the 3 components.
+Numerous studies [CITATIONS] have since shown that there is a strong, negative correlation between the substitution rates between amino acids and the differences in their physiochemical properties as identified by Grantham.
+Following \citet{Grantham74}, we calculate the overall physicochemical difference between any two amino acids $i$ and $j$, $d_{ij}$ as a function of their weighted distances in the $c$, $p$, and $v$ physiochemical space, i.e. $d_{ij} = [\alpha (c_i-c_j)^2 + \beta (p_i - p_j)^2 + \gamma (v_i - v_j)^2]$ where $\alpha, \beta, \gamma$ are the corresponding weights for the 3 components.
+Clearly other metrics and scalings could be used.
+
 Grantham (1974) assigned weights to these three factors based on the average chemical distance given by the corresponding property alone.
 Take the composition for example, given the values for this property $c_i$'s for 20 amino acids, its weight $\alpha$ is defined as $(1/\bar{D}_c)^2 = 1.833$ where $\bar{D}_c = \sum[(c_i - c_j)^2]^{1/2}/\binom{20}{2}$.
 The weights for polarity and molecular volume obtained in the same way are $\beta = 0.1018$ and $\gamma = 0.000399$.
