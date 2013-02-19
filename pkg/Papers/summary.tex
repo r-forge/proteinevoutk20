@@ -24,12 +24,12 @@ Known models of amino acid substitution fall into two categories: empirical mode
 In empirical models, the substitution rates are based solely on the amino acid frequencies observed in given database.
 %empirical observations of sequence data and, in contrast to mechanistic models, are not 
 Empirical models are commonly used in phylogenetic studies and include  Dayhoff, JTT, WAG, LG, etc. 
-[CAN ONE FORMULATE A NON-MECHANISTIC CODON LEVEL MODEL? AMINO ACID MODEL?]
+[CAN ONE FORMULATE A NON-MECHANISTIC CODON LEVEL MODEL? AMINO ACID MODEL?  -YES]
 In contrast, in mechanistic model the substitution matrices are based on the actual biological processes thought to drive sequence evolution, such as natural selection and mutation bias.
 Although less commonly used, there are a number of notable models in this area including [CITATIONS].
 
 Mechanistic models are usually formulated at one of three different levels: DNA, codon and amino acid (AA) level.
-DNA-based models use the most data and are often the most powerful in terms of their ability to distinguish between closely related sequences.
+DNA-based models use the most data and are often the most powerful in terms of their ability to distinguish between closely related sequences. [NO, CODON BASED MODELS HAVE THE MOST DATA: ALL THE INFO IN DNA, PLUS KNOWING WHAT AA WILL BE MADE]
 A popular example of a mechanistic, codon-based model is \cite{YangEtAl98}.
 This implemented a few mechanistic models at the level of codons and explicitly modeled the biological processes involved, including different mutation rates between nucleotides, and the translation of the codon triplet into an amino acid. 
 In contrast to codon-based models, AA-based models ignore synonymous differences between sequences by focusing not on the codons themselves but the amino acids they code for.
@@ -45,20 +45,20 @@ Their model incorporated transition vs.~transversion bias, synonymous vs.~nonsyn
 The selective restraints at the amino acid level was accounted for by multiplying the substitution rate by a factor $\exp (d_{aa_i,aa_j}/V)$ where $d_{aa_i, aa_j}$ is the distance between amino acids $aa_i$ and $aa_j$ given by Grantham (1974) (i.e.~Grantham Distances) and $V$ is a parameter representing the variability of the gene or its tendency to undergo non-synonymous substitution.
 
 
-It is important to note that whether empirical or mechanistic, most phylogenetic models, including the GY model, are general time reversible (GTR).
-In GTR models, the substitution rate matrix used is symmetric such that the exchange rate of any given site going from state $i$ to state $j$ is equal to the rate of that site going from state $j$ to state $i$.
+It is important to note that whether empirical or mechanistic, most phylogenetic models, including the GY model, are time-reversible. [GTR IS A PARTICULAR MODEL, NOT THE TERM FOR ALL TIME REVERSIBLE MODELS]
+In time-reversible models, the substitution rate matrix used is symmetric such that the exchange rate of any given site going from state $i$ to state $j$ is equal to the rate of that site going from state $j$ to state $i$.
 While time reversibility provides substantial mathematical and computational advantages, the substitution rate matrices are difficult to interpret biologically if one assumes natural selection is acting consistently on a given site.
 Surprisingly this lack of inconsistency has gone largely unrecognized.
 By definition, if the substitution of state $i$ to $j$ is favored by natural selection, in the absence of mutation bias it must occur at a faster rate than the reverse substitution of $j$ to $i$.
-While mutation bias can alter this requirement when selection is weak, it can only do so when the assumption of GTR is violated.
-For example, consider a GTR codon-level substitution models where synonymous substitutions occur at a faster rate than non-synonymous substitutions.
+While mutation bias can alter this requirement when selection is weak, it can only do so when the assumption of time reversibility is violated.
+For example, consider a time-reversible codon-level substitution models where synonymous substitutions occur at a faster rate than non-synonymous substitutions.
 For any given state of the system, such a model implies that the current amino acid is optimal since synonymous substitutions occur at a faster rate than non-synonymous ones.
 However, once a non-synonymous substitution has occurred (and as time goes to infinity it will),  the time reversible aspects of the model now imply that the new state is the optimal state and the old state is sub-optimal.
-Thus, the only reasonable way to interpret such a GTR model is that the substitution matrix is actually describing the rate at which the optimal state switches at a given site and that once such a switch has occurred the system instantaneously shifts to the new state.
-If, in contrast, one were to assume the converse, that non-synonymous substitution occur at a faster rate than synonymous, then the interpretation of GTR models becomes even more problematic from a biological perspective.
+Thus, the only reasonable way to interpret such a time-reversible model is that the substitution matrix is actually describing the rate at which the optimal state switches at a given site and that once such a switch has occurred the system instantaneously shifts to the new state.
+If, in contrast, one were to assume the converse, that non-synonymous substitution occur at a faster rate than synonymous, then the interpretation of time-reversible models becomes even more problematic from a biological perspective.
 In such a scenario, not only is the optimal state constantly changing, the current state of any given site is always sub-optimal.
 
-While GTR models have played an important role in the development of the field of phylogenetics,  in order be able to model natural selection and mutation bias in a realistic manner the assumption of time reversibility must be relaxed.
+While time-reversible models have played an important role in the development of the field of phylogenetics,  in order be able to model natural selection and mutation bias in a realistic manner the assumption of time reversibility must be relaxed.
 In this study we develop an amino-acid based model in which we assume that for each individual site there's a corresponding optimal amino acid $\hat{a}$.
 The optimal state can be assigned or, as we demonstrate, estimated from the data itself.
 As with the GY model, we assume that the substitution rate between amino acids at a given site is a function of their Grantham distances $d_{i,j}$ from optimal amino acids and, in a similar manner, assume genes can vary in their sensitivities to such changes.
@@ -70,7 +70,7 @@ Furthermore, unlike most models in phylogenetics, we define the fitness of a giv
 We then use a model from population genetics to calculate the substitution rate between any two genotypes by explicitly taking into account the fitness differences between genotypes as well as the effects of mutation bias and genetic drift.
 We illustrate our approach by fitting our model's likelihood function to the \cite{RokasEtAl03} data set of 106 genes sequenced from 8 different species of yeast.
 When fitting our model, we can estimate the phylogenies of the yeast species, the Grantham sensitivity $g$ of a gene (roughly comparable to $1/V$ in the GY model), as well as state optimal amino acid $\hat{a}$ for any given site in a coding sequence.
-Using AIC we compare our model's fit to the Rokas data to other commonly used GTR AA-based models [LIST MODELS -- IF WE STICK TO AA MODELS, WHY DO WE SPEND SO MUCH TIME DISCUSSING THE GY MODEL WHICH IS A CODON LEVEL MODEL?].
+Using AIC we compare our model's fit to the Rokas data to other commonly used GTR AA-based models [LIST MODELS -- IF WE STICK TO AA MODELS, WHY DO WE SPEND SO MUCH TIME DISCUSSING THE GY MODEL WHICH IS A CODON LEVEL MODEL? --ANSWER: WE DON'T HAVE A CODON MODEL, WE HAVE AN AA MODEL WHERE THE MUTATION RATES ARE BASED ON DNA DATA. SO WE TRY TO EXPLAIN THE AA DATA AND COMPARE IT TO AA MODELS].
 These results show that even with our most parameter rich model in which we estimate the optimal amino acid at every site, thereby introducing tens of thousands of additional parameters, our model does a substantially better job fitting the Rokas dataset.
 So although the computational cost of our model is greater than most GTR models,  our ability to fit the phylogenetic data and extract biologically meaningful information is substantially greater than other models.
 Furthermore, because our approach explicitly links genotype to phenotype, phenotype to fitness, and fitness to fixation rate, the biological assumptions underlying our model are clearly stated and our ability to incorporate additional biological factors, such as selection on codon usage bias, are greatly enhanced.
@@ -89,7 +89,7 @@ As a result, our approach is applicable to any homologous protein-coding DNA seq
 In our model we assume that for any given site there is an optimal amino acid for that site.
 The strength of natural selection for the optimal amino acid can vary between sites and genes.
 The strength of selection is modeled to be a function of the gene's expression level, the physiochemical properties of a given amino acid, and the sensitivity of the gene's functionality to changes in these properties.
-As a result, our approach uses 20 different substitution rate matricies, one for each amino acid. 
+As a result, our approach uses 20 different substitution rate matrices, one for each amino acid. 
 The states of the substitution matrices these same 20 amino acids.
 Additional, nonnatural amino acids can be easily incorporated into our framework.
 Each substitution matrix consists of a  $20 \times 20$ rate matrix $Q^k(\vec{\Lambda})=\{Q^k_{i,j}(\vec{\Lambda})\}$ where $Q^k_{ij}(\vec{\Lambda})$ represents the instantaneous rate that amino acid $i$ will be substituted by amino acid $j$ given a set of parameters $\vec{\Lambda}$.[WE COULD FORMULATE THIS MORE GENERALLY, I.E. AT THE CODON LEVEL (61x61) AND THEN SIMPLIFY TO IGNORE CODON DIFFERENCES AA.]
@@ -464,6 +464,6 @@ On the other hand there is directional selection leading to an increase in fitne
 When the ancestral sequences are estimated from the new model the fitness is significantly higher. 
 And WAG simulation leads to a decrease in fitness while the fitness is maintained under simulation with the new model.
 No matter how the ancestral sequences are obtained, the new model presents a better match to the observed data.
-This realistic behavior shows that the new model is more adequate than the WAG model for Rokas's data.
+This realistic behavior shows that the new model is more adequate than the WAG model for Rokas's data. [I THINK WE SHOULD USE THE ACTUAL BEST MODEL UNDER PROTTEST, PLUS  AA BASED ON GY94 AND GTR CODON/NUCLEOTIDE MODELS]
 
 \end{document}
