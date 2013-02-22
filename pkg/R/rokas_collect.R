@@ -45,7 +45,25 @@
 # opwdir <- "~/BackupProEvo/Newton/opw_short/"
 maxdir <- "~/BackupProEvo/Newton/rokas_max/"
 #majdir <- "~/BackupProEvo/Newton/rokas_maj/"
-
+#################################################################
+##Find the functionality of observed sequences at 8 extant species, 
+##with optimal aa sequence, Grantham sensitivity, distant matrix estimated from data
+## Use these, combined with the Phi values, to find the relationship between Phi and g.
+ftny_all <- matrix(nrow=106,ncol=8)
+for(genect in 70:106){
+  filename = paste(maxdir, "gene",genect,"_s_weight.RData",sep="")
+  if(!file.exists(filename))
+    cat("load RData for gene", genect,"failed, file does not exist","\n")
+  load(filename)
+  source("~/proteinevoutk20/pkg/R/main.R")
+  data <- res_op$data
+  index <- attr(data,"index")
+  datamat <- matrix(unlist(data),nrow=8,byrow=T)
+  datamat <- datamat[,index]
+  if(max(datamat)<=20) #Do not calculate if there is amino acid order bigger than 20
+    ftny_all[genect,] <- apply(datamat,1,Ftny_protein,protein_op=res_op$ll$opaa[index],s=res_op$s,DisMat=res_op$dismat)
+}
+#################################################################
 res_max <- vector("list",length=106)
 l <- 106
 for(genect in 1:l){
