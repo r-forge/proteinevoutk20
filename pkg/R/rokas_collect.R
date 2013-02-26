@@ -44,7 +44,7 @@
 # opw1dir <- "~/BackupProEvo/Newton/opwFirst_short/"
 # opwdir <- "~/BackupProEvo/Newton/opw_short/"
 maxdir <- "~/BackupProEvo/Newton/rokas_max/"
-#majdir <- "~/BackupProEvo/Newton/rokas_maj/"
+majdir <- "~/BackupProEvo/Newton/rokas_maj/"
 #################################################################
 ##Find the functionality of observed sequences at 8 extant species, 
 ##with optimal aa sequence, Grantham sensitivity, distant matrix estimated from data
@@ -120,22 +120,22 @@ sw_max <- rbind(s_max,GM_max[2,],GM_max[3,])
 # # br_opw <- sapply(1:106,function(x) sum(res_opw[[x]]$tree$edge.length))
 # # opw_opw <- sapply(1:106, function(x) res_opw[[x]]$opw)
 # 
-# res_maj <- vector("list",length=106)
-# l <- 106
-# for(genect in 1:l){
-#   filename = paste(majdir, "gene",genect,"_s_weight.RData",sep="")
-#   if(!file.exists(filename))
-#     cat("load RData for gene", genect,"failed, file does not exist","\n")
-#   load(filename)
-#   res_maj[[genect]] <- res_op
-# }
-# 
-# s_maj <- sapply(1:106,function(x) res_maj[[x]]$s)
-# loglik_maj <- sapply(1:106,function(x) res_maj[[x]]$ll$loglik)
-# GM_maj <- sapply(1:106,function(x) res_maj[[x]]$GMweights)
-# Q_maj <- sapply(1:106,function(x) res_maj[[x]]$Q)
-# br_maj <- sapply(1:106,function(x) sum(res_maj[[x]]$tree$edge.length))
-# sw_maj <- rbind(s_maj,GM_maj[2,],GM_maj[3,])
+res_maj <- vector("list",length=106)
+l <- 106
+for(genect in 1:l){
+  filename = paste(majdir, "gene",genect,"_s_weight.RData",sep="")
+  if(!file.exists(filename))
+    cat("load RData for gene", genect,"failed, file does not exist","\n")
+  load(filename)
+  res_maj[[genect]] <- res_op
+}
+
+s_maj <- sapply(1:106,function(x) res_maj[[x]]$s)
+loglik_maj <- sapply(1:106,function(x) res_maj[[x]]$ll$loglik)
+GM_maj <- sapply(1:106,function(x) res_maj[[x]]$GMweights)
+Q_maj <- sapply(1:106,function(x) res_maj[[x]]$Q)
+br_maj <- sapply(1:106,function(x) sum(res_maj[[x]]$tree$edge.length))
+sw_maj <- rbind(s_maj,GM_maj[2,],GM_maj[3,])
 ###########################################################
 pruneDir <- "~/BackupProEvo/Lab9/prunetree/"
 diffAA <- vector(mode="numeric",length=106)
