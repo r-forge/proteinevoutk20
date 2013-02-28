@@ -752,7 +752,7 @@ llaaw <- function(tree,data,Qall,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=
 ## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
 ## nucleotide transition rate matrix of length 6
 ## this one uses expm for matrix exponentiation
-mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+mllm <- function(data,tree,s,alpha=al,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -766,7 +766,7 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
   if(is.null(Q)) Q = rep(1,6)
   if(is.null(bfaa)) bfaa = findBf2(data) #if bfaa is not given, use the empirical bf
   if(is.null(dismat))
-    dismat = GM_cpv(GM_CPV,al,beta,gamma)
+    dismat = GM_cpv(GM_CPV,alpha,beta,gamma)
   if(is.null(mumat)){
     mumat = aa_MuMat_form(Q)
   }
@@ -775,7 +775,7 @@ mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa
     ll = llop(data,tree,op=opaa,bf=bfaa,Qall=Qall,C=C,Phi=Phi,q=q,Ne=Ne)
   else 
     ll = llaaw(tree,data,Qall,opw,bfaa,C,Phi,q,Ne)
-  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,dismat=dismat,mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,call=call)
+  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(alpha,beta,gamma),Q=Q,dismat=dismat,mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,call=call)
   class(result) = "mllm"
   return(result)
 }
