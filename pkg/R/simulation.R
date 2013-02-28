@@ -1,6 +1,14 @@
 ## source the R file that contains required functions
 #source("~/proteinevoutk20/pkg/R/pphyproevo.R")
 ########################################################################################################
+# find the Gramma rates given the shape parameter and number of categories
+discrete.gamma <- function (alpha, k) 
+{
+  if (k == 1) return(1)
+  quants <- qgamma((1:(k - 1))/k, shape = alpha, rate = alpha)
+  diff( c(0, pgamma(quants * alpha, alpha + 1),1)) * k
+}
+########################################################################################################
 ## Given s, Distance matrix, mutation rate matrix, and other parameters, find the list of 20 rate matrices corresponding to optimal aa 1:20
 ## same function as QAllaa, but all the matrices are scaled in this function
 rate_move_mat <- function(s, DisMat, MuMat,bfaa = rep(1/20,20),C=2, Phi=0.5, q=4e-7, Ne=5e6){
@@ -248,7 +256,9 @@ simulationQ <- function(protein,t,Q,bf=rep(1/20,20)){
   path[,l+2] <- c(path[-1,l+2],NA)  
   return(path)
 }
-
+##################################################################################################
+##result includes the functionality of the protein at each step, mean distance from the optimal protein
+## and the corresponding step functions of fty and distance vectors
 ## simulation based on WAG model
 sim.Wag <- function(t=1,protein,bf,opaa,s,dismat){
   sim <- simulationQ(protein=protein,t=t,Q=WagMat,bf=bf)
@@ -261,7 +271,7 @@ sim.Wag <- function(t=1,protein,bf,opaa,s,dismat){
   #plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
   return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
 }
-
+## simulation based on SAC model, given s, opaa, beta, gamma, bfaa,and starting sequence on a single branch with length t.
 sim.New <- function(s=1,t=10,root,opaa,beta,gamma,bfaa){
   dismat = GM_cpv(GM_CPV,al,beta,gamma)
   mumat = aa_MuMat_form(res_op$Q)
@@ -279,3 +289,19 @@ sim.New <- function(s=1,t=10,root,opaa,beta,gamma,bfaa){
   #return(as.numeric(tail(sim,1)[1:l])) #the sequence at the end of simulation
   return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
 }
+
+##################################################################################################
+## wrapper for seq-gen (seq-gen already installed on the computer)
+## opts is the string of options one would use in the command "seq-gen"
+## opts: [-m MODEL] [-l LENGTH] [-n NUM OF DATASETS] [-p NUM OF PARTITIONS] [-s BRANCH LENGTH SCALING] [-d TOTAL TREE SCALE]
+## [-k ANCESTRAL SEQUENCE] [-c RATES FOR CODON POSITION HETEROGENEITY, 3 numbers] [-a SHAPE OF GAMMA DISN] [-g GAMMA CATEGORIES] 
+## [-i PROPORTION OF INVARIANT SITES] [-t TRANSITION TRANSVERSION RATIO] [-r general rate matrix, 6 numbers][-f e BASE FREQUENCIES]
+## [-z SEED FOR RANDOM NUMBER GENERATOR] [-o prn OUTPUT FILE FORMAT: phylip/relaxed phylip/nexus]
+## [-w ar WRITE ADDITIONAL INFO: ancestral seq/rate for each site] [-q QUIET]
+##################################################################################################
+seq_gen <- function(opts, inputfile, outputfile){
+  command <- paste("seq-gen", opts,"<",inputfile, ">",outputfile,sep=" ")
+  system(command)
+}
+## opts <- "-mWAG -l144 -a3.514 -i0.193 -f0.03559028,0.05121528,0.02777778,0.01649306,0.01388889,0.03472222,0.05121528,0.06944444,0.02777778,0.09375000,0.14409722,0.05034722,0.01909722,0.05815972,0.02864583,0.07552083,0.04687500,0.02343750,0.04600694,0.08593750 -on -war"
+## seq_gen(opts,"gene7.tree","gene7sim.txt")
