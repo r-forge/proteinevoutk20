@@ -169,3 +169,10 @@ plot.grid <- function(index){
 }
 
 ###################################################################
+source("~/proteinevoutk20/pkg/R/main.R") 
+gene10 = conv("~/proteinevoutk20/pkg/Data/gene10.fasta","phyDat") 
+res=mllm1(gene10,ROKAS_TREE,0.1,be,ga,Q=NU_VEC,opw=rep(1,20)) 
+res$ll$loglik 
+res_op = optim.mllm(res,optQ=T,optBranch=T,optsWeight=T,optOpw=T,control=list(epsilon=1e-08,hmaxit=50,htrace=1,print_level=1,maxeval="100")) 
+res_op$ll$loglik 
+save.image(file="gene10_s_weight.RData",compress=TRUE) 
