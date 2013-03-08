@@ -107,6 +107,21 @@ The states of the substitution matrices are these same 20 amino acids.
 Currently, each substitution matrix consists of a  $20 \times 20$ rate matrix $\Qmat^k(\vec{\Lambda})=\{Q^k_{i,j}(\vec{\Lambda})\}$ where $Q^k_{ij}(\vec{\Lambda})$ represents the instantaneous rate that amino acid $i$ will be substituted by amino acid $j$ given a set of parameters $\vec{\Lambda}$.
 Our model could be formulated more generally, such as at the codon level or to include nonnatural amino acids.
 
+<<<<<<< .mine
+Conceptually, we subdivide the parameter set $\vec{\Lambda}$ into two different groups $\vec{\Lambda}_1$ and $\vec{\Lambda}_2$.
+$\vec{\Lambda}_1$ contains the mutation rates between the different codons while $\vec{\Lambda}_2$ contains terms related to genotype fitness and fixation probability.
+More specificially, $\vec{\Lambda}_1$ includes parameters describing the sensitivity of the protein's function to the differences in the physiochemical properties of the optimal and observed amino acid, the average expression level of the gene, specifically protein production rate $\phi$, and effective population size $N_e$.
+The separation of the parameters in $\vec{\Lambda}$ reflects the two step manner in which we chose to calculate the terms of a given rate matrix $Q^k$.
+The first step is calculating the rate at which a given amino acid $i$ mutates into amino acid $j$, $M(\vec{\Lambda}_1) = \{M_{i,j}(\vec{\Lambda}_1)\}$, given the mutation rates between nucleotides and the structure of the genetic code.
+The second step is calculating the probability that the newly introduced allele goes to fixation   $F(\vec{\Lambda}_2) = F^k_{i,j}(\vec{\Lambda}_2)$ given the wild type amino acid $j$, the mutant amino acid $j$, and the optimal amino acid $k$ for the site, and $\vec{\Lambda}_2$.
+Unlike most other work in the field of phylogenetics, the fixation probability $F_{i,j}$ is based on models in the field of population genetics and includes the effects of both natural selection for the optimal amino acid and genetic drift.
+Unlike most other work in the field of phylogenetics, the fixation probability $F_{i,j}$ is based on models in the field of population genetics and includes the effects of both natural selection for the optimal amino acid and genetic drift.
+The elements of the substitution matricies are, therefore, defined as  $Q^k_{i,j} = M_{i,j}(\vec{\Lambda}_1) F^k_{i,j}(\vec{\Lambda}_2)$ for $i \neq j$.
+The diagonal elements of $Q$ are equal to the opposite of their off diagonal row sums.
+As a result, as usual, the row sums of $Q^k$ equal 0.
+Furthermore, the matrix describing the substitution probability of amino acid $i$ to amino acid $j$ as a function of time is $P^k(t|\vec{\Lambda}) = \exp\left[Q^k(\vec{\Lambda}) t\right]$. [IS MY PHRASING CORRECT?] % such that $P^k_{i,j}(t|\vec{\Lambda})= M_{i,j}(\vec{\Lambda}_1) F^k_{i,j}(\vec{\Lambda}_2)$
+=======
+>>>>>>> .r376
 
 Conceptually, we subdivide the parameter set $\vec{\Lambda}$ in two:  $\vec{\Lambda}_M$ and $\vec{\Lambda}_F$.
 The subset of parameters  $\vec{\Lambda}_M$ contains the mutation rates between the different amino acids while the subset $\vec{\Lambda}_F$ contains parameters related to genotype fitness and fixation probability.
@@ -165,12 +180,20 @@ In our model, the strength of purifying selection is a function of the physioche
 \paragraph*{Linking Amino Acid Sequence to  Protein Functionality:}
 In our model we avoid having to calculate the absolute functionality of a given protein and, instead, define it relative to some optimal amino acid sequence.
 More specifically, the relative functionality of a given amino acid sequence $\vec{a} = (a_1, a_2, \cdots, a_n)$  is a function of the differences between it's physiochemical properties  and the optimal amino acid sequence $\avecopt = (\aopt_1, \aopt_2, \cdots \aopt_n)$ where $n$ is protien length.
-\citet{Grantham74} developed a set of scaled physiochemical distance metrics based on the composition ($c$), polarity ($p$) and molecular volume ($v$) of an amino acid's side chain.
+\cite{Grantham74} developed a set of scaled physiochemical distance metrics based on the composition ($c$), polarity ($p$) and molecular volume ($v$) of an amino acid's side chain.
+<<<<<<< .mine
+Composition is defined as the atomic weight ratio of noncarbon elements in end groups or rings to carbons in the side chain.
+The last two properties are from published data (add ref).
+Numerous studies [CITATIONS] have since shown that there is a strong, negative correlation between the substitution rates between amino acids and the differences in their physiochemical properties as identified by Grantham.
+Following \cite{Grantham74}, we calculate the overall physicochemical difference between any two amino acids $i$ and $j$, $d_{ij}$ as a function of their weighted distances in the $c$, $p$, and $v$ physiochemical space, i.e. $d_{ij} = [\alpha (c_i-c_j)^2 + \beta (p_i - p_j)^2 + \gamma (v_i - v_j)^2]^{1/2}$ where $\alpha, \beta, \gamma$ are the corresponding weights for the 3 components.
+Clearly other metrics and scalings could be used.
+=======
 Composition is defined as the atomic weight ratio of noncarbon elements in end groups or rings to carbons in the side chain while side chain polarity and molecular volume are well established.
 Numerous studies [CITATIONS] have since shown that there is a strong, negative correlation between the substitution rates between amino acids and the differences in the physiochemical properties $c$, $p$, and $v$.
 Following \citet{Grantham74}, we define the physiochemical Grantham distance between amino acids $a_i$ and $a_j$ as  $d(a_i, a_j)$ and assume it is a function of their weighted distances in $c$, $p$, and $v$ physiochemical space.
 More precisely, we assume $d\left(a_i, a_j\right) = [\alpha \left(c\left(a_i\right)-c\left(a_j\right)\right)^2 + \beta\left(p\left(a_i\right) - p\left(a_j\right)\right)^2 + \gamma\left(v\left(a_i\right) - v\left(a_j\right)\right)^2]$ where $\alpha, \beta, \gamma$ are the corresponding weights for the 3 components.
 Clearly, other properties, distance measures, and scalings could be used.
+>>>>>>> .r376
 
 In Grantham (1974) the physiochemical weighting factors $\alpha$, $\beta$, and $\gamma$ were calculated such that the mean distance between all possible amino acids pairs in any given axis of physiochemical space, i.e. $c$, $p$, or $v$, is 1.
 For example, given the values for this property $c\left(a_i\right)$'s for 20 amino acids, its weight $\alpha$ is defined as $(1/\bar{D}_c)^2 = 1.833$ where $\bar{D}_c = \sum_{i=1}^{20}  \sum_{j=1}^{20}[(c\left(a_i\right) - c\left(a_j\right))^2]^{1/2}/\binom{20}{2}$.
@@ -202,13 +225,13 @@ Here we assume that the cost of protein translation does not vary between \avec 
 Thus,
 \begin{equation}
 \label{eq:etadef}
-\eta\left(\avec\middle|\right\) = \frac{C(n)}{F\left(\vec{a}\middle| \avecopt,\vec{g}\right)},
+\eta\left(\avec |\right) = \frac{C(n)}{F\left(\vec{a} | \avecopt,\vec{g}\right)},
 \end{equation}
 where $C(n)$ is the cost of producing a protein of length $n$.
 Based on the basic biology of protein translation, we define $C(n) = a_1 + a_2 n $ where  $a_1 = 4 \text{ATP}$ is the cost in ATPs of ribosome assembly on an mRNA transcript and $a_2 = 4 \text{ATP}$ is the cost in ATPs of tRNA charging and the moving the ribosome forward one codon.
 
 For a given gene, we assume that there is a mean target functionality production rate, i.e.~the average rate at which the organism requires the production of the functionality encoded by that gene.
-Thus, if $\eta(\avec\)$ represents the cost of producing one unit of functionality and the organism, on average, needs to produce that functionality at rate $\phi$, then $\eta(\avec) \times \phi$ represents the rate at which the organism must spend energy to meet its functionality requirement for a given gene.
+Thus, if $\eta(\avec)$ represents the cost of producing one unit of functionality and the organism, on average, needs to produce that functionality at rate $\phi$, then $\eta(\avec) \times \phi$ represents the rate at which the organism must spend energy to meet its functionality requirement for a given gene.
 Letting $q$ represent the proportional gain in fitness for each ATP saved per unit time, we can define the relative fitness of a genotype $i$ as,
 \[
 f(\avec_i) = f_i  \propto \exp\{-\frac{\Phi q C(n)}{F\left(\avec_i\middle|\avecopt\right)}\}.
@@ -219,7 +242,7 @@ Note that $n$, $\phi$, and \avecopt vary between loci, \avec varies between alle
 %fixation probability 
 Following the model of allele fixation presented by \citet{SellaAndHirsh05}, the fixation probability of a newly introduced mutant allele $\avec_j$ in a Fisher-Wright population with the resident allele $\avec_i$ and an effective size of $N_e$ is,
 \begin{equation}
-\pi_{ij} = \pi\left(\avec_i \to \avec_j \right) = \frac{1-\left(f\left(\avec_i\right)/f\left(\avec_j\right)\right)^$\alpha$}{1-\left(f\left(\avec_i\right)/f\left(\avec_j\right)\right)^{2N_e}}.
+\pi_{ij} = \pi\left(\avec_i \to \avec_j \right) = \frac{1-\left(f\left(\avec_i\right)/f\left(\avec_j\right)\right)^\alpha}{1-\left(f\left(\avec_i\right)/f\left(\avec_j\right)\right)^{2N_e}}.
 \label{eq:fixation}
 \end{equation}
 where $\alpha = 1$ for a diploid population and $2$ for a haploid population.
@@ -255,7 +278,7 @@ When $\avec_i$ and $\avec_j$ only differ at a single amino acid position $k$, th
  & = &\exp \left[-q \phi \left( \frac{ C(n) }{F\left(\avec_i \right)} - \frac{ C(n)}{F\left(\avec_j \right)}\right)\right] \nonumber\\
 %& = & \exp\left[ -\frac{A}{n}\left(d_k^i s_k - d_k^j s_k\right)\right]\\
 %& = & \exp\left[ -\frac{C\Phi q}{n}\left(d_k^i s_k - d_k^j s_k\right)\right]\\
-& = & \exp\left[ - q \phi \frac{C(n)}{n}\left(d_k^{(i)} - d_k^{(j)}\right) g\right]
+& = & \exp\left[ - q \phi \frac{C(n)}{n}\left(d_k^{(i)} - d_k^{(j)}\right) g\right]\\
 & = & \exp\left[ - q \phi a_2 \left(d_k^{(i)} - d_k^{(j)}\right) g\right] \label{eq:ratio}
 \end{eqnarray}
 where, again, $a_2$ is the cost of each elongation step during protein translation. 
@@ -282,7 +305,7 @@ q_{ij} = 2N_e \mu_{ij} \pi_{ij}.
 Given the values for $\left(M_{\nu},g, \alpha, \beta, \gamma, C, \Phi, q, N_e\right)$, the frequencies of different amino acids and the optimal amino acid at a site, we can calculate the $20 \times 20$ instantaneous substitution rate matrix $\Qmat^k$ for the Markov process. 
 $\Qmat$ is scaled by the frequencies of amino acids to satisfy $\sum_{i=1}^{20} \pi_i q_{ii}= -1$.
 Under this restraint, the length of a branch represents the expected number of substitutions along the branch.
-With the probabilities $P(t)  = \exp\left(\Qmat t)$ the likelihood for a given tree topology can be calculated following Felsenstein (1981).
+With the probabilities $P(t)  = \exp\left(\Qmat t\right)$ the likelihood for a given tree topology can be calculated following Felsenstein (1981).
 Since all sites are independent, we can calculate the likelihood of observing the sequence data at the tips of a phylogenetic tree $T$ with given topology and branch lengths by multiplying the likelihood values at all sites.\\
 
 %table of parameters in the model%
