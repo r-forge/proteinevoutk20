@@ -24,18 +24,3 @@ plot(true.phi, gphi/true.phi, log="y")
 plot(bad.phi, gphi/bad.phi, log="y")
 plot(awful.phi, gphi/awful.phi,log="y")
 #plot(true.phi, gphi)
-
-phi <- rokasPhi
-phi$Ingolia <- NULL
-phi$gene <- NULL
-phi.log <- log(phi)
-phi.log.center <- phi.log
-for(i in 1:3){
-  phi.log.center[,i] <- phi.log[,i] - mean(phi.log[,i],na.rm=TRUE)
-}
-phi.log.mean <- colMeans(phi.log.center,na.rm=TRUE)
-
-nas <- which(is.na(phi.log.center$SEMPPR))
-gphi <- s_max[-nas]
-phi.log.center <- phi.log.center[-nas,]
-cphi <- phi.log.center #rename the centered log phi values as cphi -- shorter name
