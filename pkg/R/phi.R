@@ -1,19 +1,6 @@
-##   Read in 106 gene data  from Rokas's ##
-#source("~/proteinevoutk20/pkg/R/main.R")
-l <- 106
-ROKAS_DATA <- vector("list",length=l)
-##data stores the data of all genes in rokas's data
-for(i in 1:l){
-  ROKAS_DATA[[i]] <- conv(paste(datadir,"gene",i,".fasta",sep=""),type="AA")
-}
-rm(l)
-rokasdata = read.phyDat("~/proteinevoutk20/pkg/Data/rokasAA",type="AA")
-rokasAA = vector(mode="list",8)
-for(i in 1:106){
-  for(j in 1:8){
-    rokasAA[[j]] <- c(rokasAA[[j]],ROKAS_DATA[[i]][[j]])
-}
-}
+## load RData file for gphi values
+load("~/proteinevoutk20/pkg/RData/gphi.RData")
+gphi <- s_max
 ############################################################################
 ## read in Phi values for 106 (and more) genes in budding yeast
 rokasPhi <- read.csv("~/proteinevoutk20/pkg/Data/genePhi.csv",header=TRUE)
@@ -37,18 +24,18 @@ rokasPhi$Ingolia <- as.numeric(rokasPhi$Ingolia) #convert character class to num
 rokasPhi$Beyer <- as.numeric(rokasPhi$Beyer)
 rokasPhi$SEMPPR <- as.numeric(rokasPhi$SEMPPR)
 rokasPhi$Ing <- as.numeric(rokasPhi$Ing)
-
 ############################################################################
-## analysis of mtDNA data of primates on 12 species, length = 898 including noncoding region
-prim <- read.nexus.data("~/Garli-2.0-anyOSX/example/basic/primates.nex")
-for(i in 1:length(prim)){
-  prim[[i]] <- prim[[i]][c(2:457,660:896)] #coding region
+phi <- rokasPhi
+phi$Ingolia <- NULL #drop the first column, which is proportional to the last column
+phi$gene <- NULL #drop gene names
+phi.log <- log(phi) # log phi
+phi.log.center <- phi.log
+for(i in 1:3){
+  phi.log.center[,i] <- phi.log[,i] - mean(phi.log[,i],na.rm=TRUE) #centered log phi values
 }
-prim.AA <- lapply(prim,translate,numcode=2) #mtDNA
-prim.phy <- phyDat(prim.AA,type="AA") #in phyDat format
-tre <- read.nexus("~/proteinevoutk20/pkg/Data/primates.tre") #read the tree
-rtre <- (root(tre,1:2,resolve.root=T)) # root the phylogeny
-prim.vec <- c(3.56175, 43.70565, 3.02842, 2.34962, 34.63963, 1.00000)
-prim.res <- mllm1(prim.phy,rtre,s=1,beta=be,gamma=ga,Q=rep(1,6))
-optim.prim <- optim.mllm1(prim.res,optQ=T,optBranch=T,optsWeight=T,control = list(epsilon=1e-08,hmaxit=10,htrace=TRUE,print_level=1,maxeval="300"))
+phi.log.mean <- colMeans(phi.log.center,na.rm=TRUE)
 
+nas <- which(is.na(phi.log.center$SEMPPR)) #genes with NA in SEMPPR phi values
+gphi <- gphi[-nas] #drop those genes without phi values
+phi.log.center <- phi.log.center[-nas,] #drop the same genes
+cphi <- phi.log.center #rename the centered log phi values as cphi -- shorter name

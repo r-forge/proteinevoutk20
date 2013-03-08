@@ -125,6 +125,9 @@ conv <- function(filename,type="num"){
   }
   ## type = AA, return a list of amino acid sequences
   seqdata <- lapply(1:length(data),dna.to.aa)
+  seqdata <- matrix(unlist(seqdata),nrow=length(data),byrow=TRUE)
+  na.index <- which(seqdata=="X",arr.ind=TRUE)
+  seqdata <- seqdata[,-na.index[2]]
   names(seqdata) = attr(data,"name")
   if(type=="AA")
     return(seqdata)
