@@ -24,18 +24,26 @@ rokasPhi$Ingolia <- as.numeric(rokasPhi$Ingolia) #convert character class to num
 rokasPhi$Beyer <- as.numeric(rokasPhi$Beyer)
 rokasPhi$SEMPPR <- as.numeric(rokasPhi$SEMPPR)
 rokasPhi$Ing <- as.numeric(rokasPhi$Ing)
+#rokasPhi$Ing <- rokasPhi$Ingolia/10000
 ############################################################################
 phi <- rokasPhi
+phi$Ing <- phi$Ingolia/10000 # less NA's in Ing column
 phi$Ingolia <- NULL #drop the first column, which is proportional to the last column
 phi$gene <- NULL #drop gene names
-phi.log <- log(phi) # log phi
+na.col <- sort(unique(arrayInd(which(is.na(phi)),.dim=c(106,3))[,1])) #columns with NA in it
+phi <- phi[-na.col,]
+phi.mat <- data.matrix(phi) #convert to matrix
+gphi <- gphi[-na.col] # phi and gphi without NA's 
+lgphi <- log(gphi)
+#phi.log <- log(phi) # log phi
+phidata <- log(phi)
+phidata$lgphi <- lgphi
+
 phi.log.center <- phi.log
 for(i in 1:3){
   phi.log.center[,i] <- phi.log[,i] - mean(phi.log[,i],na.rm=TRUE) #centered log phi values
 }
-phi.log.mean <- colMeans(phi.log.center,na.rm=TRUE)
-
-nas <- which(is.na(phi.log.center$SEMPPR)) #genes with NA in SEMPPR phi values
-gphi <- gphi[-nas] #drop those genes without phi values
-phi.log.center <- phi.log.center[-nas,] #drop the same genes
-cphi <- phi.log.center #rename the centered log phi values as cphi -- shorter name
+#phi.log.mean <- colMeans(phi.log.center,na.rm=TRUE)
+clogphi <- phi.log.center #rename the centered log phi values as cphi -- shorter name
+cphidata <- clogphi
+cphidata$lgphi <- lgphi
