@@ -35,10 +35,16 @@ phi <- phi[-na.col,]
 phi.mat <- data.matrix(phi) #convert to matrix
 gphi <- gphi[-na.col] # phi and gphi without NA's 
 lgphi <- log(gphi)
-#phi.log <- log(phi) # log phi
-phidata <- log(phi)
-phidata$lgphi <- lgphi
 
+phidata <- log(phi)
+phidata$lgphi <- lgphi #put all log(phi) values and log(gphi) in the same data frame
+
+############################################################################
+## same data frame with log(phi) values centered at 0, this does not affect the 
+## coefficients in the linear regression, but does affect the intercept
+## new data frame is called cphidata, also with a column for log(gphi) values
+############################################################################
+phi.log <- log(phi) # log phi
 phi.log.center <- phi.log
 for(i in 1:3){
   phi.log.center[,i] <- phi.log[,i] - mean(phi.log[,i],na.rm=TRUE) #centered log phi values
@@ -47,3 +53,22 @@ for(i in 1:3){
 clogphi <- phi.log.center #rename the centered log phi values as cphi -- shorter name
 cphidata <- clogphi
 cphidata$lgphi <- lgphi
+############################################################################
+## analysis procedure on data frame structured like the cphidata or phidata
+## the data frame should have the same structure as phidata,
+## 1st col: Beyer; 2nd col: SEMPPR; 3rd col: Ing; 4th col: log(gphi)
+############################################################################
+phidata.lm <- function(phidata){
+  lm.phi <- lm(lgphi~Beyer+SEMPPR+Ing,data=phidata) #linear regression on 3 measurements
+  print(summary(lm.phi)) #print regression info
+  predict.val <- data.matrix(phidata[,1:3]) %*% lm.phi$coefficients[-1] #weighted phi values
+  gval <- lm.phi$residuals + lm.phi$coefficients[1] #g values
+  opar <- par(no.readonly=TRUE) #original graphical parameter
+  par(mfrow=c(2,2)) # new graphical parameter
+  ##Plot of g vs. phi values
+  plot(gval~predict.val,main="g vs weighted phi/log scale",xlab="weighted phi",ylab="g")
+  plot(gval~phidata$Beyer,main="g vs Beyer phi/log scale",xlab="Beyer phi",ylab="g")
+  plot(gval~phidata$SEMPPR,main="g vs SEMPPR phi/log scale",xlab="SEMPPR phi",ylab="g")
+  plot(gval~phidata$Ing,main="g vs Ingolia phi/log scale",xlab="Ingolia phi",ylab="g")
+  par(opar) #reset to original
+}

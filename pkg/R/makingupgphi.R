@@ -1,8 +1,19 @@
 #true.phi<-runif(106, min=min(rokasPhi$SEMPPR, na.rm=TRUE), max=max(rokasPhi$SEMPPR, na.rm=TRUE))
-true.phi <- rlnorm(100,mean(cphi$SEMPPR),sd(cphi$SEMPPR)) # random samples from log normal distribution
-gphi<-rnorm(length(true.phi), 10*true.phi, 0.1)
+true.phi <- rlnorm(100,mean(phidata$SEMPPR),sd(phidata$SEMPPR)) # random samples from log normal distribution
+gphi<-abs(rnorm(length(true.phi), 2*true.phi, 0.001))
 print(range(true.phi))
 print(range(gphi))
+phi.sd <- 0.01
+phi1<-abs(rnorm(length(true.phi), true.phi, phi.sd))
+phi2<-abs(rnorm(length(true.phi), true.phi, phi.sd))
+phi3<-abs(rnorm(length(true.phi), true.phi, phi.sd))
+mkp.data <- data.frame(Beyer=log(phi1),SEMPPR=log(phi2),Ing=log(phi3),lgphi=log(gphi))
+pairs(mkp.data)
+phidata.lm(mkp.data)
+# mkp.data$Beyer <- log(phi1)
+# mkp.data$SEMPPR <- log(phi2)
+# mkp.data$Ing <- log(phi3)
+# mkp.data$lgphi <- log(gphi)
 #plot(gphi, true.phi)
 bad.phi<-abs(rnorm(length(true.phi), true.phi, 1))
 awful.phi<-runif(100,min=exp(min(cphi$SEMPPR)),max=exp(max(cphi$SEMPPR)))
