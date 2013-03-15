@@ -1,9 +1,11 @@
 #true.phi<-runif(106, min=min(rokasPhi$SEMPPR, na.rm=TRUE), max=max(rokasPhi$SEMPPR, na.rm=TRUE))
-true.phi <- rlnorm(100,mean(phidata$SEMPPR),sd(phidata$SEMPPR)) # random samples from log normal distribution
-gphi<-abs(rnorm(length(true.phi), 2*true.phi, 0.001))
+phi.sd <- 0.1
+true.phi <- exp(phidata$SEMPPR) # random samples from log normal distribution
+loggs <- 1*log(true.phi) #Grantham sensitivity
+gphi<-abs(rnorm(length(true.phi), exp(loggs)*true.phi, 0.001))
 print(range(true.phi))
 print(range(gphi))
-phi.sd <- 0.01
+
 phi1<-abs(rnorm(length(true.phi), true.phi, phi.sd))
 phi2<-abs(rnorm(length(true.phi), true.phi, phi.sd))
 phi3<-abs(rnorm(length(true.phi), true.phi, phi.sd))
