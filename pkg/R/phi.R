@@ -60,15 +60,28 @@ cphidata$lgphi <- lgphi
 ############################################################################
 phidata.lm <- function(phidata){
   lm.phi <- lm(lgphi~Beyer+SEMPPR+Ing,data=phidata) #linear regression on 3 measurements
-  print(summary(lm.phi)) #print regression info
-  predict.val <- data.matrix(phidata[,1:3]) %*% lm.phi$coefficients[-1] #weighted phi values
-  gval <- lm.phi$residuals + lm.phi$coefficients[1] #g values
+  #print(summary(lm.phi)) #print regression info
+  predict.gphi <- lm.phi$fitted.values # est(gphi)
+  weighted.phi <- data.matrix(phidata[,1:3]) %*% lm.phi$coefficients[-1] #weighted phi
+  est.gval <- phidata$lgphi - weighted.phi
+  #est.gval <- lm.phi$coefficients[1]+weighted.phi #est(g)
+  gval <- predict.gphi-weighted.phi
+  #gval <- lm.phi$residuals + lm.phi$coefficients[1] #g values
   opar <- par(no.readonly=TRUE) #original graphical parameter
   par(mfrow=c(2,2)) # new graphical parameter
   ##Plot of g vs. phi values
-  plot(gval~predict.val,main="g vs weighted phi/log scale",xlab="weighted phi",ylab="g")
-  plot(gval~phidata$Beyer,main="g vs Beyer phi/log scale",xlab="Beyer phi",ylab="g")
-  plot(gval~phidata$SEMPPR,main="g vs SEMPPR phi/log scale",xlab="SEMPPR phi",ylab="g")
-  plot(gval~phidata$Ing,main="g vs Ingolia phi/log scale",xlab="Ingolia phi",ylab="g")
+  plot(est.gval~weighted.phi,main="g vs weighted phi/log scale",xlab="weighted phi",ylab="g")
+  plot(est.gval~phidata$Beyer,main="g vs Beyer phi/log scale",xlab="Beyer phi",ylab="g")
+  plot(est.gval~phidata$SEMPPR,main="g vs SEMPPR phi/log scale",xlab="SEMPPR phi",ylab="g")
+  plot(est.gval~phidata$Ing,main="g vs Ingolia phi/log scale",xlab="Ingolia phi",ylab="g")
   par(opar) #reset to original
+  return(lm.phi)
+}
+
+lm.plot <- function(lm,phi){
+  predict.gphi <- lm$fitted.values # est(gphi)
+  #weighted.phi <- data.matrix(phidata[,1:3]) %*% lm.phi$coefficients[-1] #weighted phi
+  est.gval <- lm$coefficients[1]+(lm$coefficients[2]-1)*lm$model[[2]] #est(g): a + b*log(phi)
+  plot((predict.gphi-phi)~phi,main="est(gphi)/obs(phi) vs. obs(phi) on log scale",xlab="obs(phi)",ylab="est(gphi)/obs(phi)")
+  plot(est.gval~phi,main="est(g) vs. obs(phi) on log scale",xlab="obs(phi)",ylab="est(g)")
 }
