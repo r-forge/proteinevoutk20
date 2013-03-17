@@ -38,7 +38,7 @@ lgphi <- log(gphi)
 
 phidata <- log(phi)
 phidata$lgphi <- lgphi #put all log(phi) values and log(gphi) in the same data frame
-
+allphi <- c(data.matrix(phidata[,1:3]))
 ############################################################################
 ## same data frame with log(phi) values centered at 0, this does not affect the 
 ## coefficients in the linear regression, but does affect the intercept
@@ -53,6 +53,7 @@ for(i in 1:3){
 clogphi <- phi.log.center #rename the centered log phi values as cphi -- shorter name
 cphidata <- clogphi
 cphidata$lgphi <- lgphi
+allcphi <- c(data.matrix(cphidata[,1:3]))
 ############################################################################
 ## analysis procedure on data frame structured like the cphidata or phidata
 ## the data frame should have the same structure as phidata,
