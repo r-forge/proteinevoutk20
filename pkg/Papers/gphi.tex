@@ -1,0 +1,24 @@
+\documentclass[13pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{xspace}
+\linespread{1.7}
+
+\begin{document}
+Note: all parameters, including $\phi, g$, are on $\log$ scale.\\
+
+Suppose that $\phi_{ij}$ follows a normal distribution with mean $\phi_i$ and standard deviation $\sigma$: $\phi_{ij} \sim N(\phi_i, \sigma^2)$, and $\phi_i$'s are i.i.d. from $N(\hat{\phi},{\hat{\sigma}}^2)$, where $1 \le i \le n$ and $1 \le j \le m$. In our case, $n = 106$ and $m = 3$. 
+ú
+\begin{eqnarray}
+P(\phi_{ij} | \hat{\phi}, \hat{\sigma},\sigma) & = & \int P(\phi_{ij}, \phi_i | \hat{\phi}, \hat{\sigma}) dF(\phi_i) \nonumber\\
+& = & \int_{-\infty}^{\infty} \phi(\phi_{ij} | \phi_i, \sigma) \phi(\phi_{i} | \hat{\phi}, \hat{\sigma}) d\phi_i \nonumber
+\end{eqnarray}
+where $\phi(x | \mu, \sigma)$ is the probability density function for normal distribution with mean $\mu$ and variance $\sigma^2$. Here if $\sigma$ and $\hat{\sigma}$ are switched, the probability will stay the same, and the variance of $\phi_{ij}$'s is roughly $\sigma^2 + \hat{\sigma}^2$. With the likelihood of observing $\phi_{ij}$ given parameter values for $\hat{\phi}, \hat{\sigma}$ and $\sigma$, we can find the maximum likelihood estimates for the 3 parameters with constraints $\sigma \ge \hat{\sigma}$.
+
+Suppose there is a linear relationship between $g$ and $\phi$: $g_i = a + b\phi_i$, then it follows that $g_i+\phi_i = a + (b+1)\phi_i + \epsilon_i$, for $1 \le i \le n$ where $\epsilon_i$ is the noise in the estimators/observations for gene $i$, and $\epsilon_i \sim N(0, \sigma_e^2)$. Since $\phi_i \sim N(\hat{\phi},\hat{\sigma}^2)$, we have $g_i + \phi_i \sim N(a + (b+1)\hat{\phi}, (b+1)^2\hat{\sigma}^2 + \sigma_e^2)$. With the values for $g_i + \phi_i$, the sufficient statistics (mean and variance) can be found which will provide estimators of $a+(b+1)\hat{\phi}$ and $b+1)^2\hat{\sigma}^2 + \sigma_e^2$. However there are 3 parameters ($a, b$ and $\sigma_e$), which means they are not all identifiable from data. (more than 1 set of parameters can give the maximum likelihood).
+
+\end{document}
