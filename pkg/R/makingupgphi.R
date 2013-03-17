@@ -1,12 +1,14 @@
 #true.phi<-runif(106, min=min(rokasPhi$SEMPPR, na.rm=TRUE), max=max(rokasPhi$SEMPPR, na.rm=TRUE))
-phi.sd <- 0.01
-true.phi <- phidata$SEMPPR # random samples from log normal distribution
-gs <- 0.5+1*true.phi #Grantham sensitivity
-lgphi<-rnorm(length(true.phi), gs+true.phi, 0.01)
+phi.sd <- 0.1
+#true.phi <- phidata$SEMPPR # random samples from log normal distribution
+true.phi <- rnorm(200,1,0.2)
+gs <- 0.5+2*true.phi #Grantham sensitivity
+lgphi<-rnorm(length(true.phi), gs+true.phi, 0.1)
 
 phi1<-rnorm(length(true.phi), true.phi, phi.sd)
-phi2<-rnorm(length(true.phi), true.phi, 2*phi.sd)
-phi3<-rnorm(length(true.phi), true.phi, 5*phi.sd)
+phi2<-rnorm(length(true.phi), true.phi, phi.sd)
+phi3<-rnorm(length(true.phi), true.phi, phi.sd)
+allphi <- c(phi1,phi2,phi3)
 mkp.data <- data.frame(Beyer=phi1,SEMPPR=phi2,Ing=phi3,lgphi=lgphi)
 pairs(mkp.data)
 phidata.lm(mkp.data)
