@@ -25,21 +25,21 @@ optim.phi.sigma <- function(phis,phi_hat,sigma,sigma_hat,maxeval="500",print_lev
   return(res)
 }
 
-lik_gphi <- function(gphi,a,b,phi_hat,sigma_hat,sigma_e){
-  dnorm(gphi,mean=a+(b+1)*phi_hat,sd=sqrt(((b+1)^2*sigma_hat^2)+sigma_e^2))
+lik_gphi <- function(gphi,phi,sigma,a,b,sigma_e){
+  dnorm(gphi,mean=a+(b+1)*phi,sd=sqrt(((b+1)^2*sigma^2)+sigma_e^2))
 }
-lik_gphi_vec <- Vectorize(lik_gphi,vectorize.args="gphi")
-optim.ab.sigma_e <- function(gphis,a,b,phi_hat,sigma_hat,sigma_e,maxeval="500",print_level=1){
+lik_gphi_vec <- Vectorize(lik_gphi,vectorize.args=c("gphi","phi"))
+optim.ab.sigma_e <- function(gphis,phis, a,b,sigma,sigma_e,maxeval="500",print_level=1){
   ## a function of x that return the sum of -loglikelihood values for all genes with s optimized separately for different genes
-  ab <- c(a,b,sigma_e)
+  ab <- c(a,b,log(sigma_e))
   fn <- function(ab){
     cat(ab,"\n")
-    loglik <- -sum(log(lik_gphi_vec(gphis,a=ab[1],b=ab[2],
-                                   phi_hat=phi_hat,sigma_hat=sigma_hat,sigma_e=ab[3])))
+    loglik <- -sum(log(lik_gphi_vec(gphi=gphis,phi=phis,sigma=sigma,a=ab[1],b=ab[2],
+                                    sigma_e=exp(ab[3]))))
     return(loglik) #summation of all values
   }
   
-  lower <- c(-100,-100,0.01) #lower bound
+  lower <- c(-100,-100,-Inf) #lower bound
   upper <- c(100,100,Inf) #upper bound
   #options for optimizer
   opts <- list("algorithm"="NLOPT_LN_SBPLX","maxeval"=maxeval,

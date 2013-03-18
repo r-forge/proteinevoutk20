@@ -1,7 +1,7 @@
 #true.phi<-runif(106, min=min(rokasPhi$SEMPPR, na.rm=TRUE), max=max(rokasPhi$SEMPPR, na.rm=TRUE))
 phi.sd <- 0.1
 #true.phi <- phidata$SEMPPR # random samples from log normal distribution
-true.phi <- rnorm(200,1,0.2)
+true.phi <- rnorm(500,1,0.2)
 gs <- 0.5+2*true.phi #Grantham sensitivity
 lgphi<-rnorm(length(true.phi), gs+true.phi, 0.1)
 
