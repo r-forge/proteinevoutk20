@@ -23,11 +23,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Abstract}
 We introduce a new, mechanistic Markov model for studying the evolution of amino acid sequences within a phylogenetic context.
-Our model links the relationship between genotype, phenotype, and fitness and uses a model of allele substitution from population genetics to calculate the fixation probability of a newly arised mutant.
+Our model links together genotype, phenotype, and fitness of proteins, by calculating the fixation probability of a newly arisen mutant using a model of allele substitution from population genetics. 
 As a result, our model explicitly includes the effects of mutation bias, genetic drift, and natural selection favoring an optimal amino acid sequence for a given protein.
 We assume that the strength of purifying selection is a function of the physiochemical differences between a given amino acid and the optimal amino acid for the site, how a protein's functionality declines with this distance, and the target expression level of the gene.
-Analysis of a multilocus yeast data set using AIC shows that our new model provides a substantially better fit to data than the standard empirical models and allows researchers to estimate biologically meaningful parameters such as the sensitivity of a protein's function to an amino acid substitution and the optimal amino acids at a given site.
-Further, because our model is based on explicit models of various biological processes, unlike empirical models it can easily be modified in the future to include other important biological phenonoma such as selection on codon usage or test alternative hypotheses about the relationship between amino acid sequence and protein functionality.
+Analysis of a multi-locus yeast data set using AIC shows that our new model provides a substantially better fit to data than the standard empirical models and allows researchers to estimate biologically meaningful parameters such as the sensitivity of a protein's function to an amino acid substitution and the optimal amino acids at a given site.
+Further, because our model is based on explicit models of various biological processes, unlike empirical models it can easily be modified in the future to include other important biological phenomena such as selection on codon usage or test alternative hypotheses about the relationship between amino acid sequence and protein functionality.
 
 
 \section{Introduction}
@@ -35,17 +35,29 @@ Importance of building accurate model for protein evolution. \\
 
 Known models of amino acid substitution fall into two categories: empirical models and mechanistic models. 
 In empirical models, the substitution rates are based solely on the amino acid frequencies observed in given database.
-%empirical observations of sequence data and, in contrast to mechanistic models, are not 
 Empirical models are commonly used in phylogenetic studies and include  Dayhoff, JTT, WAG, LG, etc. 
 [CAN ONE FORMULATE A NON-MECHANISTIC CODON LEVEL MODEL? AMINO ACID MODEL?  -YES]
-In contrast, in mechanistic model the substitution matrices are based on the actual biological processes thought to drive sequence evolution, such as natural selection and mutation bias.
+In contrast, the substitution matrices in mechanistic model are based on the actual biological processes thought to drive sequence evolution, such as natural selection and mutation bias.
 Although less commonly used, there are a number of notable models in this area including [CITATIONS].
 
-Mechanistic models are usually formulated at one of three different levels: DNA, codon and amino acid (AA) level.
-DNA-based models use the most data and are often the most powerful in terms of their ability to distinguish between closely related sequences. [NO, CODON BASED MODELS HAVE THE MOST DATA: ALL THE INFO IN DNA, PLUS KNOWING WHAT AA WILL BE MADE]
+Mechanistic models are usually formulated at one of three different levels: mono-nucleotide level in DNA, codon level, and amino acid (AA) level.
+The nucleotides, codons, or amino acids are assumed to evolve independently.
+DNA- and codon-based models use more data and are often the most powerful in terms of their ability to distinguish between closely related sequences. 
+Of these two, codon-based models use all the information in DNA and know the product of amino acid additionally. 
+On the other hand, AA-based models ignore synonymous differences between sequences by focusing not on the codons themselves but the amino acids they code for. 
+
+Nucleotide level models use the most data and are often the most powerful in terms of their ability to distinguish between closely related sequences [CUT $\rightarrow$?] such as those caused by synonymous substitutions which are invisible at amino acid level [WOULDN''T THIS APPLY TO CODON-LEVEL MODELS AS WELL? YES].
+[DISCUSSION OF CODON LEVEL MODELS-- HOW DO THEY DIFFER FROM DNA MODELS?]
+A popular example of a mechanistic, codon level model is \cite{YangEtAl98}.
+This implemented a few mechanistic models at the level of codons and explicitly modeled the biological processes involved, including different mutation rates between nucleotides, translation of the codon triplet into an amino acid, and the acceptance or rejection of the amino acid due to selective pressure on the protein. 
+In contrast to codon level models, amino acid level models ignore synonymous differences between sequences by focusing not on the codons themselves but the amino acids they code for.
+=======
+
+
 A popular example of a mechanistic, codon-based model is \cite{YangEtAl98}.
 This implemented a few mechanistic models at the level of codons and explicitly modeled the biological processes involved, including different mutation rates between nucleotides, and the translation of the codon triplet into an amino acid. 
 In contrast to codon-based models, AA-based models ignore synonymous differences between sequences by focusing not on the codons themselves but the amino acids they code for.
+>>>>>>> .r374
 Since synonymous codon usage is largely driven by mutation bias in low expression genes and selection on translational efficiency for high expression genes [CITATIONS], ignoring this aspect of the data has the advantage of reducing the noise in sequence data for low expression genes but at the cost of losing potentially useful information held in the high expression genes.
 Such an approach makes sense for most phylogenetic models since they ignore the effect of gene expression on sequence evolution [EXCEPTIONS?].
 However, as we show here, our models provide a natural framework for including the effect of gene expression on sequence evolution.
@@ -53,7 +65,7 @@ However, as we show here, our models provide a natural framework for including t
 
 
 One of the most commonly used codon-based model is that of Goldman and Yang (GY) (1994, MBE).
-This uses the nucleotide-level information in DNA sequences and the amino-acid level information of synonymous and non synonymous nucleotide substitutions simultaneously [DON'T ALL CODON-BASED MODELS DO THIS?]
+This uses the nucleotide-level information in DNA sequences and the amino-acid level information of synonymous and non-synonymous nucleotide substitutions simultaneously [DON'T ALL CODON-BASED MODELS DO THIS?]
 Their model incorporated transition vs.~transversion bias, synonymous vs.~nonsynonymous variation in a gene, and the physiochemical differences between amino acids.
 The selective restraints at the amino acid level was accounted for by multiplying the substitution rate by a factor $\exp (d_{aa_i,aa_j}/V)$ where $d_{aa_i, aa_j}$ is the distance between amino acids $aa_i$ and $aa_j$ given by Grantham (1974) (i.e.~Grantham Distances) and $V$ is a parameter representing the variability of the gene or its tendency to undergo non-synonymous substitution.
 
@@ -79,11 +91,19 @@ Here the sensitivity to amino acid changes is calculated using a cost-benefit fr
 More specifically, the cost represents the cost of protein synthesis while the benefit represents the functionality provided by the protein encoded by the sequence.
 For simplicity, we assume that the synthesis cost is proportional to the length of the coding sequence, and that utility of the protein produced is an inverse function of its distances from the optimal amino acid sequence.
 Unlike the GY model, we also incorporate the effects of gene expression on the substitution rate, with higher expression genes being under stronger selection to be at the optimal state $\avecopt$.
+<<<<<<< .mine
+Furthermore, unlike most models in phylogenetics, we define the fitness of a given genotype explicitly.
+We then use a model from population genetics to calculate the substitution rate between any two genotypes explicitly taking into account the fitness differences between genotypes as well as the effects of mutation bias and genetic drift.
+We illustrate our approach by fitting our model's likelihood function to the \cite{RokasEtAl03} data set of 103[?] genes sequenced from 8 different species of yeast.
+When fitting our model, we can estimate the phylogenies of the yeast species as well as additional model parameters such as the a Grantham sensitivity of a gene (roughly comparable to $1/V$ in the GY model), as well as state optimal amino acid $\hat{a}$ for any given site in a coding sequence.
+Using AIC we compare our model's fit to the Rokas data to other commonly used GTR amino acid level models [LIST MODELS -- IF WE STICK TO AA MODELS, WHY DO WE SPEND SO MUCH TIME DISCUSSING THE GY MODEL WHICH IS A CODON LEVEL MODEL?].
+=======
 Furthermore, unlike most models in phylogenetics, we define the fitness of a given protein explicitly.
 We then use a model from population genetics to calculate the substitution rate between any two genotypes by explicitly taking into account the fitness differences between genotypes as well as the effects of mutation bias and genetic drift.
 We illustrate our approach by fitting our model's likelihood function to the \cite{RokasEtAl03} data set of 106 genes sequenced from 8 different species of yeast.
 When fitting our model, we can estimate the phylogenies of the yeast species, the Grantham sensitivity $g$ of a gene (roughly comparable to $1/V$ in the GY model), as well as state optimal amino acid $\avecopt$ for any given site in a coding sequence.
 Using AIC we compare our model's fit to the Rokas data to other commonly used GTR AA-based models [LIST MODELS -- IF WE STICK TO AA MODELS, WHY DO WE SPEND SO MUCH TIME DISCUSSING THE GY MODEL WHICH IS A CODON LEVEL MODEL? --ANSWER: WE DON'T HAVE A CODON MODEL, WE HAVE AN AA MODEL WHERE THE MUTATION RATES ARE BASED ON DNA DATA. SO WE TRY TO EXPLAIN THE AA DATA AND COMPARE IT TO AA MODELS].
+>>>>>>> .r374
 These results show that even with our most parameter rich model in which we estimate the optimal amino acid at every site, thereby introducing tens of thousands of additional parameters, our model does a substantially better job fitting the Rokas dataset.
 So although the computational cost of our model is greater than most GTR models,  our ability to fit the phylogenetic data and extract biologically meaningful information is substantially greater than other models.
 Furthermore, because our approach explicitly links genotype to phenotype, phenotype to fitness, and fitness to fixation rate, the biological assumptions underlying our model are clearly stated and our ability to incorporate additional biological factors, such as selection on codon usage bias, are greatly enhanced.
