@@ -125,14 +125,14 @@ conv <- function(filename,type="num"){
   }
   ## type = AA, return a list of amino acid sequences
   seqdata <- lapply(1:length(data),dna.to.aa)
-  seqdata <- matrix(unlist(seqdata),nrow=length(data),byrow=TRUE)
-  na.index <- which(seqdata=="X",arr.ind=TRUE)
-  seqdata <- seqdata[,-na.index[2]]
-  names(seqdata) = attr(data,"name")
-  if(type=="AA")
-    return(seqdata)
-  if(type=="phyDat") ## convert amino acid sequences to phyDat type
+  seqdata <- matrix(unlist(seqdata),nrow=length(data),byrow=TRUE)  
+  if(type=="AA"){
+    row.names(seqdata) = attr(data,"name")
+  }
+  else if(type=="phyDat"){ ## convert amino acid sequences to phyDat type
     seqdata = phyDat(seqdata,type="AA")
+    names(seqdata) = attr(data,"name")
+  }
   return(seqdata)
 }
 #convert fasta file to nexus file, for protein data
