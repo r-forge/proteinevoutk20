@@ -80,10 +80,10 @@ optim.ab.sd <- function(gphis,phis, mu,a,b,phi.sd,mu.sd,phig.sd,maxeval="500",pr
     return(loglik) #summation of all values
   }
   
-  lower <- rep(-Inf,6) #lower bound
-  upper <- rep(Inf,6) #upper bound
+  lower <- rep(-10,6) #lower bound
+  upper <- rep(10,6) #upper bound
   #options for optimizer
-  opts <- list("algorithm"="NLOPT_LN_COBYLA","maxeval"=maxeval,
+  opts <- list("algorithm"="NLOPT_LN_SBPLX","maxeval"=maxeval,
                "xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps,"print_level"=print_level)
   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts)
   return(res)
