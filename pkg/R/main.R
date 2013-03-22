@@ -126,9 +126,8 @@ conv <- function(filename,type="num"){
   ## type = AA, return a list of amino acid sequences
   seqdata <- lapply(1:length(data),dna.to.aa)
   seqdata <- matrix(unlist(seqdata),nrow=length(data),byrow=TRUE)  
-  if(type=="AA"){
+  if(type=="AA")
     row.names(seqdata) = attr(data,"name")
-  }
   else if(type=="phyDat"){ ## convert amino acid sequences to phyDat type
     seqdata = phyDat(seqdata,type="AA")
     names(seqdata) = attr(data,"name")
