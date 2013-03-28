@@ -112,9 +112,16 @@ names(cdlist) <- AA
 ##################################################################
 ## read in fasta file of nucleotide, convert it into amino acid data
 ## type = "num" -- integers ; "AA" -- amino acid names; "phyDat" --- phyDat data type used in phangorn
-conv <- function(filename,type="num"){
+conv <- function(filename,range=NULL,type="num"){
   levels <- AA #amino acids in alphabeticla order (not the single letter names, the 3-letter names)
-  data <- seqinr::read.fasta(file=filename) #read fasta file including nucleotide data
+  if(class(filename)=="character")
+    data <- seqinr::read.fasta(file=filename) #read fasta file including nucleotide data
+  else
+    data <- filename
+  if(length(range)!=0){
+    for(i in 1:length(data))
+      data[[i]] = data[[i]][range]
+  }
   dna.to.aa <- function(x){ #given the order of the data, convert nucleotide data to amino acid data
     aas <- translate(seq=data[[x]])
     if(type=="num"){
