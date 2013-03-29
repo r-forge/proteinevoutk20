@@ -9,6 +9,18 @@
 ## EF-1alpha-1,2,3pos: 5726-6783
 ## 18S: 6784-10478
 ## 28S: 10479-12777
+## for data without 18S and 28S
+pos1 <- 1:915
+pos2 <- 916:2973
+pos3 <- 2974:3472
+pos4 <- 3473:4275
+pos5 <- 4276:4836
+pos6 <- 4837:5736
+bedata=beetle
+for(i in 1:length(beetle))
+  bedata[[i]] = beetle[[i]][pos4]
+bedata <- conv(beetle,range=pos6,type="AA")
+sum(bedata=="*")
 source("~/proteinevoutk20/pkg/R/main.R")
 #beetle data without 18S and 28S, 28 taxa from earlier paper
 beetle <- read.nexus.data("~/proteinevoutk20/pkg/Data/beetle_short_data.nex")
