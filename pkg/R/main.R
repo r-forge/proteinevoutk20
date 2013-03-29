@@ -112,7 +112,7 @@ names(cdlist) <- AA
 ##################################################################
 ## read in fasta file of nucleotide, convert it into amino acid data
 ## type = "num" -- integers ; "AA" -- amino acid names; "phyDat" --- phyDat data type used in phangorn
-conv <- function(filename,range=NULL,type="num"){
+conv <- function(filename,range=NULL,type="num",frame=0){
   levels <- AA #amino acids in alphabeticla order (not the single letter names, the 3-letter names)
   if(class(filename)=="character")
     data <- seqinr::read.fasta(file=filename) #read fasta file including nucleotide data
@@ -123,7 +123,7 @@ conv <- function(filename,range=NULL,type="num"){
       data[[i]] = data[[i]][range]
   }
   dna.to.aa <- function(x){ #given the order of the data, convert nucleotide data to amino acid data
-    aas <- translate(seq=data[[x]])
+    aas <- translate(seq=data[[x]],frame=frame)
     if(type=="num"){
       aas <- as.numeric(factor(aas,levels)) #convert from letters to numbers, as levels
       return(aas)
@@ -235,7 +235,7 @@ mat_form_lowtriQ <- function(Q=rep(1,6),bf=rep(0.25,4)){
   res = res+t(res) #symmetric matrix with diagonals 0
   res = res * rep(bf,each=l) #multiply cols by bf
   diag(res) = -rowSums(res) #set row sum to 0
-  res2 = res * rep(bf,l) #multiply rows by bf
+  res2 = res * rep(bf,l) #multiply rows by bf, used later to normalize the matrix
   diag(res2)=0 
   res = res/sum(res2) #normalize rate matrix
   return(res)
