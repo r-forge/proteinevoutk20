@@ -1,4 +1,4 @@
-## beetles data analysis
+## beetles data analysis, data set with 28 taxa
 ## partitions: 
 ## AATS: 1-915
 ## CAD: 916-2962
