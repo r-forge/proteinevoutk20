@@ -62,7 +62,7 @@ ngenes<-106
 #true.vals<-matrix(ncol=3, nrow=0)
 #est.vals<-matrix(ncol=3, nrow=0)
 phi.sd <- 2
-phig.sd <- 0.01
+phig.sd <- 0.1
 mu.sd <- 0.5
 a<-3
 b<-2

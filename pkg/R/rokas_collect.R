@@ -44,7 +44,7 @@
 # opw1dir <- "~/BackupProEvo/Newton/opwFirst_short/"
 # opwdir <- "~/BackupProEvo/Newton/opw_short/"
 maxdir <- "~/BackupProEvo/Newton/rokas_max/"
-majdir <- "~/BackupProEvo/Newton/rokas_maj/"
+#majdir <- "~/BackupProEvo/Newton/rokas_maj/"
 #################################################################
 ##Find the functionality of observed sequences at 8 extant species, 
 ##with optimal aa sequence, Grantham sensitivity, distant matrix estimated from data
