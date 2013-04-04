@@ -98,6 +98,19 @@ charset <- list(bag2 = 1:186,
                 znfx1 = 45490:46125,
                 zscan29 = 46126:46152)
 mamtree <- read.nexus("proteinevoutk20/pkg/Data/mammals/T15taxa.nex")
+##truncate the names of tip so that the length is no bigger than 10 for prottest
+## the resulting tree is written in file mam15.tre
+mamtree$tip.label <- sapply(1:15, function(x) substr(mamtree$tip.label[x],1,10))
+
+load("~/proteinevoutk20/pkg/Data/mammals/charset.RData") 
+for(i in 1:97){
+  mam <- conv("~/proteinevoutk20/pkg/Data/mammals/mam15.fasta",range=charset[[i]],"AA")
+  mamlist <- lapply(seq_len(nrow(mam)),function(i) mam[i,])
+  names(mamlist) <- dimnames(mam)[[1]]
+  filename = paste("mam_15_",i,".nex",sep="")
+  write.nexus.data(mamlist,file=filename,format="protein",interleaved=FALSE)
+}
+
 for(i in 1:length(charset)){
   range <- charset[[1]]
   mam <- conv("~/proteinevoutk20/pkg/Data/mammals/mam15.fasta",range=range,type="phyDat")
