@@ -904,7 +904,7 @@ optim.s.weight <- function(data, tree, s,beta,gamma, method="SBPLX",maxeval="50"
 #   ab <- log(ab)
   fn = function(ab,data,tree){
     #ab <- exp(ab)
-    #print(ab)
+    print(ab)
     result = -mllm1(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], mumat=mumat,bfaa=bfaa, ...)$ll$loglik
     return(result)
   }
@@ -1248,4 +1248,10 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
   
   object = update(object, tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw,...)
   return(object)
+}
+
+## convert a string that contains many numbers separated by blanks, to a vector of numbers
+str.to.num <- function(string,split=" "){
+  char.vec <- strsplit(string,split=split)[[1]]
+  return(as.numeric(char.vec))
 }
