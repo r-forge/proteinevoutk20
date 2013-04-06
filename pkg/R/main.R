@@ -582,7 +582,7 @@ getPm <- function(el, Q, g){
 #       cat(g[i])
 #       print(Q)
 #       cat("Q*el*g:","\n")
-       print(Q*el[j]*g[i])
+#       print(Q*el[j]*g[i])
       res[[i,j]] = expm(Q*el[j]*g[i])
     }
   }
