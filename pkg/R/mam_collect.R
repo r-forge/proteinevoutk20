@@ -16,12 +16,12 @@ loglik_max <- sapply(1:97,function(x) res_max[[x]]$ll$loglik)
 GM_max <- sapply(1:97,function(x) res_max[[x]]$GMweights)
 Q_max <- sapply(1:97,function(x) res_max[[x]]$Q)
 br_max <- sapply(1:97,function(x) sum(res_max[[x]]$tree$edge.length))
-beta <- NULL
-gamma <- NULL
+beta_mam <- NULL
+gamma_mam <- NULL
 for(i in 1:97){
   if(!is.null(res_max[[i]])){
-    beta <- c(beta,GM_max[[i]][2])
-    gamma <- c(gamma,GM_max[[i]][3])
+    beta_mam <- c(beta_mam,GM_max[[i]][2])
+    gamma_mam <- c(gamma_mam,GM_max[[i]][3])
   }
     
 }
