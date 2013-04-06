@@ -1075,7 +1075,6 @@ optimQ <- function(tree,data,Q=rep(1,6),method="SBPLX",maxeval="100",print_level
                "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
   res$solution = c(res$solution,1) # append the last rate (1) to the rate vector
-  #print(res)
   return(res)
 }
 ######################################################################################################
