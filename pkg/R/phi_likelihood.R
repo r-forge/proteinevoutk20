@@ -1,3 +1,4 @@
+library(lmodel2)
 # library(nloptr)
 # dlik <- function(gphi,phi,phi_i,mu,a,b,phi.sd,mu.sd,phig.sd)
 #   prod(dnorm(phi_i,mu,mu.sd)*dnorm(gphi,a+(b+1)*phi_i,phig.sd)*dnorm(phi,phi_i,phi.sd))
@@ -61,7 +62,7 @@
 ngenes<-106
 #true.vals<-matrix(ncol=3, nrow=0)
 #est.vals<-matrix(ncol=3, nrow=0)
-phi.sd <- 2
+phi.sd <- 0.5
 phig.sd <- 0.1
 mu.sd <- 0.5
 a<-3
