@@ -9,7 +9,7 @@ library(mgcv) #find the unique rows in a matrix - uniquecombs
 library(numDeriv) # calculate hessian of a function at a point
 library(gtools) #package used to draw random samples from dirichlet distribution -- rdirichlet, ddirichlet
 library(nloptr)
-library(scatterplot3d)
+#library(scatterplot3d)
 #library(akima) # gridded bivariate interpolation for irredular data
 #library(Rmpfr)
 #library(ppso)
@@ -578,10 +578,11 @@ getPm <- function(el, Q, g){
   res = array(list(NULL),dim=c(gl,ell))
   for(i in 1:gl){
     for(j in 1:ell){
-#       print(el[j])
-#       print(g[i])
+#       cat("branch length is ",el[j],"\n")
+#       cat(g[i])
 #       print(Q)
-#       print(Q*el[j]*g[i])
+#       cat("Q*el*g:","\n")
+       print(Q*el[j]*g[i])
       res[[i,j]] = expm(Q*el[j]*g[i])
     }
   }
@@ -1249,6 +1250,7 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
   object = update(object, tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw,...)
   return(object)
 }
+
 
 ## convert a string that contains many numbers separated by blanks, to a vector of numbers
 str.to.num <- function(string,split=" "){
