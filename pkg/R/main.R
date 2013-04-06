@@ -1054,7 +1054,7 @@ optim.br <- function(data,tree,el=NULL,method="COBYLA",maxeval="100", print_leve
 ## can be easily changed to account for other models, e.g. Jukes-Cantor, etc.
 #mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-optimQ <- function(tree,data,Q=rep(1,6),method="COBYLA",maxeval="100",print_level=0, ...){
+optimQ <- function(tree,data,Q=rep(1,6),method="SBPLX",maxeval="100",print_level=0, ...){
   Q = Q/Q[6] #make last rate 1
   #store information from initial condition, with other parameters fixed
   res.initial = mllm1(data=data,tree=tree,Q=Q,...)
