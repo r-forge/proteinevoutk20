@@ -1,4 +1,4 @@
-\documentclass[12pt, draft]{article}
+\documentclass[12pt]{article}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
@@ -6,6 +6,8 @@
 \usepackage{graphicx}
 \usepackage[round]{natbib}
 \usepackage{xspace}
+\usepackage{hyperref}
+\usepackage{hypernat}
 \linespread{1.7}
 
 
@@ -14,7 +16,7 @@
 \newcommand{\aopt}{\ensuremath{a^\prime}\xspace}
 \newcommand{\Qmat}{\ensuremath{\mathbf{Q}}\xspace}
 
-\includeonly{abstract,introduction}
+\includeonly{abstract,introduction,methods}
 
 \title{A phylogenetic and population genetic model of amino acid substitution}
 \author{}
@@ -22,10 +24,12 @@
 \maketitle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \input{abstract}
+\newpage
+\tableofcontents
 \input{introduction}
 \input{methods}
 \input{results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibliographystyle{abbrvnat}
+\bibliographystyle{plainnat}
 \bibliography{ProEvo}
 \end{document}
