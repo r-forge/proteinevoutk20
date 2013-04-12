@@ -200,8 +200,10 @@ findBf2 <- function(data){
 }
 ## Find the most frequent element of a vector
 ## It works for numbers and characters
-Mode <- function(x) {
+Mode <- function(x,exclude=NULL) {
   ux <- unique(x)
+  if(!is.null(exclude))
+    ux <- setdiff(ux,exclude)
   ux[which.max(tabulate(match(x, ux)))]
 }
 ## Find the most frequent amino acids for each distince pattern in a gene data
@@ -212,7 +214,7 @@ ModeAA <- function(phydata){
   mat = NULL
   for(i in 1:l)
     mat = rbind(mat,phydata[[i]])
-  modeaa = apply(mat,2,Mode)
+  modeaa = apply(mat,2,Mode,exclude=23)
   return(modeaa)
   }
 

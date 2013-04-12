@@ -3,7 +3,7 @@ load("~/proteinevoutk20/pkg/RData/gphi.RData")
 gphi <- s_max
 ############################################################################
 ## read in Phi values for 106 (and more) genes in budding yeast
-rokasPhi <- read.csv("~/proteinevoutk20/pkg/Data/genePhi.csv",header=TRUE)
+rokasPhi <- read.csv("~/proteinevoutk20/pkg/Data/Rokas/genePhi.csv",header=TRUE)
 phi <- read.csv("~/proteinevoutk20/pkg/Data/phi.csv")
 # convert class of data frame from factor to character
 phi <- data.frame(lapply(phi,as.character),stringsAsFactors=FALSE)
@@ -25,6 +25,8 @@ rokasPhi$Beyer <- as.numeric(rokasPhi$Beyer)
 rokasPhi$SEMPPR <- as.numeric(rokasPhi$SEMPPR)
 rokasPhi$Ing <- as.numeric(rokasPhi$Ing)
 #rokasPhi$Ing <- rokasPhi$Ingolia/10000
+plot(gphi/rokasPhi$SEMPPR~rokasPhi$SEMPPR,log="xy",xlab=expression(phi),ylab=expression(g),
+     main=expression(paste(g, " vs ", phi)),frame.plot=FALSE,pch=20)
 ############################################################################
 phi <- rokasPhi
 phi$Ing <- phi$Ingolia/10000 # less NA's in Ing column
