@@ -62,13 +62,13 @@ library(lmodel2)
 ngenes<-106
 #true.vals<-matrix(ncol=3, nrow=0)
 #est.vals<-matrix(ncol=3, nrow=0)
-phi.sd <- 0.5
-phig.sd <- 0.1
-mu.sd <- 0.5
-a<-3
+phi.sd <- 1
+phig.sd <- 0.01
+mu.sd <- 0.1
+a<-10
 b<-2
 #c<-runif(1, 0.000, 0.01)
-mu <- 10
+mu <- -3
 #true.vals <- rbind(true.vals, c(a, b, c))
 #true.logphi <- runif(ngenes, -6, -1)
 true.logphi <- rnorm(ngenes, mu,mu.sd)
@@ -78,17 +78,22 @@ est.logphi2 <- rnorm(length(true.logphi), true.logphi, phi.sd)
 est.logphi3 <- rnorm(length(true.logphi), true.logphi, phi.sd)
 est.logphi <- cbind(est.logphi1,est.logphi2,est.logphi3)
 est.logphig <- rnorm(length(true.logphi), a+(b+1)*true.logphi,phig.sd)
-par(mfrow=c(2,3))
-plot(true.logphi,est.logphi1)
-plot(est.logphi2~true.logphi)
-plot(est.logphi3~true.logphi)
-plot((est.logphig-true.logphi)~true.logphi)
-plot((est.logphig-est.logphi1)~est.logphi1)
-plot((est.logphig-est.logphi2)~est.logphi2)
-gphi.lm <- lmodel2(est.logphig~est.logphi1,range.y="interval",range.x="interval",nperm=99)
-true.gphi.lm <- lmodel2(est.logphig~true.logphi,range.y="interval",range.x="interval",nperm=99)
+# par(mfrow=c(2,3))
+# plot(true.logphi,est.logphi1)
+# plot(est.logphi2~true.logphi)
+# plot(est.logphi3~true.logphi)
+# plot((est.logphig-true.logphi)~true.logphi)
+# plot((est.logphig-est.logphi1)~est.logphi1)
+# plot((est.logphig-est.logphi2)~est.logphi2)
+# gphi.lm <- lmodel2(est.logphig~est.logphi1,range.y="interval",range.x="interval",nperm=99)
+# true.gphi.lm <- lmodel2(est.logphig~true.logphi,range.y="interval",range.x="interval",nperm=99)
 
 # plot((est.logphig)~true.logphi)
 # plot((est.logphig)~est.logphi1)
 # plot((est.logphig)~est.logphi2)
 
+plot((est.logphig-true.logphi)~true.logphi,xlab=expression(log(phi)),ylab=expression(log(g)),
+     pch=20,frame.plot=FALSE,ylim=range(c(est.logphig-true.logphi,est.logphig-est.logphi1)),
+     xlim=range(c(true.logphi,est.logphi1)),main=expression(paste(log(g),"vs.", log(phi),sep="  ")))
+points((est.logphig-est.logphi1)~est.logphi1,pch=20,col="red")
+#plot((est.logphig-est.logphi1)~est.logphi1)
