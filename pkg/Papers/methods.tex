@@ -4,7 +4,7 @@ In this study we use a series of continuous time Markov models with amino acid a
 Our approach, is applicable to any homologous protein-coding DNA sequence dataset where any gaps have been removed.
 In our model we assume that there is an optimal amino acid for any given site.
 The strength of natural selection for the optimal amino acid is a function of the gene's expression level, the physiochemical properties of a given amino acid, and the sensitivity of the gene's functionality to changes in these properties.
-It can vary between genes and different sites in a gene. (IN CURRENT IMPLEMENTATION SENSITIVITY DOES NOT VARY WITHIN A GENE)
+It can vary between genes and different sites in a gene. ({\color{blue} in current implementation sensitivity does not vary within a gene})
 As a result, for each of 20 natural amino acids as optimal we have a $20 \times 20$ substation rate matrix with the same 20 amino acids as its states. 
 Additional, non-natural amino acids can be easily incorporated into the framework.
 
@@ -144,7 +144,7 @@ In order to simplify the notation we will drop $\avecopt$ and $g$ when there is 
 
 
 \paragraph*{Defining Protein Fitness:} 
-Following our previous work relating protein production cost, relative functionality, and energy expenditure to fitness [CITATION] \cite{Gilchrist2007,ShahAndGilchrist11}, we define a cost-benefit function $\eta(\avec|\avecopt)$ as the cost of producing the protein sequence \avec over its expected functionality.
+Following our previous work relating protein production cost, relative functionality, and energy expenditure to fitness [CITATION] \cite{Gilchrist2007,ShahGilchrist2011pnas}, we define a cost-benefit function $\eta(\avec|\avecopt)$ as the cost of producing the protein sequence \avec over its expected functionality.
 Here we assume that the cost of protein translation is simply proportional to the length of the protein produced.
 Thus,
 \begin{equation}
@@ -164,15 +164,15 @@ Clearly, fitness $f_i$ is an increasing function of functionality $F$ and the st
 Note that $n$, $\phi$, and \avecopt vary between loci, \avec varies between allels at a given locus, but $q$ is the same for all genes.
 
 %fixation probability 
-Following the model of allele fixation presented by \citet{SellaAndHirsh05}, the fixation probability of a newly introduced mutant allele $\avec_j$ in a Fisher-Wright population with the resident allele $\avec_i$ and an effective size of $N_e$ is,
+Following the model of allele fixation presented by \citet{SellaHirsh2005}, the fixation probability of a newly introduced mutant allele $\avec_j$ in a Fisher-Wright population with the resident allele $\avec_i$ and an effective size of $N_e$ is,
 \begin{equation}
 \pi_{ij} = \pi\left(\avec_i \to \avec_j \right) = \frac{1-\left(f\left(\avec_i\right)/f\left(\avec_j\right)\right)^\alpha}{1-\left(f\left(\avec_i\right)/f\left(\avec_j\right)\right)^{2N_e}}.
 \label{eq:fixation}
 \end{equation}
 where $\alpha = 1$ for a diploid population and $2$ for a haploid population.
 Here we focus on diploid populations.
-This formula for the fixation of a mutant allele is valid under weak mutation assumptions, i.e. $s, \frac{1}{N_e}, Ns^2 \ll 1$ where $s=1-\frac{f(\avec_i)}{f(\avec_j)}$.[SELLA AND HIRSH NEVER MENTION WEAK SELECTION IN MAIN TEXT. ONLY WEAK MUTATION. SHOULD CHECK SUPPORTING MATERIALS -CHECKED, SINGLE MUTATION IN A LARGE POPULATION, AND WEAK SELECTION, THIS IS ALSO THE CONDITION FOR THE CANONICAL FORMULA] %under the condition $s, \frac{1}{N}, Ns^2 \ll 1$ where $s$ is the selelction advantage/disadvantage of the mutant over the resident. (Add ref or delete)\\
-Alternative fixation calculations, such as the canonical forms derived by Fisher, Moran(1960, 1961) \citet{Fisher30, Wright31} or \citet{Kimura62} could also be used. [FISHER AND WRIGHT CITATIONS TAKEN FROM KIMURA PAPER. SHOULD CHECK. - ALSO MORAN] 
+This formula for the fixation of a mutant allele is valid under weak mutation assumptions, i.e. $s, \frac{1}{N_e}, Ns^2 \ll 1$ where $s=1-\frac{f(\avec_i)}{f(\avec_j)}$.[SELLA AND HIRSH NEVER MENTION WEAK SELECTION IN MAIN TEXT. ONLY WEAK MUTATION. SHOULD CHECK SUPPORTING MATERIALS - {\color{blue} CHECKED, SINGLE MUTATION IN A LARGE POPULATION, AND WEAK SELECTION, THIS IS ALSO THE CONDITION FOR THE CANONICAL FORMULA}] %under the condition $s, \frac{1}{N}, Ns^2 \ll 1$ where $s$ is the selelction advantage/disadvantage of the mutant over the resident. (Add ref or delete)\\
+Alternative fixation calculations, such as the canonical forms derived by \citet{fisher1930theory, wright1931evolution,moran1962statistical} or \citet{kimura1962probability} could also be used. 
 %Both S-H and the canonical formulae are valid under the same condition: $s, \frac{1}{N}, Ns^2 \ll 1$.\\
 
 %It is an approximation to the canonical formula 
@@ -231,7 +231,7 @@ q_{ij} = 2N_e \mu_{ij} \pi_{ij}.
 Given the values for $\left(M_{\nu},g, \alpha, \beta, \gamma, C, \Phi, q, N_e\right)$, the frequencies of different amino acids $\Pi$ and the optimal amino acid $k$ at a site, we can calculate the $20 \times 20$ instantaneous substitution rate matrix $Q^{(k)}$ for the Markov process. 
 $Q$ is scaled by the frequencies of amino acids to satisfy $\sum_{i=1}^{20} \pi_i q_{ii}= -1$.
 Under this restraint, the length of a branch represents the expected number of substitutions along the branch.
-With the probabilities $P(t)  = \exp\left(Q t\right)$ the likelihood for a given tree topology can be calculated following Felsenstein (1981).
+With the probabilities $P(t)  = \exp\left(Q t\right)$ the likelihood at 1 site for a given tree topology can be calculated following Felsenstein (1981).
 Since all sites are independent, we can calculate the likelihood of observing the sequence data at the tips of a phylogenetic tree $T$ with given topology and branch lengths by multiplying the likelihood values at all sites.\\
 
 %table of parameters in the model%
@@ -258,17 +258,17 @@ $N_e$ & effective population size \\
 
 \subsection{Identification of optimal amino acids}
 To calculate the likelihood values, the optimal amino acids need to be identified.
-We implement 3 approaches to identify the optimal amino acid at a certain site.
+We implemented 3 approaches to identify the optimal amino acid at a certain site.
 First one is called ``max rule''.
-We calculate the likelihood values when each of 20 amino acids is optimal with all other parameters given and choose the one that maximizes the likelihood as optimal.
-This method treats the optimal amino acids as estimable parameters in the maximum likelihood computation.
+The likelihood values are calculated when each of 20 amino acids is optimal with all other parameters given and choose the one that maximizes the likelihood as optimal.
+This method treats the optimal amino acids as estimable parameters in the maximum likelihood estimation.
 The number of parameters increases with the number of distinct sequence patterns at the tips, which often is a big number. \\
 Second approach uses the ``majority rule'', i.e. the most frequent amino acid in the sequence is chosen as the optimal amino acid.
 If more than 1 amino acid has the same highest frequency, then one of them is picked randomly as optimal.
 If the sequences have evolved long enough to reach equilibrium, the optimal amino acid has the highest probability to be observed.
 If the evolving time is short, or there are not enough substitutions during evolution process, the optimal amino acids estimated this way can be inaccurate. \\
 The third method is ``weighted rule''. 20 amino acids are assigned weights of being optimal.
-If the same weights are used for all sites, then the number of parameters added is 19 compared to hundreds or more in the first approach.
+If the same set of weights are used for all sites, then the number of parameters added is 19 compared to hundreds or more in the first approach.
 The weights are expected to vary with the environment, function of proteins and other factors.
 Therefore an alternative is to use different weights for different genes or gene groups in a protein sequence. \\
 Apparently the first method gives the best likelihood value but uses the most parameters.
@@ -280,4 +280,4 @@ We'll compare the performance of different approaches in the Results section.\\
 Since $C, \Phi, q$ and $g$ are multiplied together as a composite parameter, we fix the values of $C, \Phi, q$ and search for MLE for $g$.
 As mentioned earlier, for the weights used in the Grantham distance formula, $\alpha$ is fixed and $\beta, \gamma$ are estimated.
 In addition, the effective population size is assumed to be fixed in this paper.
-Suppose the phylogenetic topology is given, we are estimating the following parameters: $g, \beta/\alpha$, $\gamma/\alpha$, frequencies of amino acids, branch lengths, and the exchange rate matrix for nucleotides. 
+Suppose the phylogenetic topology is given, we are estimating the following parameters: $g, \beta/\alpha$, $\gamma/\alpha$, frequencies of amino acids $\Pi$, branch lengths, the exchange rate matrix $M_\nu$ for nucleotides, and the optimal protein sequence for the given gene. 
