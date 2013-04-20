@@ -1,42 +1,37 @@
 ##   Read in 106 gene data  from Rokas's ##
 #source("~/proteinevoutk20/pkg/R/main.R")
 l <- 106
-ROKAS_DATA <- vector("list",length=l)
+rokaslist <- vector("list",length=l)
 ##data stores the data of all genes in rokas's data
 for(i in 1:l){
-  ROKAS_DATA[[i]] <- conv(paste(datadir,"gene",i,".fasta",sep=""),type="AA")
+  rokaslist[[i]] <- conv(paste(datadir,"Rokas/gene",i,".fasta",sep=""),type="phyDat")
 }
 rm(l)
-rokasdata = read.phyDat("~/proteinevoutk20/pkg/Data/rokasAA",type="AA")
-rokasAA = vector(mode="list",8)
-for(i in 1:106){
-  for(j in 1:8){
-    rokasAA[[j]] <- c(rokasAA[[j]],ROKAS_DATA[[i]][[j]])
-}
-}
+rokasdata = read.phyDat("~/proteinevoutk20/pkg/Data/Rokas/rokasAA",type="AA")
+
 ############################################################################
 ## read in Phi values for 106 (and more) genes in budding yeast
-rokasPhi <- read.csv("~/proteinevoutk20/pkg/Data/genePhi.csv",header=TRUE)
-phi <- read.csv("~/proteinevoutk20/pkg/Data/phi.csv")
-# convert class of data frame from factor to character
-phi <- data.frame(lapply(phi,as.character),stringsAsFactors=FALSE)
-rokasPhi <- data.frame(lapply(rokasPhi,as.character),stringsAsFactors=FALSE)
-names(rokasPhi)[2] <- "Ingolia" #Ingolia Phi
-rokasPhi$Beyer <- NA #Beyer Phi
-rokasPhi$SEMPPR <- NA #SEMPPR Phi
-rokasPhi$Ing <- NA #Ingolia Phi from data that including all 3 columns
-for(i in 1:106){
-  if(rokasPhi$gene[i] %in% phi$Orf){ #If this gene is inclued in the 3 column data
-    rokasPhi$Beyer[i] <- phi$Beyer_Phi[which(phi$Orf == rokasPhi$gene[i])]
-    rokasPhi$SEMPPR[i] <- phi$SEMPPR_Mean_Phi[which(phi$Orf == rokasPhi$gene[i])]
-    rokasPhi$Ing[i] <- phi$Ingolia_Phi[which(phi$Orf == rokasPhi$gene[i])]
-  }
-}
-#rm(phi)
-rokasPhi$Ingolia <- as.numeric(rokasPhi$Ingolia) #convert character class to numeric class
-rokasPhi$Beyer <- as.numeric(rokasPhi$Beyer)
-rokasPhi$SEMPPR <- as.numeric(rokasPhi$SEMPPR)
-rokasPhi$Ing <- as.numeric(rokasPhi$Ing)
+# rokasPhi <- read.csv("~/proteinevoutk20/pkg/Data/Rokas/genePhi.csv",header=TRUE)
+# phi <- read.csv("~/proteinevoutk20/pkg/Data/phi.csv")
+# # convert class of data frame from factor to character
+# phi <- data.frame(lapply(phi,as.character),stringsAsFactors=FALSE)
+# rokasPhi <- data.frame(lapply(rokasPhi,as.character),stringsAsFactors=FALSE)
+# names(rokasPhi)[2] <- "Ingolia" #Ingolia Phi
+# rokasPhi$Beyer <- NA #Beyer Phi
+# rokasPhi$SEMPPR <- NA #SEMPPR Phi
+# rokasPhi$Ing <- NA #Ingolia Phi from data that including all 3 columns
+# for(i in 1:106){
+#   if(rokasPhi$gene[i] %in% phi$Orf){ #If this gene is inclued in the 3 column data
+#     rokasPhi$Beyer[i] <- phi$Beyer_Phi[which(phi$Orf == rokasPhi$gene[i])]
+#     rokasPhi$SEMPPR[i] <- phi$SEMPPR_Mean_Phi[which(phi$Orf == rokasPhi$gene[i])]
+#     rokasPhi$Ing[i] <- phi$Ingolia_Phi[which(phi$Orf == rokasPhi$gene[i])]
+#   }
+# }
+# #rm(phi)
+# rokasPhi$Ingolia <- as.numeric(rokasPhi$Ingolia) #convert character class to numeric class
+# rokasPhi$Beyer <- as.numeric(rokasPhi$Beyer)
+# rokasPhi$SEMPPR <- as.numeric(rokasPhi$SEMPPR)
+# rokasPhi$Ing <- as.numeric(rokasPhi$Ing)
 
 ############################################################################
 ## analysis of mtDNA data of primates on 12 species, length = 898 including noncoding region

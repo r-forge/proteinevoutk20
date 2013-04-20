@@ -180,7 +180,7 @@ simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NU
 ## simulation under the new model and WAG model
 ##################################################################################################
 ## Read the WAG matrix (lower triangular part)
-WagMat <- scan("~/proteinevoutk20/pkg/Data/wag.txt")
+WagMat <- scan("~/proteinevoutk20/pkg/Data/AAmodel/wag.txt",nlines=19)
 #Qwag <- mat_form_lowtriQ(Q=WagMat,bf=bfaa)
 ll_site_lowQ <- function(tree,data,Q,bf=rep(1/20,20),g=1){
   ##If the given tree is not rooted and binary, then throw error and exit
