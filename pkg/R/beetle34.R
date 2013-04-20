@@ -6,7 +6,7 @@ for(i in 1:8){
   bee <- conv(beetle,range=char[[i]],"AA")
   beelist <- lapply(seq_len(nrow(bee)),function(i) bee[i,]) #turn matrix into list
   names(beelist) <- beename
-  filename = paste("beetle34_",i,".nex",sep="")
+  filename = paste("beetle34_",i,"_shortname.nex",sep="")
   write.nexus.data(beelist,file=filename,format="protein",interleaved=FALSE)
 }
 

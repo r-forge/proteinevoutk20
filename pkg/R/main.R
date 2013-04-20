@@ -208,17 +208,18 @@ Mode <- function(x,exclude=NULL) {
 }
 ## Find the most frequent amino acids for each distince pattern in a gene data
 ## used for optimal aa in majority rule
-ModeAA <- function(phydata){
+ModeAA <- function(phydata,exclude=23){
   if(class(phydata)!="phyDat") stop("data must be of class phyDat!")
   l = length(phydata)
   mat = NULL
   for(i in 1:l)
     mat = rbind(mat,phydata[[i]])
-  modeaa = apply(mat,2,Mode,exclude=23)
+  modeaa = apply(mat,2,Mode,exclude=exclude)
   return(modeaa)
   }
 
 #find the (default: 10) most frequent patterns from data of phyDat format 
+# return the most frequent patterns with their counts
 MostFreq <- function(data,count=10){
   weight = attr(data,"weight")
   datamat <- matrix(unlist(data),nrow=length(data),byrow=T)
@@ -392,9 +393,8 @@ aa_MuMat_form <- function(vec=rep(1,6)){
 # }
 ## Amino acid mutation rate matrix for the GTR model of nucleotide
 MUMAT <- aa_MuMat_form(NU_VEC)
-#MUMAT <- sym.to.Q(MUMAT)
-#MUMAT_JC <- aa_MuMat_form()
 
+## change tree to be in pruning order, if it is not
 reorderPruning <- function (x, ...)
 {
   parents <- as.integer(x$edge[, 1])
@@ -431,7 +431,7 @@ Ftny <- function(d, s){
   if((length(s)==1)&&(length(d)!=1)){ #if s is given as a scalar, then treat it to be the same across all sites
     s <- rep(s,length(d))
   }
-  result <- length(d)/(sum(1+d*s)) #harmonic mean of ftny at all sites (F_i = 1 + d_i * s_i)
+  result <- length(d)/(sum(1+d*s)) #harmonic mean of ftny at all sites (F_i = 1/(1 + d_i * s_i))
   return(result)
 } #d and s are given
 
@@ -464,8 +464,8 @@ fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
 }
 #check the product of fixation probability and population size, 
 # see if it's a constant
-fixNe <- function(d1,d2,s,q,Ne,mpfr=FALSE){
-  return(fix(d1,d2,s,C=2,Phi=0.5,q=q,Ne=Ne,mpfr=mpfr)*Ne)
+fixNe <- function(d1,d2,s,q,Ne){
+  return(fix(d1,d2,s,C=2,Phi=0.5,q=q,Ne=Ne)*Ne)
 }
 ## Use the Rmpfr package for higher precision
 fix.mpfr <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
@@ -479,6 +479,7 @@ fix.mpfr <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
 ####################
 #comments: in the fixation probability calculation, should the length of the protein sequence be taken
 #into account? here the length is considered to be 1... which could be wrong...
+#Since the production cost C is actually a linear function of length, the length n cancels
 ####################
 #vector version of the fixation function, d1, d2 and s are vectors instead of numbers
 fix2 <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
