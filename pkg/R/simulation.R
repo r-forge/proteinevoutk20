@@ -1,5 +1,3 @@
-## source the R file that contains required functions
-#source("~/proteinevoutk20/pkg/R/pphyproevo.R")
 ########################################################################################################
 # find the Gramma rates given the shape parameter and number of categories
 discrete.gamma <- function (alpha, k) 
@@ -175,12 +173,79 @@ simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NU
   return(list(data=res,tree=tree,optimal=protein_op,rootseq=rootseq,s=s,Q=GTRvec,GMweights=c(alpha,beta,gamma),bfaa=bfaa,call=call))
 }
 #simTree(tree,5,protein_op=Protein_op[1:5],m=20,s=0.3,Nu_vec,al,be,ga,q=4e-7,Ne=5e6,Root[1:5])
-
+##################################################################################################
+## simulation under the empirical models
+##################################################################################################
+## simulation given rate matrix (or lower triangular part) Q, proportion of invariant sites inv,
+## Gamma rate, and number of categories k, base frequencies bf.
+simulationQ <- function(protein,t,Q=NULL,bf=NULL,inv=0,rate=1,k=1){
+  if(is.null(bf)) bf <- rep(1/20,20)
+  if(is.null(Q)) Q <- rep(1,190)
+  Qmat <- mat_form_lowtriQ(Q,bf) #transition rate matrix
+  l <- length(protein) #number of sites
+  
+  inv_runif <- runif(l) #sample the sites that are invariant
+  inv_site <- which(inv_runif < inv) #this could have length 0 if inv is very small
+  grates <- discrete.gamma(rate,k) #rates in different categories for gamma distribution
+  var_site <- setdiff(1:l,inv_site) #indices of variant sites
+  protein_inv <- protein[inv_site] #invariant sites
+  protein_var <- protein[var_site] #simulation on the variant sites only, then attach the invariant sites to the variant sites
+  lvar <- length(var_site) #number of variant sites
+  var_cat <- sample(1:k,lvar,replace=T,prob=rep(1,k)) #assign gamma categories for variant sites
+  
+  sprotein <- protein_var #starting protein
+  t_now <- 0 #time until the current step of simulation
+  path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
+  colnames(path) <- colnames(path,do.NULL = FALSE, prefix = "Site.") #column names
+  ##last two columns in the paths, recording Time up to this point and the waiting time at the current state
+  colnames(path)[l+1] <- "Time Now"
+  colnames(path)[l+2] <- "Waiting Time"
+  m = 20
+  rwait <- -diag(Qmat) #exponential rate of waiting, diagonal of Qmat
+  while(t_now < t){ #when current time is less than t
+    rates <- Qmat[sprotein,] * grates[var_cat]
+    rates <- c(t(rates)) #moving rates of a protein to its neighbors
+    rates[rates < 0] <- 0    
+    #rates <- rwait[sprotein]*grates[var_cat] #take into account of gamma rates
+    lambda <- sum(rates) #total rates of moving (reaction)
+    t_wait <- rexp(1,lambda) #waiting time, coming from exponential distribution with rate lambda
+    t_now <- t_now + t_wait # current time after the first transition
+    ##determine where the first transition is
+    if(t_now < t){
+      index <- sample(1:length(rates),1,replace=T,rates) #index of the protein it moves to
+      pos <- (index-1) %/% m + 1 #index of the site that changes
+      rmd <- (index-1) %% m + 1 # the amino acid that site changes to
+      sprotein[pos] <- seq(1:m)[rmd] #new protein
+      protein[var_site] <- sprotein
+      protein[inv_site] <- protein_inv
+      path <- rbind(path,c(protein,t_now,t_wait)) #record this moving step
+    }
+    else{
+      path <- rbind(path,c(protein,t,NA)) #record this moving step
+    }
+  }
+  path[,l+2] <- c(path[-1,l+2],NA)  
+  return(list(seq=path,inv_site=inv_site))
+}
+## simulation according to empirical models,l is the length of simulated sequence, rootseq is the starting sequence
+## if none of Q and bf is specified, then they are got from the model
+## this is just along one branch with given length, not along a tree
+simAA <- function(l=100,rootseq=NULL,t=1,Q=NULL,bf=NULL,inv=0,rate=1,k=1,model="USER"){
+  if(!is.null(model)){
+    model <- match.arg(model,c("WAG","JTT","LG","Dayhoff","cpREV","mtmam","mtArt","MtZoa","mtREV24"))
+    if(model!="USER") getModelAA(model,bf=is.null(bf),Q=is.null(Q))
+  }
+  lbf = 20
+  if(is.null(bf)) bf = rep(1/lbf,lbf)
+  if(is.null(Q))  Q = rep(1,lbf*(lbf-1)/2)
+  if(is.null(rootseq)) rootseq=sample(1:20,l,replace=TRUE,prob=bf)
+  return(simulationQ(protein=rootseq,t=t,Q=Q,bf=bf,inv=inv,rate=rate,k=k))
+}
 ##################################################################################################
 ## simulation under the new model and WAG model
 ##################################################################################################
 ## Read the WAG matrix (lower triangular part)
-WagMat <- scan("~/proteinevoutk20/pkg/Data/AAmodel/wag.txt",nlines=19)
+##WagMat <- scan("~/proteinevoutk20/pkg/Data/AAmodel/wag.txt",nlines=21)
 #Qwag <- mat_form_lowtriQ(Q=WagMat,bf=bfaa)
 ll_site_lowQ <- function(tree,data,Q,bf=rep(1/20,20),g=1){
   ##If the given tree is not rooted and binary, then throw error and exit
@@ -221,75 +286,21 @@ ll_site_lowQ <- function(tree,data,Q,bf=rep(1/20,20),g=1){
   #return(list(ll=max(probvec[root,]),root=which.max(probvec[root,]))) #with the corresponding root returned 
   #return(max(probvec[root,])) #just the value
 }
-## simulation given rate matrix, 
-simulationQ <- function(protein,t,Q,bf=rep(1/20,20)){
-  Qmat <- mat_form_lowtriQ(Q,bf)
-  l <- length(protein) #number of sites
-  t_now <- 0 #time until the current step of simulation
-  path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
-  colnames(path) <- colnames(path,do.NULL = FALSE, prefix = "Site.") #column names
-  ##last two columns in the paths, recording Time up to this point and the waiting time at the current state
-  colnames(path)[l+1] <- "Time Now"
-  colnames(path)[l+2] <- "Waiting Time"
-  m = 20
-  while(t_now < t){ #when current time is less than t
-    rates <- Qmat[protein,]
-    rates <- c(t(rates)) #moving rates of a protein to its neighbors
-    rates[rates < 0] <- 0
-    lambda <- sum(rates) #total rates of moving (reaction)
-    t_wait <- rexp(1,lambda) #waiting time, coming from exponential distribution with rate lambda
-    t_now <- t_now + t_wait # current time after the first transition
-    ##determine where the first transition is
-    if(t_now < t){
-      index <- sample(1:length(rates),1,replace=T,rates) #index of the protein it moves to
-      pos <- (index-1) %/% m + 1 #index of the site that changes
-      rmd <- (index-1) %% m + 1 # the amino acid that site changes to
-      protein[pos] <- seq(1:m)[rmd] #new protein
-      path <- rbind(path,c(protein,t_now,t_wait)) #record this moving step
-    }
-    else{
-      path <- rbind(path,c(protein,t,NA)) #record this moving step
-    }
-  }
-  ##shift the third column up one step so that the waiting time is the time
-  ## spent in the state in the first column
-  path[,l+2] <- c(path[-1,l+2],NA)  
-  return(path)
-}
 ##################################################################################################
-##result includes the functionality of the protein at each step, mean distance from the optimal protein
-## and the corresponding step functions of fty and distance vectors
-## simulation based on WAG model
-sim.Wag <- function(t=1,protein,bf,opaa,s,dismat){
-  sim <- simulationQ(protein=protein,t=t,Q=WagMat,bf=bf)
-  l <- dim(sim)[2] - 2
+## given the simulation sequences with times of transitions, find the functionalities of each protein 
+## on the path, and the distance of them from the optimal aa, as well as the stepfunction formed by them
+sim.info <- function(sim,opaa,s=1,beta=be,gamma=ga){
+  dismat <- GM_cpv(GM_CPV,al,beta,gamma)
+  l <- dim(sim)[2]-2
   fty <- apply(sim[,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
   dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=opaa,DisMat=dismat)#distance from optimal amino acids
   dis <- apply(dis,2,mean)#average distance for all sites
   ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
   disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
-  #plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
   return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
 }
-## simulation based on SAC model, given s, opaa, beta, gamma, bfaa,and starting sequence on a single branch with length t.
-sim.New <- function(s=1,t=10,root,opaa,beta,gamma,bfaa){
-  dismat = GM_cpv(GM_CPV,al,beta,gamma)
-  mumat = aa_MuMat_form(res_op$Q)
-  sim <- simulation(root,opaa,t=t,s=s,DisMat=dismat,MuMat=mumat,bfaa=bfaa) #simulation
-  l <- dim(sim)[2] - 2
-  fty <- apply(sim[,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
-  dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=opaa,DisMat=dismat)#distance from optimal amino acids
-  dis <- apply(dis,2,mean)#average distance for all sites
-  ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
-  disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
-  #if(func) #plot functionality vs time
-  #plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
-  #if(dist) #plot distance vs time
-  #plot(disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i",add=add)
-  #return(as.numeric(tail(sim,1)[1:l])) #the sequence at the end of simulation
-  return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
-}
-
+#plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i")
+#plot(disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i")
 ##################################################################################################
 ## wrapper for seq-gen (seq-gen already installed on the computer)
 ## opts is the string of options one would use in the command "seq-gen"
@@ -299,9 +310,37 @@ sim.New <- function(s=1,t=10,root,opaa,beta,gamma,bfaa){
 ## [-z SEED FOR RANDOM NUMBER GENERATOR] [-o prn OUTPUT FILE FORMAT: phylip/relaxed phylip/nexus]
 ## [-w ar WRITE ADDITIONAL INFO: ancestral seq/rate for each site] [-q QUIET]
 ##################################################################################################
-seq_gen <- function(opts, inputfile, outputfile){
-  command <- paste("seq-gen", opts,"<",inputfile, ">",outputfile,sep=" ")
-  system(command)
-}
+# seq_gen <- function(opts, inputfile, outputfile){
+#   command <- paste("seq-gen", opts,"<",inputfile, ">",outputfile,sep=" ")
+#   system(command)
+# }
 ## opts <- "-mWAG -l144 -a3.514 -i0.193 -f0.03559028,0.05121528,0.02777778,0.01649306,0.01388889,0.03472222,0.05121528,0.06944444,0.02777778,0.09375000,0.14409722,0.05034722,0.01909722,0.05815972,0.02864583,0.07552083,0.04687500,0.02343750,0.04600694,0.08593750 -on -war"
 ## seq_gen(opts,"gene7.tree","gene7sim.txt")
+
+readAArate <- function(file){
+  tmp <- scan("~/proteinevoutk20/pkg/Data/AAmodel/wag.txt",nlines=21)
+  if(length(tmp)!=210) stop("require lower triangular matrix and equilibrium rates, check file!")
+  Q <- tmp[1:190]
+  bf <- tmp[191:210]
+  names(bf) <- AA
+  return(list(Q=Q, bf=bf))
+}
+# .LG <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/lg.dat")
+# .WAG <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/wag.dat")
+# .Dayhoff <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/dayhoff-dcmut.dat")
+# .JTT <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/jtt-dcmut.dat")
+# .cpREV <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/cpREV.dat")
+# .mtmam <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtmam.dat")
+# .mtArt <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtArt.dat")
+# .MtZoa <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/MtZoa.dat")
+# .mtREV24 <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtREV24.dat")
+#.FLU <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/FLU.dat")
+.aamodels <- list(LG=.LG,WAG=.WAG,Dayhoff=.Dayhoff,JTT=.JTT,cpREV=.cpREV,mtmam=.mtmam,MtZoa=.MtZoa,mtREV24=.mtREV24,FLU=.FLU)
+
+getModelAA <- function(model, bf=TRUE, Q=TRUE){
+  model <- match.arg(eval(model), c("WAG", "JTT", "LG", "Dayhoff", "cpREV", "mtmam", "mtArt", "MtZoa", "mtREV24"))
+  #model <- match.arg(eval(model), .aamodels)
+  tmp = .aamodels[[model]]
+  if(Q) assign("Q", tmp$Q, envir=parent.frame())
+  if(bf) assign("bf", tmp$bf, envir=parent.frame())
+}

@@ -1,7 +1,7 @@
-load("~/proteinevoutk20/pkg/scratch/lab9/prunetree/gene1.RData")
+load("~/BackupProEvo/Lab9/prunetree/gene1.RData")
 source("~/proteinevoutk20/pkg/R/main.R")
 source("~/proteinevoutk20/pkg/R/simulation.R")
-nsim <- 100
+nsim <- 2
 wsim <- vector(mode="list",length=nsim)
 wsimWag <- vector(mode="list",length=nsim)
 wroots <- vector(mode="list",length=nsim)
@@ -10,8 +10,13 @@ for(i in 1:nsim){
   ## simulation starting with WAG equilibrium frequencies
   root <- sapply(1:length(index),function(x) sample(20,1,replace=TRUE,prob=bfaa))
   wroots[[i]] <- root
-  wsim[[i]] <- sim.New(s=s,t=brlen,root=root,opaa=opaa,beta=beta,gamma=gamma,bfaa=bfaa)
-  wsimWag[[i]] <- sim.Wag(t=brlen,protein=root,bf=bfaa,opaa=opaa,s=s,dismat=dismat)
+  dismat = GM_cpv(GM_CPV,al,beta,gamma)
+  mumat = aa_MuMat_form(res_op$Q)
+  sim <- simulation(root,opaa,t=brlen,s=s,DisMat=dismat,MuMat=mumat,bfaa=bfaa) #simulation     
+  wsim[[i]] <- sim.info(sim,opaa=opaa,s=s,beta=beta,gamma=gamma)
+  simwag <- simAA(rootseq=root,bf=bfaa,model="LG",inv=0,rate=0.771,k=4)
+  wsimWag[[i]] <- sim.info(simwag$seq,opaa=opaa,s=s,beta=beta,gamma=gamma)
+  #wsimWag[[i]] <- sim.Wag(t=brlen,protein=root,bf=bfaa,opaa=opaa,s=s,dismat=dismat)
 }
 ##################################################################################################
 ## analysis of the simulated data under both models
