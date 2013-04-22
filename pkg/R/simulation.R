@@ -299,8 +299,8 @@ sim.info <- function(sim,opaa,s=1,beta=be,gamma=ga){
   disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
   return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
 }
-#plot(ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i")
-#plot(disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i")
+# plot(wsim[[1]]$ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,brlen),xaxs="i")
+# plot(wsim[[1]]$disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),pch=20,xlim=c(0,brlen),xaxs="i")
 ##################################################################################################
 ## wrapper for seq-gen (seq-gen already installed on the computer)
 ## opts is the string of options one would use in the command "seq-gen"

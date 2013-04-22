@@ -662,14 +662,13 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20),Q, g = 1)
   mNodes = as.integer(max(node) + 1)
   contrast = attr(dat1, "contrast")
   nco = as.integer(dim(contrast)[1])
-  if(packageVersion("phangorn")=='1.7.4'){
     res <- .Call("LogLik2", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
     result = log(res[[1]]%*%bf) #updated phangorn, phangorn 1.7
-  }
-  else{
-    res <- .Call("LogLik4", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
-    result = res[[2]][[1]] + log(res[[1]][[1]] %*% bf)   #phangorn 1.6
-  }
+
+#   else{
+#     res <- .Call("LogLik4", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
+#     result = res[[2]][[1]] + log(res[[1]][[1]] %*% bf)   #phangorn 1.6
+#   }
   return(result)
   
 }
