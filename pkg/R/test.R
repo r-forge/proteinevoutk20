@@ -24,30 +24,4 @@
 #   points(xyz,pch=3,col="blue")
 # }
 
-#MLE for s and Ne, using subplex method by default
-#mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
-#                  opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-#sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,Q=NU_VEC))
-optim.s.Ne <- function(data, tree,s,Ne, method="SBPLX",maxeval="500",print_level=0,...){
-  #store information from initial condition, with other parameters fixed
-  res.initial = mllm1(data=data,tree=tree,s=s,beta=be,gamma=ga,Ne=Ne,...)
-  #these don't change with the change of s
-  mumat = res.initial$mumat
-  bfaa=res.initial$bfaa
-  
-  ab <- c(s,Ne) ##initial value
-  fn = function(ab,data,tree){
-    cat("s, Ne = ",ab[1]," ",ab[2],"\n")
-    result = -mllm1(data=data,tree=tree,s=ab[1],beta=be,gamma=ga, mumat=mumat,bfaa=bfaa,Ne=ab[2], ...)$ll$loglik
-    cat(result,"\n")
-    return(result)
-    
-  }
-  lower <- rep(0,2)
-  upper <- rep(Inf,2)
-  #options for optimizer
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
-               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
-  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
-  return(res)
-}
+

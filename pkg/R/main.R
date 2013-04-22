@@ -662,9 +662,9 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20),Q, g = 1)
   mNodes = as.integer(max(node) + 1)
   contrast = attr(dat1, "contrast")
   nco = as.integer(dim(contrast)[1])
-  res <- .Call("LogLik4", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
-  result = res[[2]][[1]] + log(res[[1]][[1]] %*% bf)   
-  #result1 = res[[2]][[1]] + log(res[[1]][[1]])
+  res <- .Call("LogLik2", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
+  #result = res[[2]][[1]] + log(res[[1]][[1]] %*% bf)   #phangorn 1.6
+  result = log(res[[1]]%*%bf) #updated phangorn, phangorn 1.7
   return(result)
   
 }
@@ -1252,8 +1252,57 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
   object = update(object, tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw,...)
   return(object)
 }
+#MLE for s and Ne, using subplex method by default
+#mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
+#                  opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
+#sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,5000,beta=be,gamma=ga,Q=NU_VEC,...)
+optim.s.Ne <- function(data, tree,s,Ne, method="SBPLX",maxeval="500",print_level=0,...){
+  #store information from initial condition, with other parameters fixed
+  res.initial = mllm1(data=data,tree=tree,s=s,beta=be,gamma=ga,Ne=Ne,...)
+  #these don't change with the change of s
+  mumat = res.initial$mumat
+  bfaa=res.initial$bfaa
+  
+  ab <- c(s,Ne) ##initial value
+  fn = function(ab,data,tree){
+    cat("s, Ne = ",ab[1]," ",ab[2],"\n")
+    result = -mllm1(data=data,tree=tree,s=ab[1],beta=be,gamma=ga, mumat=mumat,bfaa=bfaa,Ne=ab[2], ...)$ll$loglik
+    cat(result,"\n")
+    return(result)
+    
+  }
+  lower <- rep(0,2)
+  upper <- rep(Inf,2)
+  #options for optimizer
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
+               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
+  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
+  return(res)
+}
 
-
+optim.Ne <- function(data, tree,s,Ne, method="SBPLX",maxeval="500",print_level=0,...){
+  #store information from initial condition, with other parameters fixed
+  res.initial = mllm1(data=data,tree=tree,s=s,beta=be,gamma=ga,Ne=Ne,...)
+  #these don't change with the change of s
+  mumat = res.initial$mumat
+  bfaa=res.initial$bfaa
+  
+  ab <- Ne ##initial value
+  fn = function(ab,data,tree){
+    cat("Ne = ",ab,"\n")
+    result = -mllm1(data=data,tree=tree,s=s,beta=be,gamma=ga, mumat=mumat,bfaa=bfaa,Ne=ab, ...)$ll$loglik
+    cat(result,"\n")
+    return(result)
+    
+  }
+  lower <- 0
+  upper <- Inf
+  #options for optimizer
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
+               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
+  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
+  return(res)
+}
 ## convert a string that contains many numbers separated by blanks, to a vector of numbers
 str.to.num <- function(string,split=" "){
   char.vec <- strsplit(string,split=split)[[1]]
