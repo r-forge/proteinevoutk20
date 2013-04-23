@@ -641,7 +641,7 @@ ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
 ####################################################################################################################################
 # Here Q gets scaled in the function, so the given matrix doesn't have to be scaled
 # returns loglikelihood values for all distinct patterns in the data, matrix with 1 column (or a column vector)
-ll3m <- function (dat1, tree, bf = rep(1/20,20),Q, g = 1) 
+ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, Q, g = 1) 
 {
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise")
     tree <- reorderPruning(tree)
@@ -662,18 +662,21 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20),Q, g = 1)
   mNodes = as.integer(max(node) + 1)
   contrast = attr(dat1, "contrast")
   nco = as.integer(dim(contrast)[1])
-    res <- .Call("LogLik2", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
-    result = log(res[[1]]%*%bf) #updated phangorn, phangorn 1.7
-
-#   else{
-#     res <- .Call("LogLik4", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
-#     result = res[[2]][[1]] + log(res[[1]][[1]] %*% bf)   #phangorn 1.6
-#   }
+  res <- .Call("LogLik2", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
+  if(is.null(ancestral)){
+    result = sapply(1:nr,function(x) max(res[[1]][x,]))
+    result = matrix(log(result),ncol=1)
+    root =  sapply(1:nr,function(x) which.max(res[[1]][x,]))
+  }
+  else{
+    result = log(res[[1]]%*%ancestral) #updated phangorn, phangorn 1.7
+    root = ancestral
+  }
+  #return(list(result=result,root=root))
   return(result)
-  
 }
 # loglikelihood given optimal amino acids at each site. 
-llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
+llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
   nr = attr(data,"nr") #number of different sites
@@ -683,7 +686,7 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e
   optimal_aa = "" #is optimal aa given or not?
   ## calculate the loglikelihood for each different site pattern (m), with every amino acid as optimal
   ## arrange them in a matrix of dimension m * 20
-  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,g=1)
+  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=ancestral,g=1)
   if(nr==1)
     result = matrix(result,nrow=1,ncol=20)
 #   for(i in 1:20){ #when optimal aa is i
@@ -714,10 +717,10 @@ llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e
 ## For all the distinct sites (m), find loglikelihood, result is m * 20 matrix
 ## each column stores the loglikelihods when the corresponding amino acid is optimal 
 ## maximizing rule for optimal aa
-llaam <- function(tree,data,Qall,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
+llaam <- function(tree,data,Qall,bf=rep(1/20,20),ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
-  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,g=1)
+  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=ancestral,g=1)
   opaa = apply(result,1,which.max)
   sitelik = apply(result,1,max)
   loglik = sum(weight * sitelik)
@@ -743,12 +746,12 @@ llaaw_grad <- function(opw,weight,llmat){
 }
 # assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
 # if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
-llaaw <- function(tree,data,Qall,opw=NULL,bf=rep(1/20,20),C=2,Phi=0.5,q=4e-7,Ne=5e6){
+llaaw <- function(tree,data,Qall,opw=NULL,bf=rep(1/20,20),ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
   nr = attr(data,"nr")
   opaa = NULL
-  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,g=1)
+  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=ancestral,g=1)
 
   if(!is.null(opw)){
     opw = opw/sum(opw)
@@ -799,7 +802,7 @@ mllm <- function(data,tree,s,alpha=al,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=
 #0.0000001000 0.0018676483 0.0003990333
 #more flexibility on what is provided, good for avoiding unnecessary computations
 mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
-                  opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+                  opaa=NULL,opw=NULL,bfaa=NULL,ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -826,9 +829,9 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall
     Qall = QAllaa1(fixmatall,mumat,Ne=Ne)
   }
   if(!is.null(opaa))
-    ll = llop(data,tree,op=opaa,Qall=Qall,bf=bfaa,C=C,Phi=Phi,q=q,Ne=Ne)
+    ll = llop(data,tree,op=opaa,Qall=Qall,bf=bfaa,ancestral=ancestral,C=C,Phi=Phi,q=q,Ne=Ne)
   else 
-    ll = llaaw(tree,data,Qall,opw,bfaa,C,Phi,q,Ne)
+    ll = llaaw(tree,data,Qall,opw,bfaa,ancestral=ancestral,C,Phi,q,Ne)
   result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,dismat=dismat,fixmatall=fixmatall,Qall=Qall,
                 mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,call=call)
   class(result) = "mllm"
@@ -1311,4 +1314,30 @@ optim.Ne <- function(data, tree,s,Ne, method="SBPLX",maxeval="500",print_level=0
 str.to.num <- function(string,split=" "){
   char.vec <- strsplit(string,split=split)[[1]]
   return(as.numeric(char.vec))
+}
+#############################################################################
+# #for a given vector of log likelihood, and the corresponding opaa, find the smallest set of aa
+# # that cover the 95% of the total likelihood
+aa.set <- function(llvec){
+  lvec = exp(llvec) #likelihood
+  ord = order(llvec,decreasing=T) #order of llvec (increasing)
+  lvec = lvec[ord] # ordered likelihood
+  tol = sum(lvec) #total likelihood
+  CumSum = cumsum(lvec) # cumulative sum 
+  ind = sum(CumSum < tol*0.95) + 1 #the index that gives > 95% totol likelihood
+  Sum = CumSum[ind] # sum of the first "ind" terms
+  #return the set of amino acids that give > 95% likelihood, percentile, and 
+  #the percentile of the likelihood given by the optimal aa (max rule)
+  return(list(aa=ord[1:ind], percentile=Sum/tol,op.percentile=lvec[1]/tol))
+}
+# aa.conf = apply(X=mat,MARGIN=1,FUN=aa.set) #here mat is the llmat from result
+# numaa = sapply(1:9128,function(x) length(aa.conf[[x]]$aa))
+# op.lik = sapply(1:9128, function(x) aa.conf[[x]]$op.per)
+
+# heatmap of probabilities that each amino acid accounts for
+hmap.op <- function(llmat){
+  probmat <- exp(llmat)
+  lsite <- dim(probmat)[1]
+  #probmat <- t(sapply(1:lsite,function(x) expmat[x,]/sum(expmat[x,])))
+  heatmap(probmat[1:lsite,],Rowv=NA,Colv=NA,col=cm.colors(256))
 }
