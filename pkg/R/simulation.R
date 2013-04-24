@@ -181,7 +181,7 @@ simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NU
 simulationQ <- function(protein,t,Q=NULL,bf=NULL,inv=0,rate=1,k=1){
   if(is.null(bf)) bf <- rep(1/20,20)
   if(is.null(Q)) Q <- rep(1,190)
-  Qmat <- mat_form_lowtriQ(Q,bf) #transition rate matrix
+  Qmat <- mat_form_lowtriQ(Q,bf,byrow=TRUE) #transition rate matrix
   l <- length(protein) #number of sites
   
   inv_runif <- runif(l) #sample the sites that are invariant
@@ -253,7 +253,7 @@ ll_site_lowQ <- function(tree,data,Q,bf=rep(1/20,20),g=1){
   m = 20
   ##if the base frequencies are not specified, do a uniform distribution
   if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
-  Qmat <- mat_form_lowtriQ(Q,bf)
+  Qmat <- mat_form_lowtriQ(Q,bf,byrow=TRUE)
   
   tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
   edge = tree$edge #edges
@@ -318,24 +318,31 @@ sim.info <- function(sim,opaa,s=1,beta=be,gamma=ga){
 ## seq_gen(opts,"gene7.tree","gene7sim.txt")
 
 readAArate <- function(file){
-  tmp <- scan("~/proteinevoutk20/pkg/Data/AAmodel/wag.txt",nlines=21)
+  tmp <- scan(file,nmax=210)
   if(length(tmp)!=210) stop("require lower triangular matrix and equilibrium rates, check file!")
   Q <- tmp[1:190]
   bf <- tmp[191:210]
   names(bf) <- AA
   return(list(Q=Q, bf=bf))
 }
-# .LG <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/lg.dat")
-# .WAG <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/wag.dat")
-# .Dayhoff <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/dayhoff-dcmut.dat")
-# .JTT <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/jtt-dcmut.dat")
-# .cpREV <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/cpREV.dat")
-# .mtmam <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtmam.dat")
-# .mtArt <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtArt.dat")
-# .MtZoa <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/MtZoa.dat")
-# .mtREV24 <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtREV24.dat")
-#.FLU <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/FLU.dat")
-.aamodels <- list(LG=.LG,WAG=.WAG,Dayhoff=.Dayhoff,JTT=.JTT,cpREV=.cpREV,mtmam=.mtmam,MtZoa=.MtZoa,mtREV24=.mtREV24,FLU=.FLU)
+.LG <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/lg.dat")
+.WAG <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/wag.dat")
+.Dayhoff <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/dayhoff-dcmut.dat")
+.JTT <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/jtt-dcmut.dat")
+.cpREV <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/cpREV.dat")
+.mtmam <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtmam.dat")
+.mtArt <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtArt.dat")
+.MtZoa <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/MtZoa.dat")
+.mtREV24 <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtREV24.dat")
+.FLU <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/FLU.dat")
+.Blosum62 <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/Blosum62.dat")
+.HIVb <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/HIVb.dat")
+.HIVw <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/HIVw.dat")
+.RtREV <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/RtREV.dat")
+.VT <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/VT.dat")
+.aamodels <- list(LG=.LG,WAG=.WAG,Dayhoff=.Dayhoff,JTT=.JTT,cpREV=.cpREV,
+                  mtmam=.mtmam,MtZoa=.MtZoa,mtREV24=.mtREV24,FLU=.FLU,
+                  Blosum62=.Blosum62,HIVb=.HIVb,HIVw=.HIVw,RtREV=.RtREV,VT=.VT)
 
 getModelAA <- function(model, bf=TRUE, Q=TRUE){
   model <- match.arg(eval(model), c("WAG", "JTT", "LG", "Dayhoff", "cpREV", "mtmam", "mtArt", "MtZoa", "mtREV24"))

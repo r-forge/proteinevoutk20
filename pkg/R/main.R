@@ -229,12 +229,15 @@ MostFreq <- function(data,count=10){
 #############################################################################
 ##given lower triangular part of R (i.e. Q = R %*% diag(bf)), and base frequencies, find the scaled Q
 ## Default: 4 by 4 matrix for Jukes-Cantor model
-mat_form_lowtriQ <- function(Q=rep(1,6),bf=rep(0.25,4)){
+mat_form_lowtriQ <- function(Q=rep(1,6),bf=rep(0.25,4),byrow=FALSE){
   if(sum(bf)==0) stop("base frequencies can't all be 0!")
   l=length(bf)
   bf=bf/sum(bf)
   res = matrix(0, l, l)
-  res[lower.tri(res)] = Q
+  if(byrow)
+    res[upper.tri(res)] = Q
+  else
+    res[lower.tri(res)] = Q
   res = res+t(res) #symmetric matrix with diagonals 0
   res = res * rep(bf,each=l) #multiply cols by bf
   diag(res) = -rowSums(res) #set row sum to 0
@@ -392,7 +395,7 @@ aa_MuMat_form <- function(vec=rep(1,6)){
 #   return(isSymmetric(diag(bfaa) %*% aaq))
 # }
 ## Amino acid mutation rate matrix for the GTR model of nucleotide
-MUMAT <- aa_MuMat_form(NU_VEC)
+## MUMAT <- aa_MuMat_form(NU_VEC)
 
 ## change tree to be in pruning order, if it is not
 reorderPruning <- function (x, ...)
@@ -464,18 +467,18 @@ fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
 }
 #check the product of fixation probability and population size, 
 # see if it's a constant
-fixNe <- function(d1,d2,s,q,Ne){
-  return(fix(d1,d2,s,C=2,Phi=0.5,q=q,Ne=Ne)*Ne)
-}
+# fixNe <- function(d1,d2,s,q,Ne){
+#   return(fix(d1,d2,s,C=2,Phi=0.5,q=q,Ne=Ne)*Ne)
+#}
 ## Use the Rmpfr package for higher precision
-fix.mpfr <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
-  if((d1==d2)||(s==0)) #When the fitnesses are the same, neutral case, pure drift
-    return(1/(2*Ne))
-  else{
-    fit_ratio <- exp(mpfr(-C*Phi*q*s*(d1-d2),prec=200)) #f1/f2
-    return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
-  }
-}
+# fix.mpfr <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+#   if((d1==d2)||(s==0)) #When the fitnesses are the same, neutral case, pure drift
+#     return(1/(2*Ne))
+#   else{
+#     fit_ratio <- exp(mpfr(-C*Phi*q*s*(d1-d2),prec=200)) #f1/f2
+#     return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
+#   }
+# }
 ####################
 #comments: in the fixation probability calculation, should the length of the protein sequence be taken
 #into account? here the length is considered to be 1... which could be wrong...
@@ -675,57 +678,75 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, Q, g = 1)
   #return(list(result=result,root=root))
   return(result)
 }
-# loglikelihood given optimal amino acids at each site. 
-llop <- function(data,tree,op=NULL,Qall,bf=rep(1/20,20),ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+ll <- function(Q,ancestral,data,tree,bf,g){
+  ll3m(data,tree,bf,ancestral,Q,g)
+}
+
+llmat <- function(data,tree,Qall,bf=rep(1/20,20),ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   weight = attr(data,"weight")
   nr = attr(data,"nr") #number of different sites
   index = attr(data,"index")
   ns = length(index) #number of sites
-  opaa = NULL #optimal amino acids
-  optimal_aa = "" #is optimal aa given or not?
-  ## calculate the loglikelihood for each different site pattern (m), with every amino acid as optimal
-  ## arrange them in a matrix of dimension m * 20
-  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=ancestral,g=1)
+  if(is.null(ancestral))
+    ancestral = "max"
+  
+  if(ancestral=="max")
+    result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=NULL,g=1)
+  else if(ancestral=="opaa"){
+    anc=diag(20)
+    anc = lapply(1:20,function(x) anc[x,])
+    result = mapply(ll,Qall,anc,MoreArgs=list(data=data,tree=tree,bf=bf,g=1))
+  }
+  else if(ancestral=="eqm"){
+    anc=lapply(X=Qall,function(x) expm(x*100)[1,])
+    result = mapply(ll,Qall,anc,MoreArgs=list(data=data,tree=tree,bf=bf,g=1))
+  }
+  else if(ancestral=="emp")
+    result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=bf,g=1)
+  else stop("ancestral options: opaa, eqm,emp,max")
+  
   if(nr==1)
     result = matrix(result,nrow=1,ncol=20)
-#   for(i in 1:20){ #when optimal aa is i
-#     llopi = ll3m(data,tree,bf=bf,Q=Qall[[i]]) #loglikelihood when optimal amino acid is i
-#     result = cbind(result,llopi)
-#   }
+  return(result)
+}
+## optimal amino acids are given
+llop <- function(op,llmat,data){
+  weight = attr(data,"weight")
+  nr = attr(data,"nr") #number of different sites
+  index = attr(data,"index")
+  ns = length(index) #number of sites
   if(!is.null(op)){
     opaa = op
     if(length(op)==ns){ #opaa is given for every site
       optimal_aa = "given for all sites"
-      sitelik = sapply(1:ns,function(i) result[index[i],op[i]])
+      sitelik = sapply(1:ns,function(i) llmat[index[i],op[i]])
       loglik <- sum(sitelik)
     } else if(length(op)==nr){ #opaa is given for each distinct data pattern
       optimal_aa = "given for distinct patterns"
-      sitelik = sapply(1:nr,function(i) result[i,op[i]])
+      sitelik = sapply(1:nr,function(i) llmat[i,op[i]])
       loglik <- sum(weight*sitelik)
     }
   }
-  else{
-    optimal_aa = "not given, estimated using maximization"
-    opaa = apply(result,1,which.max)
-    sitelik=apply(result,1,max)
-    loglik <- sum(weight*sitelik)
-  }
-  return(list(loglik=loglik, optimal_aa = optimal_aa,opaa=opaa,sitelik = sitelik, llmat=result))
+  return(list(loglik=loglik, optimal_aa = optimal_aa,opaa=opaa,sitelik = sitelik, llmat=llmat))
 }
-
-## For all the distinct sites (m), find loglikelihood, result is m * 20 matrix
-## each column stores the loglikelihods when the corresponding amino acid is optimal 
-## maximizing rule for optimal aa
-llaam <- function(tree,data,Qall,bf=rep(1/20,20),ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
-  result = NULL
-  weight = attr(data,"weight")
-  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=ancestral,g=1)
-  opaa = apply(result,1,which.max)
-  sitelik = apply(result,1,max)
+## optimal amino acids are found by max rule
+llmax <- function(llmat,weight){
+  optimal_aa = "not given, estimated using maximization"
+  opaa = apply(llmat,1,which.max)
+  sitelik=apply(llmat,1,max)
+  loglik <- sum(weight*sitelik)
+  return(list(loglik=loglik, optimal_aa = optimal_aa,opaa=opaa,sitelik = sitelik, llmat=llmat))
+}
+# assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
+# if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
+llaaw <- function(opw,weight,llmat){
+  opw = opw/sum(opw)
+  eresult = exp(llmat) #likelihood values, from exp(loglikelihood)
+  sitelik = eresult %*% opw
+  sitelik = log(sitelik)
   loglik = sum(weight * sitelik)
-  res=list(loglik= loglik, opaa = opaa, sitelik = sitelik, llmat=result)
-  return(res)
+  return(list(loglik=loglik,weights=opw, sitelik = sitelik, llmat=llmat))
 }
 ## given opw (weights of aas being optimal), weights of data patterns and LIKELIHOOD (not loglikelihood) matrix: n * 20
 ## find the -loglikelihood for all data
@@ -744,62 +765,10 @@ llaaw_grad <- function(opw,weight,llmat){
   }
   return(grad_vec)
 }
-# assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
-# if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
-llaaw <- function(tree,data,Qall,opw=NULL,bf=rep(1/20,20),ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
-  result = NULL
-  weight = attr(data,"weight")
-  nr = attr(data,"nr")
-  opaa = NULL
-  result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=ancestral,g=1)
 
-  if(!is.null(opw)){
-    opw = opw/sum(opw)
-#     result = result * rep(opw,each=nr)
-#     sitelik = apply(result,1,sum) ## these two lines are replaced by the following line
-    eresult = exp(result) #likelihood values, from exp(loglikelihood)
-    sitelik = eresult %*% opw
-    sitelik = log(sitelik)
-    loglik = sum(weight * sitelik)
-  }
-  else{
-    opaa = apply(result,1,which.max)
-    sitelik=apply(result,1,max)
-    loglik = sum(weight*sitelik)
-  }
-  return(list(loglik=loglik, opaa=opaa,weights=opw, sitelik = sitelik, llmat=result))
-}
 ## find the loglikelihood given Q and other paramters, here Q is the lower triangular part of the 
 ## nucleotide transition rate matrix of length 6
 ## this one uses expm for matrix exponentiation
-mllm <- function(data,tree,s,alpha=al,beta=be,gamma=ga,Q=NULL,dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
-  call <- match.call()
-  if(class(tree)!="phylo") stop("tree must be of class phylo") 
-  if (is.null(attr(tree, "order")) || attr(tree, "order") == 
-    "cladewise") 
-    tree <- reorderPruning(tree)
-  if (class(data)[1] != "phyDat") stop("data must be of class phyDat")
-  if(is.null(tree$edge.length)) stop("tree must have branch length") 
-  if(any(is.na(match(tree$tip, attr(data, "names"))))) stop("tip labels are not in data")
-  if(!is.null(opaa) && !is.null(opw)) warning("both optimal amino acis and weights are specified, weights are ignored")
-  
-  if(is.null(Q)) Q = rep(1,6)
-  if(is.null(bfaa)) bfaa = findBf2(data) #if bfaa is not given, use the empirical bf
-  if(is.null(dismat))
-    dismat = GM_cpv(GM_CPV,alpha,beta,gamma)
-  if(is.null(mumat)){
-    mumat = aa_MuMat_form(Q)
-  }
-  Qall = QAllaa(s,dismat,mumat,C,Phi,q,Ne)
-  if(!is.null(opaa))
-    ll = llop(data,tree,op=opaa,bf=bfaa,Qall=Qall,C=C,Phi=Phi,q=q,Ne=Ne)
-  else 
-    ll = llaaw(tree,data,Qall,opw,bfaa,C,Phi,q,Ne)
-  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(alpha,beta,gamma),Q=Q,dismat=dismat,mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,call=call)
-  class(result) = "mllm"
-  return(result)
-}
-#0.0000001000 0.0018676483 0.0003990333
 #more flexibility on what is provided, good for avoiding unnecessary computations
 mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
                   opaa=NULL,opw=NULL,bfaa=NULL,ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
@@ -828,12 +797,17 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall
     }
     Qall = QAllaa1(fixmatall,mumat,Ne=Ne)
   }
-  if(!is.null(opaa))
-    ll = llop(data,tree,op=opaa,Qall=Qall,bf=bfaa,ancestral=ancestral,C=C,Phi=Phi,q=q,Ne=Ne)
-  else 
-    ll = llaaw(tree,data,Qall,opw,bfaa,ancestral=ancestral,C,Phi,q,Ne)
+  llmat = llmat(data=data,tree=tree,Qall=Qall,bf=bfaa,ancestral=ancestral,C=C,Phi=Phi,q=q,Ne=Ne)
+  weight = attr(data,"weight")
+  if(!is.null(opaa)) #opaa specified
+    ll = llop(op=opaa,llmat=llmat,data=data)
+  else if(!is.null(opw)) ## opw specified or max rule for optimal aa
+    ll = llaaw(opw=opw,weight=weight,llmat=llmat)
+  else{
+    ll = llmax(llmat,weight)
+  }
   result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,dismat=dismat,fixmatall=fixmatall,Qall=Qall,
-                mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,call=call)
+                mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,ancestral=ancestral,call=call)
   class(result) = "mllm"
   return(result)
 }
