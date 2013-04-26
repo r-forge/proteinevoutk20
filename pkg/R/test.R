@@ -23,6 +23,11 @@ model_comp <- function(i){
   r1$deltaAIC <- r1$AIC - min(r1$AIC)
   return(r1)
 }
+
+trimRData <- function(DataFile,obj="res_op"){
+  load(DataFile)
+  save(list=obj,file=DataFile,compress=TRUE)
+}
 # plot.grid <- function(index){
 #   xyz = grid.gen(opw_mean,index,res_op=res_op,gridnum=20)
 #   akima.xyz = interp(xyz$x,xyz$y,xyz$z)
