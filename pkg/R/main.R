@@ -8,7 +8,7 @@ library(minqa) #optimization function bobyqa
 library(mgcv) #find the unique rows in a matrix - uniquecombs
 library(numDeriv) # calculate hessian of a function at a point
 library(gtools) #package used to draw random samples from dirichlet distribution -- rdirichlet, ddirichlet
-library(nloptr)
+library(nloptr) #optimization
 #library(scatterplot3d)
 #library(akima) # gridded bivariate interpolation for irredular data
 #library(Rmpfr)
@@ -110,7 +110,7 @@ names(cdlist) <- AA
 ##################################################################
 ##   Read gene data ##
 ##################################################################
-## read in fasta file of nucleotide, convert it into amino acid data
+## read in fasta file of nucleotide (or nucleotide sequence), convert it into amino acid data
 ## type = "num" -- integers ; "AA" -- amino acid names; "phyDat" --- phyDat data type used in phangorn
 conv <- function(filename,range=NULL,type="num",frame=0){
   levels <- AA #amino acids in alphabeticla order (not the single letter names, the 3-letter names)
@@ -177,11 +177,11 @@ PruneMissing <- function(x,return=FALSE){
 #############################################################################
 ## find the empirical base frequencies for AMINO ACID list data (not phyDat data)
 findBf <- function(datalist){
-  data = unlist(datalist)
-  datatb = table(data)
-  datatb = datatb[AA]
+  data = unlist(datalist) #from list to vector
+  datatb = table(data) #frequencies of each amino acid
+  datatb = datatb[AA] #rearrange and order as AA
   datatb = as.numeric(datatb)
-  return(datatb/sum(datatb))
+  return(datatb/sum(datatb)) #make sum 1
 }
 ## for phyDat format
 findBf2 <- function(data){
@@ -200,6 +200,7 @@ findBf2 <- function(data){
 }
 ## Find the most frequent element of a vector
 ## It works for numbers and characters
+## "exclude" is not included in the mode (missing data)
 Mode <- function(x,exclude=NULL) {
   ux <- unique(x)
   if(!is.null(exclude))
@@ -227,26 +228,6 @@ MostFreq <- function(data,count=10){
   return(list(mat=datamat[,Index],wt=weight[Index]))
 }
 #############################################################################
-##given lower triangular part of R (i.e. Q = R %*% diag(bf)), and base frequencies, find the scaled Q
-## Default: 4 by 4 matrix for Jukes-Cantor model
-mat_form_lowtriQ <- function(Q=rep(1,6),bf=rep(0.25,4),byrow=FALSE){
-  if(sum(bf)==0) stop("base frequencies can't all be 0!")
-  l=length(bf)
-  bf=bf/sum(bf)
-  res = matrix(0, l, l)
-  if(byrow)
-    res[upper.tri(res)] = Q
-  else
-    res[lower.tri(res)] = Q
-  res = res+t(res) #symmetric matrix with diagonals 0
-  res = res * rep(bf,each=l) #multiply cols by bf
-  diag(res) = -rowSums(res) #set row sum to 0
-  res2 = res * rep(bf,l) #multiply rows by bf, used later to normalize the matrix
-  diag(res2)=0 
-  res = res/sum(res2) #normalize rate matrix
-  return(res)
-}
-
 #scale Q w.r.t bf, if bf is not given, use equal frequencies
 # bf doesn't have sum to 1
 scaleQ <- function(Q,bf=NULL){
@@ -257,6 +238,25 @@ scaleQ <- function(Q,bf=NULL){
   Q = Q/scalef
   return(Q)
 }
+##given lower triangular part of R (i.e. Q = R %*% diag(bf)), and base frequencies, find the scaled Q
+## Default: 4 by 4 matrix for Jukes-Cantor model
+mat_form_lowtriQ <- function(Q=rep(1,6),bf=rep(0.25,4),byrow=FALSE){
+  if(sum(bf)==0) stop("base frequencies can't all be 0!")
+  l=length(bf)
+  bf=bf/sum(bf)
+  res = matrix(0, l, l)
+  if(byrow) # if the lower triangular part of matrix is read by row instead of by column (default)
+    res[upper.tri(res)] = Q
+  else
+    res[lower.tri(res)] = Q
+  res = res+t(res) #symmetric matrix with diagonals 0
+  res = res * rep(bf,each=l) #multiply cols by bf
+  diag(res) = -rowSums(res) #set row sum to 0
+  res = scaleQ(res,bf) #scale Q so that sum(pi_i * Q_ii) = -1
+  return(res)
+}
+
+
 ## from symmetric matrix of rates, find GTR rate matrix
 sym.to.Q <- function(A,bf=NULL){
   if(!isSymmetric(A)) stop("matrix is not symmetric!")
@@ -282,12 +282,12 @@ freq_codon <- function(bf = rep(1/4,4)){
   bf=bf/sum(bf)
   freq = rep(0,61)
   for(i in 1:61){
-    cd = as.numeric(factor(s2c(CDS[i]),Nu))
-    freq[i] = prod(bf[cd])
+    cd = as.numeric(factor(s2c(CDS[i]),Nu)) #nucleotide triplet of the codon considered
+    freq[i] = prod(bf[cd]) #product of frequencies of nucleotides at all 3 positions
   }
   freq = as.table(freq)
   freq = freq/sum(freq)
-  dimnames(freq)[[1]] = CDS
+  dimnames(freq)[[1]] = CDS # change the names of factors to the codon triplets
   return(freq)
 }
 ##given the nucleotide base frequencies, find the bf for amino acids
@@ -296,7 +296,7 @@ freq_aa <- function(nubf=rep(1/4,4)){
   bf = freq_codon(nubf) #codon frequencies
   freq = matrix(0,20,1)
   dimnames(freq)[[1]] = AA
-  CDS_AA = sapply(1:61, function(x) translate(s2c(CDS[x]))) #amino acids coded by the list of codons
+  #CDS_AA = sapply(1:61, function(x) translate(s2c(CDS[x]))) #amino acids coded by the list of codons
   for(i in 1:20)
     freq[AA[i],1] = sum(bf[CDS_AA==AA[i]])
   freq = as.table(as.vector(freq))
@@ -304,9 +304,9 @@ freq_aa <- function(nubf=rep(1/4,4)){
   return(freq)
 }
 ## Given the rate matrix for 61 codons,find the rate matrix for 20 amino acids.
-## Assume all the codons have the same frequencies
+## Assume all the codons have the same frequencies for each amino acid
 ## Only mutation is taken into account, not selection and fixation.
-## time reversible matrix
+## This is an exchange rate matrix, symmetric
 AAMat <- function(CdMat){
   Q = matrix(0,20,20)
   for(i in 1:19){
@@ -343,13 +343,14 @@ cd_MuMat_form <- function(vec=rep(1,6)){
   for(m in 1:60){                       #loop through all 61 codons
     fcd <- CDS[m] #codon mutated from
     fcd_ch <- s2c(fcd) #convert from string to character
-    for(i in (m+1):61){
+    for(i in (m+1):61){ #only do the upper triangular part
       tcd = CDS[i]
       tcd_ch = s2c(tcd)
       cmp = cdcmp(fcd_ch,tcd_ch) #compare the 2 codons
-      if(cmp$num==1){
+      if(cmp$num==1){ # if only one position differs
         pos = cmp$pos
-        codon_array[fcd,tcd] = Q[fcd_ch[pos],tcd_ch[pos]]
+        #set the mutation rate to be the one between nucleotides
+        codon_array[fcd,tcd] = Q[fcd_ch[pos],tcd_ch[pos]] 
       }
     }
   }
@@ -360,6 +361,7 @@ cd_MuMat_form <- function(vec=rep(1,6)){
 
 #Find the mutation rate matrix A (20 by 20) from the 6 rates in GTR mutation rate matrix for nucleotides, row sum is 0
 # result is a symmetric matrix with row sum 0
+# therefore this is only an exchange rate matrix, freq of amino acids are not taken into account
 aa_MuMat_form <- function(vec=rep(1,6)){
   l = 4
   Q = matrix(0, l, l)
@@ -388,6 +390,7 @@ aa_MuMat_form <- function(vec=rep(1,6)){
   return(arr)
 }
 # ##check if the transition between amino acids is time reversible
+# isSymmetric(aa_MuMat_form(runif(6)))
 # checkSymmetric <- function(nuvec,bf){
 #   bfq = freq_codon(bf)
 #   bfaa = freq_aa(bf)
@@ -488,24 +491,19 @@ fix <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
 fix2 <- function(d1,d2,s,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   if(length(d1)!=length(d2)) #throw error if length of proteins are not the same
     stop("error: 2 proteins are of different lengths!")
-  if((length(s)==1)&&(length(d1)!=1)) #if s is given as a scalar, then treat it to be the same across all sites
-    s <- rep(s,length(d1))
-  l = length(d1)
-  cmp = cdcmp(d1,d2)
-  if(cmp$num > 1) return(0) #more than 1 position differ
-  else if((cmp$num ==0)) return(1/(2*Ne)) #same fitness/functionality
-  else{ #exactly 1 position differs
-    pos = cmp$pos 
-    if(s[pos]==0)
-      return(1/(2*Ne))
-    else{
-      fit_ratio <- exp(-C*Phi*q*(sum(s*(d1-d2)))/l) #f1/f2
-      if(fit_ratio==Inf) #1 is much better than 2 (the mutant)
-        return(0)
-      else if(fit_ratio==1)
-        return(1/(2*Ne))
-      else
-        return((1-fit_ratio)/(1-fit_ratio^(2*Ne)))
+  if(length(d1)==1){ #only one amino acid
+    return(fix(d1,d2,s,C=C,Phi=Phi,q=q,Ne=Ne))
+  }
+  else{
+    if((length(s)==1)&&(length(d1)!=1)) #if s is given as a scalar, then treat it to be the same across all sites
+      s <- rep(s,length(d1))
+    l = length(d1)
+    cmp = cdcmp(d1,d2)
+    if(cmp$num > 1) return(0) #more than 1 position differ
+    else if((cmp$num ==0)) return(1/(2*Ne)) #same fitness/functionality
+    else{ #exactly 1 position differs
+      pos = cmp$pos 
+      return(fix(d1[pos],d2[pos],s[pos],C=C,Phi=Phi,q=q,Ne=Ne))
     }
   }
 }
@@ -517,7 +515,7 @@ fix_protein <- function(protein1, protein2, protein_op, s, DisMat,
                         C=2,Phi=0.5,q=4e-7,Ne=5e6){
   d1 <- pchem_d(protein1,protein_op,DisMat)
   d2 <- pchem_d(protein2,protein_op,DisMat)
-  return(fix(d1,d2,s,C,Phi,q,Ne))
+  return(fix2(d1,d2,s,C,Phi,q,Ne))
 }
 
 ######################################################
@@ -548,7 +546,7 @@ fixmat <- function(aa_op,s,DisMat,C=2, Phi=0.5,q=4e-7,Ne=5e6){
   for(i in 1:(m-1)){
     for(j in (i+1):m){
       mat[i,j] <- fix_protein(i,j,aa_op,s,DisMat,C,Phi,q,Ne) #fixation prob -> transition rate
-      mat[j,i] <- fix_protein(j,i,aa_op,s,DisMat,C,Phi,q,Ne) #symmetric entry
+      mat[j,i] <- fix_protein(j,i,aa_op,s,DisMat,C,Phi,q,Ne) #symmetric entry (not the same rate!)
     }#end for j
   }#end for i
   return(mat)
@@ -567,6 +565,8 @@ Qmat <- function(FixMat,MuMat,Ne=5e6){
 # list of 20 rate matrices, one of each aa as optimal
 # these matrices are not scaled, did not use the base frequencies
 QAllaa <- function(s,DisMat,MuMat,C=2, Phi=0.5,q=4e-7,Ne=5e6){
+  #fixall <- fixmatAll(s=s,DisMat=DisMat,C=C,Phi=Phi,q=q,Ne=Ne)
+  #res <- lapply(1:20, function(x) Qmat(fixall[[x,1]],MuMat,Ne=Ne))
   res = lapply(1:20,function(i) {mat_gen_indep(i,s,DisMat, MuMat,C, Phi, q, Ne)})
   return(as.matrix(res))
 }
@@ -593,6 +593,14 @@ getPm <- function(el, Q, g){
     }
   }
   return(res)
+}
+## find the equilibrium frequencies from Q(instantaneous transition rate matrix), row sums of Q are 0
+## This does not use matrix exponentiation, runs faster
+eqmQ <- function(Q){
+  n <- dim(Q)[1]
+  Q[,1] <- rep(1,n) #sum of frequencies is equal to 1
+  vec <- solve(t(Q),c(1,rep(0,n-1)))
+  return(vec)
 }
 ##################################################################
 ##   downpass/pruning method to find probabilities of finding each
@@ -644,6 +652,7 @@ ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
 ####################################################################################################################################
 # Here Q gets scaled in the function, so the given matrix doesn't have to be scaled
 # returns loglikelihood values for all distinct patterns in the data, matrix with 1 column (or a column vector)
+# This calls the internal C function in phangorn package
 ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, Q, g = 1) 
 {
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise")
@@ -667,9 +676,9 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, Q, g = 1)
   nco = as.integer(dim(contrast)[1])
   res <- .Call("LogLik2", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
   if(is.null(ancestral)){
-    result = sapply(1:nr,function(x) max(res[[1]][x,]))
-    result = matrix(log(result),ncol=1)
-    root =  sapply(1:nr,function(x) which.max(res[[1]][x,]))
+    result = sapply(1:nr,function(x) max(res[[1]][x,])) #find the root state that maximizes the likelihood
+    result = matrix(log(result),ncol=1) #take logarithm 
+    root =  sapply(1:nr,function(x) which.max(res[[1]][x,])) # return the root states at all sites
   }
   else{
     result = log(res[[1]]%*%ancestral) #updated phangorn, phangorn 1.7
@@ -678,33 +687,38 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, Q, g = 1)
   #return(list(result=result,root=root))
   return(result)
 }
+# change the orders of the arguments in function ll3m so that mapply can be used later
 ll <- function(Q,ancestral,data,tree,bf,g){
   ll3m(data,tree,bf,ancestral,Q,g)
 }
-
+## return a matrix with 20 columns (one for each aa as optimal aa)
+## one row for each site patter in data
+## with the choice of ancestral states given
+## The matrix is used later, when the optimal aa's are known or the rule of finding them is given
 llmat <- function(data,tree,Qall,bf=rep(1/20,20),ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
-  weight = attr(data,"weight")
+  #weight = attr(data,"weight")
   nr = attr(data,"nr") #number of different sites
-  index = attr(data,"index")
-  ns = length(index) #number of sites
-  if(is.null(ancestral))
+  #index = attr(data,"index")
+  #ns = length(index) #number of sites
+  if(is.null(ancestral)) #default is MaxRoot
     ancestral = "max"
-  
-  if(ancestral=="max")
+  if(ancestral=="max") #MaxRoot
     result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=NULL,g=1)
-  else if(ancestral=="opaa"){
+  else if(ancestral=="opaa"){ #OpRoot -- root is the same as optimal aa
     anc=diag(20)
     anc = lapply(1:20,function(x) anc[x,])
     result = mapply(ll,Qall,anc,MoreArgs=list(data=data,tree=tree,bf=bf,g=1))
   }
-  else if(ancestral=="eqm"){
-    anc=lapply(X=Qall,function(x) expm(x*100)[1,])
+  else if(ancestral=="eqm"){ # EqmRoot
+    anc=lapply(X=Qall,eqmQ) #find equilibrium frequencies for all Q's
     result = mapply(ll,Qall,anc,MoreArgs=list(data=data,tree=tree,bf=bf,g=1))
   }
-  else if(ancestral=="emp")
-    result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=bf,g=1)
-  else stop("ancestral options: opaa, eqm,emp,max")
+  else if(ancestral=="emp") #EmpRoot - root frequencies from observation
+    result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=findBf2(data),g=1)
+  else if(is.vector(ancestral,mode="numeric")) #if root freq is given as vector
+    result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=ancestral,g=1)
+  else stop("ancestral options: opaa, eqm,emp,max, or a numeric vector of length 20")
   
   if(nr==1)
     result = matrix(result,nrow=1,ncol=20)
@@ -713,7 +727,7 @@ llmat <- function(data,tree,Qall,bf=rep(1/20,20),ancestral=NULL,C=2,Phi=0.5,q=4e
 ## optimal amino acids are given
 llop <- function(op,llmat,data){
   weight = attr(data,"weight")
-  nr = attr(data,"nr") #number of different sites
+  nr = attr(data,"nr") #number of different site patterns
   index = attr(data,"index")
   ns = length(index) #number of sites
   if(!is.null(op)){
@@ -741,12 +755,13 @@ llmax <- function(llmat,weight){
 # assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
 # if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
 llaaw <- function(opw,weight,llmat){
+  optimal_aa = "weighted"
   opw = opw/sum(opw)
   eresult = exp(llmat) #likelihood values, from exp(loglikelihood)
   sitelik = eresult %*% opw
   sitelik = log(sitelik)
   loglik = sum(weight * sitelik)
-  return(list(loglik=loglik,weights=opw, sitelik = sitelik, llmat=llmat))
+  return(list(loglik=loglik,optimal_aa=optimal_aa,weights=opw, sitelik = sitelik, llmat=llmat))
 }
 ## given opw (weights of aas being optimal), weights of data patterns and LIKELIHOOD (not loglikelihood) matrix: n * 20
 ## find the -loglikelihood for all data
@@ -788,7 +803,7 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall
   if(is.null(Qall)){
     if(is.null(fixmatall)){
       if(is.null(dismat))
-      {dismat = GM_cpv(GM_CPV,al,beta,gamma)}
+        dismat = GM_cpv(GM_CPV,al,beta,gamma)
       fixmatall <- fixmatAll(s,DisMat=dismat,C=C,Phi=Phi,q=q,Ne=Ne)
     }
     if(is.null(mumat)){
@@ -814,8 +829,8 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall
 
 ######################################################################################################
 #MLE for s, given beta and gamma and all other parameter values
-#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
+#  mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,
+#                    Qall=NULL,opaa=NULL,opw=NULL,bfaa=NULL,ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call : optim.s(gene1,ROKAS_TREE,print_level=1,beta=be,gamma=ga,Q=NU_VEC))
 optim.s <- function(data, tree, s,method="BOBYQA",maxeval="100",print_level=0, ...){ # s is the initial
   #store information from initial condition, with other parameters fixed
@@ -1062,107 +1077,21 @@ optimQ <- function(tree,data,Q=rep(1,6),method="SBPLX",maxeval="100",print_level
   return(res)
 }
 ######################################################################################################
-#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-optim.mllm <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, optOpw = FALSE,
-                       control = list(epsilon=1e-08,hmaxit=10,htrace=TRUE,print_level=0,maxeval="300"),...){
-  tree = object$tree
-  if(class(tree)!="phylo") stop("tree must be of class phylo") 
-  if(!is.rooted(tree)) stop("tree must be rooted")
-  if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") 
-    tree <- reorderPruning(tree)
-  if(any(tree$edge.length < 1e-08)){
-    tree$edge.length[tree$edge.length < 1e-08] <- 1e-08
-    object <- update(object, tree=tree)
-  }
-#   if(optOpw)
-#     object = update(object,opw=rep(1,20))
-  call = object$call
-  #maxit = control$maxit #maximum number of iterations for each sub optimizer
-  htrace = control$htrace #print out information about steps or not?
-  print_level=control$print_level
-  maxeval = control$maxeval
-  data = object$data
-  Q = object$Q
-  #if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
-  bfaa = object$bfaa #this is going to be the same, no matter from data or given -- empirical frequencies
-  if(optOpw)  opw = object$opw
-  else opw = NULL
-  ll = object$ll$loglik
-  ll1 = ll
-  s = object$s
-  beta = object$GMweights[2]
-  gamma = object$GMweights[3]
-  opti = TRUE # continue optimizing or not
-  rounds = 0 #index of iterations
-  while(opti){
-    if(htrace){
-      cat("\n","Round, ",rounds+1,"\n")
-      cat("opw = ", opw, "\n")
-    }
-    if(optOpw){
-      res = optim.opw(data,tree,opw=opw,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...) #new optimizer using nloptr
-      if(htrace){
-        ##notice that the loglikelihood will decrease if the opw is not given in the "object"
-        cat("optimize weights of optimal aa:", ll, "--->", -res$objective, "\n")
-        cat("weights are now: ", res$solution, "\n")
-      }
-      opw = res$solution
-      ll = -res$objective
-    }
-    if(optsWeight){
-      res = optim.s.weight(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw,...)
-      s = res$solution[1]
-      beta = res$solution[2]
-      gamma = res$solution[3]
-      if(htrace){
-        cat("optimize s and Grantham weights: ", ll, "--->", -res$objective, "\n")
-        cat("s, beta and gamma are now: ", res$solution, "\n")
-      }
-      ll = -res$objective
-    }
-    if(optQ){
-      res = optimQ(tree,data,Q=Q,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,opw=opw, ...)
-      Q = res$solution
-      if(htrace){
-        cat("optimize rate matrix: ", ll, "--->", -res$objective, "\n")
-        cat("Q is now: ", res$solution, "\n")
-      }
-      ll = -res$objective
-    }
-    if(optBranch){
-      res = optim.br(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw, ...)
-      if(htrace){
-        cat("optimize branch lengths:", ll, "--->", -res$objective, "\n")
-        cat("branch lengths are now: ", res$solution, "\n")
-      }
-      tree$edge.length = res$solution
-      ll =-res$objective
-    }
-    rounds = rounds + 1
-    if(rounds >= control$hmaxit) opti <- FALSE
-    if(((ll1-ll)<=0) && ((ll1-ll)/ll < control$epsilon)) opti <- FALSE
-    ll1 = ll
-  }
-  object = update(object, tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw,...)
-  return(object)
-}
-#rokasdata = read.phyDat("proteinevoutk20/pkg/Result/rokasAA",format="phylip",type="AA")
-
-## another version of optimization on all parameters: first optimize all parameters except optimal weights
+## optimize parameters
+## first optimize all parameters except optimal weights
 ## then optimize the weights of amino acids being optimal
 optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, optOpw = FALSE,
                        control = list(epsilon=1e-08,hmaxit=10,htrace=TRUE,print_level=0,maxeval="300"),...){
   tree = object$tree
-  if(class(tree)!="phylo") stop("tree must be of class phylo") 
-  if(!is.rooted(tree)) stop("tree must be rooted")
-  if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") 
-    tree <- reorderPruning(tree)
+  ## these are automatically satisfied if object comes from mllm1
+#   if(class(tree)!="phylo") stop("tree must be of class phylo") 
+#   if(!is.rooted(tree)) stop("tree must be rooted")
+#   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") 
+#     tree <- reorderPruning(tree)
   if(any(tree$edge.length < 1e-08)){
     tree$edge.length[tree$edge.length < 1e-08] <- 1e-08
     #object <- update(object, tree=tree)
   }
-
   call = object$call
   #maxit = control$maxit #maximum number of iterations for each sub optimizer
   htrace = control$htrace #print out information about steps or not?
