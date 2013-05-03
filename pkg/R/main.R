@@ -14,6 +14,7 @@ library(nloptr) #optimization
 #library(Rmpfr)
 #library(ppso)
 ##################################################################
+test = TRUE
 #directory of the data need to read, including gene, tree, Grantham data
 datadir <- "~/proteinevoutk20/pkg/Data/"
 ##################################################################
@@ -618,7 +619,7 @@ ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
   Qmat = mat_gen_indep(optimal,s,DisMat=GM,MuMat=mumat,C,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
   Qmat = scaleQ(Qmat,bf)
   
-  tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
+  tree <- ape:::reorder.phylo(tree,"pruningwise") #reorder the tree in pruningwise order
   edge = tree$edge #edges
   nNodes = max(edge) #number of nodes in the tree (including tips)
   probvec = matrix(NA,nNodes,m) #probability of gettting different states at nodes that evolve to the current sequences
@@ -1240,5 +1241,7 @@ hmap.op <- function(llmat){
   probmat <- exp(llmat)
   lsite <- dim(probmat)[1]
   #probmat <- t(sapply(1:lsite,function(x) expmat[x,]/sum(expmat[x,])))
-  heatmap(probmat[1:lsite,],Rowv=NA,Colv=NA,col=cm.colors(256))
+  #heatmap(probmat[1:lsite,],Rowv=NA,Colv=NA,col=grey.colors(256))
+  heatmap(t(probmat),Rowv=NA,Colv=NA,col=grey.colors(256))
 }
+
