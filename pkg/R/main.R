@@ -1021,8 +1021,6 @@ optim.all <- function(s,beta,gamma,Q,tree,generange,multicore=FALSE,print_level=
 #             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 #sample call: optim.br(data,tree,el=NULL,s=0.1,beta=be,gamma=ga,Q=NU_VEC...)
 optim.br <- function(data,tree,el=NULL,method="COBYLA",maxeval="100", print_level=0, ...){
-  if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
-    tree <- reorderPruning(tree)
   if(is.null(el))
   {el <- tree$edge.length}
   br.num <- length(el)
