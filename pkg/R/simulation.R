@@ -1,4 +1,4 @@
-source("~/proteinevoutk20/pkg/R/getAAmodels.R")
+#source("~/proteinevoutk20/pkg/R/getAAmodels.R")
 ########################################################################################################
 # find the Gramma rates given the shape parameter and number of categories
 discrete.gamma <- function (alpha, k) 
@@ -327,8 +327,6 @@ readAArate <- function(file){
   names(bf) <- AA
   return(list(Q=Q, bf=bf))
 }
-
-
 getModelAA <- function(model, bf=TRUE, Q=TRUE){
   model <- match.arg(eval(model), c("WAG", "JTT", "LG", "Dayhoff", "cpREV", "mtmam", "mtArt", "MtZoa", "mtREV24"))
   #model <- match.arg(eval(model), .aamodels)
