@@ -2,6 +2,8 @@
 #filename: fasta file with DNA data
 source("~/proteinevoutk20/pkg/R/main.R")
 source("~/proteinevoutk20/pkg/R/simulation.R")
+source("~/proteinevoutk20/pkg/R/getAAmodels.R")
+
 ######################################################################
 ## analysis under new model
 ######################################################################
