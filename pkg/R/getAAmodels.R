@@ -1,0 +1,18 @@
+.LG <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/lg.dat")
+.WAG <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/wag.dat")
+.Dayhoff <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/dayhoff-dcmut.dat")
+.JTT <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/jtt-dcmut.dat")
+.cpREV <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/cpREV.dat")
+.mtmam <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtmam.dat")
+.mtArt <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtArt.dat")
+.MtZoa <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/MtZoa.dat")
+.mtREV24 <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtREV24.dat")
+.FLU <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/FLU.dat")
+.Blosum62 <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/Blosum62.dat")
+.HIVb <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/HIVb.dat")
+.HIVw <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/HIVw.dat")
+.RtREV <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/RtREV.dat")
+.VT <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/VT.dat")
+.aamodels <- list(LG=.LG,WAG=.WAG,Dayhoff=.Dayhoff,JTT=.JTT,cpREV=.cpREV,
+                  mtmam=.mtmam,MtZoa=.MtZoa,mtREV24=.mtREV24,FLU=.FLU,
+                  Blosum62=.Blosum62,HIVb=.HIVb,HIVw=.HIVw,RtREV=.RtREV,VT=.VT)

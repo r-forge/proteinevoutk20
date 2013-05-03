@@ -1,3 +1,4 @@
+source("~/proteinevoutk20/pkg/R/getAAmodels.R")
 ########################################################################################################
 # find the Gramma rates given the shape parameter and number of categories
 discrete.gamma <- function (alpha, k) 
@@ -80,6 +81,7 @@ simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2
 
 ## similar to the previous function, instead of getting rate matrices form DisMat and MuMat, these are given as "matall"
 simulation1 <- function(protein,protein_op,t,matall,C=2, Phi=0.5,q=4e-7, Ne=5e6){
+  start_protein = protein
   l <- length(protein) #number of sites
   t_now <- 0 #time until the current step of simulation
   path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
@@ -110,7 +112,7 @@ simulation1 <- function(protein,protein_op,t,matall,C=2, Phi=0.5,q=4e-7, Ne=5e6)
   ##shift the third column up one step so that the waiting time is the time
   ## spent in the state in the first column
   path[,l+2] <- c(path[-1,l+2],NA)  
-  return(list(path=path,start_seq=protein,op_seq=protein_op, t=t))
+  return(list(path=path,start_seq=start_protein,op_seq=protein_op, t=t))
 }
 
 # simulation with length l, all optimal aa are the same, given by opaa.
@@ -299,8 +301,8 @@ sim.info <- function(sim,opaa,s=1,beta=be,gamma=ga){
   disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
   return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
 }
-# plot(wsim[[1]]$ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,brlen),xaxs="i")
-# plot(wsim[[1]]$disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),pch=20,xlim=c(0,brlen),xaxs="i")
+#plot(siminfo$ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i")
+#plot(siminfo[[1]]$disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i")
 ##################################################################################################
 ## wrapper for seq-gen (seq-gen already installed on the computer)
 ## opts is the string of options one would use in the command "seq-gen"
@@ -325,24 +327,7 @@ readAArate <- function(file){
   names(bf) <- AA
   return(list(Q=Q, bf=bf))
 }
-.LG <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/lg.dat")
-.WAG <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/wag.dat")
-.Dayhoff <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/dayhoff-dcmut.dat")
-.JTT <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/jtt-dcmut.dat")
-.cpREV <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/cpREV.dat")
-.mtmam <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtmam.dat")
-.mtArt <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtArt.dat")
-.MtZoa <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/MtZoa.dat")
-.mtREV24 <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/mtREV24.dat")
-.FLU <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/FLU.dat")
-.Blosum62 <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/Blosum62.dat")
-.HIVb <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/HIVb.dat")
-.HIVw <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/HIVw.dat")
-.RtREV <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/RtREV.dat")
-.VT <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/VT.dat")
-.aamodels <- list(LG=.LG,WAG=.WAG,Dayhoff=.Dayhoff,JTT=.JTT,cpREV=.cpREV,
-                  mtmam=.mtmam,MtZoa=.MtZoa,mtREV24=.mtREV24,FLU=.FLU,
-                  Blosum62=.Blosum62,HIVb=.HIVb,HIVw=.HIVw,RtREV=.RtREV,VT=.VT)
+
 
 getModelAA <- function(model, bf=TRUE, Q=TRUE){
   model <- match.arg(eval(model), c("WAG", "JTT", "LG", "Dayhoff", "cpREV", "mtmam", "mtArt", "MtZoa", "mtREV24"))

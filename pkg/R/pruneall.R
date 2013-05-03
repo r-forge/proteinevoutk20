@@ -2,18 +2,18 @@ system("sed -e '11d;12d' ~/proteinevoutk20/pkg/Data/gene88.fasta > ~/proteinevou
 source("~/proteinevoutk20/pkg/R/main.R")
 source("~/proteinevoutk20/pkg/R/simulation.R")
 ## import data on 7 tips and 8 tips
-datap = conv("~/proteinevoutk20/pkg/scratch/lab9/prunetree/gene88p.fasta","phyDat")
-data = conv("~/proteinevoutk20/pkg/Data/gene88.fasta","phyDat")
+datap = conv("~/proteinevoutk20/pkg/scratch/lab9/prunetree/gene88p.fasta","phyDat") #data with 7 tips
+data = conv("~/proteinevoutk20/pkg/Data/Rokas/gene88.fasta","phyDat") #data with 8 tips
 dataPnum <- matrix(unlist(datap),nrow=7,byrow=TRUE) #7-tip data in numbers stored in matrix
 datanum <- conv("~/proteinevoutk20/pkg/Data/gene88.fasta")
 datanum <- matrix(unlist(datanum),nrow=8,byrow=TRUE) #8-tip data in numbers stored in matrix
 ## starting tree with Scas pruned
 tre = read.tree("~/proteinevoutk20/pkg/Data/prune.tre")
-res = mllm1(datap,tre,0.1,be,ga,Q=NU_VEC)
+res = mllm1(datap,tre,0.1,be,ga,Q=NU_VEC,ancestral="eqm")
 res$ll$loglik
 ## optimal parameters with 7 tip data
-res_op <- optim.mllm(res,optQ=T,optBranch=T,optsWeight=T,optOpw=FALSE,
-                     control=list(epsilon=1e-08,hmaxit=500,htrace=1,print_level=0,maxeval="50"))
+res_op <- optim.mllm1(res,optQ=T,optBranch=T,optsWeight=T,optOpw=FALSE,
+                     control=list(epsilon=1e-08,hmaxit=500,htrace=1,print_level=0,maxeval="50"),ancestral="eqm")
 res_op$ll$loglik
 s = res_op$s
 beta=res_op$GMweights[2]
