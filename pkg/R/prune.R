@@ -124,7 +124,7 @@ prune_new <- function(filename,dtip,tree){
   sumsplits = tree_p$edge.length[br.split]
   ## optimize branch lengths on 8-tip tree with parameters just found, and 8-tip data
   br <- optim.br.add(data,tree,new.ext=new.ext,new.splits=new.splits,sumsplits=sumsplits,
-                     maxeval=iter,print_level=1,mumat=mumat_p,fixmatall=fixmatall_p,ancestral="eqm")
+                     maxeval=iter,print_level=1,mumat=mumat,fixmatall=fixmatall,ancestral="eqm")
   tree$edge.length[new.ext] <- br$solution[1] #assign the tree optimized branch lengths
   tree$edge.length[new.splits[1]] <- br$solution[2]
   tree$edge.length[new.splits[2]] <- sumsplits - br$solution[2]
