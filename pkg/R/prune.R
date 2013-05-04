@@ -23,6 +23,19 @@ get_best_model <- function(filename){
   }
   cm <- paste("cat ",filename, " | grep -A 5 ","' : ",bmodel,"' | grep 'lnL' | awk '{print $NF}'",sep="")
   lnL = as.numeric(system(cm,intern=TRUE))
+  ## JTT LG DCMut MtREV MtMam MtArt Dayhoff WAG RtREV CpREV Blosum62 VT HIVb HIVw FLU
+  ## "WAG", "JTT", "LG", "Dayhoff", "cpREV", "mtmam", "mtArt", "MtZoa", "mtREV24"
+  model <- bmodel_p[1]
+  if(model=="MtREV")
+    bmodel_p[1] <- "mtREV24"
+  else if(model == "MtMam")
+    bmodel_p[1] <- "mtmam"
+  else if(model == "MtArt")
+    bmodel_p[1] <- "mtArt"
+  else if(model == "CpREV")
+    bmodel_p[1] <- "cpREV"
+  else if(model == "MtMam")
+    bmodel_p[1] <- "mtmam"
   return(list(shape=best.shape,inv=best.inv,lnL=lnL,model=bmodel_p))
 }
 
