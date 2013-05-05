@@ -50,17 +50,18 @@ optim.br.add <- function(data,tree,new.ext,new.splits,sumsplits,el=NULL,method="
   #these don't change with the change of s
   Qall = res.initial$Qall
   bfaa = res.initial$bfaa
-  ab <- tree$edge.length[c(new.ext,new.splits[1])] #what if the second number is bigger than sumsplits?
+  #ab <- tree$edge.length[c(new.ext,new.splits[1])] #what if the second number is bigger than sumsplits?
   fn = function(ab,data,tree){
     tree$edge.length[new.ext] = ab[1]
     tree$edge.length[new.splits[1]] = ab[2]
     tree$edge.length[new.splits[2]] = sumsplits - ab[2]
+    #print(c(ab,sumsplits-ab[2]))
     #print(tree$edge.length)
     result = -mllm1(data,tree, Qall=Qall,bfaa=bfaa,...)$ll$loglik
     return(result)
   }
   lower=rep(0,2)
-  upper=rep(Inf,2)
+  upper=c(Inf,sumsplits)
   #options for optimizer
   opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps,
                "stopval"=-Inf,"print_level"=print_level)
@@ -93,8 +94,11 @@ optim.br.add.emp <- function(data,tree,new.ext,new.splits,sumsplits,el=NULL,meth
 ## prune one branch and grow it back
 ######################################################################
 ## analysis under new model
-
-prune_new <- function(filename,dtip,tree){
+## filename: file that contains the fasta data of nuleotide data
+## dtip: the tip to delete from the tree, could be the order or the actual name
+## tree: the tree to start with, with all the tips
+## ancestral: method of specifying the root states
+prune_new <- function(filename,dtip,tree,ancestral="eqm"){
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") #make sure it's pruningwise order
     tree <- reorder.phylo(tree,order="pruningwise") #ape function
   data = conv(filename,type="phyDat")
@@ -109,14 +113,14 @@ prune_new <- function(filename,dtip,tree){
   
   data_p = subset(data,subset=tree_p$tip.label) # pruned data
   data_p = phyDat(as.character(data_p),type="AA") #re-weight pruned data
-  res_p <- mllm1(data_p,tree_p,s=1,beta=be,gamma=ga,Q=NU_VEC,ancestral="eqm") #ll of pruned data
+  res_p <- mllm1(data_p,tree_p,s=1,beta=be,gamma=ga,Q=NU_VEC,ancestral=ancestral) #ll of pruned data
   if(test){
     res_op <- res_p
     iter="10"
   }
   else{
     res_op <- optim.mllm1(res_p,optQ=T,optBranch=T,optsWeight=T,optOpw=FALSE,
-                          control=list(epsilon=1e-08,hmaxit=50,htrace=1,print_level=0,maxeval="100"),ancestral="eqm")
+                          control=list(epsilon=1e-08,hmaxit=50,htrace=1,print_level=0,maxeval="100"),ancestral=ancestral)
     iter="200"
   }
   ## MLE for the parameters
@@ -137,7 +141,7 @@ prune_new <- function(filename,dtip,tree){
   sumsplits = tree_p$edge.length[br.split]
   ## optimize branch lengths on 8-tip tree with parameters just found, and 8-tip data
   br <- optim.br.add(data,tree,new.ext=new.ext,new.splits=new.splits,sumsplits=sumsplits,
-                     maxeval=iter,print_level=1,mumat=mumat,fixmatall=fixmatall,ancestral="eqm")
+                     maxeval=iter,print_level=1,mumat=mumat,fixmatall=fixmatall,ancestral=ancestral)
   tree$edge.length[new.ext] <- br$solution[1] #assign the tree optimized branch lengths
   tree$edge.length[new.splits[1]] <- br$solution[2]
   tree$edge.length[new.splits[2]] <- sumsplits - br$solution[2]
@@ -247,56 +251,4 @@ comp.tree <- function(tree,ptree){
     stop("something is wrong!")
   return(list(br.split=br.split,new.ext=new.ext,new.splits=new.splits,shareind=shareind))
 }
-
-
 ######################################################################
-# gene = 2
-# filename <- paste("~/proteinevoutk20/pkg/Data/Rokas/gene",gene,".fasta",sep="")
-# model <- "LG+G"
-# 
-# p1 <- prune_new(filename,8,ROKAS_TREE)
-# p2 <- prune_emp(filename,8,ROKAS_TREE,model)
-# 
-# data = conv(filename,type="phyDat")
-# dtip=1
-# tree=ROKAS_TREE
-# if(is.numeric(dtip)) dtip = tree$tip.label[dtip]
-# tipnum = which(tree$tip.label==dtip)
-# add.br.ind <- which(tree$edge[,2]==tipnum) #the index of newly add branch
-# node_at <- tree$edge[ext.br.ind,1]#the interior node where the new branch is attached
-# int.br.ind <- which(tree$edge[,2]==node_at) #internal branch created by attachment
-# ext.br.ind <- setdiff(which(tree$edge[,1]==node_at),add.br.ind)
-# 
-# tree_p = drop.tip(tree,dtip) # new tree, after trim the tip
-# data_p = subset(data,subset=tree_p$tip.label) # pruned data
-# data_p = phyDat(as.character(data_p),type="AA") #re-weight pruned data
-# #res_p <- mllm1(data_p,tree_p,s=1,beta=be,gamma=ga,Q=NU_VEC,ancestral="eqm") #ll of pruned data
-# ## MLE for the parameters
-# s_p = 1.358591
-# beta_p=0.1722574 
-# gamma_p = 0.0009062474
-# Q_p = str.to.num( "8.376571 72.18232 22.74422 5.083989 20.45968 1")
-# res_p <- mllm1(data_p,tree_p,s=s_p,beta=beta_p,gamma=gamma_p,Q=Q_p,ancestral="eqm")
-# mumat_p=res_p$mumat
-# fixmatall_p = res_p$fixmatall
-# tree = ape:::reorder.phylo(tree,"pruningwise")
-# ## optimize branch lengths on 8-tip tree with parameters just found, and 8-tip data
-# br <- optim.br(data,tree,maxeval="50",print_level=1,mumat=mumat_p,fixmatall=fixmatall_p,ancestral="eqm")
-# br
-# tree$edge.length <- br$solution #assign the tree optimized branch lengths
-# br.index <- which(tree$edge[,2]==which(tree$tip.label==dtip)) #index of edge.length of the pruned branch
-# brlen <- br$solution[br.index]  # length of the re-grafted branch
-# tree$edge.length[br.index] <- 0 #make that branch 0
-# 
-# nr <- attr(data_p,"nr") #number of different patterns in 7-tip data
-# # for site i, find the probability (likelihood) of all 20 states at that site
-# # for every site, set the observed state to be i, and then loop through all the 20 states
-# state_i <- function(x){
-#   datai <- data_p #pruned data
-#   datai$add <- as.integer(rep(x,nr)) #add the pruned tip back
-#   names(datai)[length(datai)] <- dtip #change the name back
-#   ll_i <- mllm1(datai,tree,Qall=Qall_p,opaa=opaa_p,bfaa=bfaa_p,ancestral="eqm")$ll$sitelik #ll for all sites
-#   return(ll_i)
-# }
-# sitell <- sapply(1:20,state_i) #loop through all states and put results together in a matrix
-# siteprob <- exp(sitell)
