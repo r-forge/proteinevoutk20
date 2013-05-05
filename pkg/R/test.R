@@ -3,27 +3,22 @@
 source("~/proteinevoutk20/pkg/R/main.R")
 source("~/proteinevoutk20/pkg/R/simulation.R")
 source("~/proteinevoutk20/pkg/R/getAAmodels.R")
-
-
 #######################################################################
-gene = 1
 filename <- paste("~/proteinevoutk20/pkg/Data/Rokas/gene",gene,".fasta",sep="")
-em_model <- "LG+G+F"
-model <- strsplit(em_model,"+",fixed=TRUE)[[1]] #arguments in the model
-p1 <- prune_new(filename,2,ROKAS_TREE)
-p2 <- prune_emp(filename,2,ROKAS_TREE,em_model)
+source("~/proteinevoutk20/pkg/R/main.R")
+obs.data <- conv(filename=filename,type="num")
+model <- best_emp_model$model #arguments in the model
+
 ## do simulations on the regrafted branch, under both new model and the best empirical model
-nsim <- 2
+nsim <- 10
 ##simulation under both models, starting from ancestral states inferred from both models
 ## sim_emp_new: start from emp model result and do simulation under new model
-sim_emp_emp <- vector(mode="list",length=nsim)
-sim_emp_new <- vector(mode="list",length=nsim)
-sim_new_emp <- vector(mode="list",length=nsim)
-sim_new_new <- vector(mode="list",length=nsim)
-sim_emp_emp_info <- vector(mode="list",length=nsim)
-sim_emp_new_info <- vector(mode="list",length=nsim)
-sim_new_emp_info <- vector(mode="list",length=nsim)
-sim_new_new_info <- vector(mode="list",length=nsim)
+sim <- vector(mode="list")
+sim$emp_emp <- vector(mode="list",length=nsim)
+sim$emp_new <- vector(mode="list",length=nsim)
+sim$new_emp <- vector(mode="list",length=nsim)
+sim$new_new <- vector(mode="list",length=nsim)
+sim_info <- sim
 
 prob_emp <- p2$prob
 prob_new <- p1$prob
@@ -34,8 +29,7 @@ dismat = p1$res$dismat
 mumat = p1$res$mumat
 inv = p2$res$inv
 shape=p2$res$shape
-k=4
-inv = 0
+if("G"%in% model) k = 4
 bf=p1$res$bfaa
 #bf = NULL
 opaa_p <- p1$res$ll$opaa
@@ -51,34 +45,45 @@ for(i in 1:nsim){
   root_new <- sapply(1:length(index_p),function(x) sample(20,1,replace=TRUE,prob=prob_new[index_p[x],]))
   roots[[i]]$emp <- root_emp
   roots[[i]]$new <- root_new
-  sim_emp_new[[i]] <- simulation(protein=root_emp,protein_op=opaa_p[index_p],t=brlen_emp,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
-  sim_emp_emp[[i]] <- simAA(rootseq=root_emp,t=brlen_emp,bf=bf,inv=inv,rate=shape,k=k,model=model[1])
-  sim_new_new[[i]] <- simulation(protein=root_new,protein_op=opaa_p[index_p],t=brlen_new,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
-  sim_new_emp[[i]] <- simAA(rootseq=root_new,t=brlen_new,bf=bf,inv=inv,rate=shape,k=k,model=model[1])
+  sim$emp_new[[i]] <- simulation(protein=root_emp,protein_op=opaa_p[index_p],t=brlen_emp,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
+  sim$emp_emp[[i]] <- simAA(rootseq=root_emp,t=brlen_emp,bf=bf,inv=inv,rate=shape,k=k,model=model[1])
+  sim$new_new[[i]] <- simulation(protein=root_new,protein_op=opaa_p[index_p],t=brlen_new,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
+  sim$new_emp[[i]] <- simAA(rootseq=root_new,t=brlen_new,bf=bf,inv=inv,rate=shape,k=k,model=model[1])
 }
 
 for(i in 1:nsim){
-  sim_emp_new_info[[i]] <- sim.info(sim_emp_new[[i]],opaa=opaa_p[index_p],
+  sim_info$emp_new[[i]] <- sim.info(sim$emp_new[[i]],opaa=opaa_p[index_p],
                                s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
-  sim_emp_emp_info[[i]] <- sim.info(sim_emp_emp[[i]]$seq,opaa=opaa_p[index_p],
+  sim_info$emp_emp[[i]] <- sim.info(sim$emp_emp[[i]]$seq,opaa=opaa_p[index_p],
                                s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
-  sim_new_new_info[[i]] <- sim.info(sim_new_new[[i]],opaa=opaa_p[index_p],
+  sim_info$new_new[[i]] <- sim.info(sim$new_new[[i]],opaa=opaa_p[index_p],
                                s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
-  sim_new_emp_info[[i]] <- sim.info(sim_new_emp[[i]]$seq,opaa=opaa_p[index_p],
+  sim_info$new_emp[[i]] <- sim.info(sim$new_emp[[i]]$seq,opaa=opaa_p[index_p],
                                s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
 }
 
 #sim <- simulation1(protein=root,protein_op=opaa_p[index_p],t=brlen,matall=Qall_p)
 #siminfo <- sim.info(sim=sim$path,opaa=opaa_p[index_p],s=s_p,beta=beta_p,gamma=gamma_p)
 brlen <- max(brlen_emp,brlen_new)
-ftylim = range(c(sim_emp_emp_info[[1]]$fty,sim_emp_new_info[[1]]$fty,sim_emp_new_info[[1]]$fty,sim_new_new_info[[1]]$fty))
-plot(sim_new_emp_info[[1]]$ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),xlim=c(0,brlen),ylim=ftylim,pch=20,xaxs="i")
+ftylim = range(c(sim_info$emp_emp[[1]]$fty,sim_info$emp_new[[1]]$fty,sim_info$emp_new[[1]]$fty,sim_info$new_new[[1]]$fty))
+plot(sim_info$new_emp[[1]]$ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),xlim=c(0,brlen),ylim=c(0.6,0.9),pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE)
 for(i in 1:nsim){
-  plot(sim_new_emp_info[[i]]$ftyfun,pch=20,add=TRUE)
-  plot(sim_new_new_info[[i]]$ftyfun,pch=20,col="blue",add=TRUE)
-  plot(sim_emp_emp_info[[i]]$ftyfun,pch=20,col="green",add=TRUE)
-  plot(sim_emp_new_info[[i]]$ftyfun,pch=20,col="red",add=TRUE)
+  plot(sim_info$new_emp[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE)
+  plot(sim_info$new_new[[i]]$ftyfun,pch=20,do.points=FALSE,col="blue",add=TRUE)
+  plot(sim_info$emp_emp[[i]]$ftyfun,pch=20,do.points=FALSE,col="green",add=TRUE)
+  plot(sim_info$emp_new[[i]]$ftyfun,pch=20,do.points=FALSE,col="red",add=TRUE)
 }
+obs.ftny <- Ftny_protein(protein=obs.data["Sklu",],protein_op=opaa_p[index_p],s=s,DisMat=dismat)
+abline(h=obs.ftny,col="purple")
+plot(sim_info$new_emp[[1]]$disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),xlim=c(0,brlen),pch=20,do.points=FALSE,xaxs="i",yaxs="i",frame.plot=FALSE)
+for(i in 1:nsim){
+  plot(sim_info$new_emp[[i]]$disfun,pch=20,do.points=FALSE,add=TRUE)
+  plot(sim_info$new_new[[i]]$disfun,pch=20,do.points=FALSE,col="blue",add=TRUE)
+  plot(sim_info$emp_emp[[i]]$disfun,pch=20,do.points=FALSE,col="green",add=TRUE)
+  plot(sim_info$emp_new[[i]]$disfun,pch=20,do.points=FALSE,col="red",add=TRUE)
+}
+obs.dis <- mean(pchem_d(obs.data["Sklu",],opaa_p[index_p],DisMat=dismat))
+abline(h=obs.dis,col="purple")
 # ##################################################################################################
 # ## analysis of the simulated data under both models
 # ##################################################################################################
