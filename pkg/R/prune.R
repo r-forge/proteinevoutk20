@@ -160,12 +160,12 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm"){
     datai <- data_p #pruned data
     datai$add <- as.integer(rep(x,nr)) #add the pruned tip back
     names(datai)[length(datai)] <- dtip #change the name back
-    ll_i <- mllm1(datai,tree1,Qall=Qall,opaa=opaa_p,bfaa=bfaa,ancestral="eqm",ancStates=root)$ll$sitelik #ll for all sites
+    ll_i <- mllm1(datai,tree1,Qall=Qall,opaa=opaa_p,bfaa=bfaa,ancestral=ancestral)$ll$sitelik #ll for all sites
     return(ll_i)
   }
   sitell <- sapply(1:20,state_i) #loop through all states and put results together in a matrix
   siteprob <- exp(sitell)
-  return(list(brlen=brlen,tree=tree,res=res_op,prob=siteprob))
+  return(list(brlen=brlen,tree=tree1,res=res_op,prob=siteprob))
 }
 
 ######################################################################
@@ -227,7 +227,7 @@ prune_emp <- function(filename,dtip,tree,model){
   }
   sitell <- sapply(1:20,state_i) #loop through all states and put results together in a matrix
   siteprob <- exp(sitell)
-  return(list(brlen=brlen,tree=tree,res=res_op,prob=siteprob))
+  return(list(brlen=brlen,tree=tree1,res=res_op,prob=siteprob))
 }
 get.brlen <- function(tree,tip){
   br.index <- which(tree$edge[,2]==which(tree$tip.label==tip)) #index of edge.length of the pruned branch
