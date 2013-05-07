@@ -654,7 +654,7 @@ ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
 # Here Q gets scaled in the function, so the given matrix doesn't have to be scaled
 # returns loglikelihood values for all distinct patterns in the data, matrix with 1 column (or a column vector)
 # This calls the internal C function in phangorn package
-ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, Q, g = 1) 
+ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, ancStates = NULL,Q, g = 1) 
 {
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise")
     tree <- reorderPruning(tree)
@@ -676,85 +676,112 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, Q, g = 1)
   contrast = attr(dat1, "contrast")
   nco = as.integer(dim(contrast)[1])
   res <- .Call("LogLik2", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
-  if(is.null(ancestral)){
-    result = sapply(1:nr,function(x) max(res[[1]][x,])) #find the root state that maximizes the likelihood
+#   if((!is.null(ancestral))&&(!is.null(ancStates)))
+#     warning("both ancestral state frequencies and states are specified, only ancestral states are used!")
+## if root state frequencies and root states are both given, root states have priority and are used
+  #browser()
+  if(!is.null(ancStates)){
+    if(length(ancStates)!=nr) #length has to be the same as the dinstince site patterns
+      stop("ancestral state sequence has wrong length!")
+    result = sapply(1:nr,function(x) res[[1]][x,ancStates[x]])
     result = matrix(log(result),ncol=1) #take logarithm 
-    root =  sapply(1:nr,function(x) which.max(res[[1]][x,])) # return the root states at all sites
+    ancStates = ancStates
   }
   else{
-    result = log(res[[1]]%*%ancestral) #updated phangorn, phangorn 1.7
-    root = ancestral
+    if(is.null(ancestral)){
+      result = sapply(1:nr,function(x) max(res[[1]][x,])) #find the root state that maximizes the likelihood
+      result = matrix(log(result),ncol=1) #take logarithm 
+      ancStates =  sapply(1:nr,function(x) which.max(res[[1]][x,])) # return the root states at all sites
+    }
+    else{
+      ancestral = as.matrix(ancestral,nrow=20)
+      if(ncol(ancestral)==1)
+        ancestral = sapply(1:nr,function(x) ancestral)
+      ancestral <- apply(ancestral,2,function(x) x/sum(x))
+      result = log(diag(res[[1]]%*%ancestral)) #updated phangorn, phangorn 1.7
+    }
   }
-  #return(list(result=result,root=root))
-  return(result)
+  if(is.null(ancestral)){
+    diag.mat = diag(20)
+    ancestral = diag.mat[,ancStates]
+  }
+  return(list(result=result,ancestral=ancestral,ancStates=ancStates))
+  #return(result)
 }
 # change the orders of the arguments in function ll3m so that mapply can be used later
-ll <- function(Q,ancestral,data,tree,bf,g){
-  ll3m(data,tree,bf,ancestral,Q,g)
+ll <- function(Q,ancestral,ancStates,data,tree,bf,g){
+  ll3m(data,tree,bf,ancestral,ancStates,Q,g)
 }
+
 ## return a matrix with 20 columns (one for each aa as optimal aa)
 ## one row for each site patter in data
 ## with the choice of ancestral states given
 ## The matrix is used later, when the optimal aa's are known or the rule of finding them is given
-llmat <- function(data,tree,Qall,bf=rep(1/20,20),ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+## Now it's more of a list of 20 instead of a matrix.
+## every one of the 20 list has 3 components: result(sitelik),ancestral,ancStates
+llmat <- function(data,tree,Qall,bf=rep(1/20,20),ancestral=NULL,ancStates=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   #weight = attr(data,"weight")
   nr = attr(data,"nr") #number of different sites
   #index = attr(data,"index")
   #ns = length(index) #number of sites
-  if(is.null(ancestral)) #default is MaxRoot
-    ancestral = "max"
-  if(ancestral=="max") #MaxRoot
-    result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=NULL,g=1)
-  else if(ancestral=="opaa"){ #OpRoot -- root is the same as optimal aa
-    anc=diag(20)
-    anc = lapply(1:20,function(x) anc[x,])
-    result = mapply(ll,Qall,anc,MoreArgs=list(data=data,tree=tree,bf=bf,g=1))
+#   if((!is.null(ancestral))&&(!is.null(ancStates)))
+#     warning("both ancestral state frequencies and states are specified, only ancestral states are used!")
+  if(!is.null(ancStates)){ ##root states are given
+    result = lapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancStates=ancStates,ancestral=NULL,g=1)
+   }
+  else{ ## root states are not given, ancStates==NULL
+    if(is.null(ancestral)) #default is MaxRoot
+      ancestral = "max"
+    if(is.vector(ancestral,mode="numeric")||is.matrix(ancestral)){ #if root freq is given as vector
+      result = lapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=ancestral,ancStates=ancStates,g=1)
+    }
+    else if(ancestral=="max"){ #MaxRoot
+      result = lapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=NULL,ancStates=ancStates,g=1)
+    }
+    else if(ancestral=="opaa"){ #OpRoot -- root is the same as optimal aa
+      anc=diag(20)
+      anc = lapply(1:20,function(x) anc[x,])
+      result = mapply(ll,Qall,anc,MoreArgs=list(data=data,tree=tree,bf=bf,ancStates=ancStates,g=1),SIMPLIFY=FALSE)
+    }
+    else if(ancestral=="eqm"){ # EqmRoot
+      anc=lapply(X=Qall,eqmQ) #find equilibrium frequencies for all Q's
+      result = mapply(ll,Qall,anc,MoreArgs=list(data=data,tree=tree,bf=bf,ancStates=ancStates,g=1),SIMPLIFY=FALSE)
+    }
+    else if(ancestral=="emp"){ #EmpRoot - root frequencies from observation
+      result = lapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=findBf2(data),ancStates=ancStates,g=1)
+    }
+    else stop("ancestral options: opaa, eqm,emp,max, or a numeric vector of length 20")
   }
-  else if(ancestral=="eqm"){ # EqmRoot
-    anc=lapply(X=Qall,eqmQ) #find equilibrium frequencies for all Q's
-    result = mapply(ll,Qall,anc,MoreArgs=list(data=data,tree=tree,bf=bf,g=1))
-  }
-  else if(ancestral=="emp") #EmpRoot - root frequencies from observation
-    result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=findBf2(data),g=1)
-  else if(is.vector(ancestral,mode="numeric")) #if root freq is given as vector
-    result = sapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=ancestral,g=1)
-  else stop("ancestral options: opaa, eqm,emp,max, or a numeric vector of length 20")
-  
-  if(nr==1)
-    result = matrix(result,nrow=1,ncol=20)
   return(result)
 }
 ## optimal amino acids are given
-llop <- function(op,llmat,data){
+llop <- function(op,ll_mat,data){
   weight = attr(data,"weight")
   nr = attr(data,"nr") #number of different site patterns
   index = attr(data,"index")
-  ns = length(index) #number of sites
-  if(!is.null(op)){
-    opaa = op
-    if(length(op)==ns){ #opaa is given for every site
-      optimal_aa = "given for all sites"
-      sitelik = sapply(1:ns,function(i) llmat[index[i],op[i]])
-      loglik <- sum(sitelik)
-    } else if(length(op)==nr){ #opaa is given for each distinct data pattern
-      optimal_aa = "given for distinct patterns"
-      sitelik = sapply(1:nr,function(i) llmat[i,op[i]])
-      loglik <- sum(weight*sitelik)
-    }
+  if(length(op)!=nr) #opaa is given for each distinct data pattern
+    stop("optimal aa sequence has wrong length!")
+  
+  llmat = sapply(1:20,function(x) ll_mat[[x]]$result) ## nr*20 matrix
+  sitelik = sapply(1:nr,function(i) llmat[i,op[i]]) ## loglikelihood for each site
+  loglik <- sum(weight*sitelik)
+  get.ancestral <- function(i){
+    opi <- op[i]
+    ll_mat[[opi]]$ancestral[,i]
   }
-  return(list(loglik=loglik, optimal_aa = optimal_aa,opaa=opaa,sitelik = sitelik, llmat=llmat))
+  ancestral <- sapply(1:nr,get.ancestral)
+  return(list(loglik=loglik,opaa=opaa,sitelik = sitelik,ancestral=ancestral))
 }
 ## optimal amino acids are found by max rule
-llmax <- function(llmat,weight){
-  optimal_aa = "not given, estimated using maximization"
+llmax <- function(ll_mat,data){
+  llmat = sapply(1:20,function(x) ll_mat[[x]]$result)
   opaa = apply(llmat,1,which.max)
-  sitelik=apply(llmat,1,max)
-  loglik <- sum(weight*sitelik)
-  return(list(loglik=loglik, optimal_aa = optimal_aa,opaa=opaa,sitelik = sitelik, llmat=llmat))
+  return(llop(op=opaa,ll_mat=ll_mat,data=data))
 }
 # assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
 # if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
+### root states to return need to be corrected (TO DO)
 llaaw <- function(opw,weight,llmat){
   optimal_aa = "weighted"
   opw = opw/sum(opw)
@@ -787,7 +814,7 @@ llaaw_grad <- function(opw,weight,llmat){
 ## this one uses expm for matrix exponentiation
 #more flexibility on what is provided, good for avoiding unnecessary computations
 mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
-                  opaa=NULL,opw=NULL,bfaa=NULL,ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+                  opaa=NULL,opw=NULL,bfaa=NULL,ancestral=NULL,ancStates=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
   if (is.null(attr(tree, "order")) || attr(tree, "order") == 
@@ -813,14 +840,15 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall
     }
     Qall = QAllaa1(fixmatall,mumat,Ne=Ne)
   }
-  llmat = llmat(data=data,tree=tree,Qall=Qall,bf=bfaa,ancestral=ancestral,C=C,Phi=Phi,q=q,Ne=Ne)
-  weight = attr(data,"weight")
+  ll_mat = llmat(data=data,tree=tree,Qall=Qall,bf=bfaa,ancestral=ancestral,ancStates=ancStates,C=C,Phi=Phi,q=q,Ne=Ne)
+#   llmat = ll_mat$mat
+#   root = llmat$root
   if(!is.null(opaa)) #opaa specified
-    ll = llop(op=opaa,llmat=llmat,data=data)
+    ll = llop(op=opaa,ll_mat=ll_mat,data=data)
   else if(!is.null(opw)) ## opw specified or max rule for optimal aa
     ll = llaaw(opw=opw,weight=weight,llmat=llmat)
   else{
-    ll = llmax(llmat,weight)
+    ll = llmax(ll_mat,data)
   }
   result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,dismat=dismat,fixmatall=fixmatall,Qall=Qall,
                 mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,ancestral=ancestral,call=call)
