@@ -771,13 +771,14 @@ llop <- function(op,ll_mat,data){
     ll_mat[[opi]]$ancestral[,i]
   }
   ancestral <- sapply(1:nr,get.ancestral)
-  return(list(loglik=loglik,opaa=opaa,sitelik = sitelik,ancestral=ancestral))
+  return(list(loglik=loglik,opaa=op,sitelik = sitelik,ancestral=ancestral))
 }
 ## optimal amino acids are found by max rule
 llmax <- function(ll_mat,data){
   llmat = sapply(1:20,function(x) ll_mat[[x]]$result)
   opaa = apply(llmat,1,which.max)
-  return(llop(op=opaa,ll_mat=ll_mat,data=data))
+  result = llop(op=opaa,ll_mat=ll_mat,data=data)
+  return(result)
 }
 # assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
 # if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
