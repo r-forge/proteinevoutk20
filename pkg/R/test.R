@@ -1,16 +1,18 @@
 ## import data on 7 tips and 8 tips
 #filename: fasta file with DNA data
-source("~/proteinevoutk20/pkg/R/main.R")
-source("~/proteinevoutk20/pkg/R/simulation.R")
-source("~/proteinevoutk20/pkg/R/getAAmodels.R")
+# source("~/proteinevoutk20/pkg/R/main.R")
+# source("~/proteinevoutk20/pkg/R/simulation.R")
+# source("~/proteinevoutk20/pkg/R/getAAmodels.R")
 #######################################################################
+gene = 100
+datafile <- paste("~/BackupProEvo/Newton/rokas/prunetree/rootMax/gene",gene,".RData",sep="")
+load(datafile)
 filename <- paste("~/proteinevoutk20/pkg/Data/Rokas/gene",gene,".fasta",sep="")
-source("~/proteinevoutk20/pkg/R/main.R")
 obs.data <- conv(filename=filename,type="num")
 model <- best_emp_model$model #arguments in the model
 
 ## do simulations on the regrafted branch, under both new model and the best empirical model
-nsim <- 10
+nsim <- 5
 ##simulation under both models, starting from ancestral states inferred from both models
 ## sim_emp_new: start from emp model result and do simulation under new model
 sim <- vector(mode="list")
@@ -31,13 +33,10 @@ inv = p2$res$inv
 shape=p2$res$shape
 if("G"%in% model) k = 4
 bf=p1$res$bfaa
-#bf = NULL
 opaa_p <- p1$res$ll$opaa
-# Qall_p <- p1$res$Qall
 index_p <- attr(p1$res$data,"index")
 roots <- vector(mode="list",length=nsim)
-# brlen_new = brlen_emp
-# shape=1.451
+
 for(i in 1:nsim){
   if(exists(".Random.seed"))
     rm(.Random.seed)
@@ -64,26 +63,41 @@ for(i in 1:nsim){
 
 #sim <- simulation1(protein=root,protein_op=opaa_p[index_p],t=brlen,matall=Qall_p)
 #siminfo <- sim.info(sim=sim$path,opaa=opaa_p[index_p],s=s_p,beta=beta_p,gamma=gamma_p)
+
+ftyrangeall <- sapply(sim_info,ftyrange)
+ftylim <- c(min(ftyrangeall[1,]),max(ftyrangeall[2,]))
 brlen <- max(brlen_emp,brlen_new)
-ftylim = range(c(sim_info$emp_emp[[1]]$fty,sim_info$emp_new[[1]]$fty,sim_info$emp_new[[1]]$fty,sim_info$new_new[[1]]$fty))
-plot(sim_info$new_emp[[1]]$ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),xlim=c(0,brlen),ylim=c(0.6,0.9),pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE)
+obs.ftny <- Ftny_protein(protein=obs.data["Sklu",],protein_op=opaa_p[index_p],s=s,DisMat=dismat)
+
+plot(sim_info$new_emp[[1]]$ftyfun,xlab="time",ylab="functionality",main=paste("gene ",gene,", s=",round(s,2),sep=""),xlim=c(0,brlen_new),ylim=ftylim,pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE)
 for(i in 1:nsim){
   plot(sim_info$new_emp[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE)
-  plot(sim_info$new_new[[i]]$ftyfun,pch=20,do.points=FALSE,col="blue",add=TRUE)
-  plot(sim_info$emp_emp[[i]]$ftyfun,pch=20,do.points=FALSE,col="green",add=TRUE)
+  plot(sim_info$new_new[[i]]$ftyfun,pch=20,do.points=FALSE,col="red",add=TRUE)
+}
+abline(h=obs.ftny,col="blue")
+plot(sim_info$emp_emp[[1]]$ftyfun,xlab="time",ylab="functionality",main=paste("gene ",gene,", s=",round(s,2),sep=""),xlim=c(0,brlen_emp),ylim=ftylim,pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE)
+for(i in 1:nsim){
+  plot(sim_info$emp_emp[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE)
   plot(sim_info$emp_new[[i]]$ftyfun,pch=20,do.points=FALSE,col="red",add=TRUE)
 }
-obs.ftny <- Ftny_protein(protein=obs.data["Sklu",],protein_op=opaa_p[index_p],s=s,DisMat=dismat)
-abline(h=obs.ftny,col="purple")
-plot(sim_info$new_emp[[1]]$disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),xlim=c(0,brlen),pch=20,do.points=FALSE,xaxs="i",yaxs="i",frame.plot=FALSE)
-for(i in 1:nsim){
-  plot(sim_info$new_emp[[i]]$disfun,pch=20,do.points=FALSE,add=TRUE)
-  plot(sim_info$new_new[[i]]$disfun,pch=20,do.points=FALSE,col="blue",add=TRUE)
-  plot(sim_info$emp_emp[[i]]$disfun,pch=20,do.points=FALSE,col="green",add=TRUE)
-  plot(sim_info$emp_new[[i]]$disfun,pch=20,do.points=FALSE,col="red",add=TRUE)
-}
-obs.dis <- mean(pchem_d(obs.data["Sklu",],opaa_p[index_p],DisMat=dismat))
-abline(h=obs.dis,col="purple")
+abline(h=obs.ftny,col="blue")
+
+# for(i in 1:106){
+#   file <- paste("gene",i,".RData",sep="")
+#   if(!file %in% datafiles)
+#     print(i)
+# }
+  
+  
+# plot(sim_info$new_emp[[1]]$disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),xlim=c(0,brlen),pch=20,do.points=FALSE,xaxs="i",yaxs="i",frame.plot=FALSE)
+# for(i in 1:nsim){
+#   plot(sim_info$new_emp[[i]]$disfun,pch=20,do.points=FALSE,add=TRUE)
+#   plot(sim_info$new_new[[i]]$disfun,pch=20,do.points=FALSE,col="blue",add=TRUE)
+#   plot(sim_info$emp_emp[[i]]$disfun,pch=20,do.points=FALSE,col="green",add=TRUE)
+#   plot(sim_info$emp_new[[i]]$disfun,pch=20,do.points=FALSE,col="red",add=TRUE)
+# }
+# obs.dis <- mean(pchem_d(obs.data["Sklu",],opaa_p[index_p],DisMat=dismat))
+# abline(h=obs.dis,col="purple")
 # ##################################################################################################
 # ## analysis of the simulated data under both models
 # ##################################################################################################

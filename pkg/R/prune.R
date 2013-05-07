@@ -112,7 +112,7 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm"){
   shareind <- brs$shareind
   
   data_p = subset(data,subset=tree_p$tip.label) # pruned data
-  data_p = phyDat(as.character(data_p),type="AA") #re-weight pruned data
+  #data_p = phyDat(as.character(data_p),type="AA") #re-weight pruned data
   res_p <- mllm1(data_p,tree_p,s=1,beta=be,gamma=ga,Q=NU_VEC,ancestral=ancestral) #ll of pruned data
   if(test){
     res_op <- res_p
@@ -127,6 +127,7 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm"){
   s = res_op$s
   beta=res_op$GMweights[2]
   gamma = res_op$GMweights[3]
+  ancestral = res_op$ll$ancestral
   Q = res_op$Q
   tree_p = res_op$tree
   index_p = attr(data_p,"index")
@@ -141,7 +142,9 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm"){
   sumsplits = tree_p$edge.length[br.split]
   ## optimize branch lengths on 8-tip tree with parameters just found, and 8-tip data
   br <- optim.br.add(data,tree,new.ext=new.ext,new.splits=new.splits,sumsplits=sumsplits,
-                     maxeval=iter,print_level=1,mumat=mumat,fixmatall=fixmatall,ancestral=ancestral)
+                     maxeval=iter,print_level=1,mumat=mumat,fixmatall=fixmatall,ancestral=ancestral,
+                     opaa=opaa_p)
+
   tree$edge.length[new.ext] <- br$solution[1] #assign the tree optimized branch lengths
   tree$edge.length[new.splits[1]] <- br$solution[2]
   tree$edge.length[new.splits[2]] <- sumsplits - br$solution[2]
@@ -157,7 +160,7 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm"){
     datai <- data_p #pruned data
     datai$add <- as.integer(rep(x,nr)) #add the pruned tip back
     names(datai)[length(datai)] <- dtip #change the name back
-    ll_i <- mllm1(datai,tree1,Qall=Qall,opaa=opaa_p,bfaa=bfaa,ancestral="eqm")$ll$sitelik #ll for all sites
+    ll_i <- mllm1(datai,tree1,Qall=Qall,opaa=opaa_p,bfaa=bfaa,ancestral="eqm",ancStates=root)$ll$sitelik #ll for all sites
     return(ll_i)
   }
   sitell <- sapply(1:20,state_i) #loop through all states and put results together in a matrix
