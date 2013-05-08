@@ -186,7 +186,7 @@ prune_emp <- function(filename,dtip,tree,model){
   shareind <- brs$shareind
   
   data_p = subset(data,subset=tree_p$tip.label) # pruned data
-  data_p = phyDat(as.character(data_p),type="AA") #re-weight pruned data
+  #data_p = phyDat(as.character(data_p),type="AA") #re-weight pruned data
     
   is.G <- "G" %in% model #gamma?
   is.F <- "F" %in% model #empirical frequencies?
