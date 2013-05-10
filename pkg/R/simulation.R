@@ -291,11 +291,11 @@ ll_site_lowQ <- function(tree,data,Q,bf=rep(1/20,20),g=1){
 ##################################################################################################
 ## given the simulation sequences with times of transitions, find the functionalities of each protein 
 ## on the path, and the distance of them from the optimal aa, as well as the stepfunction formed by them
-sim.info <- function(sim,opaa,s=1,beta=be,gamma=ga){
+sim.info <- function(sim,opaa,obsaa,s=1,beta=be,gamma=ga){
   dismat <- GM_cpv(GM_CPV,al,beta,gamma)
   l <- dim(sim)[2]-2
   fty <- apply(sim[,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
-  dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=opaa,DisMat=dismat)#distance from optimal amino acids
+  dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=obsaa,DisMat=dismat)#distance from optimal amino acids
   dis <- apply(dis,2,mean)#average distance for all sites
   ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
   disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
@@ -305,6 +305,12 @@ sim.info <- function(sim,opaa,s=1,beta=be,gamma=ga){
 ftyrange <- function(sim_info){
   res <- NULL
   res <- cbind(sapply(1:nsim, function(x) range(sim_info[[x]]$fty)))
+  res <- c(min(res[1,]),max(res[2,]))
+  return(res)
+}
+disrange <- function(sim_info){
+  res <- NULL
+  res <- cbind(sapply(1:nsim, function(x) range(sim_info[[x]]$dis)))
   res <- c(min(res[1,]),max(res[2,]))
   return(res)
 }
