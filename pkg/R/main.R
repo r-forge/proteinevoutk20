@@ -1262,8 +1262,11 @@ aa.set <- function(llvec){
   return(list(aa=ord[1:ind], percentile=Sum/tol,op.percentile=lvec[1]/tol))
 }
 # aa.conf = apply(X=mat,MARGIN=1,FUN=aa.set) #here mat is the llmat from result
-# numaa = sapply(1:9128,function(x) length(aa.conf[[x]]$aa))
-# op.lik = sapply(1:9128, function(x) aa.conf[[x]]$op.per)
+# numaa = sapply(1:length(aa.conf),function(x) length(aa.conf[[x]]$aa))
+# op.lik = sapply(1:length(aa.conf), function(x) aa.conf[[x]]$op.per)
+numaa_freq <- as.numeric(table(numaa))
+numaa_freq <- numaa_freq/sum(numaa_freq)
+
 
 # heatmap of probabilities that each amino acid accounts for
 hmap.op <- function(llmat){

@@ -36,7 +36,7 @@ get_best_model <- function(filename){
     bmodel_p[1] <- "cpREV"
   else if(model == "MtMam")
     bmodel_p[1] <- "mtmam"
-  return(list(shape=best.shape,inv=best.inv,lnL=lnL,model=bmodel_p))
+  return(list(shape=best.shape[1],inv=best.inv[1],lnL=lnL[1],model=bmodel_p))
 }
 
 ##################################################################
@@ -98,14 +98,21 @@ optim.br.add.emp <- function(data,tree,new.ext,new.splits,sumsplits,el=NULL,meth
 ## dtip: the tip to delete from the tree, could be the order or the actual name
 ## tree: the tree to start with, with all the tips
 ## ancestral: method of specifying the root states
-prune_new <- function(filename,dtip,tree,ancestral="eqm"){
+prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") #make sure it's pruningwise order
     tree <- reorder.phylo(tree,order="pruningwise") #ape function
-  data = conv(filename,type="phyDat")
+  data = conv(filename,range=range,type="phyDat")
   if(is.numeric(dtip)) dtip = tree$tip.label[dtip]
   tree_p = drop.tip(tree,dtip) # new tree, after trim the tip
   tree_p <- reorder.phylo(tree_p,order="pruningwise") 
-  brs <- comp.tree(tree,tree_p)
+  
+  tree1 <- tree
+  tree1$edge.length <- runif(length(tree$edge.length))
+  tree_p1 = unroot(drop.tip(tree1,dtip)) # new tree, after trim the tip
+  tree_p1 <- reorder.phylo(tree_p1,order="pruningwise") 
+  
+  brs <- comp.tree(tree1,tree_p1)
+
   br.split <- brs$br.split #branch in tree_p that's splitted into 2
   new.ext <- brs$new.ext #branch in tree that leads to dtip
   new.splits <- brs$new.splits #branches in tree that add to br.split in tree_p
@@ -171,15 +178,21 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm"){
 ######################################################################
 ## analysis under empirical model
 ######################################################################
-prune_emp <- function(filename,dtip,tree,model){
+prune_emp <- function(filename,dtip,tree,model,range=range){
   tree <- unroot(tree) #unroot the tree, (unrooted trees are used for empirical models)
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") #make sure it's pruningwise order
     tree <- reorder.phylo(tree,order="pruningwise") #ape function
-  data = conv(filename,type="phyDat")
+  data = conv(filename,range=range,type="phyDat")
   if(is.numeric(dtip)) dtip = tree$tip.label[dtip]
   tree_p = unroot(drop.tip(tree,dtip)) # new tree, after trim the tip
   tree_p <- reorder.phylo(tree_p,order="pruningwise") 
-  brs <- comp.tree(tree,tree_p)
+  #sometimes tree has many branches with same lengths, in that case the comp.tree won't work :(
+  tree1 <- tree
+  tree1$edge.length <- runif(length(tree$edge.length))
+  tree_p1 = unroot(drop.tip(tree1,dtip)) # new tree, after trim the tip
+  tree_p1 <- reorder.phylo(tree_p1,order="pruningwise") 
+  
+  brs <- comp.tree(tree1,tree_p1)
   br.split <- brs$br.split #branch in tree_p that's splitted into 2
   new.ext <- brs$new.ext #branch in tree that leads to dtip
   new.splits <- brs$new.splits #branches in tree that add to br.split in tree_p
@@ -225,6 +238,7 @@ prune_emp <- function(filename,dtip,tree,model){
                inv=res_op$inv,model=model[1]) #ll for all sites
     return(res$siteLik)
   }
+  browser()
   sitell <- sapply(1:20,state_i) #loop through all states and put results together in a matrix
   siteprob <- exp(sitell)
   return(list(brlen=brlen,tree=tree1,res=res_op,prob=siteprob))
