@@ -108,7 +108,7 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
   
   tree1 <- tree
   tree1$edge.length <- runif(length(tree$edge.length))
-  tree_p1 = unroot(drop.tip(tree1,dtip)) # new tree, after trim the tip
+  tree_p1 = drop.tip(tree1,dtip) # new tree, after trim the tip
   tree_p1 <- reorder.phylo(tree_p1,order="pruningwise") 
   
   brs <- comp.tree(tree1,tree_p1)
@@ -178,7 +178,7 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
 ######################################################################
 ## analysis under empirical model
 ######################################################################
-prune_emp <- function(filename,dtip,tree,model,range=range){
+prune_emp <- function(filename,dtip,tree,model,range=NULL){
   tree <- unroot(tree) #unroot the tree, (unrooted trees are used for empirical models)
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") #make sure it's pruningwise order
     tree <- reorder.phylo(tree,order="pruningwise") #ape function
@@ -238,7 +238,7 @@ prune_emp <- function(filename,dtip,tree,model,range=range){
                inv=res_op$inv,model=model[1]) #ll for all sites
     return(res$siteLik)
   }
-  browser()
+  #browser()
   sitell <- sapply(1:20,state_i) #loop through all states and put results together in a matrix
   siteprob <- exp(sitell)
   return(list(brlen=brlen,tree=tree1,res=res_op,prob=siteprob))
