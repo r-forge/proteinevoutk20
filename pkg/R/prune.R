@@ -105,7 +105,7 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
   if(is.numeric(dtip)) dtip = tree$tip.label[dtip]
   tree_p = drop.tip(tree,dtip) # new tree, after trim the tip
   tree_p <- reorder.phylo(tree_p,order="pruningwise") 
-  
+  ##sometimes tree has many branches with same lengths, in that case the comp.tree won't work :(
   tree1 <- tree
   tree1$edge.length <- runif(length(tree$edge.length))
   tree_p1 = drop.tip(tree1,dtip) # new tree, after trim the tip
@@ -269,3 +269,32 @@ comp.tree <- function(tree,ptree){
   return(list(br.split=br.split,new.ext=new.ext,new.splits=new.splits,shareind=shareind))
 }
 ######################################################################
+## this version's precondition: bigger tree and the tip that's deleted
+## instead of a  bigger tree and a smaller tree
+comp.tree1 <- function(tree,dtip){
+  rooted <- is.rooted(tree)
+  tree$edge.length <- runif(length(tree$edge.length))
+  if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") #make sure it's pruningwise order
+    tree <- reorder.phylo(tree,order="pruningwise") #ape function
+  if(is.numeric(dtip)) dtip = tree$tip.label[dtip]
+  ptree = drop.tip(tree,dtip) # new tree, after trim the tip
+  ptree <- reorder.phylo(ptree,order="pruningwise")
+  if(!rooted) ptree <- unroot(ptree)
+  #sometimes tree has many branches with same lengths, in that case the comp.tree won't work :(
+  dtip.ind <- which(tree$tip.label==dtip)
+  br.split <- which(!ptree$edge.length %in% tree$edge.length) #branch index in ptree that's splitted into 2
+  new.br <- which(!tree$edge.length %in% ptree$edge.length) #newly added branches in bigger tree
+  new.br.tos <- tree$edge[new.br,2] #ends of newely added branches
+  new.ext <- new.br[new.br.tos==dtip.ind] #newly added branch that leads to the new tip
+  new.splits <- new.br[new.br.tos!=dtip.ind] #newly added two branches that add to the old branch
+  pshare <- which(ptree$edge.length %in% tree$edge.length) #indices of shared branches in ptree
+  share1 <- which(tree$edge.length %in% ptree$edge.length) #indices of shared branches in tree (probably not matched with pshare)
+  share <- share1
+  for(i in 1:length(pshare)){
+    share[i] <- share1[tree$edge.length[share1]==ptree$edge.length[pshare[i]]]
+  }
+  shareind <- cbind(pshare,share)
+  if(sum(tree$edge.length[new.splits])!=ptree$edge.length[br.split])
+    stop("something is wrong!")
+  return(list(br.split=br.split,new.ext=new.ext,new.splits=new.splits,shareind=shareind))
+}
