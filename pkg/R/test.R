@@ -1,19 +1,16 @@
-## import data on 7 tips and 8 tips
-#filename: fasta file with DNA data
-# source("~/proteinevoutk20/pkg/R/main.R")
-# source("~/proteinevoutk20/pkg/R/simulation.R")
-# source("~/proteinevoutk20/pkg/R/getAAmodels.R")
 #######################################################################
-gene = 1
-datafile <- paste("~/BackupProEvo/Newton/rokas/prunetree/rootEqm/gene",gene,".RData",sep="")
-pdffile <- paste("~/proteinevoutk20/pkg/Plot/prunetree/sim_gene",gene,".pdf",sep="")
+gene = 1 #change this to run analysis on other genes
+datafile <- paste("~/BackupProEvo/Newton/rokas/prunetree/rootEqm/gene",gene,".RData",sep="") #RData file to load, pruning analysis
+simDatafile <- paste("gene",gene,".RData",sep="")
+pdffile <- paste("~/proteinevoutk20/pkg/Plot/prunetree/sim_gene",gene,".pdf",sep="") #file where the plots are saved
 pdf(pdffile)
 load(datafile)
-source("~/proteinevoutk20/pkg/R/main.R")
-obs.data <- conv(filename=fastafile,type="num")
-obs.seq <- obs.data["Smik",]
+source("~/proteinevoutk20/pkg/R/main.R") #resouce the files in case there are changes after *.RData file was generated
+source("~/proteinevoutk20/pkg/R/simulation.R")
+obs.data <- conv(filename=fastafile,type="num") #observed data sequences
+obs.seq <- obs.data["Smik",] #the one sequence at the deleted tip
 model <- best_emp_model$model #arguments in the model
-
+#######################################################################
 ## do simulations on the regrafted branch, under both new model and the best empirical model
 nsim <- 20
 ##simulation under both models, starting from ancestral states inferred from both models
@@ -38,8 +35,10 @@ if("G"%in% model) k = 4
 bf=p1$res$bfaa
 opaa_p <- p1$res$ll$opaa
 index_p <- attr(p1$res$data,"index")
+opaa <- opaa_p[index_p]
 roots <- vector(mode="list",length=nsim)
-
+#######################################################################
+## simulations
 for(i in 1:nsim){
   if(exists(".Random.seed"))
     rm(.Random.seed)
@@ -47,49 +46,49 @@ for(i in 1:nsim){
   root_new <- sapply(1:length(index_p),function(x) sample(20,1,replace=TRUE,prob=prob_new[index_p[x],]))
   roots[[i]]$emp <- root_emp
   roots[[i]]$new <- root_new
-  sim$emp_new[[i]] <- simulation(protein=root_emp,protein_op=opaa_p[index_p],t=brlen_emp,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
+  sim$emp_new[[i]] <- simulation(protein=root_emp,protein_op=opaa,t=brlen_emp,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
   sim$emp_emp[[i]] <- simAA(rootseq=root_emp,t=brlen_emp,bf=bf,inv=inv,rate=shape,k=k,model=model[1])
-  sim$new_new[[i]] <- simulation(protein=root_new,protein_op=opaa_p[index_p],t=brlen_new,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
+  sim$new_new[[i]] <- simulation(protein=root_new,protein_op=opaa,t=brlen_new,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
   sim$new_emp[[i]] <- simAA(rootseq=root_new,t=brlen_new,bf=bf,inv=inv,rate=shape,k=k,model=model[1])
 }
-source("~/proteinevoutk20/pkg/R/simulation.R")
-par(mfrow=c(2,2))
+
+## gather information from the simulated sequences
 for(i in 1:nsim){
-  sim_info$emp_new[[i]] <- sim.info(sim$emp_new[[i]],opaa=opaa_p[index_p],obsaa=obs.seq,
+  sim_info$emp_new[[i]] <- sim.info(sim$emp_new[[i]],opaa=opaa,obsaa=obs.seq,
                                s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
-  sim_info$emp_emp[[i]] <- sim.info(sim$emp_emp[[i]]$seq,opaa=opaa_p[index_p],obsaa=obs.seq,
+  sim_info$emp_emp[[i]] <- sim.info(sim$emp_emp[[i]]$seq,opaa=opaa,obsaa=obs.seq,
                                s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
-  sim_info$new_new[[i]] <- sim.info(sim$new_new[[i]],opaa=opaa_p[index_p],obsaa=obs.seq,
+  sim_info$new_new[[i]] <- sim.info(sim$new_new[[i]],opaa=opaa,obsaa=obs.seq,
                                s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
-  sim_info$new_emp[[i]] <- sim.info(sim$new_emp[[i]]$seq,opaa=opaa_p[index_p],obsaa=obs.seq,
+  sim_info$new_emp[[i]] <- sim.info(sim$new_emp[[i]]$seq,opaa=opaa,obsaa=obs.seq,
                                s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
 }
+########################################################################################
+## plot the functionalities and the distances (from obs seq) along the simulation path
+########################################################################################
+par(mfrow=c(2,2))
 
-
-
-#sim <- simulation1(protein=root,protein_op=opaa_p[index_p],t=brlen,matall=Qall_p)
-#siminfo <- sim.info(sim=sim$path,opaa=opaa_p[index_p],s=s_p,beta=beta_p,gamma=gamma_p)
-
+##functionalities
 ftyrangeall <- sapply(sim_info,ftyrange)
 ftylim <- c(min(ftyrangeall[1,]),max(ftyrangeall[2,],1))
 brlen <- max(brlen_emp,brlen_new)
-obs.ftny <- Ftny_protein(protein=obs.data["Smik",],protein_op=opaa_p[index_p],s=s,DisMat=dismat)
-ftny.vec <- apply(obs.data,MARGIN=1,FUN=Ftny_protein,protein_op=opaa_p[index_p],s=s,DisMat=dismat)
+obs.ftny <- Ftny_protein(protein=obs.data["Smik",],protein_op=opaa,s=s,DisMat=dismat)
+ftny.vec <- apply(obs.data,MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)
 plot(sim_info$new_emp[[1]]$ftyfun,xlab="time",ylab="functionality",main=paste("gene ",gene,", s=",round(s,2),sep=""),xlim=c(0,brlen_new),ylim=ftylim,pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE)
 for(i in 1:nsim){
   plot(sim_info$new_emp[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE)
   plot(sim_info$new_new[[i]]$ftyfun,pch=20,do.points=FALSE,col="red",add=TRUE)
-  #plot(sim_info$op_new[[i]]$ftyfun,pch=20,do.points=FALSE,col="green",add=TRUE)
 }
 abline(h=obs.ftny,col="blue")
+## ancestral sequences estimated under empirical models
 plot(sim_info$emp_emp[[1]]$ftyfun,xlab="time",ylab="functionality",main=paste("gene ",gene,", s=",round(s,2),sep=""),xlim=c(0,brlen_emp),ylim=ftylim,pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE)
 for(i in 1:nsim){
   plot(sim_info$emp_emp[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE)
   plot(sim_info$emp_new[[i]]$ftyfun,pch=20,do.points=FALSE,col="red",add=TRUE)
-  #plot(sim_info$op_emp[[i]]$ftyfun,pch=20,do.points=FALSE,col="green",add=TRUE)
 }
 abline(h=obs.ftny,col="blue")
 
+## distances
 disrangeall <- sapply(sim_info,disrange)
 dislim <- c(min(disrangeall[1,]),max(disrangeall[2,]))
 
@@ -99,46 +98,55 @@ plot(sim_info$new_emp[[1]]$disfun,xlab="time",ylab="distance",main=paste("gene "
 for(i in 1:nsim){
   plot(sim_info$new_emp[[i]]$disfun,pch=20,do.points=FALSE,add=TRUE)
   plot(sim_info$new_new[[i]]$disfun,pch=20,do.points=FALSE,col="red",add=TRUE)
-  #plot(sim_info$op_new[[i]]$ftyfun,pch=20,do.points=FALSE,col="green",add=TRUE)
 }
 
 plot(sim_info$emp_emp[[1]]$disfun,xlab="time",ylab="distance",main=paste("gene ",gene,", s=",round(s,2),sep=""),xlim=c(0,brlen_emp),ylim=dislim,pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE)
 for(i in 1:nsim){
   plot(sim_info$emp_emp[[i]]$disfun,pch=20,do.points=FALSE,add=TRUE)
   plot(sim_info$emp_new[[i]]$disfun,pch=20,do.points=FALSE,col="red",add=TRUE)
-  #plot(sim_info$op_emp[[i]]$ftyfun,pch=20,do.points=FALSE,col="green",add=TRUE)
 }
-
 
 ###############################################################
 ## start from optimal amino acid sequence 
 par(mfrow=c(1,1))
-sim_t <- 300
-opaa <- opaa_p[index_p]
-sites <- seq(10,length(index_p),by=50)
+sim_t <- 150
+
+sites <- c(0,seq(10,length(index_p),by=50))
 sim_op_new <- vector(mode="list",length=length(sites))
 sim_op_new_info <- sim_op_new
+sim_op_emp <- sim_op_new
+sim_op_emp_info <- sim_op_new_info
 for(i in 1:length(sites)){
   change_ind <- sample(1:length(index_p),sites[i],replace=FALSE)
   change_aa <- sample(20,size=sites,replace=TRUE)
   start_aa <- opaa
   start_aa[change_ind] <- change_aa
   print(Ftny_protein(protein=start_aa,protein_op=opaa,s=s,DisMat=dismat))
-  sim_op_new[[i]] <- simulation(protein=start_aa,protein_op=opaa_p[index_p],t=sim_t,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
-  sim_op_new_info[[i]] <- sim.info(sim_op_new[[i]],opaa=opaa_p[index_p],obsaa=obs.seq,
+  sim_op_new[[i]] <- simulation(protein=start_aa,protein_op=opaa,t=sim_t,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
+  sim_op_emp[[i]] <- simAA(rootseq=start_aa,t=sim_t,bf=bf,inv=inv,rate=shape,k=k,model=model[1])
+  sim_op_new_info[[i]] <- sim.info(sim_op_new[[i]],opaa=opaa,obsaa=obs.seq,
                               s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
+  sim_op_emp_info[[i]] <- sim.info(sim_op_emp[[i]]$seq,opaa=opaa,obsaa=obs.seq,
+                               s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
 }
+sim_op <- list(new=sim_op_new,emp=sim_op_emp)
+sim_op_info <- list(new=sim_op_new_info,emp=sim_op_emp_info)
 plot(sim_op_new_info[[1]]$ftyfun,xlab="time",ylab="functionality",
      main=paste("gene ",gene,", s=",round(s,2),sep=""),xlim=c(0,sim_t),ylim=c(0,1),
-     pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE)
+     pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE,col="red")
 for(i in 2:length(sites))
-  plot(sim_op_new_info[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE)
-abline(h=obs.ftny,col="blue")
+  plot(sim_op_new_info[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE,col="red")
+for(i in 1:length(sites))
+  plot(sim_op_emp_info[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE)
+#abline(h=obs.ftny,col="blue")
 dev.off()
+save(sim,sim_info,sim_op,sim_op_info,p1,p2,file=simDatafile)
 ###############################################################
 ## find out which one of the gene was not run, whose .RData files don't exist
-# for(i in 1:106){
-#   file <- paste("gene",i,".RData",sep="")
-#   if(!file %in% datafiles)
-#     print(i)
-# }
+datafiles <- system("ls *RData",intern=TRUE)
+missinggene <- NULL
+for(i in 1:106){
+  file <- paste("gene",i,".RData",sep="")
+  if(!file %in% datafiles)
+    missinggene <- c(missinggene,i)
+}

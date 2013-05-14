@@ -12,8 +12,9 @@ gene = 1
 prottestfile <- paste("~/proteinevoutk20/pkg/Result/Prottest/beetle/beetle34_",gene,"_prottest.txt",sep="")
 RDatafile <- paste("gene",gene,".RData",sep="")
 best_emp_model <- get_best_model(prottestfile)
-p2 <- prune_emp(fastafile,8,beetree,best_emp_model$model,range=char[[gene]])
-p1 <- prune_new(fastafile,8,beetree,ancestral="max",range=char[[gene]])
+dtip = 17
+p2 <- prune_emp(fastafile,dtip,beetree,best_emp_model$model,range=char[[gene]])
+p1 <- prune_new(fastafile,dtip,beetree,ancestral="max",range=char[[gene]])
 save.image(RDatafile,compress=TRUE)
 
 
