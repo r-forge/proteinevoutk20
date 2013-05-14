@@ -5,7 +5,7 @@
 # source("~/proteinevoutk20/pkg/R/getAAmodels.R")
 #######################################################################
 gene = 1
-datafile <- paste("~/BackupProEvo/Newton/rokas/prunetree/rootMax/gene",gene,".RData",sep="")
+datafile <- paste("~/BackupProEvo/Newton/rokas/prunetree/rootEqm/gene",gene,".RData",sep="")
 pdffile <- paste("~/proteinevoutk20/pkg/Plot/prunetree/sim_gene",gene,".pdf",sep="")
 pdf(pdffile)
 load(datafile)
