@@ -9,8 +9,7 @@ datafile <- paste("~/BackupProEvo/Newton/rokas/prunetree/rootEqm/gene",gene,".RD
 pdffile <- paste("~/proteinevoutk20/pkg/Plot/prunetree/sim_gene",gene,".pdf",sep="")
 pdf(pdffile)
 load(datafile)
-# source("~/proteinevoutk20/pkg/R/prune.R")
-# p2 <- prune_emp(fastafile,"Sklu",ROKAS_TREE,best_emp_model$model)
+source("~/proteinevoutk20/pkg/R/main.R")
 obs.data <- conv(filename=fastafile,type="num")
 obs.seq <- obs.data["Smik",]
 model <- best_emp_model$model #arguments in the model
