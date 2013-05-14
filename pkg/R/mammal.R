@@ -1,198 +1,24 @@
-source("~/proteinevoutk20/pkg/R/main.R")
-## charsets of Mam15 -- 97 genes
-charset <- list(bag2 = 1:186,
-                bag3 = 187:483, 
-                bche = 484:990,
-                bmp10 = 991:1503,
-                bmp2 = 1054:2058,
-                btbd3 = 2059:2424,
-                c17orf71 = 2425:2988,
-                c3orf59 = 2989:3612,
-                c3orf63 = 3613:4035,
-                c6orf190 = 4036:4455,
-                casr2 = 4456:5181,
-                casr = 5182:5529,
-                cdh20 = 5530:5640,
-                cdkl5 = 5641:5772,
-                chst10 = 5773:5943,
-                chst9 = 5944:6279,
-                co11orf61 = 6280:6831,
-                cog8 = 6832:7320,
-                cxcr4 = 7321:8007,
-                dmrta1 = 8008:8262,
-                dmxl1 = 8263:8505,
-                ehbp1 = 8506:9090,
-                enpp4 = 9091:9402,
-                erbb2ip = 9403:9648,
-                fam135a = 9649:10356,
-                frmd7 = 10357:10911,
-                fshr = 10912:11442,
-                fzd4 = 11443:12174,
-                fzd6 = 12175:12867,
-                ggps1 = 12868:13224,
-                gpr176 = 13225:13839,
-                grm7 = 13840:14409,
-                grm8 = 14410:14958,
-                has2 = 14959:15324,
-                has3 = 15325:15894,
-                hdx = 15895:16500,
-                hivep2 = 16501:17016,
-                hyal1 = 17017:17331,
-                kbtbd2 = 17332:18162,
-                kbtbd3 = 18163:18678,
-                kcnj1 = 18679:19257,
-                kcnj2 = 19258:20007,
-                kcnj6 = 20008:20373,
-                kera = 20374:20718,
-                kiaa0100 = 20719:21411,
-                kiaa0355 = 21412:22011,
-                kiaa1279 = 22012:22419,
-                kiaa1539 = 22420:22992,
-                kl = 22993:23265,
-                klhl15 = 23266:23751,
-                klhl28 = 23752:24498,
-                lhcgr = 24499:25059,
-                lnpep = 25060:25803,
-                med13 = 25804:26460,
-                med13l = 26461:26919,
-                met = 26920:27471,
-                mga = 27472:28086,
-                mrp116 = 28087:28395,
-                mypn = 28396:28824,
-                nedd9 = 28825:29022,
-                nfe2l2 = 29023:29403,
-                np7058 = 29404:30114,
-                npas4 = 30115:30786,
-                nr4a2 = 30787:31236,
-                palmd = 31237:31878,
-                pappa = 31879:32376,
-                pcdh9 = 32377:32568,
-                phlppl = 32569:32946,
-                pigv = 32947:33444,
-                pik3cg = 33445:33903,
-                plagl2 = 33904:34512,
-                polr1b = 34513:34911,
-                ppargc1a = 34912:35589,
-                ppm1b = 35590:36126,
-                ptpn22 = 36127:36390,
-                rbbp8 = 36391:36690,
-                rest = 36691:37278,
-                rnf216 = 37279:37617,
-                scn8a = 37618:38181,
-                serpind1 = 38182:38565,
-                setbp1 = 38566:38793,
-                sipa1l12 = 38794:39150,
-                sipa1l1 = 39151:39708,
-                smyd4 = 39709:40227,
-                ston2 = 40228:40815,
-                syt11 = 40816:41367,
-                syt4 = 41368:41730,
-                trip12 = 41731:42300,
-                trps1 = 42301:42639,
-                ugt8 = 42640:43017,
-                zc3h12c = 43018:43632,
-                znf192 = 43633:44199,
-                znf318 = 44200:44919,
-                znf652 = 44920:45078,
-                znf691 = 45079:45489,
-                znfx1 = 45490:46125,
-                zscan29 = 46126:46152)
-charset_comb <- list(bag = 1:483,
-                bche = 484:990,
-                bmp = 991:2058,
-                btbd3 = 2059:2424,
-                c17orf71 = 2425:2988,
-                c3orf59 = 2989:3612,
-                c3orf63 = 3613:4035,
-                c6orf190 = 4036:4455,
-                casr = 4456:5529,
-                cdh20 = 5530:5640,
-                cdkl5 = 5641:5772,
-                chst = 5773:6279,
-                co11orf61 = 6280:6831,
-                cog8 = 6832:7320,
-                cxcr4 = 7321:8007,
-                dmrta1 = 8008:8262,
-                dmxl1 = 8263:8505,
-                ehbp1 = 8506:9090,
-                enpp4 = 9091:9402,
-                erbb2ip = 9403:9648,
-                fam135a = 9649:10356,
-                frmd7 = 10357:10911,
-                fshr = 10912:11442,
-                fzd = 11443:12867,
-                ggps1 = 12868:13224,
-                gpr176 = 13225:13839,
-                grm7 = 13840:14958,
-                has = 14959:15894,
-                hdx = 15895:16500,
-                hivep2 = 16501:17016,
-                hyal1 = 17017:17331,
-                kbtbd2 = 17332:18678,
-                kcnj = 18679:20373,
-                kera = 20374:20718,
-                kiaa0100 = 20719:22992,
-                kl = 22993:23265,
-                klhl15 = 23266:24498,
-                lhcgr = 24499:25059,
-                lnpep = 25060:25803,
-                med13 = 25804:26919,
-                met = 26920:27471,
-                mga = 27472:28086,
-                mrp116 = 28087:28395,
-                mypn = 28396:28824,
-                nedd9 = 28825:29022,
-                nfe2l2 = 29023:29403,
-                np7058 = 29404:30114,
-                npas4 = 30115:30786,
-                nr4a2 = 30787:31236,
-                palmd = 31237:31878,
-                pappa = 31879:32376,
-                pcdh9 = 32377:32568,
-                phlppl = 32569:32946,
-                pigv = 32947:33444,
-                pik3cg = 33445:33903,
-                plagl2 = 33904:34512,
-                polr1b = 34513:34911,
-                ppargc1a = 34912:35589,
-                ppm1b = 35590:36126,
-                ptpn22 = 36127:36390,
-                rbbp8 = 36391:36690,
-                rest = 36691:37278,
-                rnf216 = 37279:37617,
-                scn8a = 37618:38181,
-                serpind1 = 38182:38565,
-                setbp1 = 38566:38793,
-                sipa1l12 = 38794:39708,
-                smyd4 = 39709:40227,
-                ston2 = 40228:40815,
-                syt11 = 40816:41730,
-                trip12 = 41731:42300,
-                trps1 = 42301:42639,
-                ugt8 = 42640:43017,
-                zc3h12c = 43018:43632,
-                znf192 = 43633:45489,
-                znfx1 = 45490:46125,
-                zscan29 = 46126:46152)
+source("~/proteinevoutk20/pkg/R/prune.R")
+gene = 1
+fastafile <- "~/proteinevoutk20/pkg/Data/mammals/mam15.fasta"
+load("~/proteinevoutk20/pkg/Data/mammals/charset.RData") 
 mamtree <- read.nexus("proteinevoutk20/pkg/Data/mammals/T15taxa.nex")
+prottestfile <- paste("~/proteinevoutk20/pkg/Result/Prottest/mammal/mam15_",gene,"_prottest.txt",sep="")
+RDatafile <- paste("gene",gene,".RData",sep="")
+best_emp_model <- get_best_model(prottestfile)
+dtip = 12
+p2 <- prune_emp(fastafile,dtip,mamtree,best_emp_model$model,range=charset[[gene]])
+p1 <- prune_new(fastafile,dtip,mamtree,ancestral="max",range=charset[[gene]])
+save.image(RDatafile,compress=TRUE)
 ##truncate the names of tip so that the length is no bigger than 10 for prottest
 ## the resulting tree is written in file mam15.tre
-mamtree$tip.label <- sapply(1:15, function(x) substr(mamtree$tip.label[x],1,10))
+## mamtree$tip.label <- sapply(1:15, function(x) substr(mamtree$tip.label[x],1,10))
 
-load("~/proteinevoutk20/pkg/Data/mammals/charset.RData") 
-for(i in 1:97){
-  mam <- conv("~/proteinevoutk20/pkg/Data/mammals/mam15.fasta",range=charset[[i]],"AA")
-  mamlist <- lapply(seq_len(nrow(mam)),function(i) mam[i,])
-  names(mamlist) <- dimnames(mam)[[1]]
-  filename = paste("mam_15_",i,".nex",sep="")
-  write.nexus.data(mamlist,file=filename,format="protein",interleaved=FALSE)
-}
 
-for(i in 1:length(charset)){
-  range <- charset[[1]]
-  mam <- conv("~/proteinevoutk20/pkg/Data/mammals/mam15.fasta",range=range,type="phyDat")
-  mam.res <- mllm1(mam,mamtree,s=1,beta=be,gamma=ga,Q=rep(1,6))
-  mam.optim <- optim.mllm1(mam.res,optQ=T,optBranch=T,optsWeight=T,
-                           control=list(epsilon=1e-08,hmaxit=30,htrace=TRUE,print_level=0,maxit=300))
-  save(mam.optim,file="mam_i.RData")
-}
+# for(i in 1:97){
+#   mam <- conv("~/proteinevoutk20/pkg/Data/mammals/mam15.fasta",range=charset[[i]],"AA")
+#   mamlist <- lapply(seq_len(nrow(mam)),function(i) mam[i,])
+#   names(mamlist) <- dimnames(mam)[[1]]
+#   filename = paste("mam_15_",i,".nex",sep="")
+#   write.nexus.data(mamlist,file=filename,format="protein",interleaved=FALSE)
+# }
