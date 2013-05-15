@@ -234,7 +234,7 @@ simulationQ <- function(protein,t,Q=NULL,bf=NULL,inv=0,rate=1,k=1){
 ## this is just along one branch with given length, not along a tree
 simAA <- function(l=100,rootseq=NULL,t=1,Q=NULL,bf=NULL,inv=0,rate=1,k=1,model="USER"){
   if(!is.null(model)){
-    model <- match.arg(model,c("WAG","JTT","LG","Dayhoff","cpREV","mtmam","mtArt","MtZoa","mtREV24"))
+    model <- match.arg(model,get(".aamodels",environment(pml)))
     if(model!="USER") getModelAA(model,bf=is.null(bf),Q=is.null(Q))
   }
   lbf = 20
@@ -332,18 +332,11 @@ disrange <- function(sim_info){
 ## opts <- "-mWAG -l144 -a3.514 -i0.193 -f0.03559028,0.05121528,0.02777778,0.01649306,0.01388889,0.03472222,0.05121528,0.06944444,0.02777778,0.09375000,0.14409722,0.05034722,0.01909722,0.05815972,0.02864583,0.07552083,0.04687500,0.02343750,0.04600694,0.08593750 -on -war"
 ## seq_gen(opts,"gene7.tree","gene7sim.txt")
 
-readAArate <- function(file){
-  tmp <- scan(file,nmax=210)
-  if(length(tmp)!=210) stop("require lower triangular matrix and equilibrium rates, check file!")
-  Q <- tmp[1:190]
-  bf <- tmp[191:210]
-  names(bf) <- AA
-  return(list(Q=Q, bf=bf))
-}
-getModelAA <- function(model, bf=TRUE, Q=TRUE){
-  model <- match.arg(eval(model), c("WAG", "JTT", "LG", "Dayhoff", "cpREV", "mtmam", "mtArt", "MtZoa", "mtREV24"))
-  #model <- match.arg(eval(model), .aamodels)
-  tmp = .aamodels[[model]]
+
+getModelAA <- function(model, bf=TRUE, Q=TRUE){                                                                     
+  model <- match.arg(eval(model),get(".aamodels",environment(pml)))
+  tmp = get(paste(".", model, sep=""),environment(pml))
   if(Q) assign("Q", tmp$Q, envir=parent.frame())
   if(bf) assign("bf", tmp$bf, envir=parent.frame())
 }
+

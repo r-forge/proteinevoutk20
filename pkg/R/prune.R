@@ -36,6 +36,8 @@ get_best_model <- function(filename){
     bmodel_p[1] <- "cpREV"
   else if(model == "MtMam")
     bmodel_p[1] <- "mtmam"
+  else if(model == "Blosum62")
+    bmodel_p[1] <- "Blossum62"
   return(list(shape=best.shape[1],inv=best.inv[1],lnL=lnL[1],model=bmodel_p))
 }
 

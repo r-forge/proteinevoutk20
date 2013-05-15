@@ -15,4 +15,4 @@
 .VT <- readAArate("~/proteinevoutk20/pkg/Data/AAmodel/VT.dat")
 .aamodels <- list(LG=.LG,WAG=.WAG,Dayhoff=.Dayhoff,JTT=.JTT,cpREV=.cpREV,
                   mtmam=.mtmam,MtZoa=.MtZoa,mtREV24=.mtREV24,FLU=.FLU,
-                  Blosum62=.Blosum62,HIVb=.HIVb,HIVw=.HIVw,RtREV=.RtREV,VT=.VT)
+                  Blosum62=.Blosum62,HIVb=.HIVb,HIVw=.HIVw,RtREV=.RtREV)
