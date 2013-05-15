@@ -143,10 +143,8 @@ dev.off()
 save(sim,sim_info,sim_op,sim_op_info,p1,p2,file=simDatafile)
 ###############################################################
 ## find out which one of the gene was not run, whose .RData files don't exist
-datafiles <- system("ls *RData",intern=TRUE)
-missinggene <- NULL
-for(i in 1:106){
-  file <- paste("gene",i,".RData",sep="")
-  if(!file %in% datafiles)
-    missinggene <- c(missinggene,i)
-}
+# for(i in 1:106){
+#   file <- paste("gene",i,".RData",sep="")
+#   if(!file %in% datafiles)
+#     print(i)
+# }
