@@ -1,7 +1,5 @@
 source("~/proteinevoutk20/pkg/R/main.R")
 source("~/proteinevoutk20/pkg/R/simulation.R")
-if(!exists(".aamodels"))
-  source("~/proteinevoutk20/pkg/R/getAAmodels.R")
 ######################################################################
 # find the best model from prottest result file
 get_best_model <- function(filename){
@@ -233,14 +231,14 @@ prune_emp <- function(filename,dtip,tree,model,range=NULL){
   # for site i, find the probability (likelihood) of all 20 states at that site
   # for every site, set the observed state to be i, and then loop through all the 20 states
   state_i <- function(x){
-    datai <- data_p #pruned data
-    datai$add <- as.integer(rep(x,nr)) #add the pruned tip back
-    names(datai)[length(datai)] <- dtip #change the name back
-    res <- pml(tree1,datai,bf=res_op$bf,k=k,shape=res_op$shape,
-               inv=res_op$inv,model=model[1]) #ll for all sites
+    tip_ind <- which(names(data)==dtip)
+    datai <- data #pruned data
+    datai[[tip_ind]] <- as.integer(rep(x,nr))
+    res <- pml(tree1,datai)
+    res <- update(res,bf=res_op$bf,k=k,shape=res_op$shape,inv=res_op$inv,model=model[1]) #ll for all sites
     return(res$siteLik)
   }
-  #browser()
+  browser()
   sitell <- sapply(1:20,state_i) #loop through all states and put results together in a matrix
   siteprob <- exp(sitell)
   return(list(brlen=brlen,tree=tree1,res=res_op,prob=siteprob))
