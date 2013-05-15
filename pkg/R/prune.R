@@ -102,6 +102,7 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") #make sure it's pruningwise order
     tree <- reorder.phylo(tree,order="pruningwise") #ape function
   data = conv(filename,range=range,type="phyDat")
+  data.char <- as.character(data)
   if(is.numeric(dtip)) dtip = tree$tip.label[dtip]
   tree_p = drop.tip(tree,dtip) # new tree, after trim the tip
   tree_p <- reorder.phylo(tree_p,order="pruningwise") 
@@ -163,12 +164,15 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
   nr <- attr(data_p,"nr") #number of different patterns in 7-tip data
   # for site i, find the probability (likelihood) of all 20 states at that site
   # for every site, set the observed state to be i, and then loop through all the 20 states
+  aa <- tolower(AA)
   state_i <- function(x){
-    datai <- data_p #pruned data
-    datai$add <- as.integer(rep(x,nr)) #add the pruned tip back
-    names(datai)[length(datai)] <- dtip #change the name back
+    tip_ind <- which(dimnames(data.char)[[1]]==dtip)
+    datai.char <- data.char #pruned data
+    datai.char[tip_ind,] <- rep(aa[x],dim(data.char)[2])
+    datai<- phyDat(datai.char,type="AA")
+    index <- attr(datai,"index")
     ll_i <- mllm1(datai,tree1,Qall=Qall,opaa=opaa_p,bfaa=bfaa,ancestral=ancestral)$ll$sitelik #ll for all sites
-    return(ll_i)
+    return(ll_i[index])
   }
   sitell <- sapply(1:20,state_i) #loop through all states and put results together in a matrix
   siteprob <- exp(sitell)
@@ -178,11 +182,14 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
 ######################################################################
 ## analysis under empirical model
 ######################################################################
+#p2 <- prune_emp(fastafile,dtip,mamtree,best_emp_model$model,range=charset[[gene]])
 prune_emp <- function(filename,dtip,tree,model,range=NULL){
   tree <- unroot(tree) #unroot the tree, (unrooted trees are used for empirical models)
+  tree_o <- tree
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") #make sure it's pruningwise order
     tree <- reorder.phylo(tree,order="pruningwise") #ape function
   data = conv(filename,range=range,type="phyDat")
+  data.char <- as.character(data) #data in the form of matrix with characters as entries
   if(is.numeric(dtip)) dtip = tree$tip.label[dtip]
   tree_p = unroot(drop.tip(tree,dtip)) # new tree, after trim the tip
   tree_p <- reorder.phylo(tree_p,order="pruningwise") 
@@ -191,16 +198,17 @@ prune_emp <- function(filename,dtip,tree,model,range=NULL){
   tree1$edge.length <- runif(length(tree$edge.length))
   tree_p1 = unroot(drop.tip(tree1,dtip)) # new tree, after trim the tip
   tree_p1 <- reorder.phylo(tree_p1,order="pruningwise") 
-  
   brs <- comp.tree(tree1,tree_p1)
+  
   br.split <- brs$br.split #branch in tree_p that's splitted into 2
   new.ext <- brs$new.ext #branch in tree that leads to dtip
   new.splits <- brs$new.splits #branches in tree that add to br.split in tree_p
   shareind <- brs$shareind
   
   data_p = subset(data,subset=tree_p$tip.label) # pruned data
+  data_p.char <- as.character(data_p)
   #data_p = phyDat(as.character(data_p),type="AA") #re-weight pruned data
-    
+  
   is.G <- "G" %in% model #gamma?
   is.F <- "F" %in% model #empirical frequencies?
   is.I <- "I" %in% model #invariant sites included?
@@ -218,7 +226,7 @@ prune_emp <- function(filename,dtip,tree,model,range=NULL){
   #browser()
   br <- optim.br.add.emp(data=data,tree=tree,new.ext=new.ext,new.splits=new.splits,sumsplits=sumsplits,print_level=1,
                          bf=res_op$bf,k=k,shape=res_op$shape,inv=res_op$inv,model=model[1])
-
+  
   tree$edge.length[new.ext] <- br$solution[1] #assign the tree optimized branch lengths
   tree$edge.length[new.splits[1]] <- br$solution[2]
   tree$edge.length[new.splits[2]] <- sumsplits - br$solution[2]
@@ -226,23 +234,28 @@ prune_emp <- function(filename,dtip,tree,model,range=NULL){
   brlen <- br$solution[1]  # length of the re-grafted branch
   tree1 <- tree #tree with regrafted branch length 0
   tree1$edge.length[new.ext] <- 0 #make that branch 0
+  tree1$edge.length[tree1$edge.length<1e-8] <- 1e-8
   
   nr <- attr(data_p,"nr") #number of different patterns in 7-tip data
   # for site i, find the probability (likelihood) of all 20 states at that site
   # for every site, set the observed state to be i, and then loop through all the 20 states
+  aa <- tolower(AA)
   state_i <- function(x){
-    tip_ind <- which(names(data)==dtip)
-    datai <- data #pruned data
-    datai[[tip_ind]] <- as.integer(rep(x,nr))
-    res <- pml(tree1,datai)
-    res <- update(res,bf=res_op$bf,k=k,shape=res_op$shape,inv=res_op$inv,model=model[1]) #ll for all sites
-    return(res$siteLik)
+    tip_ind <- which(dimnames(data.char)[[1]]==dtip)
+    datai.char <- data.char #pruned data
+    datai.char[tip_ind,] <- rep(aa[x],dim(data.char)[2])
+    datai<- phyDat(datai.char,type="AA")
+    index <- attr(datai,"index")
+    res <- pml(tree1,datai,bf=res_op$bf,k=k,shape=res_op$shape,inv=res_op$inv,model=model[1])#ll for all sites
+    sitelik <- as.vector(res$siteLik)
+    return(sitelik[index]) #number of columns is equal to the number of sites (not distinct sites)
   }
-  browser()
   sitell <- sapply(1:20,state_i) #loop through all states and put results together in a matrix
   siteprob <- exp(sitell)
   return(list(brlen=brlen,tree=tree1,res=res_op,prob=siteprob))
 }
+
+######################################################################
 get.brlen <- function(tree,tip){
   br.index <- which(tree$edge[,2]==which(tree$tip.label==tip)) #index of edge.length of the pruned branch
   brlen <- tree$edge.length[br.index]  # length of the re-grafted branch
