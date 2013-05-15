@@ -1,5 +1,5 @@
 source("~/proteinevoutk20/pkg/R/prune.R")
-gene = 1
+gene = 2
 fastafile <- "~/proteinevoutk20/pkg/Data/mammals/mam15.fasta"
 load("~/proteinevoutk20/pkg/Data/mammals/charset.RData") 
 mamtree <- read.nexus("proteinevoutk20/pkg/Data/mammals/T15taxa.nex")
