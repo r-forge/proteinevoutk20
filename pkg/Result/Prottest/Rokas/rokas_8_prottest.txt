@@ -1,0 +1,1432 @@
+
+
+ProtTest 3.2                        Fast selection of the best-fit models of protein evolution
+(c) 2009-2010   Diego Darriba (1,2), Guillermo Taboada (2), Ram—n Doallo (2), David Posada (1)
+(1)                               Facultad de Biologia, Universidad de Vigo, 36200 Vigo, Spain
+(2)                    Facultade de Inform‡tica, Universidade da Coru–a, 15071 A Coru–a, Spain
+Contact:                                                     ddarriba@udc.es, dposada@uvigo.es
+----------------------------------------------------------------------------------------------
+
+Thu May 02 18:21:35 EDT 2013
+OS = Mac OS X (10.6.8)
+
+Citation: Darriba D, Taboada GL, Doallo R, Posada D. ProtTest 3: fast selection of best-fit 
+          models of protein evolution. Bioinformatics, 27:1164-1165, 2011
+
+
+ProtTest options
+----------------
+  Alignment file........... : /Users/chaij/proteinevoutk20/pkg/Data/Rokas/gene8AA.nex
+  Tree..................... : /Users/chaij/proteinevoutk20/pkg/Data/Rokas/gtr_newick
+  StrategyMode............. : User defined topology
+  Candidate models......... : 
+    Matrices............... : JTT LG DCMut MtREV MtMam MtArt Dayhoff WAG RtREV CpREV Blosum62 VT HIVb HIVw FLU 
+    Distributions.......... : +G +I +I+G Uniform 
+    Observed frequencies... : true
+
+  Statistical framework
+    Sort models according to....: 
+       AIC  BIC  DT 
+    Sample size.................: 390.0 (not calculated yet)
+      sampleSizeMode............: Total number of characters (aligment length)
+  Other options:
+    Display best tree in ASCII..: false
+    Display best tree in Newick.: true
+    Display consensus tree......: false
+    Verbose.....................: false
+
+**********************************************************
+Observed number of invariant sites: 147
+Observed aminoacid frequencies:
+ A: 0.039    C: 0.016    D: 0.055    E: 0.046    F: 0.052   
+ G: 0.043    H: 0.025    I: 0.098    K: 0.072    L: 0.134   
+ M: 0.022    N: 0.036    P: 0.050    Q: 0.033    R: 0.038   
+ S: 0.067    T: 0.037    V: 0.068    W: 0.020    Y: 0.050   
+
+**********************************************************
+
+Model................................ : JTT
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3397.44
+     (seconds))
+
+Model................................ : JTT+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3347.89
+     (seconds))
+
+Model................................ : JTT+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.292
+ -lnL................................ = 3349.63
+     (seconds))
+
+Model................................ : JTT+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.289
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3301.09
+     (seconds))
+
+Model................................ : JTT+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.785
+ -lnL................................ = 3338.22
+     (seconds))
+
+Model................................ : JTT+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.781
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3289.05
+     (seconds))
+
+Model................................ : JTT+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.902
+    proportion of invariable sites... = 0.046
+ -lnL................................ = 3338.23
+     (seconds))
+
+Model................................ : JTT+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.861
+    proportion of invariable sites... = 0.033
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3289.06
+     (seconds))
+
+Model................................ : LG
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3354.00
+     (seconds))
+
+Model................................ : LG+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3326.86
+     (seconds))
+
+Model................................ : LG+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.281
+ -lnL................................ = 3309.57
+     (seconds))
+
+Model................................ : LG+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.278
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3281.75
+     (seconds))
+
+Model................................ : LG+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.818
+ -lnL................................ = 3298.89
+     (seconds))
+
+Model................................ : LG+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.786
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3268.51
+     (seconds))
+
+Model................................ : LG+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.043
+    proportion of invariable sites... = 0.076
+ -lnL................................ = 3298.85
+     (seconds))
+
+Model................................ : LG+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.875
+    proportion of invariable sites... = 0.036
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3268.51
+     (seconds))
+
+Model................................ : DCMut
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3451.94
+     (seconds))
+
+Model................................ : DCMut+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3371.14
+     (seconds))
+
+Model................................ : DCMut+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.288
+ -lnL................................ = 3396.17
+     (seconds))
+
+Model................................ : DCMut+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.287
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3320.05
+     (seconds))
+
+Model................................ : DCMut+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.761
+ -lnL................................ = 3386.67
+     (seconds))
+
+Model................................ : DCMut+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.765
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3309.59
+     (seconds))
+
+Model................................ : DCMut+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.418
+    proportion of invariable sites... = 0.163
+ -lnL................................ = 3386.01
+     (seconds))
+
+Model................................ : DCMut+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.147
+    proportion of invariable sites... = 0.118
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3309.33
+     (seconds))
+
+Model................................ : MtREV
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3545.37
+     (seconds))
+
+Model................................ : MtREV+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3400.65
+     (seconds))
+
+Model................................ : MtREV+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.275
+ -lnL................................ = 3484.32
+     (seconds))
+
+Model................................ : MtREV+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.282
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3339.88
+     (seconds))
+
+Model................................ : MtREV+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.657
+ -lnL................................ = 3457.76
+     (seconds))
+
+Model................................ : MtREV+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.673
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3320.45
+     (seconds))
+
+Model................................ : MtREV+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.657
+    proportion of invariable sites... = 0.0
+ -lnL................................ = 3457.76
+     (seconds))
+
+Model................................ : MtREV+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.766
+    proportion of invariable sites... = 0.046
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3320.44
+     (seconds))
+
+Model................................ : MtMam
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3657.49
+     (seconds))
+
+Model................................ : MtMam+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3500.83
+     (seconds))
+
+Model................................ : MtMam+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.286
+ -lnL................................ = 3561.24
+     (seconds))
+
+Model................................ : MtMam+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.294
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3407.79
+     (seconds))
+
+Model................................ : MtMam+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.468
+ -lnL................................ = 3502.21
+     (seconds))
+
+Model................................ : MtMam+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.491
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3367.77
+     (seconds))
+
+Model................................ : MtMam+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.467
+    proportion of invariable sites... = 0.0
+ -lnL................................ = 3502.21
+     (seconds))
+
+Model................................ : MtMam+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.53
+    proportion of invariable sites... = 0.032
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3367.76
+     (seconds))
+
+Model................................ : MtArt
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3578.37
+     (seconds))
+
+Model................................ : MtArt+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3438.44
+     (seconds))
+
+Model................................ : MtArt+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.269
+ -lnL................................ = 3502.59
+     (seconds))
+
+Model................................ : MtArt+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.275
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3364.75
+     (seconds))
+
+Model................................ : MtArt+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.51
+ -lnL................................ = 3447.92
+     (seconds))
+
+Model................................ : MtArt+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.535
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3323.07
+     (seconds))
+
+Model................................ : MtArt+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.51
+    proportion of invariable sites... = 0.0
+ -lnL................................ = 3447.92
+     (seconds))
+
+Model................................ : MtArt+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.535
+    proportion of invariable sites... = 0.0
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3323.07
+     (seconds))
+
+Model................................ : Dayhoff
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3452.13
+     (seconds))
+
+Model................................ : Dayhoff+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3371.23
+     (seconds))
+
+Model................................ : Dayhoff+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.288
+ -lnL................................ = 3396.09
+     (seconds))
+
+Model................................ : Dayhoff+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.287
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3319.90
+     (seconds))
+
+Model................................ : Dayhoff+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.759
+ -lnL................................ = 3386.50
+     (seconds))
+
+Model................................ : Dayhoff+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.763
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3309.37
+     (seconds))
+
+Model................................ : Dayhoff+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.405
+    proportion of invariable sites... = 0.162
+ -lnL................................ = 3385.84
+     (seconds))
+
+Model................................ : Dayhoff+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.146
+    proportion of invariable sites... = 0.119
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3309.11
+     (seconds))
+
+Model................................ : WAG
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3377.27
+     (seconds))
+
+Model................................ : WAG+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3328.21
+     (seconds))
+
+Model................................ : WAG+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.275
+ -lnL................................ = 3338.98
+     (seconds))
+
+Model................................ : WAG+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.275
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3290.12
+     (seconds))
+
+Model................................ : WAG+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.951
+ -lnL................................ = 3334.23
+     (seconds))
+
+Model................................ : WAG+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.919
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3283.61
+     (seconds))
+
+Model................................ : WAG+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.76
+    proportion of invariable sites... = 0.149
+ -lnL................................ = 3333.74
+     (seconds))
+
+Model................................ : WAG+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.419
+    proportion of invariable sites... = 0.117
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3283.40
+     (seconds))
+
+Model................................ : RtREV
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3383.40
+     (seconds))
+
+Model................................ : RtREV+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3347.51
+     (seconds))
+
+Model................................ : RtREV+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.275
+ -lnL................................ = 3338.99
+     (seconds))
+
+Model................................ : RtREV+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.276
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3302.74
+     (seconds))
+
+Model................................ : RtREV+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.857
+ -lnL................................ = 3330.35
+     (seconds))
+
+Model................................ : RtREV+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.801
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3290.67
+     (seconds))
+
+Model................................ : RtREV+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.31
+    proportion of invariable sites... = 0.117
+ -lnL................................ = 3330.11
+     (seconds))
+
+Model................................ : RtREV+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.968
+    proportion of invariable sites... = 0.061
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3290.64
+     (seconds))
+
+Model................................ : CpREV
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3365.63
+     (seconds))
+
+Model................................ : CpREV+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3336.05
+     (seconds))
+
+Model................................ : CpREV+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.271
+ -lnL................................ = 3323.32
+     (seconds))
+
+Model................................ : CpREV+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.274
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3293.13
+     (seconds))
+
+Model................................ : CpREV+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.818
+ -lnL................................ = 3309.70
+     (seconds))
+
+Model................................ : CpREV+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.818
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3280.93
+     (seconds))
+
+Model................................ : CpREV+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.818
+    proportion of invariable sites... = 0.0
+ -lnL................................ = 3309.70
+     (seconds))
+
+Model................................ : CpREV+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.818
+    proportion of invariable sites... = 0.0
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3280.93
+     (seconds))
+
+Model................................ : Blosum62
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3376.62
+     (seconds))
+
+Model................................ : Blosum62+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3353.28
+     (seconds))
+
+Model................................ : Blosum62+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.265
+ -lnL................................ = 3345.42
+     (seconds))
+
+Model................................ : Blosum62+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.265
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3321.72
+     (seconds))
+
+Model................................ : Blosum62+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.048
+ -lnL................................ = 3340.96
+     (seconds))
+
+Model................................ : Blosum62+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.017
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3316.13
+     (seconds))
+
+Model................................ : Blosum62+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.694
+    proportion of invariable sites... = 0.119
+ -lnL................................ = 3340.71
+     (seconds))
+
+Model................................ : Blosum62+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 1.4
+    proportion of invariable sites... = 0.087
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3316.00
+     (seconds))
+
+Model................................ : VT
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3407.91
+     (seconds))
+
+Model................................ : VT+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3374.48
+     (seconds))
+
+Model................................ : VT+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.257
+ -lnL................................ = 3370.13
+     (seconds))
+
+Model................................ : VT+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.254
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3334.90
+     (seconds))
+
+Model................................ : VT+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.783
+ -lnL................................ = 3351.05
+     (seconds))
+
+Model................................ : VT+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.764
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3313.83
+     (seconds))
+
+Model................................ : VT+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.782
+    proportion of invariable sites... = 0.0
+ -lnL................................ = 3351.05
+     (seconds))
+
+Model................................ : VT+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.764
+    proportion of invariable sites... = 0.0
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3313.83
+     (seconds))
+
+Model................................ : HIVb
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3441.67
+     (seconds))
+
+Model................................ : HIVb+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3398.86
+     (seconds))
+
+Model................................ : HIVb+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.304
+ -lnL................................ = 3374.33
+     (seconds))
+
+Model................................ : HIVb+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.305
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3329.63
+     (seconds))
+
+Model................................ : HIVb+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.62
+ -lnL................................ = 3345.46
+     (seconds))
+
+Model................................ : HIVb+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.601
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3300.00
+     (seconds))
+
+Model................................ : HIVb+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.62
+    proportion of invariable sites... = 0.0
+ -lnL................................ = 3345.46
+     (seconds))
+
+Model................................ : HIVb+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.601
+    proportion of invariable sites... = 0.0
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3300.00
+     (seconds))
+
+Model................................ : HIVw
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3571.53
+     (seconds))
+
+Model................................ : HIVw+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3482.54
+     (seconds))
+
+Model................................ : HIVw+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.312
+ -lnL................................ = 3493.05
+     (seconds))
+
+Model................................ : HIVw+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.321
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3403.06
+     (seconds))
+
+Model................................ : HIVw+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.519
+ -lnL................................ = 3454.39
+     (seconds))
+
+Model................................ : HIVw+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.521
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3369.94
+     (seconds))
+
+Model................................ : HIVw+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.519
+    proportion of invariable sites... = 0.0
+ -lnL................................ = 3454.39
+     (seconds))
+
+Model................................ : HIVw+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.52
+    proportion of invariable sites... = 0.0
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3369.94
+     (seconds))
+
+Model................................ : FLU
+  Number of parameters............... : 13 (0 + 13 branch length estimates)
+ -lnL................................ = 3431.19
+     (seconds))
+
+Model................................ : FLU+F
+  Number of parameters............... : 32 (19 + 13 branch length estimates)
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3389.54
+     (seconds))
+
+Model................................ : FLU+I
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    proportion of invariable sites... = 0.285
+ -lnL................................ = 3374.89
+     (seconds))
+
+Model................................ : FLU+I+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    proportion of invariable sites... = 0.284
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3331.35
+     (seconds))
+
+Model................................ : FLU+G
+  Number of parameters............... : 14 (1 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.656
+ -lnL................................ = 3349.79
+     (seconds))
+
+Model................................ : FLU+G+F
+  Number of parameters............... : 33 (20 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.621
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3303.61
+     (seconds))
+
+Model................................ : FLU+I+G
+  Number of parameters............... : 15 (2 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.656
+    proportion of invariable sites... = 0.0
+ -lnL................................ = 3349.79
+     (seconds))
+
+Model................................ : FLU+I+G+F
+  Number of parameters............... : 34 (21 + 13 branch length estimates)
+    gamma shape (4 rate categories).. = 0.621
+    proportion of invariable sites... = 0.0
+    aminoacid frequencies............ = observed (see above)
+ -lnL................................ = 3303.61
+     (seconds))
+
+************************************************************
+Date   :  Thu May 02 18:29:01 EDT 2013
+Runtime:  0h:07:25
+
+
+
+***************************************************************************
+Best model according to AIC: LG+G+F
+Sample Size:         390.0
+Confidence Interval: 100.0
+***************************************************************************
+Model          deltaAIC       AIC            AICw           -lnL           
+---------------------------------------------------------------------------
+LG+G+F         0.00           6603.02        0.73           3268.51        
+LG+I+G+F       2.00           6605.03        0.27           3268.51        
+LG+G           22.75          6625.78        0.00           3298.89        
+LG+I+G         24.67          6627.70        0.00           3298.85        
+CpREV+G+F      24.83          6627.86        0.00           3280.93        
+LG+I+F         26.48          6629.51        0.00           3281.75        
+CpREV+I+G+F    26.83          6629.86        0.00           3280.93        
+WAG+G+F        30.19          6633.21        0.00           3283.61        
+WAG+I+G+F      31.78          6634.81        0.00           3283.40        
+JTT+G+F        41.08          6644.11        0.00           3289.05        
+JTT+I+G+F      43.10          6646.12        0.00           3289.06        
+WAG+I+F        43.22          6646.25        0.00           3290.12        
+LG+I           44.12          6647.14        0.00           3309.57        
+RtREV+G+F      44.31          6647.33        0.00           3290.67        
+CpREV+G        44.37          6647.40        0.00           3309.70        
+RtREV+I+G+F    46.25          6649.27        0.00           3290.64        
+CpREV+I+G      46.37          6649.40        0.00           3309.70        
+CpREV+I+F      49.24          6652.26        0.00           3293.13        
+HIVb+G+F       62.98          6666.00        0.00           3300.00        
+HIVb+I+G+F     64.98          6668.00        0.00           3300.00        
+JTT+I+F        65.15          6668.18        0.00           3301.09        
+RtREV+I+F      68.45          6671.48        0.00           3302.74        
+FLU+G+F        70.20          6673.23        0.00           3303.61        
+CpREV+I        71.62          6674.64        0.00           3323.32        
+FLU+I+G+F      72.20          6675.23        0.00           3303.61        
+Dayhoff+G+F    81.71          6684.74        0.00           3309.37        
+DCMut+G+F      82.15          6685.18        0.00           3309.59        
+Dayhoff+I+G+F  83.19          6686.21        0.00           3309.11        
+DCMut+I+G+F    83.63          6686.65        0.00           3309.33        
+RtREV+G        85.67          6688.69        0.00           3330.35        
+RtREV+I+G      87.19          6690.21        0.00           3330.11        
+VT+G+F         90.63          6693.66        0.00           3313.83        
+VT+I+G+F       92.63          6695.66        0.00           3313.83        
+WAG+G          93.43          6696.46        0.00           3334.23        
+WAG+I+G        94.45          6697.48        0.00           3333.74        
+Blosum62+G+F   95.24          6698.26        0.00           3316.13        
+Blosum62+I+G+F 96.98          6700.01        0.00           3316.00        
+JTT+G          101.41         6704.43        0.00           3338.22        
+Dayhoff+I+F    102.77         6705.79        0.00           3319.90        
+WAG+I          102.94         6705.96        0.00           3338.98        
+RtREV+I        102.96         6705.99        0.00           3338.99        
+DCMut+I+F      103.08         6706.11        0.00           3320.05        
+JTT+I+G        103.43         6706.46        0.00           3338.23        
+MtREV+G+F      103.88         6706.90        0.00           3320.45        
+MtREV+I+G+F    105.85         6708.87        0.00           3320.44        
+Blosum62+I+F   106.41         6709.43        0.00           3321.72        
+Blosum62+G     106.89         6709.92        0.00           3340.96        
+Blosum62+I+G   108.40         6711.42        0.00           3340.71        
+MtArt+G+F      109.12         6712.14        0.00           3323.07        
+MtArt+I+G+F    111.12         6714.14        0.00           3323.07        
+LG+F           114.69         6717.72        0.00           3326.86        
+Blosum62+I     115.81         6718.83        0.00           3345.42        
+HIVb+G         115.89         6718.92        0.00           3345.46        
+WAG+F          117.40         6720.43        0.00           3328.21        
+HIVb+I+G       117.89         6720.92        0.00           3345.46        
+HIVb+I+F       122.24         6725.27        0.00           3329.63        
+JTT+I          124.24         6727.27        0.00           3349.63        
+FLU+G          124.55         6727.57        0.00           3349.79        
+FLU+I+F        125.68         6728.71        0.00           3331.35        
+FLU+I+G        126.55         6729.58        0.00           3349.79        
+VT+G           127.08         6730.11        0.00           3351.05        
+VT+I+G         129.08         6732.11        0.00           3351.05        
+LG             130.97         6734.00        0.00           3354.00        
+VT+I+F         132.77         6735.80        0.00           3334.90        
+CpREV+F        133.08         6736.10        0.00           3336.05        
+MtREV+I+F      142.74         6745.77        0.00           3339.88        
+CpREV          154.24         6757.27        0.00           3365.63        
+RtREV+F        155.99         6759.01        0.00           3347.51        
+JTT+F          156.76         6759.79        0.00           3347.89        
+VT+I           165.23         6768.26        0.00           3370.13        
+Blosum62+F     167.54         6770.57        0.00           3353.28        
+HIVb+I         173.63         6776.66        0.00           3374.33        
+FLU+I          174.75         6777.77        0.00           3374.89        
+Blosum62       176.21         6779.23        0.00           3376.62        
+WAG            177.52         6780.55        0.00           3377.27        
+RtREV          189.78         6792.80        0.00           3383.40        
+MtArt+I+F      192.48         6795.51        0.00           3364.75        
+Dayhoff+G      197.98         6801.01        0.00           3386.50        
+DCMut+G        198.32         6801.34        0.00           3386.67        
+MtMam+G+F      198.52         6801.54        0.00           3367.77        
+Dayhoff+I+G    198.65         6801.68        0.00           3385.84        
+DCMut+I+G      198.99         6802.01        0.00           3386.01        
+MtMam+I+G+F    200.49         6803.52        0.00           3367.76        
+HIVw+G+F       202.86         6805.89        0.00           3369.94        
+DCMut+F        203.26         6806.28        0.00           3371.14        
+Dayhoff+F      203.44         6806.47        0.00           3371.23        
+HIVw+I+G+F     204.86         6807.89        0.00           3369.94        
+VT+F           209.93         6812.95        0.00           3374.48        
+Dayhoff+I      217.16         6820.18        0.00           3396.09        
+DCMut+I        217.32         6820.34        0.00           3396.17        
+JTT            217.85         6820.87        0.00           3397.44        
+VT             238.79         6841.81        0.00           3407.91        
+FLU+F          240.06         6843.08        0.00           3389.54        
+HIVb+F         258.69         6861.72        0.00           3398.86        
+MtREV+F        262.28         6865.31        0.00           3400.65        
+HIVw+I+F       269.09         6872.11        0.00           3403.06        
+MtMam+I+F      278.55         6881.58        0.00           3407.79        
+FLU            285.36         6888.39        0.00           3431.19        
+HIVb           306.31         6909.33        0.00           3441.67        
+MtArt+G        320.82         6923.84        0.00           3447.92        
+MtArt+I+G      322.82         6925.84        0.00           3447.92        
+DCMut          326.85         6929.87        0.00           3451.94        
+Dayhoff        327.23         6930.25        0.00           3452.13        
+HIVw+G         333.76         6936.79        0.00           3454.39        
+HIVw+I+G       335.76         6938.79        0.00           3454.39        
+MtArt+F        337.85         6940.87        0.00           3438.44        
+MtREV+G        340.49         6943.52        0.00           3457.76        
+MtREV+I+G      342.49         6945.52        0.00           3457.76        
+MtREV+I        393.61         6996.63        0.00           3484.32        
+HIVw+I         411.07         7014.10        0.00           3493.05        
+HIVw+F         426.05         7029.07        0.00           3482.54        
+MtMam+G        429.39         7032.42        0.00           3502.21        
+MtArt+I        430.16         7033.19        0.00           3502.59        
+MtMam+I+G      431.39         7034.42        0.00           3502.21        
+MtMam+F        462.64         7065.66        0.00           3500.83        
+MtREV          513.72         7116.75        0.00           3545.37        
+MtMam+I        547.45         7150.48        0.00           3561.24        
+HIVw           566.03         7169.06        0.00           3571.53        
+MtArt          579.71         7182.73        0.00           3578.37        
+MtMam          737.95         7340.98        0.00           3657.49        
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+***********************************************
+Relative importance of parameters
+***********************************************
+  alpha       (+G):     0.731
+  p-inv       (+I):     0.000
+  alpha+p-inv (+I+G):   0.269
+  freqs       (+F):     1.000
+
+***********************************************
+Model-averaged estimate of parameters
+***********************************************
+  alpha (+G):           0.786
+  p-inv (+I):           0.278
+  alpha (+I+G):         0.875
+  p-inv (+I+G):         0.036
+
+********************************************************
+                         LG+G+F
+********************************************************
+
+(Scer:0.013102,Spar:0.032729,(Smik:0.050996,(Skud:0.054966,(Sbay:0.088203,(Scas:0.243087,(Sklu:0.252308,Calb:1.098199):0.148774):0.147779):0.000006):0.029174):0.016715);
+
+***************************************************************************
+Best model according to BIC: LG+G
+Sample Size:         390.0
+Confidence Interval: 100.0
+***************************************************************************
+Model          deltaBIC       BIC            BICw           -lnL           
+---------------------------------------------------------------------------
+LG+G           0.00           6681.30        0.95           3298.89        
+LG+I+G         5.88           6687.19        0.05           3298.85        
+LG+I           21.36          6702.67        0.00           3309.57        
+CpREV+G        21.62          6702.92        0.00           3309.70        
+CpREV+I+G      27.58          6708.89        0.00           3309.70        
+CpREV+I        48.86          6730.17        0.00           3323.32        
+LG+G+F         52.60          6733.91        0.00           3268.51        
+LG+I+G+F       58.57          6739.88        0.00           3268.51        
+RtREV+G        62.91          6744.22        0.00           3330.35        
+RtREV+I+G      68.40          6749.71        0.00           3330.11        
+WAG+G          70.68          6751.98        0.00           3334.23        
+WAG+I+G        75.66          6756.97        0.00           3333.74        
+CpREV+G+F      77.44          6758.74        0.00           3280.93        
+JTT+G          78.66          6759.96        0.00           3338.22        
+LG+I+F         79.09          6760.39        0.00           3281.75        
+WAG+I          80.18          6761.49        0.00           3338.98        
+RtREV+I        80.21          6761.52        0.00           3338.99        
+WAG+G+F        82.79          6764.09        0.00           3283.61        
+CpREV+I+G+F    83.40          6764.71        0.00           3280.93        
+Blosum62+G     84.14          6765.45        0.00           3340.96        
+JTT+I+G        84.64          6765.95        0.00           3338.23        
+WAG+I+G+F      88.35          6769.66        0.00           3283.40        
+Blosum62+I+G   89.61          6770.92        0.00           3340.71        
+Blosum62+I     93.05          6774.36        0.00           3345.42        
+HIVb+G         93.14          6774.44        0.00           3345.46        
+JTT+G+F        93.68          6774.99        0.00           3289.05        
+WAG+I+F        95.82          6777.13        0.00           3290.12        
+RtREV+G+F      96.91          6778.22        0.00           3290.67        
+HIVb+I+G       99.11          6780.41        0.00           3345.46        
+JTT+I+G+F      99.67          6780.97        0.00           3289.06        
+JTT+I          101.49         6782.79        0.00           3349.63        
+FLU+G          101.80         6783.10        0.00           3349.79        
+CpREV+I+F      101.84         6783.15        0.00           3293.13        
+RtREV+I+G+F    102.82         6784.12        0.00           3290.64        
+LG             104.25         6785.56        0.00           3354.00        
+VT+G           104.33         6785.63        0.00           3351.05        
+FLU+I+G        107.76         6789.07        0.00           3349.79        
+VT+I+G         110.30         6791.60        0.00           3351.05        
+HIVb+G+F       115.58         6796.88        0.00           3300.00        
+JTT+I+F        117.76         6799.06        0.00           3301.09        
+RtREV+I+F      121.05         6802.36        0.00           3302.74        
+HIVb+I+G+F     121.55         6802.85        0.00           3300.00        
+FLU+G+F        122.81         6804.11        0.00           3303.61        
+CpREV          127.52         6808.83        0.00           3365.63        
+FLU+I+G+F      128.77         6810.08        0.00           3303.61        
+Dayhoff+G+F    134.32         6815.62        0.00           3309.37        
+DCMut+G+F      134.75         6816.06        0.00           3309.59        
+Dayhoff+I+G+F  139.76         6821.06        0.00           3309.11        
+DCMut+I+G+F    140.20         6821.50        0.00           3309.33        
+VT+I           142.48         6823.79        0.00           3370.13        
+VT+G+F         143.24         6824.54        0.00           3313.83        
+Blosum62+G+F   147.84         6829.15        0.00           3316.13        
+VT+I+G+F       149.20         6830.51        0.00           3313.83        
+Blosum62       149.49         6830.79        0.00           3376.62        
+WAG            150.80         6832.11        0.00           3377.27        
+HIVb+I         150.88         6832.19        0.00           3374.33        
+FLU+I          151.99         6833.30        0.00           3374.89        
+Blosum62+I+G+F 153.55         6834.86        0.00           3316.00        
+Dayhoff+I+F    155.37         6836.67        0.00           3319.90        
+DCMut+I+F      155.69         6836.99        0.00           3320.05        
+MtREV+G+F      156.48         6837.79        0.00           3320.45        
+Blosum62+I+F   159.01         6840.31        0.00           3321.72        
+MtArt+G+F      161.72         6843.02        0.00           3323.07        
+MtREV+I+G+F    162.42         6843.72        0.00           3320.44        
+RtREV          163.06         6844.36        0.00           3383.40        
+LG+F           163.33         6844.64        0.00           3326.86        
+WAG+F          166.04         6847.35        0.00           3328.21        
+MtArt+I+G+F    167.68         6848.99        0.00           3323.07        
+HIVb+I+F       174.85         6856.15        0.00           3329.63        
+Dayhoff+G      175.23         6856.53        0.00           3386.50        
+DCMut+G        175.56         6856.87        0.00           3386.67        
+FLU+I+F        178.28         6859.59        0.00           3331.35        
+Dayhoff+I+G    179.86         6861.17        0.00           3385.84        
+DCMut+I+G      180.20         6861.51        0.00           3386.01        
+CpREV+F        181.72         6863.02        0.00           3336.05        
+VT+I+F         185.38         6866.68        0.00           3334.90        
+JTT            191.13         6872.43        0.00           3397.44        
+Dayhoff+I      194.40         6875.71        0.00           3396.09        
+DCMut+I        194.56         6875.87        0.00           3396.17        
+MtREV+I+F      195.35         6876.65        0.00           3339.88        
+RtREV+F        204.62         6885.93        0.00           3347.51        
+JTT+F          205.40         6886.71        0.00           3347.89        
+VT             212.07         6893.37        0.00           3407.91        
+Blosum62+F     216.18         6897.48        0.00           3353.28        
+MtArt+I+F      245.08         6926.39        0.00           3364.75        
+MtMam+G+F      251.12         6932.43        0.00           3367.77        
+DCMut+F        251.89         6933.20        0.00           3371.14        
+Dayhoff+F      252.08         6933.39        0.00           3371.23        
+HIVw+G+F       255.47         6936.77        0.00           3369.94        
+MtMam+I+G+F    257.06         6938.36        0.00           3367.76        
+VT+F           258.57         6939.87        0.00           3374.48        
+FLU            258.64         6939.95        0.00           3431.19        
+HIVw+I+G+F     261.43         6942.74        0.00           3369.94        
+HIVb           279.59         6960.89        0.00           3441.67        
+FLU+F          288.70         6970.00        0.00           3389.54        
+MtArt+G        298.06         6979.37        0.00           3447.92        
+DCMut          300.13         6981.43        0.00           3451.94        
+Dayhoff        300.51         6981.81        0.00           3452.13        
+MtArt+I+G      304.03         6985.33        0.00           3447.92        
+HIVb+F         307.33         6988.63        0.00           3398.86        
+MtREV+F        310.92         6992.22        0.00           3400.65        
+HIVw+G         311.01         6992.32        0.00           3454.39        
+HIVw+I+G       316.98         6998.28        0.00           3454.39        
+MtREV+G        317.74         6999.05        0.00           3457.76        
+HIVw+I+F       321.69         7003.00        0.00           3403.06        
+MtREV+I+G      323.71         7005.01        0.00           3457.76        
+MtMam+I+F      331.16         7012.46        0.00           3407.79        
+MtREV+I        370.85         7052.16        0.00           3484.32        
+MtArt+F        386.48         7067.79        0.00           3438.44        
+HIVw+I         388.32         7069.62        0.00           3493.05        
+MtMam+G        406.64         7087.94        0.00           3502.21        
+MtArt+I        407.41         7088.71        0.00           3502.59        
+MtMam+I+G      412.61         7093.91        0.00           3502.21        
+HIVw+F         474.69         7155.99        0.00           3482.54        
+MtREV          487.00         7168.31        0.00           3545.37        
+MtMam+F        511.27         7192.58        0.00           3500.83        
+MtMam+I        524.70         7206.00        0.00           3561.24        
+HIVw           539.32         7220.62        0.00           3571.53        
+MtArt          552.99         7234.29        0.00           3578.37        
+MtMam          711.23         7392.54        0.00           3657.49        
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+***********************************************
+Relative importance of parameters
+***********************************************
+  alpha       (+G):     0.950
+  p-inv       (+I):     0.000
+  alpha+p-inv (+I+G):   0.050
+  freqs       (+F):     0.000
+
+***********************************************
+Model-averaged estimate of parameters
+***********************************************
+  alpha (+G):           0.818
+  p-inv (+I):           0.281
+  alpha (+I+G):         1.043
+  p-inv (+I+G):         0.076
+
+********************************************************
+                          LG+G
+********************************************************
+
+(Scer:0.012986,Spar:0.032493,(Smik:0.048561,(Skud:0.056612,(Sbay:0.084938,(Scas:0.238169,(Sklu:0.240084,Calb:1.015790):0.143626):0.138739):0.000016):0.028421):0.018384);
+
+***************************************************************************
+Best model according to DT: LG+G
+Sample Size:         390.0
+Confidence Interval: 100.0
+***************************************************************************
+Model          deltaDT        DT             DTw            -lnL           
+---------------------------------------------------------------------------
+LG+G           0.00           0.00           0.01           3298.89        
+LG+I+G         0.00           0.00           0.01           3298.85        
+JTT+I+G        0.02           0.02           0.01           3338.23        
+JTT+G          0.02           0.02           0.01           3338.22        
+HIVb+I         0.02           0.02           0.01           3374.33        
+VT+G           0.02           0.02           0.01           3351.05        
+FLU+I          0.02           0.02           0.01           3374.89        
+VT+I+G         0.02           0.02           0.01           3351.05        
+JTT+G+F        0.03           0.03           0.01           3289.05        
+JTT+I+G+F      0.03           0.03           0.01           3289.06        
+CpREV+I+G+F    0.03           0.03           0.01           3280.93        
+CpREV+G+F      0.03           0.03           0.01           3280.93        
+DCMut+I+G      0.04           0.04           0.01           3386.01        
+Dayhoff+I+G    0.04           0.04           0.01           3385.84        
+DCMut+G        0.05           0.05           0.01           3386.67        
+Dayhoff+G      0.05           0.05           0.01           3386.50        
+MtREV+I+F      0.05           0.05           0.01           3339.88        
+RtREV+I+G+F    0.06           0.06           0.01           3290.64        
+RtREV+G+F      0.06           0.06           0.01           3290.67        
+MtArt          0.07           0.07           0.01           3578.37        
+RtREV+G        0.07           0.07           0.01           3330.35        
+RtREV+I+G      0.08           0.08           0.01           3330.11        
+DCMut+I+G+F    0.08           0.08           0.01           3309.33        
+MtArt+F        0.08           0.08           0.01           3438.44        
+CpREV+I+G      0.08           0.08           0.01           3309.70        
+CpREV+G        0.08           0.08           0.01           3309.70        
+LG+I+F         0.08           0.08           0.01           3281.75        
+LG+G+F         0.08           0.08           0.01           3268.51        
+Dayhoff+I+G+F  0.08           0.08           0.01           3309.11        
+LG+I+G+F       0.09           0.09           0.01           3268.51        
+DCMut+G+F      0.09           0.09           0.01           3309.59        
+HIVb+I+F       0.09           0.09           0.01           3329.63        
+Dayhoff+G+F    0.09           0.09           0.01           3309.37        
+VT+G+F         0.09           0.09           0.01           3313.83        
+Dayhoff+I+F    0.10           0.10           0.01           3319.90        
+VT+I+G+F       0.10           0.10           0.01           3313.83        
+DCMut+I+F      0.10           0.10           0.01           3320.05        
+MtMam+F        0.10           0.10           0.01           3500.83        
+RtREV+I+F      0.10           0.10           0.01           3302.74        
+FLU+I+F        0.10           0.10           0.01           3331.35        
+WAG+G+F        0.11           0.11           0.01           3283.61        
+WAG+I+G+F      0.12           0.12           0.01           3283.40        
+HIVw+I         0.12           0.12           0.01           3493.05        
+MtREV+I        0.12           0.12           0.01           3484.32        
+JTT+I+F        0.13           0.13           0.01           3301.09        
+Dayhoff+I      0.13           0.13           0.01           3396.09        
+DCMut+I        0.13           0.13           0.01           3396.17        
+MtMam          0.14           0.14           0.01           3657.49        
+VT+I+F         0.14           0.14           0.01           3334.90        
+LG+I           0.14           0.14           0.01           3309.57        
+JTT+I          0.15           0.15           0.01           3349.63        
+HIVw+I+F       0.15           0.15           0.01           3403.06        
+WAG+G          0.17           0.17           0.01           3334.23        
+CpREV+I+F      0.17           0.17           0.01           3293.13        
+WAG+I+G        0.18           0.18           0.01           3333.74        
+FLU+F          0.18           0.18           0.01           3389.54        
+RtREV+I        0.19           0.19           0.01           3338.99        
+MtREV          0.21           0.21           0.01           3545.37        
+Blosum62+G+F   0.21           0.21           0.01           3316.13        
+HIVb+F         0.21           0.21           0.01           3398.86        
+HIVw+F         0.21           0.21           0.01           3482.54        
+VT+I           0.21           0.21           0.01           3370.13        
+WAG+I+F        0.21           0.21           0.01           3290.12        
+Blosum62+I+G+F 0.21           0.21           0.01           3316.00        
+CpREV+I        0.23           0.23           0.01           3323.32        
+HIVw           0.24           0.24           0.01           3571.53        
+Blosum62+G     0.25           0.25           0.01           3340.96        
+FLU            0.26           0.26           0.01           3431.19        
+WAG+I          0.26           0.26           0.01           3338.98        
+Blosum62+I+G   0.26           0.26           0.01           3340.71        
+MtREV+F        0.26           0.26           0.01           3400.65        
+HIVb           0.27           0.27           0.01           3441.67        
+HIVb+G         0.28           0.28           0.01           3345.46        
+HIVb+I+G       0.28           0.28           0.01           3345.46        
+Blosum62+I+F   0.29           0.29           0.01           3321.72        
+MtREV+G+F      0.30           0.30           0.01           3320.45        
+FLU+G          0.30           0.30           0.01           3349.79        
+MtREV+I+G+F    0.30           0.30           0.01           3320.44        
+FLU+I+G        0.30           0.30           0.01           3349.79        
+LG+F           0.30           0.30           0.01           3326.86        
+RtREV+F        0.31           0.31           0.01           3347.51        
+Blosum62+I     0.32           0.32           0.01           3345.42        
+Dayhoff+F      0.33           0.33           0.01           3371.23        
+DCMut+F        0.33           0.33           0.01           3371.14        
+MtArt+I+F      0.33           0.33           0.01           3364.75        
+VT+F           0.33           0.33           0.01           3374.48        
+JTT+F          0.34           0.34           0.01           3347.89        
+LG             0.34           0.34           0.01           3354.00        
+Dayhoff        0.35           0.35           0.01           3452.13        
+DCMut          0.36           0.36           0.01           3451.94        
+JTT            0.36           0.36           0.01           3397.44        
+CpREV+F        0.37           0.37           0.01           3336.05        
+RtREV          0.37           0.37           0.01           3383.40        
+WAG+F          0.38           0.38           0.01           3328.21        
+VT             0.39           0.39           0.01           3407.91        
+WAG            0.41           0.41           0.01           3377.27        
+CpREV          0.41           0.41           0.01           3365.63        
+HIVb+G+F       0.41           0.41           0.01           3300.00        
+HIVb+I+G+F     0.42           0.42           0.01           3300.00        
+MtREV+G        0.42           0.42           0.01           3457.76        
+MtREV+I+G      0.42           0.42           0.01           3457.76        
+Blosum62+F     0.42           0.42           0.01           3353.28        
+Blosum62       0.44           0.44           0.01           3376.62        
+MtArt+I        0.47           0.47           0.01           3502.59        
+FLU+G+F        0.49           0.49           0.01           3303.61        
+FLU+I+G+F      0.49           0.49           0.01           3303.61        
+MtMam+I+F      0.61           0.61           0.01           3407.79        
+HIVw+G         0.69           0.69           0.01           3454.39        
+HIVw+I+G       0.69           0.69           0.01           3454.39        
+HIVw+G+F       0.70           0.70           0.01           3369.94        
+HIVw+I+G+F     0.70           0.70           0.01           3369.94        
+MtMam+I        0.74           0.74           0.01           3561.24        
+MtArt+G+F      0.96           0.96           0.01           3323.07        
+MtArt+I+G+F    0.96           0.96           0.01           3323.07        
+MtArt+G        1.20           1.20           0.01           3447.92        
+MtArt+I+G      1.20           1.20           0.01           3447.92        
+MtMam+G+F      1.33           1.33           0.00           3367.77        
+MtMam+I+G+F    1.33           1.33           0.00           3367.76        
+MtMam+G        1.55           1.55           0.00           3502.21        
+MtMam+I+G      1.56           1.56           0.00           3502.21        
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+***********************************************
+Relative importance of parameters
+***********************************************
+  alpha       (+G):     0.246
+  p-inv       (+I):     0.260
+  alpha+p-inv (+I+G):   0.246
+  freqs       (+F):     0.502
+
+***********************************************
+Model-averaged estimate of parameters
+***********************************************
+  alpha (+G):           0.749
+  p-inv (+I):           0.283
+  alpha (+I+G):         0.956
+  p-inv (+I+G):         0.054
+
+********************************************************
+                          LG+G
+********************************************************
+
+(Scer:0.012986,Spar:0.032493,(Smik:0.048561,(Skud:0.056612,(Sbay:0.084938,(Scas:0.238169,(Sklu:0.240084,Calb:1.015790):0.143626):0.138739):0.000016):0.028421):0.018384);
+----------------------------------------------------------------------------------------------------
+Table: Weights(Ranking) of the candidate models under the different frameworks
+----------------------------------------------------------------------------------------------------
+model          AIC         AICc-1      AICc-2      AICc-3      BIC-1       BIC-2       BIC-3
+LG+G+F         0.73(1)     0.77(1)     0.79(1)     0.76(1)     0.00(7)     0.00(6)     0.00(7)     
+LG+I+G+F       0.27(2)     0.23(2)     0.21(2)     0.24(2)     0.00(8)     0.00(8)     0.00(8)     
+LG+G           0.00(3)     0.00(3)     0.00(3)     0.00(3)     0.95(1)     0.94(1)     0.95(1)     
+LG+I+G         0.00(4)     0.00(4)     0.00(4)     0.00(4)     0.05(2)     0.06(2)     0.05(2)     
+CpREV+G+F      0.00(5)     0.00(5)     0.00(5)     0.00(5)     0.00(13)    0.00(11)    0.00(16)    
+LG+I+F         0.00(6)     0.00(6)     0.00(6)     0.00(6)     0.00(15)    0.00(12)    0.00(17)    
+CpREV+I+G+F    0.00(7)     0.00(7)     0.00(7)     0.00(7)     0.00(19)    0.00(15)    0.00(21)    
+WAG+G+F        0.00(8)     0.00(8)     0.00(8)     0.00(8)     0.00(18)    0.00(14)    0.00(20)    
+WAG+I+G+F      0.00(9)     0.00(9)     0.00(9)     0.00(9)     0.00(22)    0.00(18)    0.00(23)    
+JTT+G+F        0.00(10)    0.00(12)    0.00(13)    0.00(12)    0.00(26)    0.00(23)    0.00(26)    
+JTT+I+G+F      0.00(11)    0.00(15)    0.00(15)    0.00(15)    0.00(30)    0.00(27)    0.00(32)    
+WAG+I+F        0.00(12)    0.00(14)    0.00(14)    0.00(14)    0.00(27)    0.00(24)    0.00(27)    
+LG+I           0.00(13)    0.00(10)    0.00(10)    0.00(10)    0.00(3)     0.00(3)     0.00(3)     
+RtREV+G+F      0.00(14)    0.00(16)    0.00(16)    0.00(16)    0.00(28)    0.00(25)    0.00(29)    
+CpREV+G        0.00(15)    0.00(11)    0.00(11)    0.00(11)    0.00(4)     0.00(4)     0.00(4)     
+RtREV+I+G+F    0.00(16)    0.00(17)    0.00(17)    0.00(17)    0.00(34)    0.00(31)    0.00(36)    
+CpREV+I+G      0.00(17)    0.00(13)    0.00(12)    0.00(13)    0.00(5)     0.00(5)     0.00(5)     
+CpREV+I+F      0.00(18)    0.00(18)    0.00(18)    0.00(18)    0.00(33)    0.00(28)    0.00(35)    
+HIVb+G+F       0.00(19)    0.00(19)    0.00(20)    0.00(19)    0.00(39)    0.00(37)    0.00(39)    
+HIVb+I+G+F     0.00(20)    0.00(21)    0.00(22)    0.00(21)    0.00(42)    0.00(42)    0.00(42)    
+JTT+I+F        0.00(21)    0.00(20)    0.00(21)    0.00(20)    0.00(40)    0.00(39)    0.00(40)    
+RtREV+I+F      0.00(22)    0.00(23)    0.00(23)    0.00(23)    0.00(41)    0.00(41)    0.00(41)    
+FLU+G+F        0.00(23)    0.00(24)    0.00(24)    0.00(24)    0.00(43)    0.00(43)    0.00(43)    
+CpREV+I        0.00(24)    0.00(22)    0.00(19)    0.00(22)    0.00(6)     0.00(7)     0.00(6)     
+FLU+I+G+F      0.00(25)    0.00(25)    0.00(25)    0.00(25)    0.00(45)    0.00(44)    0.00(45)    
+Dayhoff+G+F    0.00(26)    0.00(27)    0.00(28)    0.00(27)    0.00(46)    0.00(45)    0.00(46)    
+DCMut+G+F      0.00(27)    0.00(28)    0.00(29)    0.00(28)    0.00(47)    0.00(46)    0.00(47)    
+Dayhoff+I+G+F  0.00(28)    0.00(30)    0.00(30)    0.00(30)    0.00(48)    0.00(48)    0.00(49)    
+DCMut+I+G+F    0.00(29)    0.00(31)    0.00(31)    0.00(31)    0.00(49)    0.00(49)    0.00(50)    
+RtREV+G        0.00(30)    0.00(26)    0.00(26)    0.00(26)    0.00(9)     0.00(9)     0.00(9)     
+RtREV+I+G      0.00(31)    0.00(29)    0.00(27)    0.00(29)    0.00(10)    0.00(10)    0.00(10)    
+VT+G+F         0.00(32)    0.00(34)    0.00(34)    0.00(34)    0.00(51)    0.00(50)    0.00(51)    
+VT+I+G+F       0.00(33)    0.00(35)    0.00(36)    0.00(35)    0.00(53)    0.00(52)    0.00(57)    
+WAG+G          0.00(34)    0.00(32)    0.00(32)    0.00(32)    0.00(11)    0.00(13)    0.00(11)    
+WAG+I+G        0.00(35)    0.00(33)    0.00(33)    0.00(33)    0.00(12)    0.00(16)    0.00(12)    
+Blosum62+G+F   0.00(36)    0.00(36)    0.00(40)    0.00(36)    0.00(52)    0.00(51)    0.00(53)    
+Blosum62+I+G+F 0.00(37)    0.00(38)    0.00(41)    0.00(38)    0.00(58)    0.00(54)    0.00(58)    
+JTT+G          0.00(38)    0.00(37)    0.00(35)    0.00(37)    0.00(14)    0.00(17)    0.00(13)    
+Dayhoff+I+F    0.00(39)    0.00(43)    0.00(44)    0.00(43)    0.00(59)    0.00(55)    0.00(59)    
+WAG+I          0.00(40)    0.00(39)    0.00(37)    0.00(39)    0.00(16)    0.00(19)    0.00(14)    
+RtREV+I        0.00(41)    0.00(40)    0.00(38)    0.00(40)    0.00(17)    0.00(20)    0.00(15)    
+DCMut+I+F      0.00(42)    0.00(44)    0.00(45)    0.00(44)    0.00(60)    0.00(56)    0.00(60)    
+JTT+I+G        0.00(43)    0.00(41)    0.00(39)    0.00(41)    0.00(21)    0.00(22)    0.00(19)    
+MtREV+G+F      0.00(44)    0.00(46)    0.00(46)    0.00(45)    0.00(61)    0.00(57)    0.00(61)    
+MtREV+I+G+F    0.00(45)    0.00(47)    0.00(48)    0.00(47)    0.00(64)    0.00(64)    0.00(65)    
+Blosum62+I+F   0.00(46)    0.00(48)    0.00(47)    0.00(48)    0.00(62)    0.00(59)    0.00(62)    
+Blosum62+G     0.00(47)    0.00(42)    0.00(42)    0.00(42)    0.00(20)    0.00(21)    0.00(18)    
+Blosum62+I+G   0.00(48)    0.00(45)    0.00(43)    0.00(46)    0.00(23)    0.00(26)    0.00(22)    
+MtArt+G+F      0.00(49)    0.00(49)    0.00(51)    0.00(49)    0.00(63)    0.00(63)    0.00(64)    
+MtArt+I+G+F    0.00(50)    0.00(52)    0.00(53)    0.00(51)    0.00(68)    0.00(67)    0.00(68)    
+LG+F           0.00(51)    0.00(54)    0.00(54)    0.00(54)    0.00(66)    0.00(65)    0.00(66)    
+Blosum62+I     0.00(52)    0.00(50)    0.00(49)    0.00(50)    0.00(24)    0.00(29)    0.00(24)    
+HIVb+G         0.00(53)    0.00(51)    0.00(50)    0.00(52)    0.00(25)    0.00(30)    0.00(25)    
+WAG+F          0.00(54)    0.00(55)    0.00(57)    0.00(55)    0.00(67)    0.00(66)    0.00(67)    
+HIVb+I+G       0.00(55)    0.00(53)    0.00(52)    0.00(53)    0.00(29)    0.00(32)    0.00(28)    
+HIVb+I+F       0.00(56)    0.00(60)    0.00(62)    0.00(58)    0.00(69)    0.00(69)    0.00(71)    
+JTT+I          0.00(57)    0.00(56)    0.00(55)    0.00(56)    0.00(31)    0.00(33)    0.00(30)    
+FLU+G          0.00(58)    0.00(57)    0.00(56)    0.00(57)    0.00(32)    0.00(34)    0.00(31)    
+FLU+I+F        0.00(59)    0.00(63)    0.00(63)    0.00(62)    0.00(72)    0.00(70)    0.00(74)    
+FLU+I+G        0.00(60)    0.00(58)    0.00(58)    0.00(59)    0.00(37)    0.00(38)    0.00(37)    
+VT+G           0.00(61)    0.00(59)    0.00(59)    0.00(60)    0.00(36)    0.00(35)    0.00(34)    
+VT+I+G         0.00(62)    0.00(61)    0.00(60)    0.00(61)    0.00(38)    0.00(40)    0.00(38)    
+LG             0.00(63)    0.00(62)    0.00(61)    0.00(63)    0.00(35)    0.00(36)    0.00(33)    
+VT+I+F         0.00(64)    0.00(65)    0.00(65)    0.00(65)    0.00(76)    0.00(74)    0.00(76)    
+CpREV+F        0.00(65)    0.00(64)    0.00(64)    0.00(64)    0.00(75)    0.00(71)    0.00(75)    
+MtREV+I+F      0.00(66)    0.00(66)    0.00(66)    0.00(66)    0.00(80)    0.00(77)    0.00(80)    
+CpREV          0.00(67)    0.00(67)    0.00(67)    0.00(67)    0.00(44)    0.00(47)    0.00(44)    
+RtREV+F        0.00(68)    0.00(68)    0.00(68)    0.00(68)    0.00(81)    0.00(81)    0.00(81)    
+JTT+F          0.00(69)    0.00(69)    0.00(69)    0.00(69)    0.00(82)    0.00(82)    0.00(82)    
+VT+I           0.00(70)    0.00(70)    0.00(70)    0.00(70)    0.00(50)    0.00(53)    0.00(48)    
+Blosum62+F     0.00(71)    0.00(71)    0.00(73)    0.00(71)    0.00(84)    0.00(83)    0.00(84)    
+HIVb+I         0.00(72)    0.00(72)    0.00(71)    0.00(72)    0.00(56)    0.00(60)    0.00(55)    
+FLU+I          0.00(73)    0.00(73)    0.00(72)    0.00(73)    0.00(57)    0.00(62)    0.00(56)    
+Blosum62       0.00(74)    0.00(74)    0.00(74)    0.00(74)    0.00(54)    0.00(58)    0.00(52)    
+WAG            0.00(75)    0.00(75)    0.00(75)    0.00(75)    0.00(55)    0.00(61)    0.00(54)    
+RtREV          0.00(76)    0.00(76)    0.00(76)    0.00(76)    0.00(65)    0.00(68)    0.00(63)    
+MtArt+I+F      0.00(77)    0.00(77)    0.00(81)    0.00(77)    0.00(85)    0.00(85)    0.00(85)    
+Dayhoff+G      0.00(78)    0.00(78)    0.00(77)    0.00(78)    0.00(70)    0.00(72)    0.00(69)    
+DCMut+G        0.00(79)    0.00(79)    0.00(78)    0.00(79)    0.00(71)    0.00(73)    0.00(70)    
+MtMam+G+F      0.00(80)    0.00(82)    0.00(82)    0.00(82)    0.00(86)    0.00(86)    0.00(86)    
+Dayhoff+I+G    0.00(81)    0.00(80)    0.00(79)    0.00(80)    0.00(73)    0.00(75)    0.00(72)    
+DCMut+I+G      0.00(82)    0.00(81)    0.00(80)    0.00(81)    0.00(74)    0.00(76)    0.00(73)    
+MtMam+I+G+F    0.00(83)    0.00(83)    0.00(83)    0.00(83)    0.00(90)    0.00(90)    0.00(91)    
+HIVw+G+F       0.00(84)    0.00(84)    0.00(86)    0.00(84)    0.00(89)    0.00(89)    0.00(89)    
+DCMut+F        0.00(85)    0.00(85)    0.00(84)    0.00(85)    0.00(87)    0.00(87)    0.00(87)    
+Dayhoff+F      0.00(86)    0.00(86)    0.00(85)    0.00(86)    0.00(88)    0.00(88)    0.00(88)    
+HIVw+I+G+F     0.00(87)    0.00(87)    0.00(87)    0.00(87)    0.00(93)    0.00(92)    0.00(93)    
+VT+F           0.00(88)    0.00(88)    0.00(91)    0.00(88)    0.00(91)    0.00(91)    0.00(92)    
+Dayhoff+I      0.00(89)    0.00(89)    0.00(88)    0.00(89)    0.00(78)    0.00(79)    0.00(78)    
+DCMut+I        0.00(90)    0.00(90)    0.00(89)    0.00(90)    0.00(79)    0.00(80)    0.00(79)    
+JTT            0.00(91)    0.00(91)    0.00(90)    0.00(91)    0.00(77)    0.00(78)    0.00(77)    
+VT             0.00(92)    0.00(92)    0.00(92)    0.00(92)    0.00(83)    0.00(84)    0.00(83)    
+FLU+F          0.00(93)    0.00(93)    0.00(93)    0.00(93)    0.00(95)    0.00(95)    0.00(95)    
+HIVb+F         0.00(94)    0.00(94)    0.00(94)    0.00(94)    0.00(100)   0.00(97)    0.00(100)   
+MtREV+F        0.00(95)    0.00(95)    0.00(95)    0.00(95)    0.00(101)   0.00(100)   0.00(102)   
+HIVw+I+F       0.00(96)    0.00(96)    0.00(96)    0.00(96)    0.00(105)   0.00(103)   0.00(106)   
+MtMam+I+F      0.00(97)    0.00(97)    0.00(98)    0.00(97)    0.00(107)   0.00(106)   0.00(107)   
+FLU            0.00(98)    0.00(98)    0.00(97)    0.00(98)    0.00(92)    0.00(93)    0.00(90)    
+HIVb           0.00(99)    0.00(99)    0.00(99)    0.00(99)    0.00(94)    0.00(94)    0.00(94)    
+MtArt+G        0.00(100)   0.00(100)   0.00(100)   0.00(100)   0.00(96)    0.00(96)    0.00(96)    
+MtArt+I+G      0.00(101)   0.00(101)   0.00(101)   0.00(101)   0.00(99)    0.00(101)   0.00(99)    
+DCMut          0.00(102)   0.00(102)   0.00(102)   0.00(102)   0.00(97)    0.00(98)    0.00(97)    
+Dayhoff        0.00(103)   0.00(103)   0.00(103)   0.00(103)   0.00(98)    0.00(99)    0.00(98)    
+HIVw+G         0.00(104)   0.00(104)   0.00(104)   0.00(104)   0.00(102)   0.00(102)   0.00(101)   
+HIVw+I+G       0.00(105)   0.00(105)   0.00(105)   0.00(105)   0.00(103)   0.00(104)   0.00(103)   
+MtArt+F        0.00(106)   0.00(107)   0.00(108)   0.00(107)   0.00(109)   0.00(109)   0.00(110)   
+MtREV+G        0.00(107)   0.00(106)   0.00(106)   0.00(106)   0.00(104)   0.00(105)   0.00(104)   
+MtREV+I+G      0.00(108)   0.00(108)   0.00(107)   0.00(108)   0.00(106)   0.00(107)   0.00(105)   
+MtREV+I        0.00(109)   0.00(109)   0.00(109)   0.00(109)   0.00(108)   0.00(108)   0.00(108)   
+HIVw+I         0.00(110)   0.00(110)   0.00(110)   0.00(110)   0.00(110)   0.00(110)   0.00(109)   
+HIVw+F         0.00(111)   0.00(113)   0.00(114)   0.00(112)   0.00(114)   0.00(114)   0.00(114)   
+MtMam+G        0.00(112)   0.00(111)   0.00(111)   0.00(111)   0.00(111)   0.00(111)   0.00(111)   
+MtArt+I        0.00(113)   0.00(112)   0.00(112)   0.00(113)   0.00(112)   0.00(112)   0.00(112)   
+MtMam+I+G      0.00(114)   0.00(114)   0.00(113)   0.00(114)   0.00(113)   0.00(113)   0.00(113)   
+MtMam+F        0.00(115)   0.00(115)   0.00(115)   0.00(115)   0.00(116)   0.00(116)   0.00(116)   
+MtREV          0.00(116)   0.00(116)   0.00(116)   0.00(116)   0.00(115)   0.00(115)   0.00(115)   
+MtMam+I        0.00(117)   0.00(117)   0.00(117)   0.00(117)   0.00(117)   0.00(117)   0.00(117)   
+HIVw           0.00(118)   0.00(118)   0.00(118)   0.00(118)   0.00(118)   0.00(118)   0.00(118)   
+MtArt          0.00(119)   0.00(119)   0.00(119)   0.00(119)   0.00(119)   0.00(119)   0.00(119)   
+MtMam          0.00(120)   0.00(120)   0.00(120)   0.00(120)   0.00(120)   0.00(120)   0.00(120)   
+----------------------------------------------------------------------------------------------------
+Relative importance of
+parameters     AIC         AICc-1      AICc-2      AICc-3      BIC-1       BIC-2       BIC-3
++G             0.73        0.77        0.79        0.76        0.95        0.94        0.95        
++I             0.00        0.00        0.00        0.00        0.00        0.00        0.00        
++I+G           0.27        0.23        0.21        0.24        0.05        0.06        0.05        
++F             1.00        1.00        1.00        1.00        0.00        0.00        0.00        
+----------------------------------------------------------------------------------------------------
+Model-averaged estimate of
+parameters     AIC         AICc-1      AICc-2      AICc-3      BIC-1       BIC-2       BIC-3
+alpha (+G)     0.79        0.79        0.79        0.79        0.82        0.82        0.82        
+p-inv (+I)     0.28        0.28        0.28        0.28        0.28        0.28        0.28        
+alpha (+I+G)   0.88        0.88        0.88        0.88        1.04        1.04        1.04        
+p-inv (+I+G)   0.04        0.04        0.04        0.04        0.08        0.08        0.08        
+----------------------------------------------------------------------------------------------------
+AIC   : Akaike Information Criterion framework.
+AICc-x: Second-Order Akaike framework.
+BIC-x : Bayesian Information Criterion framework.
+AICc/BIC-1: sample size as: number of sites in the alignment                           (390.0)
+AICc/BIC-2: sample size as: Sum of position's Shannon Entropy over the whole alignment (243.9)
+AICc/BIC-3: sample size as: align. length x num sequences x averaged (0-1)Sh. Entropy  (451.5)
+----------------------------------------------------------------------------------------------------
+
