@@ -79,7 +79,7 @@ optim.br.add.emp <- function(data,tree,new.ext,new.splits,sumsplits,el=NULL,meth
     result = -pml(tree=tree,data=data,...)$logLik
     return(result)
   }
-  lower=rep(0,2)
+  lower=rep(1e-08,2)
   upper=c(Inf,sumsplits)
   #options for optimizer
   opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps,

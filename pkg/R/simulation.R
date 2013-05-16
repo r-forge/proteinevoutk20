@@ -296,7 +296,7 @@ sim.info <- function(sim,opaa,obsaa,s=1,beta=be,gamma=ga){
   l <- dim(sim)[2]-2
   fty <- apply(sim[,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
   dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=obsaa,DisMat=dismat)#distance from optimal amino acids
-  dis <- apply(dis,2,mean)#average distance for all sites
+  dis <- -apply(dis,2,mean)#average distance for all sites
   ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
   disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
   return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
