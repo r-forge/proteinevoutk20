@@ -2,8 +2,8 @@
 gene = 1 #change this to run analysis on other genes
 datafile <- paste("~/BackupProEvo/Newton/rokas/prunetree/rootEqm/gene",gene,".RData",sep="") #RData file to load, pruning analysis
 simDatafile <- paste("gene",gene,".RData",sep="")
-pdffile <- paste("~/proteinevoutk20/pkg/Plot/prunetree/sim_gene",gene,".pdf",sep="") #file where the plots are saved
-#pdf(pdffile)
+pdffile <- paste("gene",gene,".pdf",sep="") #file where the plots are saved
+pdf(pdffile)
 load(datafile)
 source("~/proteinevoutk20/pkg/R/main.R") #resouce the files in case there are changes after *.RData file was generated
 source("~/proteinevoutk20/pkg/R/simulation.R")
@@ -12,7 +12,7 @@ obs.seq <- obs.data["Smik",] #the one sequence at the deleted tip
 model <- best_emp_model$model #arguments in the model
 #######################################################################
 ## do simulations on the regrafted branch, under both new model and the best empirical model
-nsim <- 20
+nsim <- 200
 ##simulation under both models, starting from ancestral states inferred from both models
 ## sim_emp_new: start from emp model result and do simulation under new model
 sim <- vector(mode="list")
@@ -113,13 +113,13 @@ for(i in 1:nsim){
   plot(sim_info$emp_emp[[i]]$disfun,pch=20,do.points=FALSE,add=TRUE)
   plot(sim_info$emp_new[[i]]$disfun,pch=20,do.points=FALSE,col="red",add=TRUE)
 }
-
+dev.off()
 ###############################################################
 ## start from optimal amino acid sequence 
-par(mfrow=c(1,1))
-sim_t <- 1
+# par(mfrow=c(1,1))
+sim_t <- 100
 
-sites <- c(0,seq(10,length(index_p),by=100))
+sites <- c(0,seq(10,length(index_p),by=30))
 nsites <- length(sites)
 #nsites <- 2
 sim_op <- vector(mode="list")
@@ -148,8 +148,9 @@ for(i in 1:nsites){
   plot(sim_op_info$new[[i]]$ftyfun,pch=20,do.points=FALSE,col="red",add=TRUE)
 }
 abline(h=ftny.vec,col="blue")
-dev.off()
-save(sim,sim_info,sim_op,sim_op_info,p1,p2,file=simDatafile)
+abline(h=ftny.eqm,col="green")
+
+save.image(file=simDatafile,compress=TRUE)
 ###############################################################
 ## find out which one of the gene was not run, whose .RData files don't exist
 # for(i in 1:106){
