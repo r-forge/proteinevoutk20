@@ -451,6 +451,22 @@ Ftny_protein <- function(protein,protein_op,s,DisMat){
   d <- pchem_d(protein,protein_op,DisMat)
   return(Ftny(d,s))
 }
+# harmonic.mean of a vector of numbers
+harmonic.mean <- function(x){
+  return(1/mean(1/x))
+}
+## find the equilibrium functionality, given opaa, ancestral prob matirx, s and dismat
+eqm_ftny <- function(opaa,ancestral,s,DisMat,index=NULL){
+  site.eqm <- function(op,prob,s,DisMat){
+    ft <- sapply(1:20,FUN=Ftny_protein,protein_op=op,s=s,DisMat=DisMat)
+    return(sum(ft*prob))
+  }
+  ancestral <- lapply(1:dim(ancestral)[2],function(x) ancestral[,x])
+  fty.vec <- mapply(site.eqm,opaa,ancestral,MoreArgs=list(s=s,DisMat=DisMat))
+  if(!is.null(index))
+    fty.vec <- fty.vec[index]
+  return(harmonic.mean(fty.vec))
+}
 
 #fixation probability, since we consider only site by site, so n=1
 #d1, d2: distances (vectors)
