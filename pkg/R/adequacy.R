@@ -3,7 +3,7 @@ gene = 1 #change this to run analysis on other genes
 datafile <- paste("~/BackupProEvo/Newton/rokas/prunetree/rootEqm/gene",gene,".RData",sep="") #RData file to load, pruning analysis
 simDatafile <- paste("gene",gene,".RData",sep="")
 pdffile <- paste("~/proteinevoutk20/pkg/Plot/prunetree/sim_gene",gene,".pdf",sep="") #file where the plots are saved
-pdf(pdffile)
+#pdf(pdffile)
 load(datafile)
 source("~/proteinevoutk20/pkg/R/main.R") #resouce the files in case there are changes after *.RData file was generated
 source("~/proteinevoutk20/pkg/R/simulation.R")
@@ -109,9 +109,10 @@ for(i in 1:nsim){
 ###############################################################
 ## start from optimal amino acid sequence 
 par(mfrow=c(1,1))
-sim_t <- 150
+sim_t <- 10
 
-sites <- c(0,seq(10,length(index_p),by=50))
+#sites <- c(0,seq(10,length(index_p),by=50))
+sites <- 0
 sim_op_new <- vector(mode="list",length=length(sites))
 sim_op_new_info <- sim_op_new
 sim_op_emp <- sim_op_new
