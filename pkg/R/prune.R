@@ -164,13 +164,11 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
   # for every site, set the observed state to be i, and then loop through all the 20 states
   aa <- tolower(AA)
   state_i <- function(x){
-    tip_ind <- which(dimnames(data.char)[[1]]==dtip)
-    datai.char <- data.char #pruned data
-    datai.char[tip_ind,] <- rep(aa[x],dim(data.char)[2])
-    datai<- phyDat(datai.char,type="AA")
-    index <- attr(datai,"index")
+    datai <- data_p #pruned data
+    datai$add <- as.integer(rep(x,nr)) #add the pruned tip back
+    names(datai)[length(datai)] <- dtip #change the name back
     ll_i <- mllm1(datai,tree1,Qall=Qall,opaa=opaa_p,bfaa=bfaa,ancestral=ancestral)$ll$sitelik #ll for all sites
-    return(ll_i[index])
+    return(ll_i[index_p])
   }
   sitell <- sapply(1:20,state_i) #loop through all states and put results together in a matrix
   siteprob <- exp(sitell)
