@@ -1,5 +1,5 @@
 #######################################################################
-gene = 1 #change this to run analysis on other genes
+gene = 3 #change this to run analysis on other genes
 datafile <- paste("~/BackupProEvo/Newton/rokas/prunetree/rootEqm/gene",gene,".RData",sep="") #RData file to load, pruning analysis
 simDatafile <- paste("gene",gene,".RData",sep="")
 pdffile <- paste("gene",gene,".pdf",sep="") #file where the plots are saved
@@ -117,38 +117,38 @@ dev.off()
 ###############################################################
 ## start from optimal amino acid sequence 
 # par(mfrow=c(1,1))
-sim_t <- 100
-
-sites <- c(0,seq(10,length(index_p),by=30))
-nsites <- length(sites)
-#nsites <- 2
-sim_op <- vector(mode="list")
-sim_op$new <- vector(mode="list",length=nsites)
-sim_op$emp <- vector(mode="list",length=nsites)
-sim_op_info <- sim_op
-
-for(i in 1:nsites){
-  change_ind <- sample(1:length(index_p),sites[i],replace=FALSE)
-  change_aa <- sample(20,size=sites[i],replace=TRUE)
-  start_aa <- opaa
-  start_aa[change_ind] <- change_aa
-  print(Ftny_protein(protein=start_aa,protein_op=opaa,s=s,DisMat=dismat))
-  sim_op$new[[i]] <- simulation(protein=start_aa,protein_op=opaa,t=sim_t,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
-  sim_op$emp[[i]] <- simAA(rootseq=start_aa,t=sim_t,bf=bf,inv=inv,rate=shape,k=k,model=model[1])
-  sim_op_info$new[[i]] <- sim.info(sim_op$new[[i]],opaa=opaa,obsaa=obs.seq,
-                                   s=s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
-  sim_op_info$emp[[i]] <- sim.info(sim_op$emp[[i]]$seq,opaa=opaa,obsaa=obs.seq,
-                                   s=s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
-}
-plot(sim_op_info$new[[1]]$ftyfun,xlab="time",ylab="functionality",
-     main=paste("gene ",gene,", s=",round(s,2),sep=""),xlim=c(0,sim_t),ylim=c(0,1),
-     pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE,col="red")
-for(i in 1:nsites){
-  plot(sim_op_info$emp[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE)
-  plot(sim_op_info$new[[i]]$ftyfun,pch=20,do.points=FALSE,col="red",add=TRUE)
-}
-abline(h=ftny.vec,col="blue")
-abline(h=ftny.eqm,col="green")
+# sim_t <- 100
+# 
+# sites <- c(0,seq(10,length(index_p),by=30))
+# nsites <- length(sites)
+# #nsites <- 2
+# sim_op <- vector(mode="list")
+# sim_op$new <- vector(mode="list",length=nsites)
+# sim_op$emp <- vector(mode="list",length=nsites)
+# sim_op_info <- sim_op
+# 
+# for(i in 1:nsites){
+#   change_ind <- sample(1:length(index_p),sites[i],replace=FALSE)
+#   change_aa <- sample(20,size=sites[i],replace=TRUE)
+#   start_aa <- opaa
+#   start_aa[change_ind] <- change_aa
+#   print(Ftny_protein(protein=start_aa,protein_op=opaa,s=s,DisMat=dismat))
+#   sim_op$new[[i]] <- simulation(protein=start_aa,protein_op=opaa,t=sim_t,s=s,DisMat=dismat,MuMat=mumat,bfaa=bf)
+#   sim_op$emp[[i]] <- simAA(rootseq=start_aa,t=sim_t,bf=bf,inv=inv,rate=shape,k=k,model=model[1])
+#   sim_op_info$new[[i]] <- sim.info(sim_op$new[[i]],opaa=opaa,obsaa=obs.seq,
+#                                    s=s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
+#   sim_op_info$emp[[i]] <- sim.info(sim_op$emp[[i]]$seq,opaa=opaa,obsaa=obs.seq,
+#                                    s=s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
+# }
+# plot(sim_op_info$new[[1]]$ftyfun,xlab="time",ylab="functionality",
+#      main=paste("gene ",gene,", s=",round(s,2),sep=""),xlim=c(0,sim_t),ylim=c(0,1),
+#      pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE,col="red")
+# for(i in 1:nsites){
+#   plot(sim_op_info$emp[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE)
+#   plot(sim_op_info$new[[i]]$ftyfun,pch=20,do.points=FALSE,col="red",add=TRUE)
+# }
+# abline(h=ftny.vec,col="blue")
+# abline(h=ftny.eqm,col="green")
 
 save.image(file=simDatafile,compress=TRUE)
 ###############################################################

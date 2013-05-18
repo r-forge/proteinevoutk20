@@ -151,7 +151,7 @@ simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NU
   
   if(is.null(rootseq)){
     rootseq = rep(0,l) #root sequence
-    bfall = lapply(1:m,function(i) expm(matall[[i]]*100)[1,]) # all the bf vectors
+    bfall = lapply(1:m,function(i) eqmQ(matall[[i]])) # all the bf vectors
     ## figure out the starting sequence
     for(i in 1:m){
       index = which(protein_op==i)
@@ -301,6 +301,7 @@ sim.info <- function(sim,opaa,obsaa,s=1,beta=be,gamma=ga){
   disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
   return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
 }
+
 ## find the range of the functionalities from a list of objects from sim.info
 ftyrange <- function(sim_info){
   res <- NULL
@@ -314,24 +315,6 @@ disrange <- function(sim_info){
   res <- c(min(res[1,]),max(res[2,]))
   return(res)
 }
-#plot(siminfo$ftyfun,xlab="time",ylab="functionality",main=paste("functionality, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i")
-#plot(siminfo[[1]]$disfun,xlab="time",ylab="distance",main=paste("distance, s=",round(s,3),sep=""),pch=20,xlim=c(0,t),xaxs="i")
-##################################################################################################
-## wrapper for seq-gen (seq-gen already installed on the computer)
-## opts is the string of options one would use in the command "seq-gen"
-## opts: [-m MODEL] [-l LENGTH] [-n NUM OF DATASETS] [-p NUM OF PARTITIONS] [-s BRANCH LENGTH SCALING] [-d TOTAL TREE SCALE]
-## [-k ANCESTRAL SEQUENCE] [-c RATES FOR CODON POSITION HETEROGENEITY, 3 numbers] [-a SHAPE OF GAMMA DISN] [-g GAMMA CATEGORIES] 
-## [-i PROPORTION OF INVARIANT SITES] [-t TRANSITION TRANSVERSION RATIO] [-r general rate matrix, 6 numbers][-f e BASE FREQUENCIES]
-## [-z SEED FOR RANDOM NUMBER GENERATOR] [-o prn OUTPUT FILE FORMAT: phylip/relaxed phylip/nexus]
-## [-w ar WRITE ADDITIONAL INFO: ancestral seq/rate for each site] [-q QUIET]
-##################################################################################################
-# seq_gen <- function(opts, inputfile, outputfile){
-#   command <- paste("seq-gen", opts,"<",inputfile, ">",outputfile,sep=" ")
-#   system(command)
-# }
-## opts <- "-mWAG -l144 -a3.514 -i0.193 -f0.03559028,0.05121528,0.02777778,0.01649306,0.01388889,0.03472222,0.05121528,0.06944444,0.02777778,0.09375000,0.14409722,0.05034722,0.01909722,0.05815972,0.02864583,0.07552083,0.04687500,0.02343750,0.04600694,0.08593750 -on -war"
-## seq_gen(opts,"gene7.tree","gene7sim.txt")
-
 
 getModelAA <- function(model, bf=TRUE, Q=TRUE){                                                                     
   model <- match.arg(eval(model),get(".aamodels",environment(pml)))

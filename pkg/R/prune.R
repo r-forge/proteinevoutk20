@@ -75,11 +75,11 @@ optim.br.add.emp <- function(data,tree,new.ext,new.splits,sumsplits,el=NULL,meth
     tree$edge.length[new.ext] = ab[1]
     tree$edge.length[new.splits[1]] = ab[2]
     tree$edge.length[new.splits[2]] = sumsplits - ab[2]
-    #print(tree$edge.length)
+    print(tree$edge.length)
     result = -pml(tree=tree,data=data,...)$logLik
     return(result)
   }
-  lower=rep(1e-08,2)
+  lower=rep(0,2)
   upper=c(Inf,sumsplits)
   #options for optimizer
   opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps,
@@ -230,7 +230,7 @@ prune_emp <- function(filename,dtip,tree,model,range=NULL){
   brlen <- br$solution[1]  # length of the re-grafted branch
   tree1 <- tree #tree with regrafted branch length 0
   tree1$edge.length[new.ext] <- 0 #make that branch 0
-  tree1$edge.length[tree1$edge.length<1e-8] <- 1e-8
+  #tree1$edge.length[tree1$edge.length<1e-8] <- 1e-8
   
   nr <- attr(data_p,"nr") #number of different patterns in 7-tip data
   # for site i, find the probability (likelihood) of all 20 states at that site
