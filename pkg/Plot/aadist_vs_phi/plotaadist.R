@@ -1,4 +1,4 @@
-setwd("/Users/bomeara/Documents/MyDocuments/Active/proteinevoutk20/pkg/Plot/aadist_vs_phi")
+setwd("~/proteinevoutk20/pkg/Plot/aadist_vs_phi")
 data<-read.table("rokas_data_frame.txt", stringsAsFactors=F)
 data<-data[-which(is.na(data[,2])),]
 data<-data[-which(is.na(data[,4])),]
@@ -41,3 +41,4 @@ PlotUsVsWag<-function(data) {
 }
 
 PlotUsVsWag(data)
+#PlotVsExpression(data)
