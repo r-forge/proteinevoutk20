@@ -75,14 +75,15 @@ optim.br.add.emp <- function(data,tree,new.ext,new.splits,sumsplits,el=NULL,meth
     tree$edge.length[new.ext] = ab[1]
     tree$edge.length[new.splits[1]] = ab[2]
     tree$edge.length[new.splits[2]] = sumsplits - ab[2]
-    print(tree$edge.length)
+    #print(tree$edge.length)
     result = -pml(tree=tree,data=data,...)$logLik
     return(result)
   }
   lower=rep(0,2)
   upper=c(Inf,sumsplits)
   #options for optimizer
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps,
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,maxtime=200,
+               "xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps,
                "stopval"=-Inf,"print_level"=print_level)
   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
   #print(res)
