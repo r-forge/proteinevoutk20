@@ -140,15 +140,16 @@ dev.off()
 #   sim_op_info$emp[[i]] <- sim.info(sim_op$emp[[i]]$seq,opaa=opaa,obsaa=obs.seq,
 #                                    s=s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
 # }
-# plot(sim_op_info$new[[1]]$ftyfun,xlab="time",ylab="functionality",
-#      main=paste("gene ",gene,", s=",round(s,2),sep=""),xlim=c(0,sim_t),ylim=c(0,1),
-#      pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE,col="red")
-# for(i in 1:nsites){
-#   plot(sim_op_info$emp[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE)
-#   plot(sim_op_info$new[[i]]$ftyfun,pch=20,do.points=FALSE,col="red",add=TRUE)
-# }
-# abline(h=ftny.vec,col="blue")
-# abline(h=ftny.eqm,col="green")
+plot_t <- 10
+plot(sim_op_info$new[[1]]$ftyfun,xlab="time",ylab="functionality",
+     main=paste("gene ",gene,", s=",round(s,2),sep=""),xlim=c(0,plot_t),ylim=c(0,1),
+     pch=20,do.points=FALSE,xaxs="i",frame.plot=FALSE,col="red")
+for(i in 1:nsites){
+  plot(sim_op_info$emp[[i]]$ftyfun,pch=20,do.points=FALSE,add=TRUE)
+  plot(sim_op_info$new[[i]]$ftyfun,pch=20,do.points=FALSE,col="red",add=TRUE)
+}
+abline(h=ftny.vec,col="blue")
+abline(h=ftny.eqm,col="green")
 
 save.image(file=simDatafile,compress=TRUE)
 ###############################################################

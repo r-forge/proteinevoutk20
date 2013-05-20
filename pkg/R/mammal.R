@@ -1,20 +1,20 @@
 source("~/proteinevoutk20/pkg/R/prune.R")
-gene = 2
+gene = 3
 fastafile <- "~/proteinevoutk20/pkg/Data/mammals/mam15.fasta"
 load("~/proteinevoutk20/pkg/Data/mammals/charset.RData") 
 mamtree <- read.nexus("~/proteinevoutk20/pkg/Data/mammals/T15taxa.nex")
 prottestfile <- paste("~/proteinevoutk20/pkg/Result/Prottest/mammal/mam15_",gene,"_prottest.txt",sep="")
 RDatafile <- paste("gene",gene,".RData",sep="")
 best_emp_model <- get_best_model(prottestfile)
-dtip = 2
+dtip = 8 #"Ceratotherium_simum"
 p2 <- prune_emp(fastafile,dtip,mamtree,best_emp_model$model,range=charset[[gene]])
 p2$brlen
-# brlen <- NULL
-# for(i in 1:15){
-#   dtip = i
-#   p2 <- prune_emp(fastafile,dtip,mamtree,best_emp_model$model,range=charset[[gene]])
-#   brlen <- c(brlen,p2$brlen)
-# }
+brlen <- NULL
+for(i in 1:15){
+  dtip = i
+  p2 <- prune_emp(fastafile,dtip,mamtree,best_emp_model$model,range=charset[[gene]])
+  brlen <- c(brlen,p2$brlen)
+}
 p1 <- prune_new(fastafile,dtip,mamtree,ancestral="eqm",range=charset[[gene]])
 
 # save.image(RDatafile,compress=TRUE)
