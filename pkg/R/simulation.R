@@ -1,4 +1,3 @@
-#source("~/proteinevoutk20/pkg/R/getAAmodels.R")
 ########################################################################################################
 # find the Gramma rates given the shape parameter and number of categories
 discrete.gamma <- function (alpha, k) 
@@ -33,7 +32,7 @@ bfAll <- function(s,beta,gamma,GTRvec,opfreq,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   }
   matall = lapply(1:20,fn)
 
-  bfall = sapply(1:20,function(i) expm(matall[[i]]*100)[1,]) # all the bf vectors
+  bfall = sapply(1:20,function(i) eqmQ(matall[[i]])) # all the bf vectors, equilibrium frequencies
   bf = bfall * rep(opfreq,each=20)
   freq = apply(bf,1,sum)
   freq = freq / sum(freq)
@@ -125,7 +124,8 @@ sim_op <- function(opaa, l, t,matall,C=2, Phi=0.5,q=4e-7, Ne=5e6){
 ##Simulation of protein sequences of length "l" on a phylogeny "tree", 
 ##given the ancestral sequence "rootseq", optimal amino acid sequence "protein_op",
 ##selection coefficient "s", here we consider s THE SAME ACROSS ALL THE SITES IN ONE GENE 
-simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NULL,bfaa=rep(1/20,20),
+simTree <- function(tree,protein_op,s=NULL,GTRvec=NULL,alpha=al,beta=be, gamma=ga,dismat = NULL,
+                    mumat=NULL,matall=NULL,bfaa=rep(1/20,20),
                     rootseq=NULL,C=2,Phi=0.5,q=4e-7, Ne=5e6){
   call = match.call()
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
@@ -138,21 +138,22 @@ simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NU
   root <- as.integer(parent[!match(parent, child, 0)][1]) #root node
 
   tl = tree$edge.length #lengths of the edges
-  m=20
+  sim.trace <- vector(mode="list",length=length(tl))
+  m=20 #number of amino acids
   l = length(protein_op) #number of sites
   res = matrix(NA, nNodes, l) #result to return, amino acid sequences at all nodes
-
-  GM=GM_cpv(GM_CPV,alpha,beta,gamma) #Distance matrix from new weights
-  if(is.null(mumat)){
-    mumat = aa_MuMat_form(GTRvec) #symmetric matrix for the mutation rate matrix, from the GTR matrix
-    #mumat = sym.to.Q(mumat,bfaa) #from symmetric matrix to rate matrix
+  ## get all the sub rate matrices when each amino acid is optimal
+  if(is.null(matall)){
+    if(is.null(dismat))
+      dismat=GM_cpv(GM_CPV,alpha,beta,gamma) #Distance matrix from new weights
+    if(is.null(mumat))
+      mumat = aa_MuMat_form(GTRvec) #symmetric matrix for the mutation rate matrix, from the GTR matrix
+    matall = rate_move_mat(s,dismat,mumat,bfaa,C,Phi,q,Ne) #all the sub rate matrix
   }
-  matall = rate_move_mat(s,GM,mumat,bfaa,C,Phi,q,Ne) #all the sub rate matrix
-  
+  ## if rootseq is not given, sample it from the matrices, use equilibrium frequencies
   if(is.null(rootseq)){
     rootseq = rep(0,l) #root sequence
     bfall = lapply(1:m,function(i) eqmQ(matall[[i]])) # all the bf vectors
-    ## figure out the starting sequence
     for(i in 1:m){
       index = which(protein_op==i)
       rootseq[index] = sample(1:m,length(index),replace=TRUE,prob=bfall[[i]])
@@ -165,6 +166,7 @@ simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NU
     ##simulation on this one branch
     sim_res = simulation1(res[from,],protein_op,tl[i],matall,C,Phi,q,Ne)
     res[to,] = as.numeric(tail(sim_res$path,1)[1:l])
+    sim.trace[[i]] <- sim_res
   }
   res = AA[res]
   res = matrix(res,ncol=l)
@@ -172,9 +174,69 @@ simTree <- function(tree,protein_op,s,GTRvec,alpha=al,beta=be, gamma=ga,mumat=NU
   label = c(tree$tip, as.character((k+1):nNodes))
   rownames(res)=label 
   res = res[ tree$tip, , drop=FALSE]
-  return(list(data=res,tree=tree,optimal=protein_op,rootseq=rootseq,s=s,Q=GTRvec,GMweights=c(alpha,beta,gamma),bfaa=bfaa,call=call))
+  return(list(data=res,trace=sim.trace,tree=tree,call=call))
 }
 #simTree(tree,5,protein_op=Protein_op[1:5],m=20,s=0.3,Nu_vec,al,be,ga,q=4e-7,Ne=5e6,Root[1:5])
+simTreeEmp <- function(tree,l=100,rootseq=NULL,Q=NULL,bf=NULL,inv=0,rate=1,k=1,model="USER"){
+  call = match.call()
+  if(!is.null(model)){
+    model <- match.arg(model,get(".aamodels",environment(pml)))
+    if(model!="USER") getModelAA(model,bf=is.null(bf),Q=is.null(Q))
+  }
+  m=20 #number of amino acids
+  if(is.null(bf)) bf = rep(1/m,m)
+  if(is.null(Q)) Q = rep(1,m*(m-1)/2)
+  
+  if(!is.binary.tree(tree)) stop("error: the input phylogeny is not binary tree!")
+  if (is.null(attr(tree, "order")) || attr(tree, "order") !="cladewise") 
+    tree <- ape:::reorder.phylo(tree,order = "cladewise")
+  edge = tree$edge #edges
+  nNodes = max(edge) #number of nodes in the tree
+  parent <- as.integer(edge[, 1]) #parents of the edges
+  child <- as.integer(edge[, 2]) #children of the edges
+  root <- as.integer(parent[!match(parent, child, 0)][1]) #root node
+  if(is.null(rootseq)) rootseq=sample(1:20,l,replace=TRUE,prob=bf)
+  
+  tl = tree$edge.length #lengths of the edges
+  sim.trace <- vector(mode="list",length=length(tl))
+
+  l = length(rootseq) #number of sites
+  res = matrix(NA, nNodes, l) #result to return, amino acid sequences at all nodes
+  res[root,] <- rootseq
+  for(i in 1:length(tl)){
+    from = parent[i] 
+    to = child[i]
+    ##simulation on this one branch
+    sim_res = simulationQ(protein=res[from,],t=tl[i],Q=Q,bf=bf,inv=inv,rate=rate,k=k)
+    res[to,] = as.numeric(tail(sim_res$seq,1)[1:l])
+    sim.trace[[i]] <- sim_res$seq
+  }
+  res = AA[res]
+  res = matrix(res,ncol=l)
+  k = length(tree$tip)
+  label = c(tree$tip, as.character((k+1):nNodes))
+  rownames(res)=label 
+  res = res[ tree$tip, , drop=FALSE]
+  return(list(data=res,trace=sim.trace,tree=tree,call=call))
+}
+#######################################################################
+## simulation along the tree, given data, best model and tree
+sim_emp <- function(data,best_emp_model){
+  nsites <- length(attr(data,"index"))
+  model <- best_emp_model$model
+  is.G <- "G" %in% model #gamma?
+  is.F <- "F" %in% model #empirical frequencies?
+  is.I <- "I" %in% model #invariant sites included?
+  bf = NULL
+  k = 1
+  shape = 1
+  if(is.F) bf=findBf2(data)
+  if(is.I) inv=best_emp_model$inv
+  if(is.G) {shape = best_emp_model$shape 
+            k=4}
+  sim.emp <- simTreeEmp(best_emp_model$tree,l=nsites,bf=bf,rate=shape,k=k,model=model[1])
+  return(sim.emp)
+}
 ##################################################################################################
 ## simulation under the empirical models
 ##################################################################################################
@@ -246,9 +308,8 @@ simAA <- function(l=100,rootseq=NULL,t=1,Q=NULL,bf=NULL,inv=0,rate=1,k=1,model="
 ##################################################################################################
 ## simulation under the new model and WAG model
 ##################################################################################################
-## Read the WAG matrix (lower triangular part)
-##WagMat <- scan("~/proteinevoutk20/pkg/Data/AAmodel/wag.txt",nlines=21)
-#Qwag <- mat_form_lowtriQ(Q=WagMat,bf=bfaa)
+## find the site likelihood given tree, data, and the lower triangular part of Q
+## only works for data of one site, with integers as states
 ll_site_lowQ <- function(tree,data,Q,bf=rep(1/20,20),g=1){
   ##If the given tree is not rooted and binary, then throw error and exit
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
@@ -285,21 +346,24 @@ ll_site_lowQ <- function(tree,data,Q,bf=rep(1/20,20),g=1){
       warning("numerical overflow",immediate.=TRUE)
   }
   return(probvec[root,])
-  #return(list(ll=max(probvec[root,]),root=which.max(probvec[root,]))) #with the corresponding root returned 
-  #return(max(probvec[root,])) #just the value
 }
 ##################################################################################################
 ## given the simulation sequences with times of transitions, find the functionalities of each protein 
 ## on the path, and the distance of them from the optimal aa, as well as the stepfunction formed by them
-sim.info <- function(sim,opaa,obsaa,s=1,beta=be,gamma=ga){
+## The simulated sequence data will have at least 2 sequences, that's when no site encounters
+## any substitution.
+sim.info <- function(sim,opaa,obsaa=NULL,s=1,beta=be,gamma=ga){
   dismat <- GM_cpv(GM_CPV,al,beta,gamma)
   l <- dim(sim)[2]-2
   fty <- apply(sim[,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
-  dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=obsaa,DisMat=dismat)#distance from optimal amino acids
-  dis <- -apply(dis,2,mean)#average distance for all sites
   ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
-  disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
-  return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
+  return(list(sim=sim,fty=fty,ftyfun=ftyfun))
+  if(!is.null(obsaa)){
+    dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=obsaa,DisMat=dismat)#distance from optimal amino acids
+    dis <- -apply(dis,2,mean)#average distance for all sites, opposite sign
+    disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
+    return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
+  }
 }
 
 ## find the range of the functionalities from a list of objects from sim.info

@@ -425,8 +425,14 @@ pchem_d <- function(protein1, protein2,DisMat){
   if(length(protein1)!=length(protein2)) #throw error if length of proteins are not the same
     stop("error: 2 proteins are of different lengths!")
   site_d <- function(k){
-    if(is.na(protein1[k])){
+    if((is.na(protein1[k])) & (!is.na(protein2[k]))){
       return(mean(DisMat[,protein2[k]]))
+    }
+    else if((is.na(protein2[k])) & (!is.na(protein1[k]))){
+      return(mean(DisMat[protein1[k],]))
+    }
+    else if((is.na(protein2[k])) & (!is.na(protein1[k]))){
+      return(mean(DisMat))
     }
     else
       return(DisMat[protein1[k],protein2[k]])

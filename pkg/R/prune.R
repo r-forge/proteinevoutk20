@@ -34,7 +34,9 @@ get_best_model <- function(filename){
     bmodel_p[1] <- "cpREV"
   else if(model == "MtMam")
     bmodel_p[1] <- "mtmam"
-  return(list(shape=best.shape[1],inv=best.inv[1],lnL=lnL[1],model=bmodel_p))
+  tree_line <- system(paste("grep ';' ",filename,sep=""),intern=TRUE)
+  tree <- read.tree(text = tree_line[1])
+  return(list(shape=best.shape[1],inv=best.inv[1],lnL=lnL[1],model=bmodel_p,tree=tree))
 }
 
 ##################################################################
