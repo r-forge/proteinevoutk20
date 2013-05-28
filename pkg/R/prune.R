@@ -129,7 +129,7 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
   }
   else{
     res_op <- optim.mllm1(res_p,optQ=T,optBranch=T,optsWeight=T,optOpw=FALSE,
-                          control=list(epsilon=1e-08,hmaxit=50,htrace=1,print_level=0,maxeval="100"),ancestral=ancestral)
+                          control=list(epsilon=1e-08,hmaxit=50,htrace=1,print_level=1,maxeval="100"),ancestral=ancestral)
     iter="200"
   }
   ## MLE for the parameters
