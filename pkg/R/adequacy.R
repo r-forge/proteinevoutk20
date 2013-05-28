@@ -1,7 +1,7 @@
 #######################################################################
 gene = 3 #change this to run analysis on other genes
 #datafile <- paste("~/BackupProEvo/Newton/rokas/prunetree/rootEqm/gene",gene,".RData",sep="") #RData file to load, pruning analysis
-datafile <- paste("~/BackupProEvo/Newton/mammal/prunetree/rootEqm/gene",gene,".RData",sep="") #RData file to load, pruning analysis
+datafile <- paste("~/BackupProEvo/Newton/mammal/prunetree/rootMax/gene",gene,".RData",sep="") #RData file to load, pruning analysis
 
 #simDatafile <- paste("gene",gene,".RData",sep="")
 #pdffile <- paste("gene",gene,".pdf",sep="") #file where the plots are saved
@@ -14,7 +14,7 @@ obs.seq <- obs.data[dtip,] #the one sequence at the deleted tip
 model <- best_emp_model$model #arguments in the model
 #######################################################################
 ## do simulations on the regrafted branch, under both new model and the best empirical model
-nsim <- 4
+nsim <- 10
 ##simulation under both models, starting from ancestral states inferred from both models
 ## sim_emp_new: start from emp model result and do simulation under new model
 sim <- vector(mode="list")

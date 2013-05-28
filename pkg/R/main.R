@@ -605,6 +605,13 @@ QAllaa1 <- function(fixall,MuMat,Ne=5e6){
 # result is of dimension length(g)*length(el). Therefore the transition probabilities on all branches
 # To parse an object from getPm, say P, do P[i,j][[1]], or P[[i,j]]
 # Q is a scaled matrix
+getPm1 <- function(el, Q, g){
+  eig = eigen(Q,FALSE)
+  eig$inv = solve.default(eig$vec)
+  res <- .Call("getPM",eig,as.integer(length(eig$values)),as.double(el),as.double(g),PACKAG="phangorn")
+  attr(res,"dim") <- c(length(g),length(el))
+  res
+}
 getPm <- function(el, Q, g){
   ell = length(el)
   gl = length(g)

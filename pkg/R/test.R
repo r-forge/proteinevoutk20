@@ -9,6 +9,7 @@ node <- tree$edge[, 1]
 edge <- tree$edge[, 2]
 m = length(edge) + 1
 
+
 el <- as.double(tree$edge.length)
 
 #    node = as.integer(node - nTips - 1L)                                                                                                                                        
