@@ -1,5 +1,5 @@
 #######################################################################
-gene = 3 #change this to run analysis on other genes
+gene = 49 #change this to run analysis on other genes
 #datafile <- paste("~/BackupProEvo/Newton/rokas/prunetree/rootEqm/gene",gene,".RData",sep="") #RData file to load, pruning analysis
 datafile <- paste("~/BackupProEvo/Newton/mammal/prunetree/rootMax/gene",gene,".RData",sep="") #RData file to load, pruning analysis
 
@@ -56,13 +56,13 @@ for(i in 1:nsim){
 
 ## gather information from the simulated sequences
 for(i in 1:nsim){
-  sim_info$emp_new[[i]] <- sim.info(sim$emp_new[[i]],opaa=opaa,obsaa=obs.seq,
+  sim_info$emp_new[[i]] <- sim.info(sim$emp_new[[i]]$path,opaa=opaa,obsaa=obs.seq,
                                     s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
-  sim_info$emp_emp[[i]] <- sim.info(sim$emp_emp[[i]]$seq,opaa=opaa,obsaa=obs.seq,
+  sim_info$emp_emp[[i]] <- sim.info(sim$emp_emp[[i]]$path,opaa=opaa,obsaa=obs.seq,
                                     s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
-  sim_info$new_new[[i]] <- sim.info(sim$new_new[[i]],opaa=opaa,obsaa=obs.seq,
+  sim_info$new_new[[i]] <- sim.info(sim$new_new[[i]]$path,opaa=opaa,obsaa=obs.seq,
                                     s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
-  sim_info$new_emp[[i]] <- sim.info(sim$new_emp[[i]]$seq,opaa=opaa,obsaa=obs.seq,
+  sim_info$new_emp[[i]] <- sim.info(sim$new_emp[[i]]$path,opaa=opaa,obsaa=obs.seq,
                                     s=p1$res$s,beta=p1$res$GMweights[2],gamma=p1$res$GMweights[3])
 }
 ########################################################################################
@@ -72,7 +72,7 @@ par(mfrow=c(2,2))
 
 ##functionalities
 ftyrangeall <- sapply(sim_info,ftyrange)
-ftylim <- c(min(ftyrangeall[1,]),max(ftyrangeall[2,],1))
+ftylim <- c(min(c(ftyrangeall[1,],obs.ftny)),max(c(ftyrangeall[2,],obs.ftny)))
 brlen <- max(brlen_emp,brlen_new)
 obs.ftny <- Ftny_protein(protein=obs.data[dtip,],protein_op=opaa,s=s,DisMat=dismat)
 ftny.vec <- apply(obs.data,MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)
