@@ -34,40 +34,19 @@ path_to_tip <- function(tree,i){
   }
   return(list(br.path=br.path,node.path=node.path))
 }
-## get functionality from simulated path, and the starting time of simulation (instead of default 0)
-sim.info.t <- function(sim,opaa,t=0,s=1,beta=be,gamma=ga){
-  dismat <- GM_cpv(GM_CPV,al,beta,gamma)
-  l <- dim(sim)[2]-2
-  steps <- dim(sim)[1]
-  if(steps >= 400)
-    steps <- seq(from=1,to=steps,by=steps %/% 200)
-  else
-    steps <- 1:steps
-  
-  if(length(steps) == 1)
-    fty <- Ftny_protein(sim[steps,1:l],protein_op=opaa,s=s,DisMat=dismat)
-  else
-    fty <- apply(sim[steps,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
-  time <- sim[steps,l+1]+t
-  #ftyfun <- stepfun(sim[-1,l+1]+t,fty,f=0,right=FALSE)#make step functions
-  return(list(fty=fty,t=time))
-  #return(list(sim=sim,fty=fty,ftyfun=ftyfun))
-}
 
-plot_trace <- function(sim,model="new",plottip=TRUE){
+plot_trace <- function(sim,plottip=TRUE){
   sim.trace <- sim$trace ## simulations on all the branches
+  l <- length(sim.trace) ## number of traces (branches)
   tree <- sim$tree ## tree on which the simulation is done
-  br.pos <- br_pos(tree)
-  if(model=="new")
-    sim_info <- lapply(1:14, function(x) sim.info.t(sim.trace[[x]]$path,opaa[index],t=br.pos[x,1],s=s,beta,gamma))
-  ## this one is for simulation under empirical model
-  else
-    sim_info <- lapply(1:dim(br.pos)[1], function(x) sim.info.t(sim.trace[[x]],opaa[index],t=br.pos[x,1],s=s,beta,gamma))
-  ftylim <- ftyrange(sim_info)
-  ntips <- length(tree$tip.label)
+  br.pos <- br_pos(tree) ##edges, with entries as the position of nodes
+  sim_info <- lapply(1:l, function(x) sim.info(sim.trace[[x]]$path,opaa=opaa[index],t=br.pos[x,1],s=s,beta=beta,gamma=gamma))
+  
+  ftylim <- ftyrange(sim_info) #range of the functionalities
+  ntips <- length(tree$tip.label) #number of tips
   par(mfrow=c(2,4))
   for(j in 1:ntips){
-    tip = tree$tip.label[j]
+    tip = tree$tip.label[j] #name of the tip
     obs.ftny <- ftny.vec[tip]
     pathj <- path_to_tip(tree,j)
     t <- max(br.pos[pathj$br.path])
