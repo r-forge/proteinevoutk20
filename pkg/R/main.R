@@ -623,6 +623,7 @@ getPm <- function(el, Q, g){
 #       cat("Q*el*g:","\n")
 #       print(Q*el[j]*g[i])
       res[[i,j]] = expm(Q*el[j]*g[i])
+      
     }
   }
   return(res)
@@ -971,11 +972,14 @@ optim.s.weight <- function(data, tree, s,beta,gamma, method="SBPLX",maxeval="50"
   fn = function(ab,data,tree){
     #ab <- exp(ab)
     #print(ab)
-    result = -mllm1(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], mumat=mumat,bfaa=bfaa, ...)$ll$loglik
-    return(result)
+    if(any(ab > 20)) return(10^5)
+    else{
+      result = -mllm1(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], mumat=mumat,bfaa=bfaa, ...)$ll$loglik
+      return(result)
+    }
   }
   lower <- rep(0,3)
-  upper <- rep(Inf,3)
+  upper <- rep(10,3)
   #options for optimizer
   opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
                "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
