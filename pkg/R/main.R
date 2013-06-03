@@ -741,6 +741,10 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, ancStates = NU
   return(list(result=result,ancestral=ancestral,ancStates=ancStates))
   #return(result)
 }
+
+# pml.ll <- function(tree,data,bf=NULL,Q=NULL,inv=0,k=1,shape=1,rate=1,model=NULL){
+#   
+# }
 # change the orders of the arguments in function ll3m so that mapply can be used later
 ll <- function(Q,ancestral,ancStates,data,tree,bf,g){
   ll3m(data,tree,bf,ancestral,ancStates,Q,g)
