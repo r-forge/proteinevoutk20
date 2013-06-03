@@ -42,7 +42,6 @@ bfAll <- function(s,beta,gamma,GTRvec,opfreq,C=2,Phi=0.5,q=4e-7,Ne=5e6){
 #Simulation. Given the starting protein and the optimal protein
 #t should be equal to expected number of substitutions
 simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2, Phi=0.5,q=4e-7, Ne=5e6){
-  start_protein <- protein
   l <- length(protein) #number of sites
   t_now <- 0 #time until the current step of simulation
   path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
@@ -74,15 +73,13 @@ simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2
   ##shift the third column up one step so that the waiting time is the time
   ## spent in the state in the first column
   path[,l+2] <- c(path[-1,l+2],NA)  
-  return(list(path=path,start_seq=start_protein,op_seq=protein_op, t=t))
-  path
+  return(list(path=path, t=t))
 }
 #simulation(c(1,2),c(3,4),1000,10,0.1,GM,mumat,indep=T)
 #mllm(data,tree,s,beta,gamma,Q=NULL,opw=NULL,bfnu=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
 
 ## similar to the previous function, instead of getting rate matrices form DisMat and MuMat, these are given as "matall"
 simulation1 <- function(protein,protein_op,t,matall,C=2, Phi=0.5,q=4e-7, Ne=5e6){
-  start_protein = protein
   l <- length(protein) #number of sites
   t_now <- 0 #time until the current step of simulation
   path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
@@ -113,7 +110,7 @@ simulation1 <- function(protein,protein_op,t,matall,C=2, Phi=0.5,q=4e-7, Ne=5e6)
   ##shift the third column up one step so that the waiting time is the time
   ## spent in the state in the first column
   path[,l+2] <- c(path[-1,l+2],NA)  
-  return(list(path=path,start_seq=start_protein,op_seq=protein_op, t=t))
+  return(list(path=path, t=t))
 }
 
 # simulation with length l, all optimal aa are the same, given by opaa.
@@ -210,8 +207,8 @@ simTreeEmp <- function(tree,l=100,rootseq=NULL,Q=NULL,bf=NULL,inv=0,rate=1,k=1,m
     to = child[i]
     ##simulation on this one branch
     sim_res = simulationQ(protein=res[from,],t=tl[i],Q=Q,bf=bf,inv=inv,rate=rate,k=k)
-    res[to,] = as.numeric(tail(sim_res$seq,1)[1:l])
-    sim.trace[[i]] <- sim_res$seq
+    res[to,] = as.numeric(tail(sim_res$path,1)[1:l])
+    sim.trace[[i]] <- sim_res
   }
   res = AA[res]
   res = matrix(res,ncol=l)
@@ -291,7 +288,7 @@ simulationQ <- function(protein,t,Q=NULL,bf=NULL,inv=0,rate=1,k=1){
     }
   }
   path[,l+2] <- c(path[-1,l+2],NA)  
-  return(list(path=path,start_seq=protein_var,t=t))
+  return(list(path=path,t=t))
 }
 ## simulation according to empirical models,l is the length of simulated sequence, rootseq is the starting sequence
 ## if none of Q and bf is specified, then they are got from the model
@@ -308,65 +305,77 @@ simAA <- function(l=100,rootseq=NULL,t=1,Q=NULL,bf=NULL,inv=0,rate=1,k=1,model="
   return(simulationQ(protein=rootseq,t=t,Q=Q,bf=bf,inv=inv,rate=rate,k=k))
 }
 ##################################################################################################
-## simulation under the new model and WAG model
+## likelihood of tree, given observed sequences, own code, for check
 ##################################################################################################
 ## find the site likelihood given tree, data, and the lower triangular part of Q
 ## only works for data of one site, with integers as states
-ll_site_lowQ <- function(tree,data,Q,bf=rep(1/20,20),g=1){
-  ##If the given tree is not rooted and binary, then throw error and exit
-  if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
-  m = 20
-  ##if the base frequencies are not specified, do a uniform distribution
-  if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
-  Qmat <- mat_form_lowtriQ(Q,bf,byrow=TRUE)
-  
-  tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
-  edge = tree$edge #edges
-  nNodes = max(edge) #number of nodes in the tree (including tips)
-  probvec = matrix(NA,nNodes,m) #probability of gettting different states at nodes that evolve to the current sequences
-  parent <- as.integer(edge[, 1]) #parents of the edges
-  child <- as.integer(edge[, 2]) #children of the edges
-  root <- as.integer(parent[!match(parent, child, 0)][1])  
-  tip <- as.integer(child[!match(child,parent,0)])
-  
-  init.tip <- function(x){ #initiate the vector for the tips, 1 for the tip state, 0 otherwise
-    vec <- rep(0,m)
-    vec[data[x]] <- 1
-    vec
-  }
-  probvec[1:length(tip),] <- t(sapply(1:length(tip),init.tip)) #all tips
-  tl = tree$edge.length #lengths of the edges
-  P <- getPm(tl,Qmat,1)
-  for(i in 1:tree$Nnode){ #for each interior node calculate the probability vector of observing 1 of 20 states
-    from = parent[2*i] #parents
-    to = child[(2*i-1):(2*i)] #direct descendents
-    v.left <- P[[1,2*i-1]]
-    v.right <- P[[1,2*i]]
-    probvec[from,] <- as.vector((v.left%*%probvec[to[1],])*(v.right%*%probvec[to[2],])) #pruning, vector form
-    check.sum <- sum(probvec[from,])
-    if(check.sum==0) #probability is very very low
-      warning("numerical overflow",immediate.=TRUE)
-  }
-  return(probvec[root,])
-}
+# ll_site_lowQ <- function(tree,data,Q,bf=rep(1/20,20),g=1){
+#   ##If the given tree is not rooted and binary, then throw error and exit
+#   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
+#   m = 20
+#   ##if the base frequencies are not specified, do a uniform distribution
+#   if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
+#   Qmat <- mat_form_lowtriQ(Q,bf,byrow=TRUE)
+#   
+#   tree <- ape:::reorder.phylo(tree,"p") #reorder the tree in pruningwise order
+#   edge = tree$edge #edges
+#   nNodes = max(edge) #number of nodes in the tree (including tips)
+#   probvec = matrix(NA,nNodes,m) #probability of gettting different states at nodes that evolve to the current sequences
+#   parent <- as.integer(edge[, 1]) #parents of the edges
+#   child <- as.integer(edge[, 2]) #children of the edges
+#   root <- as.integer(parent[!match(parent, child, 0)][1])  
+#   tip <- as.integer(child[!match(child,parent,0)])
+#   
+#   init.tip <- function(x){ #initiate the vector for the tips, 1 for the tip state, 0 otherwise
+#     vec <- rep(0,m)
+#     vec[data[x]] <- 1
+#     vec
+#   }
+#   probvec[1:length(tip),] <- t(sapply(1:length(tip),init.tip)) #all tips
+#   tl = tree$edge.length #lengths of the edges
+#   P <- getPm(tl,Qmat,1)
+#   for(i in 1:tree$Nnode){ #for each interior node calculate the probability vector of observing 1 of 20 states
+#     from = parent[2*i] #parents
+#     to = child[(2*i-1):(2*i)] #direct descendents
+#     v.left <- P[[1,2*i-1]]
+#     v.right <- P[[1,2*i]]
+#     probvec[from,] <- as.vector((v.left%*%probvec[to[1],])*(v.right%*%probvec[to[2],])) #pruning, vector form
+#     check.sum <- sum(probvec[from,])
+#     if(check.sum==0) #probability is very very low
+#       warning("numerical overflow",immediate.=TRUE)
+#   }
+#   return(probvec[root,])
+# }
 ##################################################################################################
 ## given the simulation sequences with times of transitions, find the functionalities of each protein 
 ## on the path, and the distance of them from the optimal aa, as well as the stepfunction formed by them
 ## The simulated sequence data will have at least 2 sequences, that's when no site encounters
-## any substitution.
-sim.info <- function(sim,opaa,obsaa=NULL,s=1,beta=be,gamma=ga){
+## any substitution. t: starting time of simulation
+sim.info <- function(sim,opaa,obsaa=NULL,t=0,s=1,beta=be,gamma=ga){
   dismat <- GM_cpv(GM_CPV,al,beta,gamma)
-  l <- dim(sim)[2]-2
-  fty <- apply(sim[,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
-  ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
+  l <- dim(sim)[2]-2 # number of sites
+  ### if there are too many steps, choose less than 200 to shorten the running time
+  steps <- dim(sim)[1]
+  if(steps >= 400)
+    steps <- seq(from=1,to=steps,by=steps %/% 200)
+  else
+    steps <- 1:steps
+  
+  if(length(steps) == 1)
+    fty <- Ftny_protein(sim[steps,1:l],protein_op=opaa,s=s,DisMat=dismat)
+  else
+    fty <- apply(sim[steps,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
+  time <- sim[steps,l+1]+t #time of each step
+  #ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
   if(!is.null(obsaa)){
     dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=obsaa,DisMat=dismat)#distance from optimal amino acids
     dis <- -apply(dis,2,mean)#average distance for all sites, opposite sign
-    disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
-    return(list(fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
+    #disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
+    # return(list(fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
+    return(list(fty=fty,dis=dis))
   }
   else
-    return(list(fty=fty,ftyfun=ftyfun))
+    return(list(fty=fty,t=time))
 }
 
 ## find the range of the functionalities from a list of objects from sim.info
