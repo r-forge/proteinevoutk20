@@ -1,8 +1,13 @@
 source("~/proteinevoutk20/pkg/R/prune.R") 
-gene = 1
-fastafile <- paste("~/proteinevoutk20/pkg/Data/Rokas/gene",gene,".fasta",sep="") 
-prottestfile <- paste("~/proteinevoutk20/pkg/Result/Prottest/Rokas/rokas_",gene,"_prottest.txt",sep="") 
-RDatafile <- paste("~/BackupProEvo/Newton/rokas/rootMax/gene",gene,".RData",sep="")
+
+gene = 6
+beetle <- seqinr::read.fasta("~/proteinevoutk20/pkg/Data/beetle/beetles.fasta")
+load("~/proteinevoutk20/pkg/Data/beetle/charset.RData") 
+beetree <- read.nexus("~/proteinevoutk20/pkg/Data/beetle/tree1.nex")
+fastafile = beetle
+prottestfile <- paste("~/proteinevoutk20/pkg/Result/Prottest/beetle/beetle34_",gene,"_prottest.txt",sep="")
+best_emp_model <- get_best_model(prottestfile)
+RDatafile <- paste("~/BackupProEvo/Newton/beetle/tree1/rootMax/gene",gene,".RData",sep="")
 imagefile <- paste("gene",gene,".RData",sep="") 
 best_emp_model <- get_best_model(prottestfile) 
 data = conv(fastafile,type="phyDat")

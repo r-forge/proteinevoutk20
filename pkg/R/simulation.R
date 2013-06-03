@@ -289,7 +289,7 @@ simulationQ <- function(protein,t,Q=NULL,bf=NULL,inv=0,rate=1,k=1){
     }
   }
   path[,l+2] <- c(path[-1,l+2],NA)  
-  return(list(seq=path,inv_site=inv_site))
+  return(list(path=path,start_seq=protein_var,t=t))
 }
 ## simulation according to empirical models,l is the length of simulated sequence, rootseq is the starting sequence
 ## if none of Q and bf is specified, then they are got from the model
@@ -361,26 +361,30 @@ sim.info <- function(sim,opaa,obsaa=NULL,s=1,beta=be,gamma=ga){
     dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=obsaa,DisMat=dismat)#distance from optimal amino acids
     dis <- -apply(dis,2,mean)#average distance for all sites, opposite sign
     disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
-    return(list(sim=sim,fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
+    return(list(fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
   }
   else
-    return(list(sim=sim,fty=fty,ftyfun=ftyfun))
+    return(list(fty=fty,ftyfun=ftyfun))
 }
 
 ## find the range of the functionalities from a list of objects from sim.info
+## uses $fty component
 ftyrange <- function(sim_info){
+  nsim <- length(sim_info)
   res <- NULL
   res <- cbind(sapply(1:nsim, function(x) range(sim_info[[x]]$fty)))
   res <- c(min(res[1,]),max(res[2,]))
   return(res)
 }
+## find the range of distance between observed sequence form a list of objs from sim.info
+## uses $dis component
 disrange <- function(sim_info){
   res <- NULL
   res <- cbind(sapply(1:nsim, function(x) range(sim_info[[x]]$dis)))
   res <- c(min(res[1,]),max(res[2,]))
   return(res)
 }
-
+## given amino acid model, assign sub matrix Q and base frequencies bf to parent frame
 getModelAA <- function(model, bf=TRUE, Q=TRUE){                                                                     
   model <- match.arg(eval(model),get(".aamodels",environment(pml)))
   tmp = get(paste(".", model, sep=""),environment(pml))
