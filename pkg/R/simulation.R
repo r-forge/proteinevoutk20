@@ -42,6 +42,7 @@ bfAll <- function(s,beta,gamma,GTRvec,opfreq,C=2,Phi=0.5,q=4e-7,Ne=5e6){
 #Simulation. Given the starting protein and the optimal protein
 #t should be equal to expected number of substitutions
 simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2, Phi=0.5,q=4e-7, Ne=5e6){
+  start_protein <- protein
   l <- length(protein) #number of sites
   t_now <- 0 #time until the current step of simulation
   path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
@@ -73,6 +74,7 @@ simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2
   ##shift the third column up one step so that the waiting time is the time
   ## spent in the state in the first column
   path[,l+2] <- c(path[-1,l+2],NA)  
+  return(list(path=path,start_seq=start_protein,op_seq=protein_op, t=t))
   path
 }
 #simulation(c(1,2),c(3,4),1000,10,0.1,GM,mumat,indep=T)

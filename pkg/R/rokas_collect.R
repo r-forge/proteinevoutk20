@@ -8,7 +8,7 @@ insertRow <- function(existingDF, newrow, r) {
 model_comp <- function(i){
   protTest_file <- paste("~/proteinevoutk20/pkg/Result/Prottest/Rokas/rokas",i,".txt",sep="")
   maxroot_file <- paste("~/BackupProEvo/Newton/rokas/rootMax/gene",i,".RData",sep="")
-  emproot_file <- paste("~/BackupProEvo/Newton/rokas/rootEmp/gene",i,".RData",sep="")
+  emproot_file <- paste("~/BackupProEvo/Newton/rokas/rootEmp/gene",i,"_s_weight.RData",sep="")
   oproot_file <- paste("~/BackupProEvo/Newton/rokas/rootOp/gene",i,".RData",sep="")
   eqmroot_file <- paste("~/BackupProEvo/Newton/rokas/rootEqm/gene",i,".RData",sep="")
   #### protTest result on empirical models
