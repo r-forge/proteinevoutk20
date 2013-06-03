@@ -14,7 +14,6 @@ library(nloptr) #optimization
 #library(Rmpfr)
 #library(ppso)
 ##################################################################
-test = TRUE
 #directory of the data need to read, including gene, tree, Grantham data
 datadir <- "~/proteinevoutk20/pkg/Data/"
 ##################################################################
@@ -24,12 +23,12 @@ datadir <- "~/proteinevoutk20/pkg/Data/"
 ##Model GTR, with Gamma rate distribution and invariable sites and etc
 ##Nuvec <-  c(2.94194,8.23705,1.39133,2.33991,14.86435,1.00000)
 ##Model GTR
-NU_VEC <- c(1.96575,4.08655,1.39431,1.46172,6.36024,1.00000)
-NU_VEC_JC <- rep(1.0,6)
-##empirical base frequencies
-BF <- c(0.31065,0.18365,0.20955,0.29615)
+# NU_VEC <- c(1.96575,4.08655,1.39431,1.46172,6.36024,1.00000)
+# NU_VEC_JC <- rep(1.0,6)
+# ##empirical base frequencies
+# BF <- c(0.31065,0.18365,0.20955,0.29615)
 ##Best tree with branch lengths output by PAUP
-ROKAS_TREE <- read.nexus(paste(datadir,"GTR.tre",sep=""))
+#ROKAS_TREE <- read.nexus(paste(datadir,"GTR.tre",sep=""))
 ##Read the properties of amino acids, including c(composition),p(polarity) and 
 ##v(molecular volume), save the data.frame
 GM_CPV <- read.csv(paste(datadir,"Grantham_cpv.csv",sep=""),header=TRUE, sep=",",row.names=1)
