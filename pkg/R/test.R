@@ -1,5 +1,5 @@
 rm(list=ls())
-gene = 60
+gene = 6
 RDatafile <- paste("~/BackupProEvo/Newton/rokas/simtree/gene",gene,".RData",sep="")
 load(RDatafile)
 source("~/proteinevoutk20/pkg/R/prune.R")
