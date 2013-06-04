@@ -368,11 +368,11 @@ sim.info <- function(sim,opaa,obsaa=NULL,t=0,s=1,beta=be,gamma=ga){
   time <- sim[steps,l+1]+t #time of each step
   #ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
   if(!is.null(obsaa)){
-    dis <- apply(sim[,1:l],MARGIN=1,FUN=pchem_d,protein2=obsaa,DisMat=dismat)#distance from optimal amino acids
+    dis <- apply(sim[steps,1:l],MARGIN=1,FUN=pchem_d,protein2=obsaa,DisMat=dismat)#distance from optimal amino acids
     dis <- -apply(dis,2,mean)#average distance for all sites, opposite sign
     #disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
     # return(list(fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
-    return(list(fty=fty,dis=dis))
+    return(list(fty=fty,dis=dis,t=time))
   }
   else
     return(list(fty=fty,t=time))
@@ -395,11 +395,10 @@ disrange <- function(sim_info){
   res <- c(min(res[1,]),max(res[2,]))
   return(res)
 }
-## given amino acid model, assign sub matrix Q and base frequencies bf to parent frame
-getModelAA <- function(model, bf=TRUE, Q=TRUE){                                                                     
+  ## given amino acid model, assign sub matrix Q and base frequencies bf to parent frame
+getModelAA <- function(model, bf=TRUE, Q=TRUE){
   model <- match.arg(eval(model),get(".aamodels",environment(pml)))
   tmp = get(paste(".", model, sep=""),environment(pml))
   if(Q) assign("Q", tmp$Q, envir=parent.frame())
   if(bf) assign("bf", tmp$bf, envir=parent.frame())
 }
-

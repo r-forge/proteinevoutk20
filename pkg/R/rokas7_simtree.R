@@ -1,4 +1,5 @@
 source("~/proteinevoutk20/pkg/R/prune.R") 
+source("~/proteinevoutk20/pkg/R/plot_simtree.R")
 gene = 1
 prottestfile <- paste("~/proteinevoutk20/pkg/Result/Prottest/Rokas7/rokas_",gene,"_prottest.txt",sep="") 
 RDatafile <- paste("~/BackupProEvo/Newton/rokas7/rootEqm/gene",gene,".RData",sep="")
