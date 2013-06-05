@@ -351,7 +351,7 @@ simAA <- function(l=100,rootseq=NULL,t=1,Q=NULL,bf=NULL,inv=0,rate=1,k=1,model="
 ## on the path, and the distance of them from the optimal aa, as well as the stepfunction formed by them
 ## The simulated sequence data will have at least 2 sequences, that's when no site encounters
 ## any substitution. t: starting time of simulation
-sim.info <- function(sim,opaa,obsaa=NULL,t=0,s=1,beta=be,gamma=ga){
+sim.info <- function(sim,opaa,obsaa=NULL,ratio=TRUE,t=0,s=1,beta=be,gamma=ga,fty=TRUE,dist=TRUE){
   dismat <- GM_cpv(GM_CPV,al,beta,gamma)
   l <- dim(sim)[2]-2 # number of sites
   ### if there are too many steps, choose less than 200 to shorten the running time
@@ -360,20 +360,28 @@ sim.info <- function(sim,opaa,obsaa=NULL,t=0,s=1,beta=be,gamma=ga){
     steps <- seq(from=1,to=steps,by=steps %/% 200)
   else
     steps <- 1:steps
-  
-  if(length(steps) == 1)
-    fty <- Ftny_protein(sim[steps,1:l],protein_op=opaa,s=s,DisMat=dismat)
-  else
-    fty <- apply(sim[steps,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
+  if(fty){
+    if(length(steps) == 1)
+      fty <- Ftny_protein(sim[steps,1:l],protein_op=opaa,s=s,DisMat=dismat)
+    else
+      fty <- apply(sim[steps,1:l],MARGIN=1,FUN=Ftny_protein,protein_op=opaa,s=s,DisMat=dismat)#functionality
+  }
   time <- sim[steps,l+1]+t #time of each step
   #ftyfun <- stepfun(sim[-1,l+1],fty,f=0,right=FALSE)#make step functions
-  if(!is.null(obsaa)){
-    dis <- apply(sim[steps,1:l],MARGIN=1,FUN=pchem_d,protein2=obsaa,DisMat=dismat)#distance from optimal amino acids
-    dis <- -apply(dis,2,mean)#average distance for all sites, opposite sign
-    #disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
-    # return(list(fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
-    return(list(fty=fty,dis=dis,t=time))
+  if((!is.null(obsaa))&&dist){
+    if(!ratio){
+      dis <- apply(sim[steps,1:l],MARGIN=1,FUN=pchem_d,protein2=obsaa,DisMat=dismat)#distance from optimal amino acids
+      dis <- -apply(dis,2,mean)#average distance for all sites, opposite sign
+      #disfun <- stepfun(sim[-1,l+1],dis,f=0,right=FALSE)
+      # return(list(fty=fty,dis=dis,ftyfun=ftyfun,disfun=disfun)) #store the simulation result for later use
+      return(list(fty=fty,dis=dis,t=time))
+    }
+    else{
+      dis <- sapply(steps, function(x) sum(sim[x,1:l]==obsaa)/l)
+      return(list(fty=fty,dis=dis,t=time))
+    }
   }
+    
   else
     return(list(fty=fty,t=time))
 }
