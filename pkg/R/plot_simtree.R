@@ -35,7 +35,7 @@ path_to_tip <- function(tree,i){
   return(list(br.path=br.path,node.path=node.path))
 }
 
-plot_trace <- function(sim,plottip=TRUE){
+plot_trace <- function(sim,ratio=TRUE,plotftny=TRUE,plotdis=FALSE,plottip=TRUE){
   sim.trace <- sim$trace ## simulations on all the branches
   l <- length(sim.trace) ## number of traces (branches)
   tree <- sim$tree ## tree on which the simulation is done
@@ -62,24 +62,28 @@ plot_trace <- function(sim,plottip=TRUE){
     }
     ########################################
     t <- max(br.pos[pathj$br.path,])
-    sim_info <- sim.info(sim=tracej,opaa=opaa[index],obsaa=datanum[tip,],t=0,s=s,beta=beta,gamma=gamma)
-    ftylim <- range(sim_info$fty)
-    dislim <- range(sim_info$dis)
-    if(plottip)
-      ftylim.tip <- range(c(ftylim,obs.ftny))
-    else 
-      ftylim.tip <- ftylim
-    ## plot ftny
-    plot(c(0,t),ftylim.tip,type="n",bty="n",xlab="time",ylab="functionality",main=paste("gene", gene, ",", tip),axes=FALSE,xlim=c(0,t))
-    axis(1,pos=ftylim.tip[1])
-    axis(2,pos=0)
-    abline(h=obs.ftny,col="blue")
-    points(sim_info$fty~sim_info$t,pch=20)
-
+    sim_info <- sim.info(sim=tracej,opaa=opaa[index],obsaa=datanum[tip,],ratio=ratio,t=0,s=s,beta=beta,gamma=gamma,fty=plotftny,dist=plotdis)
+    if(plotftny){
+      ftylim <- range(sim_info$fty)
+      if(plottip)
+        ftylim.tip <- range(c(ftylim,obs.ftny))
+      else 
+        ftylim.tip <- ftylim
+      ## plot ftny
+      
+      plot(c(0,t),ftylim.tip,type="n",bty="n",xlab="time",ylab="functionality",main=paste("gene", gene, ",", tip),axes=FALSE,xlim=c(0,t))
+      axis(1,pos=ftylim.tip[1])
+      axis(2,pos=0)
+      abline(h=obs.ftny,col="blue")
+      points(sim_info$fty~sim_info$t,pch=20)
+    }
     ## plot distance
-    plot(c(0,t),dislim,type="n",bty="n",xlab="time",ylab="distance",main=paste("gene", gene, ",", tip),axes=FALSE,xlim=c(0,t))
-    axis(1,pos=dislim[2])
-    axis(2,pos=0)
-    points(sim_info$dis~sim_info$t,pch=20)
+    if(plotdis){
+      dislim <- range(sim_info$dis)
+      plot(c(0,t),dislim,type="n",bty="n",xlab="time",ylab="distance",main=paste("gene", gene, ",", tip),axes=FALSE,xlim=c(0,t))
+      axis(1,pos=dislim[1])
+      axis(2,pos=0)
+      points(sim_info$dis~sim_info$t,pch=20)
+    }
   }
 }

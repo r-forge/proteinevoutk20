@@ -61,7 +61,7 @@ op.comp <- function(res){
 }
 
 #################################################################
-maxdir <- "~/BackupProEvo/Newton/rokas/rootEqm/"
+maxdir <- "~/BackupProEvo/Newton/rokas7/rootMax/"
 #################################################################
 res_max <- vector("list",length=106)
 l <- 106
