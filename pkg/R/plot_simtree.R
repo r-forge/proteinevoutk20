@@ -80,7 +80,7 @@ plot_trace <- function(sim,ratio=TRUE,plotftny=TRUE,plotdis=FALSE,plottip=TRUE){
     ## plot distance
     if(plotdis){
       dislim <- range(sim_info$dis)
-      plot(c(0,t),dislim,type="n",bty="n",xlab="time",ylab="distance",main=paste("gene", gene, ",", tip),axes=FALSE,xlim=c(0,t))
+      plot(c(0,t),dislim,type="n",bty="n",xlab="time",ylab="similarity",main=paste("gene", gene, ",", tip),axes=FALSE,xlim=c(0,t))
       axis(1,pos=dislim[1])
       axis(2,pos=0)
       points(sim_info$dis~sim_info$t,pch=20)
