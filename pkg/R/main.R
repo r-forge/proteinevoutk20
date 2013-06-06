@@ -746,8 +746,8 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, ancStates = NU
 #   
 # }
 # change the orders of the arguments in function ll3m so that mapply can be used later
-ll <- function(Q,ancestral,ancStates,data,tree,bf,g){
-  ll3m(data,tree,bf,ancestral,ancStates,Q,g)
+ll <- function(Q,ancestral,ancStates,data,tree,scale,g){
+  ll3m(data,tree,scale,ancestral,ancStates,Q,g)
 }
 
 ## return a matrix with 20 columns (one for each aa as optimal aa)
@@ -756,7 +756,7 @@ ll <- function(Q,ancestral,ancStates,data,tree,bf,g){
 ## The matrix is used later, when the optimal aa's are known or the rule of finding them is given
 ## Now it's more of a list of 20 instead of a matrix.
 ## every one of the 20 list has 3 components: result(sitelik),ancestral,ancStates
-llmat <- function(data,tree,Qall,bf=rep(1/20,20),ancestral=NULL,ancStates=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+llmat <- function(data,tree,Qall,scale.vec=rep(1,20),ancestral=NULL,ancStates=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   result = NULL
   #weight = attr(data,"weight")
   nr = attr(data,"nr") #number of different sites
