@@ -687,7 +687,7 @@ ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
 # Here Q gets scaled in the function, so the given matrix doesn't have to be scaled
 # returns loglikelihood values for all distinct patterns in the data, matrix with 1 column (or a column vector)
 # This calls the internal C function in phangorn package
-ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, ancStates = NULL,Q, g = 1) 
+ll3m <- function (data, tree, scale = 1,ancestral = NULL, ancStates = NULL,Q, g = 1) 
 {
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise")
     tree <- reorderPruning(tree)
@@ -695,23 +695,22 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, ancStates = NU
   node <- tree$edge[, 1]
   edge <- tree$edge[, 2]
   m = length(edge) + 1
-  bf = bf/sum(bf)
-  Q = scaleQ(Q,bf) #scale the substitution rate matrix
+  Q = Q*scale
   Q = t(Q) # in order to use C function in phangorn package
   el <- tree$edge.length
   P <- getPm(el,Q,g)
-  nr <- as.integer(attr(dat1, "nr"))
-  nc <- as.integer(attr(dat1, "nc"))
+  nr <- as.integer(attr(data, "nr"))
+  nc <- as.integer(attr(data, "nc"))
   node = as.integer(node - min(node))
   edge = as.integer(edge - 1)
   nTips = as.integer(length(tree$tip))
   mNodes = as.integer(max(node) + 1)
-  contrast = attr(dat1, "contrast")
+  contrast = attr(data, "contrast")
   nco = as.integer(dim(contrast)[1])
-  res <- .Call("LogLik2", dat1[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
-#   if((!is.null(ancestral))&&(!is.null(ancStates)))
-#     warning("both ancestral state frequencies and states are specified, only ancestral states are used!")
-## if root state frequencies and root states are both given, root states have priority and are used
+  res <- .Call("LogLik2", data[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
+  #   if((!is.null(ancestral))&&(!is.null(ancStates)))
+  #     warning("both ancestral state frequencies and states are specified, only ancestral states are used!")
+  ## if root state frequencies and root states are both given, root states have priority and are used
   #browser()
   if(!is.null(ancStates)){
     if(length(ancStates)!=nr) #length has to be the same as the dinstince site patterns
@@ -742,11 +741,12 @@ ll3m <- function (dat1, tree, bf = rep(1/20,20),ancestral = NULL, ancStates = NU
   #return(result)
 }
 
+
 # pml.ll <- function(tree,data,bf=NULL,Q=NULL,inv=0,k=1,shape=1,rate=1,model=NULL){
 #   
 # }
 # change the orders of the arguments in function ll3m so that mapply can be used later
-ll <- function(Q,ancestral,ancStates,data,tree,scale,g){
+ll <- function(Q,scale,ancestral,ancStates,data,tree,g){
   ll3m(data,tree,scale,ancestral,ancStates,Q,g)
 }
 
@@ -765,28 +765,28 @@ llmat <- function(data,tree,Qall,scale.vec=rep(1,20),ancestral=NULL,ancStates=NU
 #   if((!is.null(ancestral))&&(!is.null(ancStates)))
 #     warning("both ancestral state frequencies and states are specified, only ancestral states are used!")
   if(!is.null(ancStates)){ ##root states are given
-    result = lapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancStates=ancStates,ancestral=NULL,g=1)
+    result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,ancestral=NULL,g=1))
    }
   else{ ## root states are not given, ancStates==NULL
     if(is.null(ancestral)) #default is MaxRoot
       ancestral = "max"
     if(is.vector(ancestral,mode="numeric")||is.matrix(ancestral)){ #if root freq is given as vector
-      result = lapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=ancestral,ancStates=ancStates,g=1)
+      result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancestral=ancestral,ancStates=ancStates,g=1))
     }
     else if(ancestral=="max"){ #MaxRoot
-      result = lapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=NULL,ancStates=ancStates,g=1)
+      result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,ancestral=NULL,g=1),SIMPLIFY=FALSE)
     }
     else if(ancestral=="opaa"){ #OpRoot -- root is the same as optimal aa
       anc=diag(20)
       anc = lapply(1:20,function(x) anc[x,])
-      result = mapply(ll,Qall,anc,MoreArgs=list(data=data,tree=tree,bf=bf,ancStates=ancStates,g=1),SIMPLIFY=FALSE)
+      result = mapply(ll,Qall,scale.vec,anc,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,g=1),SIMPLIFY=FALSE)
     }
     else if(ancestral=="eqm"){ # EqmRoot
       anc=lapply(X=Qall,eqmQ) #find equilibrium frequencies for all Q's
-      result = mapply(ll,Qall,anc,MoreArgs=list(data=data,tree=tree,bf=bf,ancStates=ancStates,g=1),SIMPLIFY=FALSE)
+      result = mapply(ll,Qall,scale.vec,anc,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,g=1),SIMPLIFY=FALSE)
     }
     else if(ancestral=="emp"){ #EmpRoot - root frequencies from observation
-      result = lapply(Qall,ll3m,dat1=data,tree=tree,bf=bf,ancestral=findBf2(data),ancStates=ancStates,g=1)
+      result = mapply(ll,Qall,scale.vec,dat1=data,tree=tree,ancestral=findBf2(data),ancStates=ancStates,g=1)
     }
     else stop("ancestral options: opaa, eqm,emp,max, or a numeric vector of length 20")
   }
@@ -851,7 +851,7 @@ llaaw_grad <- function(opw,weight,llmat){
 ## nucleotide transition rate matrix of length 6
 ## this one uses expm for matrix exponentiation
 #more flexibility on what is provided, good for avoiding unnecessary computations
-mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
+mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,scale.vec=rep(1,20),Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
                   opaa=NULL,opw=NULL,bfaa=NULL,ancestral=NULL,ancStates=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
   call <- match.call()
   if(class(tree)!="phylo") stop("tree must be of class phylo") 
@@ -878,7 +878,7 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall
     }
     Qall = QAllaa1(fixmatall,mumat,Ne=Ne)
   }
-  ll_mat = llmat(data=data,tree=tree,Qall=Qall,bf=bfaa,ancestral=ancestral,ancStates=ancStates,C=C,Phi=Phi,q=q,Ne=Ne)
+  ll_mat = llmat(data=data,tree=tree,Qall=Qall,scale.vec=scale.vec,ancestral=ancestral,ancStates=ancStates,C=C,Phi=Phi,q=q,Ne=Ne)
 #   llmat = ll_mat$mat
 #   root = llmat$root
   if(!is.null(opaa)) #opaa specified
@@ -888,7 +888,7 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall
   else{
     ll = llmax(ll_mat,data)
   }
-  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,dismat=dismat,fixmatall=fixmatall,Qall=Qall,
+  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,scale.vec=scale.vec,dismat=dismat,fixmatall=fixmatall,Qall=Qall,
                 mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,ancestral=ancestral,call=call)
   class(result) = "mllm"
   return(result)
@@ -961,11 +961,12 @@ optim.w <- function(beta,gamma,generange,tree,multicore=FALSE,method="BOBYQA",ma
 #sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,Q=NU_VEC))
 optim.s.weight <- function(data, tree, s,beta,gamma, method="SBPLX",maxeval="50",print_level=0,...){
   #store information from initial condition, with other parameters fixed
+  if(is.null(s)) s = 1
+  if(is.null(beta)) beta=be
+  if(is.null(gamma)) gamma=ga
   res.initial = mllm1(data=data,tree=tree,s=s,beta=beta,gamma=gamma,...)
   #these don't change with the change of s
   mumat = res.initial$mumat
-  bfaa=res.initial$bfaa
-  
   ab <- c(s,beta,gamma) ##initial value
 #   ab[ab<=0] <- 1e-4
 #   ab <- log(ab)
@@ -974,7 +975,7 @@ optim.s.weight <- function(data, tree, s,beta,gamma, method="SBPLX",maxeval="50"
     #print(ab)
     if(any(ab > 20)) return(10^5)
     else{
-      result = -mllm1(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], mumat=mumat,bfaa=bfaa, ...)$ll$loglik
+      result = -mllm1(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], mumat=mumat, ...)$ll$loglik
       return(result)
     }
   }
@@ -986,7 +987,35 @@ optim.s.weight <- function(data, tree, s,beta,gamma, method="SBPLX",maxeval="50"
   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
   return(res)
 }
-
+######################################################################################################
+#MLE for s, beta and gamma, using subplex method by default
+#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,scale.vec=rep(1,20)
+#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
+#sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,Q=NU_VEC))
+optim.scale <- function(data, tree, scale.vec=rep(1,20),Qall=NULL,method="SBPLX",maxeval="50",print_level=0,...){
+  if(is.null(Qall)){
+    res.initial = mllm1(data=data,tree=tree,scale.vec=scale.vec,...)
+    Qall <- res.initial$Qall
+  }
+  scale.vec <- scale.vec/scale.vec[1]
+  ab <- scale.vec[-1] ##initial value
+  #   ab[ab<=0] <- 1e-4
+  #   ab <- log(ab)
+  fn = function(ab,data,tree){
+    #ab <- exp(ab)
+    #print(ab)
+    scale.vec <- c(1,ab)
+    result = -mllm1(data=data,tree=tree,scale.vec=scale.vec,Qall=Qall,...)$ll$loglik
+    return(result)
+  }
+  lower <- rep(0,19)
+  upper <- rep(Inf,19)
+  #options for optimizer
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
+               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
+  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
+  return(res)
+}
 ######################################################################################################
 ## MLE for opw (weights for optimal amino acids)
 ## supply the function, the gradient function, and the restriction function (sum=1)
@@ -1098,11 +1127,10 @@ optim.br <- function(data,tree,el=NULL,method="COBYLA",maxeval="100", print_leve
   res.initial = mllm1(data=data,tree=tree,...)
   #these don't change with the change of s
   Qall = res.initial$Qall
-  bfaa = res.initial$bfaa
   fn = function(el,data,tree){
     tree$edge.length = el
     #print(el)
-    result = -mllm1(data,tree, Qall=Qall,bfaa=bfaa,...)$ll$loglik
+    result = -mllm1(data,tree, Qall=Qall,...)$ll$loglik
     return(result)
   }
   lower=rep(0,br.num)
@@ -1127,12 +1155,11 @@ optimQ <- function(tree,data,Q=rep(1,6),method="SBPLX",maxeval="100",print_level
   res.initial = mllm1(data=data,tree=tree,Q=Q,...)
   #these don't change with the change of s
   fixmatall = res.initial$fixmatall
-  bfaa = res.initial$bfaa
   
   ab <- Q[1:5] # optimize on the first 5 rates
   fn = function(ab,tree,data){
     #print(ab)
-    result = -mllm1(data,tree,Q=c(ab,1),fixmatall=fixmatall,bfaa=bfaa, ...)$ll$loglik
+    result = -mllm1(data,tree,Q=c(ab,1),fixmatall=fixmatall, ...)$ll$loglik
     return(result)
   }
   lower=rep(0,5)
@@ -1148,14 +1175,9 @@ optimQ <- function(tree,data,Q=rep(1,6),method="SBPLX",maxeval="100",print_level
 ## optimize parameters
 ## first optimize all parameters except optimal weights
 ## then optimize the weights of amino acids being optimal
-optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, optOpw = FALSE,
+optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, optOpw = FALSE,optscale=FALSE,
                        control = list(epsilon=1e-08,hmaxit=10,htrace=TRUE,print_level=0,maxeval="300"),...){
   tree = object$tree
-  ## these are automatically satisfied if object comes from mllm1
-#   if(class(tree)!="phylo") stop("tree must be of class phylo") 
-#   if(!is.rooted(tree)) stop("tree must be rooted")
-#   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") 
-#     tree <- reorderPruning(tree)
   if(any(tree$edge.length < 1e-08)){
     tree$edge.length[tree$edge.length < 1e-08] <- 1e-08
     #object <- update(object, tree=tree)
@@ -1167,6 +1189,7 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
   maxeval = control$maxeval
   data = object$data
   Q = object$Q
+  scale.vec = object$scale.vec
   #if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
   bfaa = object$bfaa #this is going to be the same, no matter from data or given -- empirical frequencies
   opw = NULL
@@ -1175,6 +1198,9 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
   s = object$s
   beta = object$GMweights[2]
   gamma = object$GMweights[3]
+  if(is.null(s)) s = 1
+  if(is.null(beta)) beta=be
+  if(is.null(gamma)) gamma=ga
   opti = TRUE # continue optimizing or not
   rounds = 0 #index of iterations
   while(opti){
@@ -1183,7 +1209,8 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       cat("opw = ", opw, "\n")
     }
     if(optsWeight){
-      res = optim.s.weight(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw,...)
+      res = optim.s.weight(data,tree,maxeval=maxeval,print_level=print_level,
+                           s=s,beta=beta,gamma=gamma,Q=Q,scale.vec=scale.vec,opw=opw,...)
       s = res$solution[1]
       beta = res$solution[2]
       gamma = res$solution[3]
@@ -1194,7 +1221,8 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       ll = -res$objective
     }
     if(optQ){
-      res = optimQ(tree,data,Q=Q,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,opw=opw, ...)
+      res = optimQ(tree,data,Q=Q,maxeval=maxeval,print_level=print_level,
+                   s=s,beta=beta,gamma=gamma,scale.vec=scale.vec,opw=opw, ...)
       Q = res$solution
       if(htrace){
         cat("optimize rate matrix: ", ll, "--->", -res$objective, "\n")
@@ -1203,7 +1231,8 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       ll = -res$objective
     }
     if(optBranch){
-      res = optim.br(data,tree,maxeval=maxeval,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw, ...)
+      res = optim.br(data,tree,maxeval=maxeval,print_level=print_level,
+                     s=s,beta=beta,gamma=gamma,Q=Q,scale.vec=scale.vec,opw=opw, ...)
       if(htrace){
         cat("optimize branch lengths:", ll, "--->", -res$objective, "\n")
         cat("branch lengths are now: ", res$solution, "\n")
@@ -1211,8 +1240,19 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       tree$edge.length = res$solution
       ll =-res$objective
     }
+    if(optscale){
+      res = optim.scale(data,tree,scale.vec=scale.vec,Qall=NULL,maxeval=maxeval,
+                        print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw,...)
+      scale.vec = c(1,res$solution)
+      if(htrace){
+        cat("optimize scales of Q:", ll, "--->", -res$objective, "\n")
+        cat("scales are now: ", scale.vec, "\n")
+      }
+      ll = -res$objective
+    }
     if(optOpw){
-      res = optim.opw(data,tree,opw=opw,print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,...) #new optimizer using nloptr
+      res = optim.opw(data,tree,opw=opw,print_level=print_level,
+                      s=s,beta=beta,gamma=gamma,Q=Q,scale.vec=scale.vec,...) #new optimizer using nloptr
       if(htrace){
         ##notice that the loglikelihood will decrease, from maximizing rule to weighted rule
         cat("optimize weights of optimal aa:", ll, "--->", -res$objective, "\n")
@@ -1221,13 +1261,15 @@ optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TR
       opw = res$solution
       ll = -res$objective
     }
+
     rounds = rounds + 1
     if(rounds >= control$hmaxit) opti <- FALSE
     if(((ll1-ll)<=0) && ((ll1-ll)/ll < control$epsilon)) opti <- FALSE
     ll1 = ll
   }
   
-  object = update(object, tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,bfaa=bfaa,opw=opw,...)
+  object = update(object,tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,scale.vec=scale.vec,
+                  opw=opw,...)
   return(object)
 }
 #MLE for s and Ne, using subplex method by default
