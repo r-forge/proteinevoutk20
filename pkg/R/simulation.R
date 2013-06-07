@@ -9,15 +9,15 @@ discrete.gamma <- function (alpha, k)
 ########################################################################################################
 ## Given s, Distance matrix, mutation rate matrix, and other parameters, find the list of 20 rate matrices corresponding to optimal aa 1:20
 ## same function as QAllaa, but all the matrices are scaled in this function
-rate_move_mat <- function(s, DisMat, MuMat,bfaa = rep(1/20,20),C=2, Phi=0.5, q=4e-7, Ne=5e6){
+rate_move_mat <- function(s, DisMat, MuMat,scale.vec=rep(1,20),C=2, Phi=0.5, q=4e-7, Ne=5e6){
   fn = function(i){
     mat = mat_gen_indep(i,s,DisMat,MuMat,C,Phi,q,Ne)
-    mat = scaleQ(mat,bfaa)
+    mat = mat*scale.vec[i]
   }
   mat_list = lapply(1:20,fn)
   return(mat_list)
 }
-rate_move <- function(protein, protein_op,s, DisMat, MuMat, bfaa = rep(1/20,20),C=2, Phi=0.5, q=4e-7, Ne=5e6){
+rate_move <- function(protein, protein_op,s, DisMat, MuMat, scale.vec=rep(1,20),C=2, Phi=0.5, q=4e-7, Ne=5e6){
     mat = rate_move_mat(s,DisMat,MuMat,bfaa,C,Phi,q,Ne)
     vec_list = sapply(1:length(protein),function(i) {mat[[protein_op[i]]][protein[i],]},simplify="array")
     #vec_list[vec_list < 0] = 0
@@ -41,7 +41,7 @@ bfAll <- function(s,beta,gamma,GTRvec,opfreq,C=2,Phi=0.5,q=4e-7,Ne=5e6){
 ########################################################################################################
 #Simulation. Given the starting protein and the optimal protein
 #t should be equal to expected number of substitutions
-simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2, Phi=0.5,q=4e-7, Ne=5e6){
+simulation <- function(protein,protein_op,t,s,DisMat,MuMat,scale.vec=rep(1,20),C=2, Phi=0.5,q=4e-7, Ne=5e6){
   l <- length(protein) #number of sites
   t_now <- 0 #time until the current step of simulation
   path <- array(c(protein,0,0),dim=c(1,l+2)) #the array that stores the protein sequences
@@ -49,7 +49,7 @@ simulation <- function(protein,protein_op,t,s,DisMat,MuMat,bfaa=rep(1/20,20),C=2
   ##last two columns in the paths, recording Time up to this point and the waiting time at the current state
   colnames(path)[l+1] <- "Time Now"
   colnames(path)[l+2] <- "Waiting Time"
-  matall = rate_move_mat(s,DisMat,MuMat,bfaa,C,Phi,q,Ne) #Q for all optimal aa possibilities
+  matall = rate_move_mat(s,DisMat,MuMat,scale.vec,C,Phi,q,Ne) #Q for all optimal aa possibilities
   m = 20
   while(t_now < t){ #when current time is less than t
     vec_list = sapply(1:l,function(i) {matall[[protein_op[i]]][protein[i],]},simplify="array")
@@ -124,7 +124,7 @@ sim_op <- function(opaa, l, t,matall,C=2, Phi=0.5,q=4e-7, Ne=5e6){
 ##given the ancestral sequence "rootseq", optimal amino acid sequence "protein_op",
 ##selection coefficient "s", here we consider s THE SAME ACROSS ALL THE SITES IN ONE GENE 
 simTree <- function(tree,protein_op,s=NULL,GTRvec=NULL,alpha=al,beta=be, gamma=ga,dismat = NULL,
-                    mumat=NULL,matall=NULL,bfaa=rep(1/20,20),
+                    mumat=NULL,matall=NULL,scale.vec=rep(1,20),
                     rootseq=NULL,C=2,Phi=0.5,q=4e-7, Ne=5e6){
   call = match.call()
   if(!is.binary.tree(tree)|!is.rooted(tree)) stop("error: the input phylogeny is not rooted binary tree!")
@@ -147,7 +147,7 @@ simTree <- function(tree,protein_op,s=NULL,GTRvec=NULL,alpha=al,beta=be, gamma=g
       dismat=GM_cpv(GM_CPV,alpha,beta,gamma) #Distance matrix from new weights
     if(is.null(mumat))
       mumat = aa_MuMat_form(GTRvec) #symmetric matrix for the mutation rate matrix, from the GTR matrix
-    matall = rate_move_mat(s,dismat,mumat,bfaa,C,Phi,q,Ne) #all the sub rate matrix
+    matall = rate_move_mat(s,dismat,mumat,scale.vec,C,Phi,q,Ne) #all the sub rate matrix
   }
   ## if rootseq is not given, sample it from the matrices, use equilibrium frequencies
   if(is.null(rootseq)){
