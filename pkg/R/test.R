@@ -1,6 +1,6 @@
 rm(list=ls())
 gene = 2
-RDatafile <- paste("~/BackupProEvo/Newton/rokas7/scaleQ/Max/gene",gene,".RData",sep="")
+RDatafile <- paste("~/BackupProEvo/Newton/rokas7/scaleQ/samescale/gene",gene,".RData",sep="")
 load(RDatafile)
 source("~/proteinevoutk20/pkg/R/prune.R")
 source("~/proteinevoutk20/pkg/R/plot_simtree.R")

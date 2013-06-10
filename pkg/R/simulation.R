@@ -351,13 +351,13 @@ simAA <- function(l=100,rootseq=NULL,t=1,Q=NULL,bf=NULL,inv=0,rate=1,k=1,model="
 ## on the path, and the distance of them from the optimal aa, as well as the stepfunction formed by them
 ## The simulated sequence data will have at least 2 sequences, that's when no site encounters
 ## any substitution. t: starting time of simulation
-sim.info <- function(sim,opaa,obsaa=NULL,ratio=TRUE,t=0,s=1,beta=be,gamma=ga,fty=TRUE,dist=TRUE){
+sim.info <- function(sim,opaa,obsaa=NULL,ratio=TRUE,t=0,s=1,beta=be,gamma=ga,max.step=200,fty=TRUE,dist=TRUE){
   dismat <- GM_cpv(GM_CPV,al,beta,gamma)
   l <- dim(sim)[2]-2 # number of sites
-  ### if there are too many steps, choose less than 200 to shorten the running time
+  ### if there are too many steps, choose less than max.step(default 200) to shorten the running time
   steps <- dim(sim)[1]
   if(steps >= 400)
-    steps <- seq(from=1,to=steps,by=steps %/% 200)
+    steps <- seq(from=1,to=steps,by=steps %/% max.step)
   else
     steps <- 1:steps
   if(fty){
