@@ -786,7 +786,7 @@ llmat <- function(data,tree,Qall,scale.vec=rep(1,20),ancestral=NULL,ancStates=NU
       result = mapply(ll,Qall,scale.vec,anc,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,g=1),SIMPLIFY=FALSE)
     }
     else if(ancestral=="emp"){ #EmpRoot - root frequencies from observation
-      result = mapply(ll,Qall,scale.vec,dat1=data,tree=tree,ancestral=findBf2(data),ancStates=ancStates,g=1)
+      result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancestral=findBf2(data),ancStates=ancStates,g=1),SIMPLIFY=FALSE)
     }
     else stop("ancestral options: opaa, eqm,emp,max, or a numeric vector of length 20")
   }
