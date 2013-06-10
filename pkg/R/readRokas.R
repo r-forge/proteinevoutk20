@@ -1,13 +1,3 @@
-##   Read in 106 gene data  from Rokas's ##
-#source("~/proteinevoutk20/pkg/R/main.R")
-# l <- 106
-# rokaslist <- vector("list",length=l)
-# ##data stores the data of all genes in rokas's data
-# for(i in 1:l){
-#   rokaslist[[i]] <- conv(paste(datadir,"Rokas/gene",i,".fasta",sep=""),type="phyDat")
-# }
-# rm(l)
-# rokasdata = read.phyDat("~/proteinevoutk20/pkg/Data/Rokas/rokasAA",type="AA")
 load("~/proteinevoutk20/pkg/Data/Rokas/rokas.RData")
 ## including AA matrix called "rokas" and range for each gene called "AArange"
 ############################################################################
