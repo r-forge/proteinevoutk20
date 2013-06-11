@@ -44,7 +44,7 @@ plot_trace <- function(sim,ratio=TRUE,plotftny=TRUE,plotdis=FALSE,plottip=TRUE){
   
   #ftylim <- ftyrange(sim_info) #range of the functionalities
   ntips <- length(tree$tip.label) #number of tips
-  par(mfrow=c(2,4))
+  
   trace.info <- vector("list",length=ntips)
   for(j in 1:ntips){
     tip = tree$tip.label[j] #name of the tip
@@ -66,13 +66,10 @@ plot_trace <- function(sim,ratio=TRUE,plotftny=TRUE,plotdis=FALSE,plottip=TRUE){
     sim_info <- sim.info(sim=tracej,opaa=opaa[index],obsaa=datanum[tip,],ratio=ratio,t=0,s=s,beta=beta,gamma=gamma,fty=T,dist=T)
     trace.info[[j]] <- sim_info
     if(plotftny){
+      par(mfrow=c(2,4))
       ftylim <- range(sim_info$fty)
       ftylim[2] <- 1
-#       if(plottip)
-#         ftylim.tip <- range(c(ftylim,obs.ftny))
-#       else 
-#         ftylim.tip <- ftylim
-      ## plot ftny
+      ftylim<- range(c(ftylim,obs.ftny))
       
       plot(c(0,t),ftylim,type="n",bty="n",xlab="time",ylab="functionality",main=paste("gene", gene, ",", tip),axes=FALSE,xlim=c(0,t))
       axis(1,pos=ftylim[1])
@@ -82,6 +79,7 @@ plot_trace <- function(sim,ratio=TRUE,plotftny=TRUE,plotdis=FALSE,plottip=TRUE){
     }
     ## plot distance
     if(plotdis){
+      par(mfrow=c(2,4))
       dislim <- range(sim_info$dis)
       dislim[2] <- 1
       plot(c(0,t),dislim,type="n",bty="n",xlab="time",ylab="similarity",main=paste("gene", gene, ",", tip),axes=FALSE,xlim=c(0,t))
