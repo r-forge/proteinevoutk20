@@ -45,6 +45,7 @@ plot_trace <- function(sim,ratio=TRUE,plotftny=TRUE,plotdis=FALSE,plottip=TRUE){
   #ftylim <- ftyrange(sim_info) #range of the functionalities
   ntips <- length(tree$tip.label) #number of tips
   par(mfrow=c(2,4))
+  trace.info <- vector("list",length=ntips)
   for(j in 1:ntips){
     tip = tree$tip.label[j] #name of the tip
     obs.ftny <- ftny.vec[tip]
@@ -62,7 +63,8 @@ plot_trace <- function(sim,ratio=TRUE,plotftny=TRUE,plotdis=FALSE,plottip=TRUE){
     }
     ########################################
     t <- max(br.pos[pathj$br.path,])
-    sim_info <- sim.info(sim=tracej,opaa=opaa[index],obsaa=datanum[tip,],ratio=ratio,t=0,s=s,beta=beta,gamma=gamma,fty=plotftny,dist=plotdis)
+    sim_info <- sim.info(sim=tracej,opaa=opaa[index],obsaa=datanum[tip,],ratio=ratio,t=0,s=s,beta=beta,gamma=gamma,fty=T,dist=T)
+    trace.info[[j]] <- sim_info
     if(plotftny){
       ftylim <- range(sim_info$fty)
       ftylim[2] <- 1
@@ -88,4 +90,5 @@ plot_trace <- function(sim,ratio=TRUE,plotftny=TRUE,plotdis=FALSE,plottip=TRUE){
       points(sim_info$dis~sim_info$t,pch=20)
     }
   }
+  return(trace.info)
 }
