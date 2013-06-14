@@ -178,9 +178,9 @@ simTree <- function(tree,protein_op,s=NULL,GTRvec=NULL,alpha=al,beta=be, gamma=g
 #simTree(tree,5,protein_op=Protein_op[1:5],m=20,s=0.3,Nu_vec,al,be,ga,q=4e-7,Ne=5e6,Root[1:5])
 simTreeEmp <- function(tree,l=100,rootseq=NULL,Q=NULL,bf=NULL,inv=0,rate=1,k=1,model="USER"){
   call = match.call()
-  if(!is.null(model)){
+  if(!is.null(model) && model!="USER"){
     model <- match.arg(model,get(".aamodels",environment(pml)))
-    if(model!="USER") getModelAA(model,bf=is.null(bf),Q=is.null(Q))
+    getModelAA(model,bf=is.null(bf),Q=is.null(Q))
   }
   m=20 #number of amino acids
   if(is.null(bf)) bf = rep(1/m,m)
@@ -244,7 +244,9 @@ sim_emp <- function(data,best_emp_model){
 simulationQ <- function(protein,t,Q=NULL,bf=NULL,inv=0,rate=1,k=1){
   if(is.null(bf)) bf <- rep(1/20,20)
   if(is.null(Q)) Q <- rep(1,190)
-  Qmat <- mat_form_lowtriQ(Q,bf,byrow=TRUE) #transition rate matrix
+  if(is.matrix(Q)) Qmat <- Q
+  else if(is.vector(Q))  
+    Qmat <- mat_form_lowtriQ(Q,bf,byrow=TRUE) #transition rate matrix
   l <- length(protein) #number of sites
   
   inv_runif <- runif(l) #sample the sites that are invariant
