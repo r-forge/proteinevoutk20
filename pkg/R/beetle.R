@@ -2,9 +2,11 @@
  #               snf=4265:4825,pol=4826:5725,ef1a=5726:6783,whole=1:6783)
 
 test = TRUE
-beetle <- seqinr::read.fasta("~/proteinevoutk20/pkg/Data/beetle/beetles.fasta")
+beetle <- seqinr::read.fasta("~/proteinevoutk20/pkg/Data/beetle/beetle_shortname.fasta")
+#beetle <- seqinr::read.fasta("~/proteinevoutk20/pkg/Data/beetle/beetles.fasta")
+
 load("~/proteinevoutk20/pkg/Data/beetle/charset.RData") 
-beetree <- read.nexus("~/proteinevoutk20/pkg/Data/beetle/tree1.nex")
+beetree <- read.tree("~/proteinevoutk20/pkg/Data/beetle/tree1_shortname.nex")
 fastafile = beetle
 gene = 6
 prottestfile <- paste("~/proteinevoutk20/pkg/Result/Prottest/beetle/beetle34_",gene,"_prottest.txt",sep="")

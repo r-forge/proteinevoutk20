@@ -1,44 +1,61 @@
-source("~/proteinevoutk20/pkg/R/prune.R")
-source("~/proteinevoutk20/pkg/R/plot_simtree.R")
-summary.sim <- vector("list",length=106)
-for(gene in 1:106){
-  RDatafile <- paste("~/BackupProEvo/Newton/rokas/rootMax/gene",gene,".RData",sep="")
-  load(RDatafile)
-  datanum <- sapply(1:length(dataphy),function(x) as.numeric(factor(tolower(data[x,]),tolower(AA))))
-  datanum <- t(datanum)
-  dimnames(datanum)[[1]] <- dimnames(data)[[1]]
-  res_op$tree$edge.length
-  index <- attr(dataphy,"index")
-  opaa <- res_op$ll$opaa
-  s = res_op$s
-  beta = res_op$GMweights[2]
-  gamma = res_op$GMweights[3]
-  scale.vec <- res_op$scale.vec
-  ftny.vec <- apply(datanum,MARGIN=1,FUN=Ftny_protein,protein_op=opaa[index],s=s,DisMat=GM_cpv(GM_CPV,al,beta,gamma))
-  ftny.vec
-
-  rootseq <- sapply(1:length(index),function(x) sample(1:20,size=1,replace=TRUE,prob=res_op$ll$ancestral[,index[x]]))
-  ftny.vec <- c(ftny.vec,Ftny_protein(protein_op=opaa[index],protein=rootseq,s=s,DisMat=GM_cpv(GM_CPV,al,beta,gamma)))
-  names(ftny.vec)[length(ftny.vec)] <- "root"
-  sim <- simTree(tree=res_op$tree,protein_op=opaa[index],matall=res_op$Qall,rootseq=rootseq,scale.vec=scale.vec)
-  trace.info <- plot_trace(sim=sim,plottip=FALSE,plotftny=FALSE,plotdis=FALSE)
-  
-  summary.sim[[gene]]$ftny.vec <- ftny.vec
-  summary.sim[[gene]]$trace.info <- trace.info
-  summary.sim[[gene]]$datanum <- datanum
-  summary.sim[[gene]]$rootseq <- rootseq
-  summary.sim[[gene]]$sim <- sim
+get.root <- function(mat){
+  l <- dim(mat)[2]
+  sapply(1:l,function(x) which(mat[,x]==1))
 }
-save.image(file="summary_sim.RData",compress=TRUE)
-## find the starting and ending position of all edges in the tree
-#plot_trace(sim=sim$emp[[1]],plottip=FALSE,plotftny=TRUE,plotdis=FALSE)
-# #plot_trace(sim=sim$emp[[1]],plottip=FALSE,plotftny=FALSE,plotdis=TRUE)
-# plot_trace(sim=sim,plottip=TRUE,plotftny=FALSE,plotdis=TRUE)
-#################################################
-# s = 5
-# fixmatall <- fixmatAll(s,DisMat=dismat)
-# Qall = QAllaa1(fixmatall,mumat)
-# bf <- sapply(Qall,FUN=eqmQ)
-# for(i in 1:20)
-#   plot(sort(bf[,i],decreasing=TRUE),type="s",ylim=c(0,1))
-#################################################
+simulationQ1 <- function(protein,t,Q=NULL,bf=NULL){
+  if(is.null(bf)) bf <- rep(1/20,20)
+  if(is.null(Q)) Q <- rep(1,190)
+  if(is.matrix(Q)) Qmat <- Q
+  else if(is.vector(Q))  
+    Qmat <- mat_form_lowtriQ(Q,bf,byrow=TRUE) #transition rate matrix
+  l <- length(protein) #number of sites
+  P <- expm(Qmat*t)
+  res <- protein
+  for(i in 1:20){
+    index <- which(protein==i)
+    res[index] <- sample(1:20,length(index),replace=TRUE,prob=P[i,])
+  }
+  return(res)
+}
+
+find.Q <- function(seq1,seq2,Q=rep(1,6),t=1,method="COBYLA",maxeval="1000",print_level=0){
+  fn <- function(Q){
+    Q <- exp(Q)
+    mumat <- aa_MuMat_form(Q)
+    P <- expm(mumat*t)
+    prob <- -log(sapply(1:length(seq1), function(i) P[seq1[i],seq2[i]]))
+    cat(Q,sum(prob),"\n")
+    return(sum(prob))
+  }
+  lower=rep(-Inf,6)
+  upper=rep(Inf,6)
+  #options for optimizer
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,
+               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
+  res = nloptr(x0=log(Q),eval_f=fn, lb=lower,ub=upper,opts=opts)
+  #optimx(log(Q),fn,hessian=FALSE,method=method,itnmax=itnmax)
+  return(res)
+}
+
+find.Q1 <- function(seq1,seq2,q=1,t=1,interval=c(-10,10)){
+  fn <- function(q){
+    q = exp(q)
+    Q <- rep(q,6)
+    mumat <- aa_MuMat_form(Q)
+    P <- expm(mumat*t)
+    prob <- -log(sapply(1:length(seq1), function(i) P[seq1[i],seq2[i]]))
+    cat(q,sum(prob),"\n")
+    return(sum(prob))
+  }
+  optimize(f=fn,interval=interval)
+}
+
+optim.ultrametric <- function(tree,data,model="WAG"){
+  
+}
+
+internal.br <- function(tree){
+  nTips <- length(tree$tip.label)
+  edge <- tree$edge
+  internal.ind <- which(!(edge[,2] %in% c(1:nTips)))
+}
