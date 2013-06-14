@@ -16,8 +16,11 @@ br_pos <- function(tree){
 ## including the branches and the nodes on the path
 path_to_tip <- function(tree,i){
   br <- tree$edge #all the edges
-  ntips <- max(br) -  tree$Nnode
-  root <- br[1,1]
+  ntips <- length(tree$tip.label)
+  parents <- as.integer(edge[, 1])
+  child <- as.integer(edge[, 2])
+  root <- as.integer(parents[!match(parents, child, 0)][1]) 
+  
   done <- FALSE
   node.path <- i #nodes on the path, from root to tip
   br.path <- NULL # indices of branches on the path to the tip
@@ -25,10 +28,10 @@ path_to_tip <- function(tree,i){
     if(node.path[1]==root)
       done <- TRUE
     else{
-      start <- node.path[1]
-      br.ind <- which(br[,2]==start)
+      start <- node.path[1] #start tracing, go backwards
+      br.ind <- which(br[,2]==start) #find the index of branch that ends in "start"
       br.path <- c(br.ind,br.path)
-      pre <- br[br.ind,1]
+      pre <- br[br.ind,1] #next node on the path when going backwards
       node.path <- c(pre,node.path)
     }
   }
