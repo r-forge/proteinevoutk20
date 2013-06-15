@@ -1,7 +1,7 @@
-# get.root <- function(mat){
-#   l <- dim(mat)[2]
-#   sapply(1:l,function(x) which(mat[,x]==1))
-# }
+get.root <- function(mat){
+  l <- dim(mat)[2]
+  sapply(1:l,function(x) which(mat[,x]==1))
+}
 # simulationQ1 <- function(protein,t,Q=NULL,bf=NULL){
 #   if(is.null(bf)) bf <- rep(1/20,20)
 #   if(is.null(Q)) Q <- rep(1,190)
