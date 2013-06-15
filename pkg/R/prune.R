@@ -260,7 +260,7 @@ get.brlen <- function(tree,tip){
   brlen <- tree$edge.length[br.index]  # length of the re-grafted branch
   return(list(index=br.index,brlen=brlen))
 }
-
+## compare tree with another tree with 1 tip broken off
 comp.tree <- function(tree,ptree){
   dtip <- setdiff(tree$tip.label,ptree$tip.label)
   dtip.ind <- which(tree$tip.label==dtip)

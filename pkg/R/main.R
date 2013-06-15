@@ -684,67 +684,69 @@ ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
   #return(max(probvec[root,])) #just the value
 }
 ####################################################################################################################################
-# Here Q gets scaled in the function, so the given matrix doesn't have to be scaled
+# Q does not get scaled in the function, it reflexes the difference in evolutionary rates for different optimal amino acids
 # returns loglikelihood values for all distinct patterns in the data, matrix with 1 column (or a column vector)
 # This calls the internal C function in phangorn package
 ll3m <- function (data, tree, scale = 1,ancestral = NULL, ancStates = NULL,Q, g = 1) 
 {
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise")
     tree <- reorderPruning(tree)
-  q = length(tree$tip.label)
   node <- tree$edge[, 1]
   edge <- tree$edge[, 2]
-  m = length(edge) + 1
-  Q = Q*scale
-  Q = t(Q) # in order to use C function in phangorn package
-  el <- tree$edge.length
-  P <- getPm(el,Q,g)
-  nr <- as.integer(attr(data, "nr"))
-  nc <- as.integer(attr(data, "nc"))
   node = as.integer(node - min(node))
   edge = as.integer(edge - 1)
+  m = length(edge) + 1
+  nr <- as.integer(attr(data, "nr"))
+  nc <- as.integer(attr(data, "nc"))
   nTips = as.integer(length(tree$tip))
   mNodes = as.integer(max(node) + 1)
   contrast = attr(data, "contrast")
   nco = as.integer(dim(contrast)[1])
-  res <- .Call("LogLik2", data[tree$tip.label], P, nr, nc, node, edge, nTips, mNodes, contrast, nco, PACKAGE = "phangorn")
-  #   if((!is.null(ancestral))&&(!is.null(ancStates)))
-  #     warning("both ancestral state frequencies and states are specified, only ancestral states are used!")
-  ## if root state frequencies and root states are both given, root states have priority and are used
-  #browser()
-  if(!is.null(ancStates)){
-    if(length(ancStates)!=nr) #length has to be the same as the dinstince site patterns
+  index = as.integer(attr(data,"index"))
+  
+  Q = Q*scale #scale Q by a number,default 1 (no scaling)
+  stnry.prob <- eqmQ(Q) #stationary probabilities, as prior on the root states
+  Q = t(Q) # in order to use C function in phangorn package
+  el <- tree$edge.length
+  P <- getPm(el,Q,g)
+  ## get likelihood for all distinct site patterns, with every aa as root state
+  res <- .Call("LogLik2", data[tree$tip.label], P, nr, nc, node, edge, nTips, 
+               mNodes, contrast, nco, PACKAGE = "phangorn")
+  if(!is.null(ancStates)){ 
+    if(length(ancStates)==nr)#if root states are given (per distinct site pattern instead of all sites)
+      result = sapply(1:nr,function(x) res[[1]][x,ancStates[x]])
+    else if(length(ancStates)==length(index)) #root states are given for all sites
+      result = sapply(1:length(index, function(x) res[[1]][index[x],ancStates[x]]))
+    else
       stop("ancestral state sequence has wrong length!")
-    result = sapply(1:nr,function(x) res[[1]][x,ancStates[x]])
     result = matrix(log(result),ncol=1) #take logarithm 
     ancStates = ancStates
   }
-  else{
-    if(is.null(ancestral)){
-      result = sapply(1:nr,function(x) max(res[[1]][x,])) #find the root state that maximizes the likelihood
-      result = matrix(log(result),ncol=1) #take logarithm 
-      ancStates =  sapply(1:nr,function(x) which.max(res[[1]][x,])) # return the root states at all sites
+  else{ # if root states are not given
+    if(is.null(ancestral)){ # method of getting root states is not specified, max as default
+      ## return the root states at all sites, TAKE INTO ACCOUNT OF PRIOR DISTRIBUTION
+      ## this only affects the default option, which is "optimize root states"
+      ancStates =  sapply(1:nr,function(x) which.max(res[[1]][x,]*stnry.prob)) 
+      result = sapply(1:nr, function(x) res[[1]][x,ancStates[x]])
+      result = matrix(log(result),ncol=1)
     }
-    else{
+    else{ # if ancestral is given as a matrix, with 20 rows, one column for each distince site pattern
       ancestral = as.matrix(ancestral,nrow=20)
-      if(ncol(ancestral)==1)
+      if(ncol(ancestral)==1) #if it's the same vector for all sites
         ancestral = sapply(1:nr,function(x) ancestral)
       ancestral <- apply(ancestral,2,function(x) x/sum(x))
       result = log(diag(res[[1]]%*%ancestral)) #updated phangorn, phangorn 1.7
     }
   }
-  if(is.null(ancestral)){
+  if(is.null(ancestral)){ # convert root states to matrix with 0-1 entries
     diag.mat = diag(20)
     ancestral = diag.mat[,ancStates]
   }
+  ## result: nsite*1 matrix, ancestral: 20*nsite matrix, ancStates: inferred root states if applicable
   return(list(result=result,ancestral=ancestral,ancStates=ancStates))
-  #return(result)
 }
 
 
-# pml.ll <- function(tree,data,bf=NULL,Q=NULL,inv=0,k=1,shape=1,rate=1,model=NULL){
-#   
-# }
 # change the orders of the arguments in function ll3m so that mapply can be used later
 ll <- function(Q,scale,ancestral,ancStates,data,tree,g){
   ll3m(data,tree,scale,ancestral,ancStates,Q,g)
@@ -756,37 +758,32 @@ ll <- function(Q,scale,ancestral,ancStates,data,tree,g){
 ## The matrix is used later, when the optimal aa's are known or the rule of finding them is given
 ## Now it's more of a list of 20 instead of a matrix.
 ## every one of the 20 list has 3 components: result(sitelik),ancestral,ancStates
-llmat <- function(data,tree,Qall,scale.vec=rep(1,20),ancestral=NULL,ancStates=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6){
+llmat <- function(data,tree,Qall,scale.vec=rep(1,20),ancestral=NULL,ancStates=NULL,g=1){
   result = NULL
-  #weight = attr(data,"weight")
   nr = attr(data,"nr") #number of different sites
-  #index = attr(data,"index")
-  #ns = length(index) #number of sites
-#   if((!is.null(ancestral))&&(!is.null(ancStates)))
-#     warning("both ancestral state frequencies and states are specified, only ancestral states are used!")
   if(!is.null(ancStates)){ ##root states are given
-    result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,ancestral=NULL,g=1))
+    result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,ancestral=NULL,g=g),SIMPLIFY=FALSE)
    }
   else{ ## root states are not given, ancStates==NULL
     if(is.null(ancestral)) #default is MaxRoot
       ancestral = "max"
     if(is.vector(ancestral,mode="numeric")||is.matrix(ancestral)){ #if root freq is given as vector
-      result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancestral=ancestral,ancStates=ancStates,g=1))
+      result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancestral=ancestral,ancStates=ancStates,g=g),SIMPLIFY=FALSE)
     }
     else if(ancestral=="max"){ #MaxRoot
-      result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,ancestral=NULL,g=1),SIMPLIFY=FALSE)
+      result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,ancestral=NULL,g=g),SIMPLIFY=FALSE)
     }
     else if(ancestral=="opaa"){ #OpRoot -- root is the same as optimal aa
       anc=diag(20)
       anc = lapply(1:20,function(x) anc[x,])
-      result = mapply(ll,Qall,scale.vec,anc,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,g=1),SIMPLIFY=FALSE)
+      result = mapply(ll,Qall,scale.vec,anc,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,g=g),SIMPLIFY=FALSE)
     }
     else if(ancestral=="eqm"){ # EqmRoot
       anc=lapply(X=Qall,eqmQ) #find equilibrium frequencies for all Q's
-      result = mapply(ll,Qall,scale.vec,anc,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,g=1),SIMPLIFY=FALSE)
+      result = mapply(ll,Qall,scale.vec,anc,MoreArgs=list(data=data,tree=tree,ancStates=ancStates,g=g),SIMPLIFY=FALSE)
     }
     else if(ancestral=="emp"){ #EmpRoot - root frequencies from observation
-      result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancestral=findBf2(data),ancStates=ancStates,g=1),SIMPLIFY=FALSE)
+      result = mapply(ll,Qall,scale.vec,MoreArgs=list(data=data,tree=tree,ancestral=findBf2(data),ancStates=ancStates,g=g),SIMPLIFY=FALSE)
     }
     else stop("ancestral options: opaa, eqm,emp,max, or a numeric vector of length 20")
   }
@@ -802,8 +799,8 @@ llop <- function(op,ll_mat,data){
   
   llmat = sapply(1:20,function(x) ll_mat[[x]]$result) ## nr*20 matrix
   sitelik = sapply(1:nr,function(i) llmat[i,op[i]]) ## loglikelihood for each site
-  loglik <- sum(weight*sitelik)
-  get.ancestral <- function(i){
+  loglik <- sum(weight*sitelik) ## total log likelihood
+  get.ancestral <- function(i){ ## get the matrix for root state probabilities
     opi <- op[i]
     ll_mat[[opi]]$ancestral[,i]
   }
@@ -813,24 +810,24 @@ llop <- function(op,ll_mat,data){
 ## optimal amino acids are found by max rule
 llmax <- function(ll_mat,data){
   llmat = sapply(1:20,function(x) ll_mat[[x]]$result)
-  opaa = apply(llmat,1,which.max)
-  result = llop(op=opaa,ll_mat=ll_mat,data=data)
+  opaa = apply(llmat,1,which.max) ## find the aas that maximize the likelihood
+  result = llop(op=opaa,ll_mat=ll_mat,data=data) ## use the above function
   return(result)
 }
 # assume every amino acid has a weight to be the optimal one, and the weights are the same for all sites, calculate the loglikelihood
 # if no weights are specified, use the aa's that maximize the likelihoods (which is the same as above)
 ### root states to return need to be corrected (TO DO)
-llaaw <- function(opw,weight,llmat){
-  optimal_aa = "weighted"
+llaaw <- function(opw,weight,ll_mat){
+  llmat = sapply(1:20,function(x) ll_mat[[x]]$result)
   opw = opw/sum(opw)
   eresult = exp(llmat) #likelihood values, from exp(loglikelihood)
   sitelik = eresult %*% opw
   sitelik = log(sitelik)
   loglik = sum(weight * sitelik)
-  return(list(loglik=loglik,optimal_aa=optimal_aa,weights=opw, sitelik = sitelik, llmat=llmat))
+  return(list(loglik=loglik,opaa="weighted",sitelik = sitelik,ancestral=NULL))
 }
 ## given opw (weights of aas being optimal), weights of data patterns and LIKELIHOOD (not loglikelihood) matrix: n * 20
-## find the -loglikelihood for all data
+## find the -loglikelihood for all data, return only that value, instead of a list
 llaaw1 <- function(opw,weight,llmat){
   sitelik = llmat %*% opw
   sitelik = log(sitelik)
@@ -864,7 +861,7 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,scale.vec=rep(1,20),Q=NULL,d
   if(!is.null(opaa) && !is.null(opw)) warning("both optimal amino acis and weights are specified, weights are ignored")
   
   
-  if(is.null(bfaa)) bfaa = findBf2(data) #if bfaa is not given, use the empirical bf
+  ##if(is.null(bfaa)) bfaa = findBf2(data) #if bfaa is not given, use the empirical bf
   #goal: to get Qall: Q matrices for all aas as optimal
   if(is.null(Qall)){
     if(is.null(fixmatall)){
@@ -878,484 +875,158 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,scale.vec=rep(1,20),Q=NULL,d
     }
     Qall = QAllaa1(fixmatall,mumat,Ne=Ne)
   }
-  ll_mat = llmat(data=data,tree=tree,Qall=Qall,scale.vec=scale.vec,ancestral=ancestral,ancStates=ancStates,C=C,Phi=Phi,q=q,Ne=Ne)
-#   llmat = ll_mat$mat
-#   root = llmat$root
+  ll_mat = llmat(data=data,tree=tree,Qall=Qall,scale.vec=scale.vec,ancestral=ancestral,ancStates=ancStates)
   if(!is.null(opaa)) #opaa specified
     ll = llop(op=opaa,ll_mat=ll_mat,data=data)
   else if(!is.null(opw)) ## opw specified or max rule for optimal aa
-    ll = llaaw(opw=opw,weight=weight,llmat=llmat)
+    ll = llaaw(opw=opw,weight=weight,llmat=ll_mat)
   else{
     ll = llmax(ll_mat,data)
   }
-  result = list(ll=ll,data=data,tree=tree,s=s,GMweights=c(al,beta,gamma),Q=Q,scale.vec=scale.vec,dismat=dismat,fixmatall=fixmatall,Qall=Qall,
-                mumat=mumat,opaa=opaa,opw=opw,bfaa=bfaa,ancestral=ancestral,call=call)
+  result = list(ll=ll,data=data,tree=tree,s=s,beta=beta,gamma=gamma,Q=Q,scale.vec=scale.vec,
+                dismat=dismat,fixmatall=fixmatall,Qall=Qall,
+                mumat=mumat,opaa=opaa,opw=opw,ancestral=ancestral,call=call)
   class(result) = "mllm"
   return(result)
 }
 
 ######################################################################################################
-#MLE for s, given beta and gamma and all other parameter values
-#  mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,
-#                    Qall=NULL,opaa=NULL,opw=NULL,bfaa=NULL,ancestral=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-#sample call : optim.s(gene1,ROKAS_TREE,print_level=1,beta=be,gamma=ga,Q=NU_VEC))
-optim.s <- function(data, tree, s,method="BOBYQA",maxeval="100",print_level=0, ...){ # s is the initial
-  #store information from initial condition, with other parameters fixed
-  res.initial = mllm1(data=data,tree=tree,s=s,...)
-  #these don't change with the change of s
-  dismat = res.initial$dismat
-  mumat = res.initial$mumat
-  bfaa=res.initial$bfaa
-  fn = function(ab,data,tree){
-    result = -mllm1(data=data,tree=tree,s=ab,dismat=dismat,mumat=mumat,bfaa=bfaa, ...)$ll$loglik
-    return(result)
-  }
-  lower <- 0 #lower bound
-  upper <- Inf #upper bound
-  #options for optimizer
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,
-               "xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
-  res = nloptr(x0=s,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
-  return(res)
-}
-# find mle of s for a range of genes in rokas data, given values of beta and gamma
-## only apply to rokas data, for other data sets, need to tweak the codes
-optim.s.range<- function(beta,gamma,generange,tree,multicore=FALSE,method="BOBYQA",maxeval="100",print_level=0, ...){
-  mle.s.one <- function(k){ ## find mle of s for one gene
-    ## for now all search start with initial value "1" for s, could let user control the starting value             
-    mle <- optim.s(ROKAS_DATA[[k]],tree,s=1,method=method,maxeval=maxeval,print_level=print_level,beta=beta,gamma=gamma,...)
-    return(mle)
-  }
-  if(multicore)
-    res <- mclapply(generange,mle.s.one)
-  else
-    res <- lapply(generange,mle.s.one)
-  
-  return(res)
-}
-######################################################################################################
-# find mle for beta and gamma, that maximize the likelihood for all genes,Q is given
-optim.w <- function(beta,gamma,generange,tree,multicore=FALSE,method="BOBYQA",maxeval="100",print_level=0, ...){
-  ## a function of x that return the sum of -loglikelihood values for all genes with s optimized separately for different genes
-  ab <- c(beta,gamma)
-  fn <- function(ab,generange,tree){
-    cat("beta, gamma = ", ab, "\n")
-    #call the previous function to optimize s for all genes
-    mle <- optim.s.range(ab[1],ab[2],generange,tree=tree,multicore=multicore,method=method,maxeval=maxeval,print_level=print_level,...) 
-    mle.val <- sapply(1:length(generange),function(ind) mle[[ind]]$objective) # best -loglikelihood values
-    return(sum(mle.val)) #summation of all values
-  }
-  
-  lower <- c(0,0) #lower bound
-  upper <- c(Inf,Inf) #upper bound
-  #options for optimizer
-  opts <- list("algorithm"="NLOPT_LN_SBPLX","maxeval"="100","xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps^0.5,"print_level"=1)
-  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,generange=generange,tree=tree)
-  return(res)
-}
-
-######################################################################################################
-#MLE for s, beta and gamma, using subplex method by default
-#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-#sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,Q=NU_VEC))
-optim.s.weight <- function(data, tree, s,beta,gamma, method="SBPLX",maxeval="50",print_level=0,...){
-  #store information from initial condition, with other parameters fixed
-  if(is.null(s)) s = 1
-  if(is.null(beta)) beta=be
-  if(is.null(gamma)) gamma=ga
-  res.initial = mllm1(data=data,tree=tree,s=s,beta=beta,gamma=gamma,...)
-  #these don't change with the change of s
-  mumat = res.initial$mumat
-  ab <- c(s,beta,gamma) ##initial value
-#   ab[ab<=0] <- 1e-4
-#   ab <- log(ab)
-  fn = function(ab,data,tree){
-    #ab <- exp(ab)
-    #print(ab)
-    if(any(ab > 20)) return(10^5)
-    else{
-      result = -mllm1(data=data,tree=tree,s=ab[1],beta=ab[2],gamma=ab[3], mumat=mumat, ...)$ll$loglik
-      return(result)
-    }
-  }
-  lower <- rep(0,3)
-  upper <- rep(10,3)
-  #options for optimizer
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
-               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
-  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
-  return(res)
-}
-######################################################################################################
-#MLE for s, beta and gamma, using subplex method by default
-#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,scale.vec=rep(1,20)
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-#sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,be,ga,Q=NU_VEC))
-optim.scale <- function(data, tree, scale.vec=rep(1,20),Qall=NULL,method="SBPLX",maxeval="50",print_level=0,...){
-  if(is.null(Qall)){
-    res.initial = mllm1(data=data,tree=tree,scale.vec=scale.vec,...)
-    Qall <- res.initial$Qall
-  }
-  scale.vec <- scale.vec/scale.vec[1]
-  ab <- scale.vec[-1] ##initial value
-  #   ab[ab<=0] <- 1e-4
-  #   ab <- log(ab)
-  fn = function(ab,data,tree){
-    #ab <- exp(ab)
-    #print(ab)
-    scale.vec <- c(1,ab)
-    result = -mllm1(data=data,tree=tree,scale.vec=scale.vec,Qall=Qall,...)$ll$loglik
-    return(result)
-  }
-  lower <- rep(0,19)
-  upper <- rep(Inf,19)
-  #options for optimizer
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
-               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
-  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
-  return(res)
-}
-######################################################################################################
-## MLE for opw (weights for optimal amino acids)
-## supply the function, the gradient function, and the restriction function (sum=1)
-#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-#sample call: optim.opw(data,tree,opw=rep(1,20),s=0.1,beta=beta,gamma=gamma,Q=NU_VEC...)
-optim.opw <- function(data, tree,opw=NULL,print_level=0, ...){
-  if(is.null(opw))
-    opw = findBf2(data)
-  opw = opw/sum(opw) #opw given in the function call doesn't have to sum to 1
-  
-  res = mllm(data=data,tree=tree,opw=opw,...) #store llmat (loglikelihood values for all opaa) 
-  llmat = exp(res$ll$llmat)    #so that they don't need to be evaluated again and again
-  weight = attr(data,"weight")
-  #cat("opw optimization, starting loglikelihood = ", res$ll$loglik, "\n") #function value at the starting point
-  
-  # function to optimize on and its gradient function
-  eval_f_list <- function(opw){
-    return(list("objective"=llaaw1(opw,weight=weight,llmat=llmat),
-                "gradient"=llaaw_grad(opw,weight=weight,llmat=llmat)))
-  }
-  # linear equality constraint, and its jacobian
-  eval_g_list <- function(opw){
-    return(list("constraints"=sum(opw)-1,"jacobian"=rep(1,20)))
-  }
-  lower <- rep(0,20) #lower bound
-  upper <- rep(1,20) #upper bound
-  local_opts <- list("algorithm"="NLOPT_LD_MMA","xtol_rel"=1e-7) #options for local optimizer
-  #options for optimizer
-  opts <- list("algorithm"="NLOPT_LD_AUGLAG","maxeval"="1000000","xtol_rel"=1e-7,"ftol_rel"=.Machine$double.eps,
-               "local_opts"=local_opts,"print_level"=print_level)
-  res = nloptr(x0=opw,eval_f=eval_f_list,eval_g_eq=eval_g_list, lb=lower,ub=upper,opts=opts)
-  # res$objective: best function value found
-  # res$solution: best parameter values
-  return(res)
-}
-
-# find mle for beta and gamma, that maximize the likelihood for all genes,Q is given
-optim.opw.range <- function(s,beta,gamma,generange,Q,tree,multicore=FALSE,print_level=0){
-  if(multicore)
-    res <- mclapply(ROKAS_DATA[generange],optim.opw,tree=tree,opw=rep(1,20),
-                    print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q)
-  else
-    res <- lapply(ROKAS_DATA[generange],optim.opw,tree=tree,opw=rep(1,20),
-                  print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q)
-  return(res)
-}
-## optimize beta, gamma and s, for each gene find the best opw for them, instead of using a universal one
-optim.opw.sbg <- function(s,beta,gamma,Q,tree,generange,multicore=FALSE,print_level=0,...){
-  ab <- c(s,beta,gamma)
-  fn <- function(ab){
-    cat("s,beta,gamma = ", ab, "\n")
-    mle <- optim.opw.range(ab[1],ab[2],ab[3],generange=generange,Q=Q,tree=tree,multicore=multicore,
-                           print_level=print_level,...)
-    mle.val <- sapply(1:length(generange), function(x) mle[[x]]$objective)
-    return(sum(mle.val))
-  }
-  lower <- rep(0,3)
-  upper <- rep(Inf,3)
-  opts <- list("algorithm"="NLOPT_LN_SBPLX","maxeval"="100","xtol_rel"=1e-6,
-               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=1)
-  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts)
-  return(res)
-}
-optim.all <- function(s,beta,gamma,Q,tree,generange,multicore=FALSE,print_level=0,maxeval="100",...){
+optim.all <- function(data,tree,s,beta,gamma,Q,print_level=0,method="SBPLX",maxeval="100",...){
   if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
     tree <- reorderPruning(tree)
-  br=tree$edge.length
-  br.num = length(br)
-  Q <- Q/Q[6]
-  ab = c(s,beta,gamma,br,Q[1:5]) #all parameters as a vector, length = 3+br.num+5
-  ablen <- length(ab)
+  brlen=tree$edge.length
+  brCt = length(brlen) # number(count) of branches
+  Q1 = Q/Q[6] #make the last entry 1
+  Q = Q1[1:5] #first 5 rates
+  ab = c(s,beta,gamma,brlen,Q) #all parameters as a vector, length = 3+br.num+6
+  paralen <- length(ab)
   fn <- function(ab){
     s <- ab[1]
     beta <- ab[2]
     gamma <- ab[3]
     cat("s,beta,gamma:",s,beta,gamma,"\n")
-    tree$edge.length <- ab[4:(4+br.num-1)]
+    tree$edge.length <- ab[4:(4+brCt-1)]
     cat("branch lengths:", tree$edge.length,"\n")
-    Q <- c(ab[(4+br.num):ablen],1)
-    cat("Q:",Q,"\n","\n")
-    mle <- optim.opw.range(s,beta,gamma,generange=generange,Q=Q,tree=tree,multicore=multicore,print_level=print_level,...)
-    mle.val <- sapply(1:length(generange), function(x) mle[[x]]$objective)
-    return(sum(mle.val))
+    Q <- c(ab[(4+brCt):paralen],1)
+    cat("Q:",Q,"\n")
+    loglik <- mllm1(data=data,tree=tree,s=s,beta=beta,gamma=gamma,Q=Q,...)$ll$loglik
+    cat("-loglik",-loglik,"\n")
+    return(-loglik)
   }
-  lower <- rep(0,ablen)
-  upper <- rep(Inf,ablen)
-  opts <- list("algorithm"="NLOPT_LN_BOBYQA","maxeval"=maxeval,"xtol_rel"=1e-6,
-               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=1)
+  lower <- rep(10e-8,paralen)
+  upper <- c(10,rep(Inf,paralen-1))
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
+               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts)
   par_optim <- res$solution
   res$s = par_optim[1]
-  res$GMweights = c(al,par_optim[2:3])
-  res$br = par_optim[4:(4+br.num-1)]
-  res$Q = c(par_optim[(4+br.num):ablen],1)
+  res$beta = par_optim[2]
+  res$gamma = par_optim[3]
+  res$Q = c(par_optim[(4+brCt):paralen],1)
+  tree$edge.length = par_optim[4:(4+brCt-1)]
+  res$tree = tree
   return(res)
 }
 
-######################################################################################################
-## MLE for branch lengths, specify starting values for el, otherwise it starts with the tree supplied with branch length
-#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-#sample call: optim.br(data,tree,el=NULL,s=0.1,beta=be,gamma=ga,Q=NU_VEC...)
-optim.br <- function(data,tree,el=NULL,method="COBYLA",maxeval="100", print_level=0, ...){
-  if(is.null(el))
-  {el <- tree$edge.length}
-  br.num <- length(el)
+
+## find the path to a particular tip in a tree
+## including the branches and the nodes on the path
+path_to_tip <- function(tree,i){
+  br <- tree$edge #all the edges
+  ntips <- length(tree$tip.label)
+  parents <- as.integer(br[, 1])
+  child <- as.integer(br[, 2])
+  root <- as.integer(parents[!match(parents, child, 0)][1]) 
   
-  res.initial = mllm1(data=data,tree=tree,...)
-  #these don't change with the change of s
-  Qall = res.initial$Qall
-  fn = function(el,data,tree){
-    tree$edge.length = el
-    #print(el)
-    result = -mllm1(data,tree, Qall=Qall,...)$ll$loglik
-    return(result)
+  done <- FALSE
+  node.path <- i #nodes on the path, from root to tip
+  br.path <- NULL # indices of branches on the path to the tip
+  while(!done){
+    if(node.path[1]==root)
+      done <- TRUE
+    else{
+      start <- node.path[1] #start tracing, go backwards
+      br.ind <- which(br[,2]==start) #find the index of branch that ends in "start"
+      br.path <- c(br.ind,br.path)
+      pre <- br[br.ind,1] #next node on the path when going backwards
+      node.path <- c(pre,node.path)
+    }
   }
-  lower=rep(0,br.num)
-  upper=rep(Inf,br.num)
-  #options for optimizer
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,"ftol_rel"=.Machine$double.eps,
-               "stopval"=-Inf,"print_level"=print_level)
-  res = nloptr(x0=el,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
-  #print(res)
-  return(res)
+  return(list(br.path=br.path,node.path=node.path))
 }
 
-######################################################################################################
-
-## optimize the mutation rates for nucleotides, this is only for GTR model, with 5 parameters
-## can be easily changed to account for other models, e.g. Jukes-Cantor, etc.
-#mllm <- function(data,tree,s,beta=be,gamma=ga,Q=NULL,
-#             dismat=NULL,mumat=NULL,opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-optimQ <- function(tree,data,Q=rep(1,6),method="SBPLX",maxeval="100",print_level=0, ...){
-  Q = Q/Q[6] #make last rate 1
-  #store information from initial condition, with other parameters fixed
-  res.initial = mllm1(data=data,tree=tree,Q=Q,...)
-  #these don't change with the change of s
-  fixmatall = res.initial$fixmatall
-  
-  ab <- Q[1:5] # optimize on the first 5 rates
-  fn = function(ab,tree,data){
-    #print(ab)
-    result = -mllm1(data,tree,Q=c(ab,1),fixmatall=fixmatall, ...)$ll$loglik
-    return(result)
+## given a tree and desired depth, make the tree ultrametric without changing the interior branch lengths
+ult.tree <- function(tree,depth=NULL,pathlist=NULL){
+  if(is.ultrametric(tree))
+    return(tree)
+  else{
+    nTips <- length(tree$tip.label)
+    if(is.null(depth))
+      depth <- max(node.depth.edgelength(tree))
+    if(is.null(pathlist))
+      pathlist = lapply(1:nTips,function(x) path_to_tip(tree,x)$br.path) #find list of paths to tips if not given
+    for(i in 1:nTips){
+      brs <- pathlist[[i]]
+      l <- length(brs)
+      if(l==1)
+        tree$edge.length[brs] = depth
+      else
+        tree$edge.length[brs[l]] = depth - sum(tree$edge.length[brs[1:(l-1)]])
+    }
+    return(tree)
   }
-  lower=rep(0,5)
-  upper=rep(Inf,5)
-  #options for optimizer
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,
-               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
-  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
-  res$solution = c(res$solution,1) # append the last rate (1) to the rate vector
-  return(res)
 }
-######################################################################################################
-## optimize parameters
-## first optimize all parameters except optimal weights
-## then optimize the weights of amino acids being optimal
-optim.mllm1 <- function(object, optQ = FALSE, optBranch = FALSE, optsWeight = TRUE, optOpw = FALSE,optscale=FALSE,
-                       control = list(epsilon=1e-08,hmaxit=10,htrace=TRUE,print_level=0,maxeval="300"),...){
-  tree = object$tree
-  if(any(tree$edge.length < 1e-08)){
-    tree$edge.length[tree$edge.length < 1e-08] <- 1e-08
-    #object <- update(object, tree=tree)
-  }
-  call = object$call
-  #maxit = control$maxit #maximum number of iterations for each sub optimizer
-  htrace = control$htrace #print out information about steps or not?
-  print_level=control$print_level
-  maxeval = control$maxeval
-  data = object$data
-  Q = object$Q
-  scale.vec = object$scale.vec
-  #if(is.null(subs)) subs = c(1:(length(Q)-1),0) #default is GTR
-  bfaa = object$bfaa #this is going to be the same, no matter from data or given -- empirical frequencies
-  opw = NULL
-  ll = object$ll$loglik
-  ll1 = ll
-  s = object$s
-  beta = object$GMweights[2]
-  gamma = object$GMweights[3]
-  if(is.null(s)) s = 1
-  if(is.null(beta)) beta=be
-  if(is.null(gamma)) gamma=ga
-  opti = TRUE # continue optimizing or not
-  rounds = 0 #index of iterations
-  while(opti){
-    if(htrace){
-      cat("\n","Round ",rounds+1,"\n")
-      cat("opw = ", opw, "\n")
-    }
-    if(optsWeight){
-      res = optim.s.weight(data,tree,maxeval=maxeval,print_level=print_level,
-                           s=s,beta=beta,gamma=gamma,Q=Q,scale.vec=scale.vec,opw=opw,...)
-      s = res$solution[1]
-      beta = res$solution[2]
-      gamma = res$solution[3]
-      if(htrace){
-        cat("optimize s and Grantham weights: ", ll, "--->", -res$objective, "\n")
-        cat("s, beta, gamma are now: ", res$solution, "\n")
-      }
-      ll = -res$objective
-    }
-    if(optQ){
-      res = optimQ(tree,data,Q=Q,maxeval=maxeval,print_level=print_level,
-                   s=s,beta=beta,gamma=gamma,scale.vec=scale.vec,opw=opw, ...)
-      Q = res$solution
-      if(htrace){
-        cat("optimize rate matrix: ", ll, "--->", -res$objective, "\n")
-        cat("Q is now: ", res$solution, "\n")
-      }
-      ll = -res$objective
-    }
-    if(optBranch){
-      res = optim.br(data,tree,maxeval=maxeval,print_level=print_level,
-                     s=s,beta=beta,gamma=gamma,Q=Q,scale.vec=scale.vec,opw=opw, ...)
-      if(htrace){
-        cat("optimize branch lengths:", ll, "--->", -res$objective, "\n")
-        cat("branch lengths are now: ", res$solution, "\n")
-      }
-      tree$edge.length = res$solution
-      ll =-res$objective
-    }
-    if(optscale){
-      res = optim.scale(data,tree,scale.vec=scale.vec,Qall=NULL,maxeval=maxeval,
-                        print_level=print_level,s=s,beta=beta,gamma=gamma,Q=Q,opw=opw,...)
-      scale.vec = c(1,res$solution)
-      if(htrace){
-        cat("optimize scales of Q:", ll, "--->", -res$objective, "\n")
-        cat("scales are now: ", scale.vec, "\n")
-      }
-      ll = -res$objective
-    }
-    if(optOpw){
-      res = optim.opw(data,tree,opw=opw,print_level=print_level,
-                      s=s,beta=beta,gamma=gamma,Q=Q,scale.vec=scale.vec,...) #new optimizer using nloptr
-      if(htrace){
-        ##notice that the loglikelihood will decrease, from maximizing rule to weighted rule
-        cat("optimize weights of optimal aa:", ll, "--->", -res$objective, "\n")
-        cat("weights are now: ", res$solution, "\n")
-      }
-      opw = res$solution
-      ll = -res$objective
-    }
+optim.all.ultrametric <- function(data,tree,s,beta,gamma,Q,print_level=0,method="SBPLX",maxeval="100",...){
+  if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
+    tree <- reorderPruning(tree)
+  
+  nTips <- length(tree$tip.label)
+  pathlist = lapply(1:nTips,function(x) path_to_tip(tree,x)$br.path)
+  nIntBr <- nTips - 2 #number of interior branches
+  edge <- tree$edge
+  int.ind <- which(!(edge[,2] %in% c(1:nTips))) #index of interior branches in tree$edge
+  ext.ind <- which(edge[,2] %in% c(1:nTips))
+  brCt <- length(int.ind) #interior branches
+  brlen=tree$edge.length[int.ind]
 
-    rounds = rounds + 1
-    if(rounds >= control$hmaxit) opti <- FALSE
-    if(((ll1-ll)<=0) && ((ll1-ll)/ll < control$epsilon)) opti <- FALSE
-    ll1 = ll
-  }
-  
-  object = update(object,tree=tree,data=data,s=s,beta=beta,gamma=gamma,Q=Q,scale.vec=scale.vec,
-                  opw=opw,...)
-  return(object)
-}
-#MLE for s and Ne, using subplex method by default
-#mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,Q=NULL,dismat=NULL,fixmatall=NULL,mumat=NULL,Qall=NULL,
-#                  opaa=NULL,opw=NULL,bfaa=NULL,C=2,Phi=0.5,q=4e-7,Ne=5e6)
-#sample call : optim.s.weight(gene1,ROKAS_TREE,0.1,5000,beta=be,gamma=ga,Q=NU_VEC,...)
-optim.s.Ne <- function(data, tree,s,Ne, method="SBPLX",maxeval="500",print_level=0,...){
-  #store information from initial condition, with other parameters fixed
-  res.initial = mllm1(data=data,tree=tree,s=s,beta=be,gamma=ga,Ne=Ne,...)
-  #these don't change with the change of s
-  mumat = res.initial$mumat
-  bfaa=res.initial$bfaa
-  
-  ab <- c(s,Ne) ##initial value
-  fn = function(ab,data,tree){
-    cat("s, Ne = ",ab[1]," ",ab[2],"\n")
-    result = -mllm1(data=data,tree=tree,s=ab[1],beta=be,gamma=ga, mumat=mumat,bfaa=bfaa,Ne=ab[2], ...)$ll$loglik
-    cat(result,"\n")
-    return(result)
+  Q1 = Q/Q[6] #make the last entry 1
+  Q = Q1[1:5] #first 5 rates
+  ab = c(s,beta,gamma,Q,brlen,max(node.depth.edgelength(tree))) #all parameters as a vector, length = 3+br.num+6
+  paralen <- length(ab)
+  fn <- function(ab){
+    s <- ab[1]
+    beta <- ab[2]
+    gamma <- ab[3]
+    cat("s,beta,gamma:",s,beta,gamma,"\n")
+    Q <- c(ab[4:8],1)
+    cat("Q:",Q,"\n")
     
+    depth <- tail(ab,1) # tree depth is the last element in the vector
+    tree$edge.length[int.ind] <- ab[9:(8+brCt)] # assign internal branches new lengths
+    tree <- ult.tree(tree,depth=depth,pathlist=pathlist) #calculate exterior branch lengths
+    cat("tree edge lengths","\n")
+    cat(tree$edge.length,"\n")
+    if(any(tree$edge.length<0)) return(10^7)
+    else{
+      loglik <- mllm1(data=data,tree=tree,s=s,beta=beta,gamma=gamma,Q=Q,...)$ll$loglik
+      cat("-loglik",-loglik,"\n")
+      return(-loglik)
+    }
   }
-  lower <- rep(0,2)
-  upper <- rep(Inf,2)
-  #options for optimizer
+  lower <- rep(10e-8,paralen)
+  upper <- c(10,rep(Inf,paralen-1))
   opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
                "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
-  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
+  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts)
+  par_optim <- res$solution
+  res$s = par_optim[1]
+  res$beta = par_optim[2]
+  res$gamma = par_optim[3]
+  res$Q = c(par_optim[4:8],1)
+  tree$edge.length[int.ind] = par_optim[9:(8+brCt)] #new interior branch lengths
+  depth <- tail(par_optim,1) # tree depth is the last element in the vector
+  res$tree <- ult.tree(tree,depth=depth,pathlist=pathlist) #calculate exterior branch lengths
   return(res)
 }
 
-optim.Ne <- function(data, tree,s,Ne, method="SBPLX",maxeval="500",print_level=0,...){
-  #store information from initial condition, with other parameters fixed
-  res.initial = mllm1(data=data,tree=tree,s=s,beta=be,gamma=ga,Ne=Ne,...)
-  #these don't change with the change of s
-  mumat = res.initial$mumat
-  bfaa=res.initial$bfaa
-  
-  ab <- Ne ##initial value
-  fn = function(ab,data,tree){
-    cat("Ne = ",ab,"\n")
-    result = -mllm1(data=data,tree=tree,s=s,beta=be,gamma=ga, mumat=mumat,bfaa=bfaa,Ne=ab, ...)$ll$loglik
-    cat(result,"\n")
-    return(result)
-    
-  }
-  lower <- 0
-  upper <- Inf
-  #options for optimizer
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
-               "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
-  res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
-  return(res)
-}
-## convert a string that contains many numbers separated by blanks, to a vector of numbers
-str.to.num <- function(string,split=" "){
-  char.vec <- strsplit(string,split=split)[[1]]
-  return(as.numeric(char.vec))
-}
-#############################################################################
-# #for a given vector of log likelihood, and the corresponding opaa, find the smallest set of aa
-# # that cover the 95% of the total likelihood
-aa.set <- function(llvec){
-  lvec = exp(llvec) #likelihood
-  ord = order(llvec,decreasing=T) #order of llvec (increasing)
-  lvec = lvec[ord] # ordered likelihood
-  tol = sum(lvec) #total likelihood
-  CumSum = cumsum(lvec) # cumulative sum 
-  ind = sum(CumSum < tol*0.95) + 1 #the index that gives > 95% totol likelihood
-  Sum = CumSum[ind] # sum of the first "ind" terms
-  #return the set of amino acids that give > 95% likelihood, percentile, and 
-  #the percentile of the likelihood given by the optimal aa (max rule)
-  return(list(aa=ord[1:ind], percentile=Sum/tol,op.percentile=lvec[1]/tol))
-}
-# aa.conf = apply(X=mat,MARGIN=1,FUN=aa.set) #here mat is the llmat from result
-# numaa = sapply(1:length(aa.conf),function(x) length(aa.conf[[x]]$aa))
-# op.lik = sapply(1:length(aa.conf), function(x) aa.conf[[x]]$op.per)
-# numaa_freq <- as.numeric(table(numaa))
-# numaa_freq <- numaa_freq/sum(numaa_freq)
-
-
-# heatmap of probabilities that each amino acid accounts for
-hmap.op <- function(llmat){
-  probmat <- exp(llmat)
-  lsite <- dim(probmat)[1]
-  #probmat <- t(sapply(1:lsite,function(x) expmat[x,]/sum(expmat[x,])))
-  #heatmap(probmat[1:lsite,],Rowv=NA,Colv=NA,col=grey.colors(256))
-  heatmap(t(probmat),Rowv=NA,Colv=NA,col=grey.colors(256))
-}
 
