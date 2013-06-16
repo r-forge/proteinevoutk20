@@ -428,7 +428,7 @@ br_pos <- function(tree){
   br.pos <- cbind(node.pos[br[,1]],node.pos[br[,2]])
   return(br.pos)
 }
-get_trace <- function(sim,s,beta,gamma,ratio=TRUE){
+get_trace <- function(sim,s,beta,gamma,ftny.vec,ratio=TRUE){
   sim.trace <- sim$trace ## simulations on all the branches
   l <- length(sim.trace) ## number of traces (branches)
   tree <- sim$tree ## tree on which the simulation is done
