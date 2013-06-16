@@ -891,7 +891,8 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,scale.vec=rep(1,20),Q=NULL,d
 }
 
 ######################################################################################################
-optim.all <- function(data,tree,s,beta,gamma,Q,print_level=0,method="SBPLX",maxeval="100",...){
+optim.all <- function(data,tree,s,beta,gamma,Q,print_level=0,
+                      method="SBPLX",maxeval="100",maxtime="0.0",...){
   if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
     tree <- reorderPruning(tree)
   brlen=tree$edge.length
@@ -910,12 +911,12 @@ optim.all <- function(data,tree,s,beta,gamma,Q,print_level=0,method="SBPLX",maxe
     Q <- c(ab[(4+brCt):paralen],1)
     cat("Q:",Q,"\n")
     loglik <- mllm1(data=data,tree=tree,s=s,beta=beta,gamma=gamma,Q=Q,...)$ll$loglik
-    cat("-loglik",-loglik,"\n")
     return(-loglik)
   }
   lower <- rep(10e-8,paralen)
   upper <- c(10,rep(Inf,paralen-1))
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,
+               "maxtime"=maxtime,"xtol_rel"=1e-6,
                "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts)
   par_optim <- res$solution
@@ -927,8 +928,8 @@ optim.all <- function(data,tree,s,beta,gamma,Q,print_level=0,method="SBPLX",maxe
   res$tree = tree
   return(res)
 }
-
-
+######################################################################################################
+## OPTIMIZE BRANCH LENGTHS WITH RESTRICTION OF THE TREE BEING ULTRAMETRIC
 ## find the path to a particular tip in a tree
 ## including the branches and the nodes on the path
 path_to_tip <- function(tree,i){
@@ -976,7 +977,8 @@ ult.tree <- function(tree,depth=NULL,pathlist=NULL){
     return(tree)
   }
 }
-optim.all.ultrametric <- function(data,tree,s,beta,gamma,Q,print_level=0,method="SBPLX",maxeval="100",...){
+optim.all.ultrametric <- function(data,tree,s,beta,gamma,Q,print_level=0,
+                                  method="SBPLX",maxeval="100",maxtime="0.0",...){
   if(is.null(attr(tree,"order")) || attr(tree,"order") == "cladwise")
     tree <- reorderPruning(tree)
   
@@ -1009,13 +1011,13 @@ optim.all.ultrametric <- function(data,tree,s,beta,gamma,Q,print_level=0,method=
     if(any(tree$edge.length<0)) return(10^7)
     else{
       loglik <- mllm1(data=data,tree=tree,s=s,beta=beta,gamma=gamma,Q=Q,...)$ll$loglik
-      cat("-loglik",-loglik,"\n")
       return(-loglik)
     }
   }
   lower <- rep(10e-8,paralen)
   upper <- c(10,rep(Inf,paralen-1))
-  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,"xtol_rel"=1e-6,
+  opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"=maxeval,
+               "maxtime"=maxtime,"xtol_rel"=1e-6,
                "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts)
   par_optim <- res$solution
