@@ -459,17 +459,18 @@ get_trace <- function(sim,s,beta,gamma,ftny.vec,ratio=TRUE){
   }
   return(trace.info)
 }
-plot_trace <- function(trace.info,obs.ftny,plotftny=TRUE,plotdis=FALSE,gene=1){
+plot_trace <- function(trace.info,obs.ftny,zoom=FALSE,plotftny=TRUE,plotdis=FALSE,label="gene",gene=1){
   if(plotftny){
     par(mfrow=c(2,4))
     ftylim <- ftyrange(trace.info)
-    ftylim[2] <- 1
+    if(!zoom)
+      ftylim[2] <- 1
     ftylim<- range(c(ftylim,obs.ftny))
     for(i in 1:length(trace.info)){
       sim_info <- trace.info[[i]]
       t <- max(sim_info$t)
       plot(c(0,t),ftylim,type="n",bty="n",xlab="time",ylab="functionality",
-           main=paste("gene", gene, ",", sim_info$tip),axes=FALSE,xlim=c(0,t))
+           main=paste(label, gene, ",", sim_info$tip),axes=FALSE,xlim=c(0,t))
       axis(1,pos=ftylim[1])
       axis(2,pos=0)
       abline(h=obs.ftny[sim_info$tip],col="blue")
@@ -485,7 +486,7 @@ plot_trace <- function(trace.info,obs.ftny,plotftny=TRUE,plotdis=FALSE,gene=1){
       sim_info <- trace.info[[i]]
       t <- max(sim_info$t)
       plot(c(0,t),dislim,type="n",bty="n",xlab="time",ylab="similarity",
-           main=paste("gene", gene, ",", sim_info$tip),axes=FALSE,xlim=c(0,t))
+           main=paste(label, gene, ",", sim_info$tip),axes=FALSE,xlim=c(0,t))
       axis(1,pos=dislim[1])
       axis(2,pos=0)
       points(sim_info$dis~sim_info$t,pch=20)
