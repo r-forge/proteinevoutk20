@@ -2,6 +2,19 @@ get.root <- function(mat){
   l <- dim(mat)[2]
   sapply(1:l,function(x) which(mat[,x]==1))
 }
+
+stnry.ftny <- function(opaa,s,beta,gamma){
+  dismat = GM_cpv(GM_CPV,al,beta,gamma)
+  fixmatall <- fixmatAll(s,DisMat=dismat)
+  mumat = aa_MuMat_form(Q)
+  Qall = QAllaa1(fixmatall,mumat)
+  eqn.prob <- sapply(Qall,FUN=eqmQ) #one column for each optimal amino acid
+  ftny.op <- function(op)
+    sapply(1:20,function(x) Ftny_protein(x,protein_op=op,s=s,DisMat=dismat)) %*% eqn.prob[,op]
+  eqn.ftny <- sapply(1:20,ftny.op)
+  ftny.vec <- eqn.ftny[opaa]
+  return(length(ftny.vec)/sum(1/ftny.vec))
+}
 # simulationQ1 <- function(protein,t,Q=NULL,bf=NULL){
 #   if(is.null(bf)) bf <- rep(1/20,20)
 #   if(is.null(Q)) Q <- rep(1,190)
@@ -104,20 +117,4 @@ optim.ultrametric <- function(tree,data,method="SBPLX",maxeval="100",print_level
 #   return(list(index = internal.ind,edge=edge[internal.ind,],edge.length=tree$edge.length[internal.ind]))
 # }
 
-ult.tree <- function(tree,depth=NULL){
-  if(is.ultrametric(tree))
-    return(list(tree=tree,depth=depth))
-  else{
-    nTips <- length(tree$tip.label)
-    depth <- max(node.depth.edgelength(tree))
-    for(i in 1:nTips){
-      brs <- path_to_tip(tree,i)$br.path
-      l <- length(brs)
-      if(l==1)
-        tree$edge.length[brs] = depth
-      else
-        tree$edge.length[brs[l]] = depth - sum(tree$edge.length[brs[1:(l-1)]])
-    }
-    return(list(tree=tree,depth=depth))
-  }
-}
+
