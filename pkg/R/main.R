@@ -1,14 +1,14 @@
-library(seqinr) #package to convert codons to amino acids
-library(phangorn) #phylogenetics package
-library(optimx) #optimization package
-library(expm) #matrix exponentiation
+library(seqinr,quietly=TRUE) #package to convert codons to amino acids
+library(phangorn,quietly=TRUE) #phylogenetics package
+library(optimx,quietly=TRUE) #optimization package
+library(expm,quietly=TRUE) #matrix exponentiation
 #library(parallel) #parallel computing
-library(multicore)
-library(minqa) #optimization function bobyqa
-library(mgcv) #find the unique rows in a matrix - uniquecombs
-library(numDeriv) # calculate hessian of a function at a point
-library(gtools) #package used to draw random samples from dirichlet distribution -- rdirichlet, ddirichlet
-library(nloptr) #optimization
+library(multicore,quietly=TRUE)
+library(minqa,quietly=TRUE) #optimization function bobyqa
+library(mgcv,quietly=TRUE) #find the unique rows in a matrix - uniquecombs
+library(numDeriv,quietly=TRUE) # calculate hessian of a function at a point
+library(gtools,quietly=TRUE) #package used to draw random samples from dirichlet distribution -- rdirichlet, ddirichlet
+library(nloptr,quietly=TRUE) #optimization
 #library(scatterplot3d)
 #library(akima) # gridded bivariate interpolation for irredular data
 #library(Rmpfr)
