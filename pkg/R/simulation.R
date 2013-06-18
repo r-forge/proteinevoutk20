@@ -428,7 +428,7 @@ br_pos <- function(tree){
   br.pos <- cbind(node.pos[br[,1]],node.pos[br[,2]])
   return(br.pos)
 }
-get_trace <- function(sim,s,beta,gamma,ftny.vec,ratio=TRUE){
+get_trace <- function(sim,s,beta,gamma,ftny.vec,opaa=opaa,ratio=TRUE){
   sim.trace <- sim$trace ## simulations on all the branches
   l <- length(sim.trace) ## number of traces (branches)
   tree <- sim$tree ## tree on which the simulation is done
@@ -453,7 +453,7 @@ get_trace <- function(sim,s,beta,gamma,ftny.vec,ratio=TRUE){
     }
     ########################################
     t <- max(br.pos[pathj$br.path,])
-    sim_info <- sim.info(sim=tracej,opaa=opaa[index],obsaa=datanum[tip,],ratio=ratio,t=0,s=s,beta=beta,gamma=gamma,fty=T,dist=T)
+    sim_info <- sim.info(sim=tracej,opaa=opaa,obsaa=datanum[tip,],ratio=ratio,t=0,s=s,beta=beta,gamma=gamma,fty=T,dist=T)
     trace.info[[j]] <- sim_info
     trace.info[[j]]$tip <- tip
   }

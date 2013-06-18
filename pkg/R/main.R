@@ -600,6 +600,20 @@ QAllaa1 <- function(fixall,MuMat,Ne=5e6){
   res <- lapply(1:20, function(x) Qmat(fixall[[x,1]],MuMat,Ne=Ne))
   return(as.matrix(res))
 }
+stnry.ftny <- function(opaa,s,beta,gamma,Qall=NULL){
+  dismat = GM_cpv(GM_CPV,al,beta,gamma)
+  if(is.null(Qall)){
+    fixmatall <- fixmatAll(s,DisMat=dismat)
+    mumat = aa_MuMat_form(Q)
+    Qall = QAllaa1(fixmatall,mumat)
+  }
+  eqn.prob <- sapply(Qall,FUN=eqmQ) #one column for each optimal amino acid
+  ftny.op <- function(op)
+    sapply(1:20,function(x) Ftny_protein(x,protein_op=op,s=s,DisMat=dismat)) %*% eqn.prob[,op]
+  eqn.ftny <- sapply(1:20,ftny.op)
+  ftny.vec <- eqn.ftny[opaa]
+  return(length(ftny.vec)/sum(1/ftny.vec))
+}
 # given the edge lengths el, rate matrix Q and rate g, find the probability transition matrices P
 # result is of dimension length(g)*length(el). Therefore the transition probabilities on all branches
 # To parse an object from getPm, say P, do P[i,j][[1]], or P[[i,j]]
