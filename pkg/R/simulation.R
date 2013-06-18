@@ -434,11 +434,12 @@ get_trace <- function(sim,datanum,s,beta,gamma,ftny.vec,opaa=opaa,ratio=TRUE){
   tree <- sim$tree ## tree on which the simulation is done
   br.pos <- br_pos(tree) ##edges, with entries as the position of nodes
   ntips <- length(tree$tip.label) #number of tips
-  
+  trace.info <- vector("list",length=ntips)
   for(j in 1:ntips){
     tip = tree$tip.label[j] #name of the tip
     obs.ftny <- ftny.vec[tip]
     pathj <- path_to_tip(tree,j)
+
     pathj.bgn <- br.pos[pathj$br.path,1] #begining position of the branches on the path 
     ########################################
     ## paste traces together for a certain tip
