@@ -428,14 +428,13 @@ br_pos <- function(tree){
   br.pos <- cbind(node.pos[br[,1]],node.pos[br[,2]])
   return(br.pos)
 }
-get_trace <- function(sim,s,beta,gamma,ftny.vec,opaa=opaa,ratio=TRUE){
+get_trace <- function(sim,datanum,s,beta,gamma,ftny.vec,opaa=opaa,ratio=TRUE){
   sim.trace <- sim$trace ## simulations on all the branches
   l <- length(sim.trace) ## number of traces (branches)
   tree <- sim$tree ## tree on which the simulation is done
   br.pos <- br_pos(tree) ##edges, with entries as the position of nodes
   ntips <- length(tree$tip.label) #number of tips
   
-  trace.info <- vector("list",length=ntips)
   for(j in 1:ntips){
     tip = tree$tip.label[j] #name of the tip
     obs.ftny <- ftny.vec[tip]
