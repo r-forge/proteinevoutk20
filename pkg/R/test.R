@@ -3,18 +3,7 @@ get.root <- function(mat){
   sapply(1:l,function(x) which(mat[,x]==1))
 }
 
-stnry.ftny <- function(opaa,s,beta,gamma){
-  dismat = GM_cpv(GM_CPV,al,beta,gamma)
-  fixmatall <- fixmatAll(s,DisMat=dismat)
-  mumat = aa_MuMat_form(Q)
-  Qall = QAllaa1(fixmatall,mumat)
-  eqn.prob <- sapply(Qall,FUN=eqmQ) #one column for each optimal amino acid
-  ftny.op <- function(op)
-    sapply(1:20,function(x) Ftny_protein(x,protein_op=op,s=s,DisMat=dismat)) %*% eqn.prob[,op]
-  eqn.ftny <- sapply(1:20,ftny.op)
-  ftny.vec <- eqn.ftny[opaa]
-  return(length(ftny.vec)/sum(1/ftny.vec))
-}
+
 # simulationQ1 <- function(protein,t,Q=NULL,bf=NULL){
 #   if(is.null(bf)) bf <- rep(1/20,20)
 #   if(is.null(Q)) Q <- rep(1,190)
