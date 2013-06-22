@@ -2,13 +2,13 @@ library(seqinr,quietly=TRUE) #package to convert codons to amino acids
 library(phangorn,quietly=TRUE) #phylogenetics package
 library(optimx,quietly=TRUE) #optimization package
 library(expm,quietly=TRUE) #matrix exponentiation
-#library(parallel) #parallel computing
 library(multicore,quietly=TRUE)
 library(minqa,quietly=TRUE) #optimization function bobyqa
 library(mgcv,quietly=TRUE) #find the unique rows in a matrix - uniquecombs
 library(numDeriv,quietly=TRUE) # calculate hessian of a function at a point
 library(gtools,quietly=TRUE) #package used to draw random samples from dirichlet distribution -- rdirichlet, ddirichlet
 library(nloptr,quietly=TRUE) #optimization
+#library(parallel) #parallel computing
 #library(scatterplot3d)
 #library(akima) # gridded bivariate interpolation for irredular data
 #library(Rmpfr)
@@ -99,7 +99,7 @@ for(i in 1:4){
 }
 CDS <- nu_list[!nu_list %in% stop_cd] #61 non-stop codons
 rm(nu_list)
-rm(stop_cd)
+stop_cd
 CDS_AA = sapply(1:61, function(x) translate(s2c(CDS[x]))) ## amino acids coded by 61 codons in order
 ## list of 20, each includes all the codons coding for the particular amino acid
 cdlist <- list()
@@ -140,22 +140,6 @@ conv <- function(filename,range=NULL,type="num",frame=0){
     names(seqdata) = attr(data,"name")
   }
   return(seqdata)
-}
-#convert fasta file to nexus file, for protein data
-fasta.to.nex <- function(geneNum){
-  for(i in geneNum){
-    file = paste("~/proteinevoutk20/pkg/Data/gene",i,".fasta",sep="")
-    gene = conv(file,"AA")
-    write.nexus.data(gene,paste("~/proteinevoutk20/pkg/Data/gene",i,"AA.nex",sep=""),format="protein",interleaved=F)
-  }
-}
-#convert fasta file to nexus file, for nucleotide data
-fasta.to.nex.Nuc <- function(geneNum){
-  for(i in geneNum){
-    file = paste("~/proteinevoutk20/pkg/Data/gene",i,".fasta",sep="")
-    gene = read.fasta(file=file)
-    write.nexus.data(gene,paste("~/proteinevoutk20/pkg/Data/gene",i,".nex",sep=""),format="dna",interleaved=F)
-  }
 }
 #############################################################################
 ## Remove columns with NA in the data
@@ -273,23 +257,6 @@ sym.to.Q <- function(A,bf=NULL){
   return(A)
 }
 #############################################################################
-## given the base frequencies of nucleotides, find base frequencies of codons
-## assuming the codon positions are all independent. Stop codons are excluded
-
-## this is not a good way to find the frequencies of codons, nucleotide freqs
-## usually are not directly related to codon freqs
-freq_codon <- function(bf = rep(1/4,4)){
-  bf=bf/sum(bf)
-  freq = rep(0,61)
-  for(i in 1:61){
-    cd = as.numeric(factor(s2c(CDS[i]),Nu)) #nucleotide triplet of the codon considered
-    freq[i] = prod(bf[cd]) #product of frequencies of nucleotides at all 3 positions
-  }
-  freq = as.table(freq)
-  freq = freq/sum(freq)
-  dimnames(freq)[[1]] = CDS # change the names of factors to the codon triplets
-  return(freq)
-}
 ##given the nucleotide base frequencies, find the bf for amino acids
 ##find the codon frequencies first,and sum up those that code for the same protein
 freq_aa <- function(nubf=rep(1/4,4)){
@@ -303,26 +270,7 @@ freq_aa <- function(nubf=rep(1/4,4)){
   dimnames(freq)[[1]] = AA
   return(freq)
 }
-## Given the rate matrix for 61 codons,find the rate matrix for 20 amino acids.
-## Assume all the codons have the same frequencies for each amino acid
-## Only mutation is taken into account, not selection and fixation.
-## This is an exchange rate matrix, symmetric
-AAMat <- function(CdMat){
-  Q = matrix(0,20,20)
-  for(i in 1:19){
-    fcodons = cdlist[[i]] #codons that code for the amino acid mutate from
-    nfcodons = length(fcodons)
-    for(j in (i+1):20){
-      tcodons = cdlist[[j]] #codons that code for the amino acid mutate to
-      ntcodons = length(tcodons)
-      Q[i,j] = sum(CdMat[fcodons,tcodons])/(nfcodons*ntcodons) #details in Yang's paper
-    }
-  }
-  #diag(Q) = -rowSums(Q)
-  dimnames(Q) = list(AA,AA)
-  return(Q)
-}
-
+###########################################################################
 ## compare 2 codons (in character vectors), return the number of positions that differ and the different positions
 cdcmp <- function(cd1,cd2){
   cmp = (cd1 != cd2)
@@ -330,76 +278,62 @@ cdcmp <- function(cd1,cd2){
   pos = which(cmp==TRUE)
   return(list(num=num,pos=pos))
 }
-#Find the mutation rate matrix A (61 by 61) from the 6 rates in the symmetric generating matrix for GTR's Q
-# # result is a symmetric matrix with row sum 0
-cd_MuMat_form <- function(vec=rep(1,6)){
-  l = 4
-  Q = matrix(0, l, l) # from vector to matrix
-  Q[lower.tri(Q)] = vec
-  Q = Q+t(Q) #symmetric matrix with diagonals 0
-  dimnames(Q) = list(Nu,Nu)
-  ##mutation matrix for 61 codons
-  codon_array <- array(0,dim=c(61,61),dimnames=list(CDS,CDS))
-  for(m in 1:60){                       #loop through all 61 codons
-    fcd <- CDS[m] #codon mutated from
-    fcd_ch <- s2c(fcd) #convert from string to character
-    for(i in (m+1):61){ #only do the upper triangular part
-      tcd = CDS[i]
-      tcd_ch = s2c(tcd)
-      cmp = cdcmp(fcd_ch,tcd_ch) #compare the 2 codons
-      if(cmp$num==1){ # if only one position differs
-        pos = cmp$pos
-        #set the mutation rate to be the one between nucleotides
-        codon_array[fcd,tcd] = Q[fcd_ch[pos],tcd_ch[pos]] 
-      }
+
+nu_comb <- combinations(4,2,v=Nu) #combinations of nucleotides
+nu_rates <- apply(nu_comb,MARGIN=1,c2s) #convert numeric pairs into characters "ac","ag", etc
+# 
+###########################################################################
+## Matrix of dimension 61 by 61, each entry is the index of mutation rate 
+## between the 2 codons in the 6-element vector NU_rates
+diff_pos <- matrix(0,61,61)
+diag(diff_pos) <- 0
+for(i in 1:60){
+  for(j in (i+1):61){
+    cmp <- cdcmp(s2c(CDS[i]),s2c(CDS[j]))
+    if(cmp$num==1){
+      nu_from <- s2c(CDS[i])[cmp$pos]
+      nu_to <- s2c(CDS[j])[cmp$pos]
+      nu_pair <- c2s(sort(c(nu_from,nu_to)))
+      diff_pos[i,j] <- as.numeric(factor(nu_pair,levels=nu_rates,labels=1:6))
     }
+    else
+      diff_pos[i,j] <- 0
   }
-  codon_array = codon_array + t(codon_array)
-  diag(codon_array) = -rowSums(codon_array)
-  return(codon_array)
+}
+diff_pos <- diff_pos + t(diff_pos)
+dimnames(diff_pos)[[1]] <- CDS #rownames and colnames are the amino acid names
+dimnames(diff_pos)[[2]] <- CDS
+###########################################################################
+## indAApair: a list of length 190, each corresponds to a pair of amino acids
+## including the number of possible ways of chaning to each other, and the rates for all the ways
+AApairs <- combinations(20,2)
+AApairs <- sapply(1:190,function(x) AApairs[x,],simplify=FALSE)
+indAApair <- vector("list",length(AApairs))
+for(i in 1:length(AApairs)){
+  diffmat <- diff_pos[cdlist[[AApairs[[i]][1]]],cdlist[[AApairs[[i]][2]]]]
+  if(sum(diffmat)!=0){
+    indAApair[[i]]$rates <- as.numeric(diffmat[diffmat!=0]) #index of rates in NU_rates
+    indAApair[[i]]$tot <- length(diffmat) #total number of codon comb for the pair of AA's
+  }
+  else{
+    indAApair[[i]]$rates <- 0
+    indAApair[[i]]$tot <- 1
+  }
+  indAApair[[i]]$AA <- AA[AApairs[[i]]]
 }
 
-#Find the mutation rate matrix A (20 by 20) from the 6 rates in GTR mutation rate matrix for nucleotides, row sum is 0
-# result is a symmetric matrix with row sum 0
-# therefore this is only an exchange rate matrix, freq of amino acids are not taken into account
-aa_MuMat_form <- function(vec=rep(1,6)){
-  l = 4
-  Q = matrix(0, l, l)
-  Q[lower.tri(Q)] = vec
-  Q = Q+t(Q) #symmetric matrix with diagonals 0
-  dimnames(Q) = list(Nu,Nu)
-  ##mutation matrix for 61 codons
-  codon_array <- array(0,dim=c(61,61),dimnames=list(CDS,CDS))
-  for(m in 1:60){                       #loop through all 61 codons
-    fcd <- CDS[m]
-    fcd_ch <- s2c(fcd)
-    for(i in (m+1):61){
-        tcd = CDS[i]
-        tcd_ch = s2c(tcd)
-        cmp = cdcmp(fcd_ch,tcd_ch) #compare the 2 codons
-        if(cmp$num==1){
-          pos = cmp$pos
-          codon_array[fcd,tcd] = Q[fcd_ch[pos],tcd_ch[pos]]
-        }
-      }
-    }
-  codon_array = codon_array + t(codon_array)
-  arr = AAMat(codon_array)
-  arr = arr+ t(arr)
-  diag(arr) = -rowSums(arr)
-  return(arr)
+## find the 20 by 20 matrix for AA's, from the 6 mutation rates between nucleotides
+AArates <- function(NUrates=rep(1,6)){
+  aarates <- matrix(0,nrow=20,ncol=20)
+  dimnames(aarates)[[1]] <- AA
+  dimnames(aarates)[[2]] <- AA
+  lowertri <- sapply(1:190,function(x) sum(NUrates[indAApair[[x]]$rates])/indAApair[[x]]$tot)
+  aarates[lower.tri(aarates)] <- lowertri
+  aarates <- aarates + t(aarates)
+  diag(aarates) <- -rowSums(aarates)
+  return(aarates)
 }
-# ##check if the transition between amino acids is time reversible
-# isSymmetric(aa_MuMat_form(runif(6)))
-# checkSymmetric <- function(nuvec,bf){
-#   bfq = freq_codon(bf)
-#   bfaa = freq_aa(bf)
-#   aaq = aa_MuMat_form(nuvec,bf)
-#   return(isSymmetric(diag(bfaa) %*% aaq))
-# }
-## Amino acid mutation rate matrix for the GTR model of nucleotide
-## MUMAT <- aa_MuMat_form(NU_VEC)
-
+###########################################################################
 ## change tree to be in pruning order, if it is not
 reorderPruning <- function (x, ...)
 {
@@ -416,8 +350,6 @@ reorderPruning <- function (x, ...)
   attr(x, "order") <- "pruningwise"
   x
 }
-
-#############################################################################
 #############################################################################
 ##find the physiochemical distance vector between two proteins, given the distance matrix
 pchem_d <- function(protein1, protein2,DisMat){
@@ -604,7 +536,7 @@ stnry.ftny <- function(opaa,s,beta,gamma,Qall=NULL){
   dismat = GM_cpv(GM_CPV,al,beta,gamma)
   if(is.null(Qall)){
     fixmatall <- fixmatAll(s,DisMat=dismat)
-    mumat = aa_MuMat_form(Q)
+    mumat = AArates(Q)
     Qall = QAllaa1(fixmatall,mumat)
   }
   eqn.prob <- sapply(Qall,FUN=eqmQ) #one column for each optimal amino acid
@@ -662,7 +594,7 @@ ll_site <- function(tree,data,optimal,s,Q,alpha=al, beta=be, gamma=ga,
   ##if the base frequencies are not specified, do a uniform distribution
   if(is.null(bf)) bf=rep(1/m,m)#base frequency, randomly chosen from all states
   GM = GM_cpv(GM_CPV,alpha,beta,gamma)
-  mumat = aa_MuMat_form(vec=Q)
+  mumat = AArates(vec=Q)
   Qmat = mat_gen_indep(optimal,s,DisMat=GM,MuMat=mumat,C,Phi,q,Ne) #transition rate matrix for the site, given the optimal aa
   Qmat = scaleQ(Qmat,bf)
   
@@ -885,7 +817,7 @@ mllm1 <- function(data,tree,s=NULL,beta=be,gamma=ga,scale.vec=rep(1,20),Q=NULL,d
     }
     if(is.null(mumat)){
       if(is.null(Q)) {Q = rep(1,6)}
-      mumat = aa_MuMat_form(Q)
+      mumat = AArates(Q)
     }
     Qall = QAllaa1(fixmatall,mumat,Ne=Ne)
   }

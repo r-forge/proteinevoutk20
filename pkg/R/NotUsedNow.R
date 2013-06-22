@@ -524,3 +524,127 @@ system.time(fungi_data <- simTree(tree,l,protein_op=Protein_op,m=20,s=0.1,
                                   Nu_vec,scale,al,be,ga,q=4e-7,Ne=1.36e7,root=Root,ancestral=TRUE))
 
 gene1tree <- read.nexus(file="rokas/gene1.tre")
+########################################################################
+## convert between file formats for data
+#convert fasta file to nexus file, for protein data
+fasta.to.nex <- function(geneNum){
+  for(i in geneNum){
+    file = paste("~/proteinevoutk20/pkg/Data/gene",i,".fasta",sep="")
+    gene = conv(file,"AA")
+    write.nexus.data(gene,paste("~/proteinevoutk20/pkg/Data/gene",i,"AA.nex",sep=""),format="protein",interleaved=F)
+  }
+}
+#convert fasta file to nexus file, for nucleotide data
+fasta.to.nex.Nuc <- function(geneNum){
+  for(i in geneNum){
+    file = paste("~/proteinevoutk20/pkg/Data/gene",i,".fasta",sep="")
+    gene = read.fasta(file=file)
+    write.nexus.data(gene,paste("~/proteinevoutk20/pkg/Data/gene",i,".nex",sep=""),format="dna",interleaved=F)
+  }
+}
+########################################################################
+#Find the mutation rate matrix A (61 by 61) from the 6 rates in the symmetric generating matrix for GTR's Q
+# # result is a symmetric matrix with row sum 0
+cd_MuMat_form <- function(vec=rep(1,6)){
+  l = 4
+  Q = matrix(0, l, l) # from vector to matrix
+  Q[lower.tri(Q)] = vec
+  Q = Q+t(Q) #symmetric matrix with diagonals 0
+  dimnames(Q) = list(Nu,Nu)
+  ##mutation matrix for 61 codons
+  codon_array <- array(0,dim=c(61,61),dimnames=list(CDS,CDS))
+  for(m in 1:60){                       #loop through all 61 codons
+    fcd <- CDS[m] #codon mutated from
+    fcd_ch <- s2c(fcd) #convert from string to character
+    for(i in (m+1):61){ #only do the upper triangular part
+      tcd = CDS[i]
+      tcd_ch = s2c(tcd)
+      cmp = cdcmp(fcd_ch,tcd_ch) #compare the 2 codons
+      if(cmp$num==1){ # if only one position differs
+        pos = cmp$pos
+        #set the mutation rate to be the one between nucleotides
+        codon_array[fcd,tcd] = Q[fcd_ch[pos],tcd_ch[pos]] 
+      }
+    }
+  }
+  codon_array = codon_array + t(codon_array)
+  diag(codon_array) = -rowSums(codon_array)
+  return(codon_array)
+}
+
+#Find the mutation rate matrix A (20 by 20) from the 6 rates in GTR mutation rate matrix for nucleotides, row sum is 0
+# result is a symmetric matrix with row sum 0
+# therefore this is only an exchange rate matrix, freq of amino acids are not taken into account
+aa_MuMat_form <- function(vec=rep(1,6)){
+  l = 4
+  Q = matrix(0, l, l)
+  Q[lower.tri(Q)] = vec
+  Q = Q+t(Q) #symmetric matrix with diagonals 0
+  dimnames(Q) = list(Nu,Nu)
+  ##mutation matrix for 61 codons
+  codon_array <- array(0,dim=c(61,61),dimnames=list(CDS,CDS))
+  for(m in 1:60){                       #loop through all 61 codons
+    fcd <- CDS[m]
+    fcd_ch <- s2c(fcd)
+    for(i in (m+1):61){
+      tcd = CDS[i]
+      tcd_ch = s2c(tcd)
+      cmp = cdcmp(fcd_ch,tcd_ch) #compare the 2 codons
+      if(cmp$num==1){
+        pos = cmp$pos
+        codon_array[fcd,tcd] = Q[fcd_ch[pos],tcd_ch[pos]]
+      }
+    }
+  }
+  codon_array = codon_array + t(codon_array)
+  arr = AAMat(codon_array)
+  arr = arr+ t(arr)
+  diag(arr) = -rowSums(arr)
+  return(arr)
+}
+# ##check if the transition between amino acids is time reversible
+# isSymmetric(aa_MuMat_form(runif(6)))
+# checkSymmetric <- function(nuvec,bf){
+#   bfq = freq_codon(bf)
+#   bfaa = freq_aa(bf)
+#   aaq = aa_MuMat_form(nuvec,bf)
+#   return(isSymmetric(diag(bfaa) %*% aaq))
+# }
+## Amino acid mutation rate matrix for the GTR model of nucleotide
+## MUMAT <- aa_MuMat_form(NU_VEC)
+## Given the rate matrix for 61 codons,find the rate matrix for 20 amino acids.
+## Assume all the codons have the same frequencies for each amino acid
+## Only mutation is taken into account, not selection and fixation.
+## This is an exchange rate matrix, symmetric
+AAMat <- function(CdMat){
+  Q = matrix(0,20,20)
+  for(i in 1:19){
+    fcodons = cdlist[[i]] #codons that code for the amino acid mutate from
+    nfcodons = length(fcodons)
+    for(j in (i+1):20){
+      tcodons = cdlist[[j]] #codons that code for the amino acid mutate to
+      ntcodons = length(tcodons)
+      Q[i,j] = sum(CdMat[fcodons,tcodons])/(nfcodons*ntcodons) #details in Yang's paper
+    }
+  }
+  #diag(Q) = -rowSums(Q)
+  dimnames(Q) = list(AA,AA)
+  return(Q)
+}
+## given the base frequencies of nucleotides, find base frequencies of codons
+## assuming the codon positions are all independent. Stop codons are excluded
+
+## this is not a good way to find the frequencies of codons, nucleotide freqs
+## usually are not directly related to codon freqs
+freq_codon <- function(bf = rep(1/4,4)){
+  bf=bf/sum(bf)
+  freq = rep(0,61)
+  for(i in 1:61){
+    cd = as.numeric(factor(s2c(CDS[i]),Nu)) #nucleotide triplet of the codon considered
+    freq[i] = prod(bf[cd]) #product of frequencies of nucleotides at all 3 positions
+  }
+  freq = as.table(freq)
+  freq = freq/sum(freq)
+  dimnames(freq)[[1]] = CDS # change the names of factors to the codon triplets
+  return(freq)
+}
