@@ -1,9 +1,10 @@
 library("qgraph")
 library("network")
 ##set all positive entries in mumat to 1, and others to 0, save it in mumat01
-net <- network(mumat,loops=F)
+net <- network(MUMAT,loops=F)
 mumat01 <- net[,]
-
+#delete this line to show the AA names instead of numbers
+dimnames(mumat01) <- NULL
 #view the color transition in stripes
 Col <- rev(heat.colors(20))
 image(1:20,1,as.matrix(1:20),col=Col)
@@ -88,7 +89,7 @@ fgraph <- function(op,s,beta=be,gamma=ga,graph=TRUE){
            
            ##filetype="pdf",filename=paste("A_op",op,sep=""))
   }
-  return(list(out=out.num,num.localop=num.localop))
+  #return(list(out=out.num,num.localop=num.localop))
   
 }
 
@@ -121,7 +122,7 @@ fgraph1 <- function(op,s,beta=be,gamma=ga,graph=TRUE){
     
     ##filetype="pdf",filename=paste("A_op",op,sep=""))
   }
-  return(list(out=out.num,num.localop=num.localop))
+  #return(list(out=out.num,num.localop=num.localop))
 }
 # ##############################################################
 # ## given beta, gamma, and s, find the number of local optima for all optimal amino acids
@@ -152,7 +153,7 @@ fgraph1 <- function(op,s,beta=be,gamma=ga,graph=TRUE){
 # points(GM_maj[3,],col="blue")
 
 ##############################################################################
-# # plot simulated data, using gene number
+# plot simulated data, using gene number
 # source("~/proteinevoutk20/pkg/R/rokas_collect.R") #collect results on genes, using max/maj rule
 # genenum <- 72
 # datafile = paste("~/BackupProEvo/Newton/rokas_max/gene",genenum,"_s_weight.RData",sep="")
