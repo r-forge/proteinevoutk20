@@ -876,7 +876,7 @@ optim.all <- function(data,tree,s,beta,gamma,Q,print_level=0,
 }
 ######################################################################################################
 ## OPTIMIZE BRANCH LENGTHS WITH RESTRICTION OF THE TREE BEING ULTRAMETRIC
-## find the path to a particular tip in a tree
+## find the path to a particular tip(or an interior node) in a tree
 ## including the branches and the nodes on the path
 path_to_tip <- function(tree,i){
   br <- tree$edge #all the edges

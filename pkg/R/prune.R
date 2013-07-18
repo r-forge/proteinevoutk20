@@ -40,7 +40,13 @@ get_best_model <- function(filename){
 }
 
 ##################################################################
-## optimize two branch lengths, one is newly added, the other is one of the splitting 2 branches
+## Optimize two branch lengths, one is newly added, the other is one of the splitting 2 branches
+## This version is for non-ultrametric trees
+## new.ext: index of the newly added branch that leads to the new tip
+## new.splits: indices of branches obtained from adding the new external branch
+## sumsplits: original length of the branch that is splitted into 2 shorter ones
+## el: branch lengths of tree, starting parameter values
+## since "sumsplits" is fixed, only 2 branch lengths need to be optimized
 optim.br.add <- function(data,tree,new.ext,new.splits,sumsplits,el=NULL,method="COBYLA",maxeval="100", print_level=0, ...){
   if(is.null(el))
   {el <- tree$edge.length}
@@ -69,6 +75,31 @@ optim.br.add <- function(data,tree,new.ext,new.splits,sumsplits,el=NULL,method="
   #print(res)
   return(res)
 }
+##################################################################
+## This is for the ultrametric tree, now only optimize one branch since the external branch length
+## is determined by the depth of the tree (ULTRAMETRIC RESTRICTION)
+optim.br.add.ultrametric <- function(data,tree,new.ext,new.splits,sumsplits,el=NULL, ...){
+  if(is.null(el))
+  {el <- tree$edge.length}
+  ab <- min(sumsplits,el[new.splits[1]]) #starting value for the optimization
+  
+  res.initial = mllm1(data=data,tree=tree,...)
+  #these don't change with the change of s
+  Qall = res.initial$Qall
+  bfaa = res.initial$bfaa
+  #ab <- tree$edge.length[c(new.ext,new.splits[1])] #what if the second number is bigger than sumsplits?
+  fn = function(ab,data,tree){
+    tree$edge.length[new.splits[1]] = ab
+    tree$edge.length[new.splits[2]] = sumsplits - ab
+    tree <- ult.tree(tree) # make the tree ultrametric
+    #print(c(ab,sumsplits-ab[2]))
+    #print(tree$edge.length)
+    result = -mllm1(data,tree, Qall=Qall,bfaa=bfaa,...)$ll$loglik
+    return(result)
+  }
+  res <- optimize(f=fn,data=data,tree=tree,lower=0,upper=sumsplits) #one-dimensional optimization
+  return(res)
+}
 optim.br.add.emp <- function(data,tree,new.ext,new.splits,sumsplits,el=NULL,method="COBYLA",maxeval="100", print_level=0, ...){
   if(is.null(el))
   {el <- tree$edge.length}
@@ -95,19 +126,19 @@ optim.br.add.emp <- function(data,tree,new.ext,new.splits,sumsplits,el=NULL,meth
 ## prune one branch and grow it back
 ######################################################################
 ## analysis under new model
-## filename: file that contains the fasta data of nuleotide data
+## data: data of phyDat format
 ## dtip: the tip to delete from the tree, could be the order or the actual name
 ## tree: the tree to start with, with all the tips
 ## ancestral: method of specifying the root states
-prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
+prune_new <- function(data,dtip,tree,ancestral="eqm"){
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") #make sure it's pruningwise order
     tree <- reorder.phylo(tree,order="pruningwise") #ape function
-  data = conv(filename,range=range,type="phyDat")
   data.char <- as.character(data)
   if(is.numeric(dtip)) dtip = tree$tip.label[dtip]
   tree_p = drop.tip(tree,dtip) # new tree, after trim the tip
   tree_p <- reorder.phylo(tree_p,order="pruningwise") 
   ##sometimes tree has many branches with same lengths, in that case the comp.tree won't work :(
+  ## tree1 and tree_p1 are replicates of tree and tree_p but with distince branch lengths
   tree1 <- tree
   tree1$edge.length <- runif(length(tree$edge.length))
   tree_p1 = drop.tip(tree1,dtip) # new tree, after trim the tip
@@ -122,24 +153,23 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
   
   data_p = subset(data,subset=tree_p$tip.label) # pruned data
   #data_p = phyDat(as.character(data_p),type="AA") #re-weight pruned data
-  res_p <- mllm1(data_p,tree_p,s=1,beta=be,gamma=ga,Q=NU_VEC,ancestral=ancestral) #ll of pruned data
+  res_p <- mllm1(data_p,tree_p,s=1,beta=be,gamma=ga,Q=rep(1,6),ancestral=ancestral) #ll of pruned data
   if(test){
     res_op <- res_p
-    iter="10"
   }
   else{
-    res_op <- optim.mllm1(res_p,optQ=T,optBranch=T,optsWeight=T,optOpw=FALSE,
-                          control=list(epsilon=1e-08,hmaxit=50,htrace=1,print_level=1,maxeval="100"),ancestral=ancestral)
-    iter="200"
+    op <- optim.all.ultrametric(data=data_p,tree=tree_p,beta=be,gamma=ga,Q=rep(1,6),print_level=0,
+                          method="BOBYQA",maxeval="10000",maxtime="10000",ancestral=ancestral)
+    res_op <- mllm1(data=data_p,tree=op$tree,s=op$s,beta=op$beta,gamma=op$gamma,Q=op$Q)
   }
   ## MLE for the parameters
   s = res_op$s
-  beta=res_op$GMweights[2]
-  gamma = res_op$GMweights[3]
-  ancestral = res_op$ll$ancestral
+  beta=res_op$beta
+  gamma = res_op$gamma
   Q = res_op$Q
   tree_p = res_op$tree
   index_p = attr(data_p,"index")
+  ancestral = res_op$ll$ancestral
   opaa_p = res_op$ll$opaa
   bfaa = res_op$bfaa
   dismat = res_op$dismat
@@ -150,15 +180,14 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
   tree$edge.length[shareind[,"share"]] <- tree_p$edge.length[shareind[,"pshare"]]
   sumsplits = tree_p$edge.length[br.split]
   ## optimize branch lengths on 8-tip tree with parameters just found, and 8-tip data
-  br <- optim.br.add(data,tree,new.ext=new.ext,new.splits=new.splits,sumsplits=sumsplits,
-                     maxeval=iter,print_level=1,mumat=mumat,fixmatall=fixmatall,ancestral=ancestral,
-                     opaa=opaa_p)
-
-  tree$edge.length[new.ext] <- br$solution[1] #assign the tree optimized branch lengths
-  tree$edge.length[new.splits[1]] <- br$solution[2]
-  tree$edge.length[new.splits[2]] <- sumsplits - br$solution[2]
+  br <- optim.br.add.ultrametric(data,tree,new.ext=new.ext,new.splits=new.splits,sumsplits=sumsplits,
+                     mumat=mumat,fixmatall=fixmatall,ancestral=ancestral,opaa=opaa_p)
   
-  brlen <- br$solution[1]  # length of the re-grafted branch
+  tree$edge.length[new.splits[1]] <- br$minimum #assign the tree optimized branch lengths
+  tree$edge.length[new.splits[2]] <- sumsplits - br$minimum
+  tree <- ult.tree(tree)
+  
+  brlen <- tree$edge.length[new.ext]  # length of the re-grafted branch
   tree1 <- tree #tree with regrafted branch length 0
   tree1$edge.length[new.ext] <- 0 #make that branch 0
   
@@ -181,13 +210,12 @@ prune_new <- function(filename,dtip,tree,ancestral="eqm",range=NULL){
 ######################################################################
 ## analysis under empirical model
 ######################################################################
-#p2 <- prune_emp(fastafile,dtip,mamtree,best_emp_model$model,range=charset[[gene]])
-prune_emp <- function(filename,dtip,tree,model,range=NULL){
+#p2 <- prune_emp(data,dtip,mamtree,best_emp_model$model)
+prune_emp <- function(data,dtip,tree,model){
   tree <- unroot(tree) #unroot the tree, (unrooted trees are used for empirical models)
   tree_o <- tree
   if (is.null(attr(tree, "order")) || attr(tree, "order") == "cladewise") #make sure it's pruningwise order
     tree <- reorder.phylo(tree,order="pruningwise") #ape function
-  data = conv(filename,range=range,type="phyDat")
   data.char <- as.character(data) #data in the form of matrix with characters as entries
   if(is.numeric(dtip)) dtip = tree$tip.label[dtip]
   tree_p = unroot(drop.tip(tree,dtip)) # new tree, after trim the tip
@@ -255,6 +283,7 @@ prune_emp <- function(filename,dtip,tree,model,range=NULL){
 }
 
 ######################################################################
+## find the index and length of the branch that leads to the given tip
 get.brlen <- function(tree,tip){
   br.index <- which(tree$edge[,2]==which(tree$tip.label==tip)) #index of edge.length of the pruned branch
   brlen <- tree$edge.length[br.index]  # length of the re-grafted branch
