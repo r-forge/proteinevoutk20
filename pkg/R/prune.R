@@ -158,7 +158,7 @@ prune_new <- function(data,dtip,tree,ancestral="eqm"){
     res_op <- res_p
   }
   else{
-    op <- optim.all.ultrametric(data=data_p,tree=tree_p,beta=be,gamma=ga,Q=rep(1,6),print_level=0,
+    op <- optim.all.ultrametric(data=data_p,tree=tree_p,s=1,beta=be,gamma=ga,Q=rep(1,6),print_level=0,
                           method="BOBYQA",maxeval="100000",maxtime="90000",ancestral=ancestral)
     res_op <- mllm1(data=data_p,tree=op$tree,s=op$s,beta=op$beta,gamma=op$gamma,Q=op$Q)
   }
