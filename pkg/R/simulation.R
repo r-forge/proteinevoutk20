@@ -493,3 +493,4 @@ plot_trace <- function(trace.info,obs.ftny,zoom=FALSE,plotftny=TRUE,plotdis=FALS
     }
   }
 }
+
