@@ -7,7 +7,7 @@ mumat01 <- net[,]
 dimnames(mumat01) <- NULL
 #view the color transition in stripes
 Col <- rev(heat.colors(20))
-image(1:20,1,as.matrix(1:20),col=Col)
+#image(1:20,1,as.matrix(1:20),col=Col)
 ##############################################################
 ##for a network object, find the step 1 neighbors and step 2 neighbors of node k
 ##return as a list with 2 entries: ng1, ng2
@@ -79,7 +79,7 @@ fgraph <- function(op,s,beta=be,gamma=ga,graph=TRUE){
   for(i in 1:20){
   out.num[i] <- length(which(fm.matrix[i,]!=0))
   }
-  num.localop <- sum(out.num==0)
+  localop <- which(out.num==0)
   if(graph){
     ##If the outflow for a node is 0, use square for the node, otherwise circle
     node.shape <- vector(mode="character",20)
@@ -89,7 +89,7 @@ fgraph <- function(op,s,beta=be,gamma=ga,graph=TRUE){
            
            ##filetype="pdf",filename=paste("A_op",op,sep=""))
   }
-  #return(list(out=out.num,num.localop=num.localop))
+  return(list(out=out.num,localop=localop))
   
 }
 
@@ -112,7 +112,7 @@ fgraph1 <- function(op,s,beta=be,gamma=ga,graph=TRUE){
   for(i in 1:20){
     out.num[i] <- length(which(fm.matrix[i,]!=0))
   }
-  num.localop <- sum(out.num==0)
+  localop <- which(out.num==0)
   if(graph){
     ##If the outflow for a node is 0, use square for the node, otherwise circle
     node.shape <- vector(mode="character",20)
@@ -122,7 +122,7 @@ fgraph1 <- function(op,s,beta=be,gamma=ga,graph=TRUE){
     
     ##filetype="pdf",filename=paste("A_op",op,sep=""))
   }
-  #return(list(out=out.num,num.localop=num.localop))
+  return(list(out=out.num,localop=localop))
 }
 # ##############################################################
 # ## given beta, gamma, and s, find the number of local optima for all optimal amino acids
