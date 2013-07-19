@@ -3,7 +3,7 @@
 # print(gene)
 # gene <- as.numeric(gene)
 test = FALSE
-gene = 49 #change this to run analysis on other genes
+gene = 1 #change this to run analysis on other genes
 datafile <- paste("gene",gene,".RData",sep="") #RData file to load, pruning analysis
 dtip = "Smik"
 source("~/proteinevoutk20/pkg/R/prune.R") #resouce the files in case there are changes after *.RData file was generated
