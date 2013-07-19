@@ -481,7 +481,6 @@ plot_trace <- function(trace.info,obs.ftny,zoom=FALSE,plotftny=TRUE,plotdis=FALS
   if(plotdis){
     par(mfrow=c(2,4))
     dislim <- disrange(trace.info)
-    dislim[2] <- 1
     for(i in 1:length(trace.info)){
       sim_info <- trace.info[[i]]
       t <- max(sim_info$t)
