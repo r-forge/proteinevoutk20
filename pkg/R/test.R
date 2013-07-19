@@ -1,6 +1,6 @@
-num.tip <- 8
-setwd(paste("~/BackupProEvo/Newton/balBobyqa_eqm/tip",num.tip,sep=""))
-load(paste(num.tip,"tip3000char.RData",sep=""))
+num.tip <- 32
+#setwd(paste("~/BackupProEvo/Newton/balBobyqa_eqm/tip",num.tip,sep=""))
+load(paste("~/BackupProEvo/Newton/balBobyqa_eqm/tip",num.tip,"/",num.tip,"tip3000char.RData",sep=""))
 opaa <- opaa[index]
 dif <- which(opaa!=opaa1)
 opaa.dif <- opaa[dif]
@@ -25,10 +25,14 @@ for(i in 1:dim(opaas.unique)[1]){
   count <- length(intersect(which(opaas[,1]==opaas.unique[i,1]),which(opaas[,2]==opaas.unique[i,2])))
   counts <- c(counts,count)
 }
+#par(mfrow=c(2,1),oma = c(0, 0, 2, 0))
 #bubble plot 
-symbols(x=opaas.unique[,1],y=opaas.unique[,2],circles=counts,inches=1/4,bg="blue",
-        main="mismatched opaas",xlab="start opaa",ylab="inferred opaa")
-abline(v=1:20,h=1:20)
+symbols(x=opaas.unique[,1],y=opaas.unique[,2],circles=counts,inches=1/4,bg="red",
+        xlim=c(1,20),ylim=c(1,20),main=paste(num.tip,"taxa"),
+        xlab="true opaa",ylab="inferred opaa",xaxt='n',yaxt='n')
+# axis(1,at=1:20,labels=AA,tick=FALSE,lwd=0.5,cex.axis=0.6)
+# axis(2,at=1:20,labels=AA,tick=FALSE,lwd=0.5,cex.axis=0.6)
+# abline(v=1:20,h=1:20)
 #################################################################
 opaas.all <- cbind(opaa1,opaa)
 opaas.all.unique <- unique.array(opaas.all) #unique rows
@@ -39,70 +43,24 @@ for(i in 1:dim(opaas.all.unique)[1]){
   all.counts <- c(all.counts,count)
 }
 #bubble plot 
+# symbols(x=opaas.all.unique[,1],y=opaas.all.unique[,2],circles=all.counts,inches=1/4,bg="blue",
+#         main="Plot of opaas",xlab="start opaa",ylab="inferred opaa",
+#         xlim=c(1,20),ylim=c(1,20),xaxt='n',yaxt='n',add=TRUE)
 symbols(x=opaas.all.unique[,1],y=opaas.all.unique[,2],circles=all.counts,inches=1/4,bg="blue",
-        main="Plot of opaas",xlab="start opaa",ylab="inferred opaa")
+        xlim=c(1,20),ylim=c(1,20),xaxt='n',yaxt='n',add=TRUE)
+axis(1,at=1:20,labels=AA,tick=FALSE,lwd=0.5,cex.axis=0.6)
+axis(2,at=1:20,labels=AA,tick=FALSE,lwd=0.5,cex.axis=0.6)
 abline(v=1:20,h=1:20)
-#################################################################
-##bubble plot:
-plot.bubble <- function(opaa,Qall,inches=1/3,grid=TRUE){
-  sub1 <- Qall[[opaa]]
-  nonzero.ind <- which(sub1>0,arr.ind=T)
-  symbols(x=nonzero.ind[,1],y=nonzero.ind[,2],circles=sub1[nonzero.ind],inches=inches,xlim=c(1,20),
-          xlab="from", ylab="to",main=paste("opaa = ", opaa))
-  if(grid)
-    abline(h=1:20,v=1:20)
-}
-matrix.bubble <- function(mat,inches=1/3,grid=TRUE){
-  nonzero.ind <- which(mat > 0,arr.ind = T)
-  symbols(x=nonzero.ind[,1],y=nonzero.ind[,2],circles=mat[nonzero.ind],inches=inches,xlim=c(1,20),
-          xlab="from", ylab="to")
-  if(grid)
-    abline(h=1:20,v=1:20)
-}
+#mtext(paste(num.tip,"taxa"),outer=TRUE,cex=1.2,lwd=1.3)
+
+
 ###########################################################################
 ftny_vec <- Vectorize(FUN="Ftny_protein",vectorize.args=c("protein","protein_op"),SIMPLIFY=TRUE)
 ###########################################################################
-## look at the nonzero entries in the AArate matrix, and try to figure out the 
-## influence of NU_rates on AA_rates
-# nonzeroPair <- indAApair[!sapply(indAApair,FUN=is.null)]
-# sapply(1:length(nonzeroPair),function(x) nonzeroPair[[x]]$rates)
-# sapply(1:length(nonzeroPair),function(x) nonzeroPair[[x]]$tot)
-# NU_to_AA <- matrix(0,nrow=6,ncol=length(nonzeroPair))
-# for(i in 1:length(nonzeroPair)){
-#   rates <- nonzeroPair[[i]]$rates
-#   NU_to_AA[,i] <- sapply(1:6,function(x) sum(rates==x))/nonzeroPair[[i]]$tot
-# }
-# get.root <- function(mat){
-#   l <- dim(mat)[2]
-#   sapply(1:l,function(x) which(mat[,x]==1))
-# }
-# optimQ <- function(tree,data,Q=rep(1,6),method="SBPLX",maxeval="100",print_level=0, ...){
-#   Q = Q/Q[6] #make last rate 1
-#   #store information from initial condition, with other parameters fixed
-#   res.initial = mllm1(data=data,tree=tree,Q=Q,...)
-#   #these don't change with the change of s
-#   fixmatall = res.initial$fixmatall
-#   
-#   ab <- Q[1:5] # optimize on the first 5 rates
-#   fn = function(ab,tree,data){
-#     cat(ab,"\n")
-#     result = -mllm1(data,tree,Q=c(ab,1),fixmatall=fixmatall, ...)$ll$loglik
-#     return(result)
-#   }
-#   lower=rep(0,5)
-#   upper=rep(Inf,5)
-#   #options for optimizer
-#   opts <- list("algorithm"=paste("NLOPT_LN_",method,sep=""),"maxeval"= maxeval,"xtol_rel"=1e-6,
-#                "ftol_rel"=.Machine$double.eps^0.5,"print_level"=print_level)
-#   res = nloptr(x0=ab,eval_f=fn, lb=lower,ub=upper,opts=opts,data=data,tree=tree)
-#   res$solution = c(res$solution,1) # append the last rate (1) to the rate vector
-#   return(res)
-# }
-# 
-# hessianQ <- function(mle,data,tree,...){
-#   fn <- function(Q){
-#     print(Q)
-#     return(-mllm1(data=data,tree=tree,Q=Q,...)$ll$loglik)
-#   }
-#   return(hessian(fn,mle,method="Richardson"))
-# }
+
+## plot the simulation path of one amino acid
+sim8 <- simulation(protein=8,protein_op=8,t=100,s=s,DisMat=dismat,MuMat=mumat)
+plot(sim8$path[,1]~sim8$path[,2],type="b",pch=20,xlab="time",ylab="amino acid",yaxt='n',ylim=c(1,20),
+     main=paste("opaa =", AA[8]))
+axis(2,at=1:20,labels=AA,lwd=0.5,cex.axis=0.6)
+abline(h=unique(sim8$path[,1]),lty=2)
