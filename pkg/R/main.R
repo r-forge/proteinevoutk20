@@ -15,7 +15,7 @@ library(nloptr,quietly=TRUE) #optimization
 #library(ppso)
 ##################################################################
 #directory of the data need to read, including gene, tree, Grantham data
-datadir <- "~/proteinevoutk20/pkg/Data/"
+datadir <- "/Users/bomeara/Documents/MyDocuments/Active/proteinevoutk20/pkg/Data/"
 ##################################################################
 ##   Read in parameters and data  ##
 ##################################################################

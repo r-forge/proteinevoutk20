@@ -28,7 +28,7 @@ PlotUsVsWag<-function(data) {
   rescaled.selection<-(logGPhi-min(logGPhi))/max(logGPhi-min(logGPhi))
   
   
- plot(c(0,1),c(0,1),type="n", bty="n", xlab="WAG", ylab="New model", yaxt="n", xaxt="n", main="Proportion simulated aa\nmatching observed aa")
+ plot(c(0,1),c(0,1),type="n", bty="n", xlab="Proportion matching with WAG", ylab="Proportion matching with SAC (new model)", yaxt="n", xaxt="n", main="Proportion simulated aa\nmatching observed aa")
 # points(1-data$pdiff_wag, 1-data$pdiff_us, pch=16)
  #text(1-data$pdiff_wag, 1-data$pdiff_us, labels=round(10*log(data$gPhi),0),col=hsv(1,.8,sqrt(rescaled.selection)))
  points(1-data$pdiff_wag, 1-data$pdiff_us, pch=16,col=hsv(1,.8,sqrt(rescaled.selection)))
