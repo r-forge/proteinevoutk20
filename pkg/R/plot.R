@@ -132,12 +132,91 @@ plot.bubble <- function(opaa,Qall,inches=1/4,grid=TRUE){
   sub1 <- Qall[[opaa]]
   nonzero.ind <- which(sub1>0,arr.ind=T)
   symbols(x=nonzero.ind[,1],y=nonzero.ind[,2],circles=sub1[nonzero.ind],inches=inches,xlim=c(1,20),
-          ylim=c(1,20),xlab="", ylab="",main=paste("opaa = ", AA[opaa]),xaxt='n',yaxt='n')
+          ylim=c(1,20),xlab="", ylab="",main=paste("opaa = ", AA[opaa]),xaxt='n',yaxt='n', asp=1, bty="n")
   axis(1,at=1:20,labels=AA,tick=FALSE,lwd=0.5,cex.axis=0.6)
   axis(2,at=1:20,labels=AA,tick=FALSE,lwd=0.5,cex.axis=0.6)
   if(grid)
     abline(h=1:20,v=1:20)
 }
+
+#does from on left axis, to on top, draws with areas proportional to values not radii
+plot.bubble2 <- function(opaa,Qall,inches=1/4,grid=FALSE, draw.axes=TRUE, main=""){
+
+  sub1 <- Qall[[opaa]]
+  plot(x=c(1,20),y=c(-1,-20), xlab="", ylab="", type="n", main=main,xaxt='n',yaxt='n', asp=1,bty="n")
+  if(grid) {
+    for (i in sequence(20)) {
+    	col="gray"
+    	if(i==opaa) {
+    		col="red"
+    	}
+    	lines(x=rep(i,2), y=c(-1,-20),lwd=0.5, col=col)
+    	col="gray"
+    	if(i==opaa) {
+    		col="purple"
+    	}
+
+    	lines(x=c(1,20),y=rep(-i,2),lwd=0.5, col=col)
+    }
+  }
+
+  for (i in sequence(20)) {
+  	for (j in sequence(20)) {
+  		if (sub1[i,j]>0) {
+  			bg="black"
+  			if(i==opaa) {
+  				bg="red"
+  			}
+  			if(j==opaa) {
+  				bg="purple"	
+  			}
+  			symbols(x=i, y=-j, circles=sqrt(sub1[j,i])/(2.1*sqrt(max(sub1))), inches=FALSE, add=TRUE, fg=bg, bg=bg)
+  		}	
+  	}	
+  }
+  if(draw.axes) {
+ 	 axis(3,at=1:20,labels=(AA),tick=FALSE,lwd=0.5,cex.axis=0.6, padj=1)
+ 	 axis(2,at=-1*c(1:20),labels=(AA),tick=FALSE,lwd=0.5,cex.axis=0.6)
+  }
+}
+
+
+Qall.orig<-Qall
+
+s=1
+ftny <- vector("numeric",length=20)
+beta<-be
+gamma<-ga
+GM <- GM_cpv(GM_CPV,al,beta,gamma)
+Ftny_protein(1,1,s,GM)
+op=1
+for(i in 1:20){
+    ftny[i] <- Ftny_protein(i,op,s,GM)
+  }
+  
+ra <- rank(ftny) #rank of the functionality, used later for coloring of nodes
+  f.matrix <- fmatrix(ftny) #matrix with differences between functionalities
+dismat = GM_cpv(GM_CPV,al,beta,gamma)
+C=2
+
+Phi=0.4
+q=4e-7
+Ne=5e6
+fixmatall <- fixmatAll(s,DisMat=dismat,C=C,Phi=Phi,q=q,Ne=Ne)
+Q = rep(1,6)
+mumat = AArates(Q)
+Qall = QAllaa1(fixmatall,mumat,Ne=Ne)
+plotAllBubble(Qall)
+
+plotAllBubble<-function(Qall, grid=TRUE, draw.axes=FALSE, mfcol=c(4,5)) {
+	par(mfcol=mfcol, mar=c(2,2,2,2)) 
+	for (opaa in sequence(20)) {
+		plot.bubble2(opaa, Qall, grid=grid, draw.axes=draw.axes)	
+	}	
+}
+
+
+
 matrix.bubble <- function(mat,inches=1/4,grid=TRUE,lowertri=FALSE,...){
   if(lowertri)
     mat[upper.tri(mat)] <- rep(0,length=sum(upper.tri(mat)))
